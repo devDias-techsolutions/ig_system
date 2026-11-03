@@ -1,0 +1,14 @@
+{
+  "name": "ig_system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema de gestão para igrejas (Google Apps Script) — suíte de testes",
+  "scripts": {
+    "test": "node --test tests/static.test.js tests/runtime.test.js",
+    "test:static": "node --test tests/static.test.js",
+    "test:runtime": "node --test tests/runtime.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
