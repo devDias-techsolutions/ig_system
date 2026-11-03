@@ -2,7 +2,7 @@
 // Testes estáticos: protegem a estrutura do projeto e a "neutralidade" para revenda.
 // Cada teste guarda um defeito encontrado — se voltar, a suíte quebra.
 
-const test = require('node:test');
+const { test } = require('./helpers/roadmap');
 const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');

@@ -1,7 +1,7 @@
 'use strict';
 // Testes de execução: carregam o backend real num contexto com mocks do Google.
 
-const test = require('node:test');
+const { test } = require('./helpers/roadmap');
 const assert = require('node:assert/strict');
 const { createEnv, makeSpreadsheet } = require('./helpers/gas');
 
