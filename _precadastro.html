@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AD Fonte da Salvação — Pré-cadastro</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary:   #00A99C;
+    --dark:      #1C353A;
+    --danger:    #e53e3e;
+    --warn:      #d97706;
+    --bg:        #f4f6f8;
+    --card:      #ffffff;
+    --text:      #1a202c;
+    --muted:     #718096;
+    --border:    #e2e8f0;
+    --radius:    10px;
+    --gutter:    16px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  /* ── Header ── */
+  .pc-header {
+    background: var(--dark);
+    padding: 20px var(--gutter);
+    text-align: center;
+    color: #fff;
+  }
+  .pc-header img { height: 56px; margin-bottom: 10px; }
+  .pc-header h1 { font-size: 18px; font-weight: 700; }
+  .pc-header p  { font-size: 13px; color: #aac5c3; margin-top: 4px; }
+
+  /* ── Card ── */
+  .pc-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 24px var(--gutter);
+    margin: 20px auto;
+    max-width: 560px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07);
+  }
+
+  .pc-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin: 20px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── Campos ── */
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 5px;
+  }
+  .field label .req { color: var(--danger); }
+  .field input,
+  .field select {
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text);
+    background: #fff;
+    transition: border-color .15s;
+    outline: none;
+  }
+  .field input:focus,
+  .field select:focus { border-color: var(--primary); }
+  .field.has-error input,
+  .field.has-error select { border-color: var(--danger); }
+  .field-error {
+    display: none;
+    font-size: 12px;
+    color: var(--danger);
+    margin-top: 4px;
+  }
+
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row-3 { display: grid; grid-template-columns: 2fr 1fr 2fr; gap: 10px; }
+
+  /* ── Botão ── */
+  .pc-btn {
+    width: 100%;
+    height: 48px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 24px;
+    letter-spacing: .02em;
+    transition: opacity .15s;
+  }
+  .pc-btn:hover { opacity: .88; }
+  .pc-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* ── Toast ── */
+  #pc-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1a202c;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    max-width: 90vw;
+    text-align: center;
+    transition: transform .3s ease;
+    z-index: 9999;
+    pointer-events: none;
+  }
+  #pc-toast.show { transform: translateX(-50%) translateY(0); }
+  #pc-toast.success { background: #276749; }
+  #pc-toast.error   { background: #9b2c2c; }
+  #pc-toast.warning { background: #975a16; }
+
+  /* ── Tela de sucesso ── */
+  #pc-success {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  #pc-success .icon { font-size: 64px; }
+  #pc-success h2 { font-size: 22px; color: var(--dark); margin: 16px 0 8px; }
+  #pc-success p  { font-size: 14px; color: var(--muted); }
+
+  @media (max-width: 400px) {
+    .row-2, .row-3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="pc-header">
+  <h1>Assembleia de Deus</h1>
+  <p>Fonte da Salvação — Pré-cadastro de Membro</p>
+</div>
+
+<div class="pc-card" id="pc-form-card">
+
+  <!-- Tela de sucesso (oculta inicialmente) -->
+  <div id="pc-success">
+    <div class="icon">🎉</div>
+    <h2>Solicitação enviada!</h2>
+    <p>Seus dados foram recebidos. A secretaria irá analisar e confirmar seu cadastro em breve.</p>
+  </div>
+
+  <!-- Formulário -->
+  <form id="pc-form" onsubmit="return false;">
+
+    <div class="pc-section-title">Dados Pessoais</div>
+
+    <div class="field" id="fld-nome">
+      <label>Nome Completo <span class="req">*</span></label>
+      <input type="text" id="pcf-nome" placeholder="Nome completo" autocomplete="name">
+      <div class="field-error" id="fle-nome">Campo obrigatório</div>
+    </div>
+
+    <div class="row-2">
+      <div class="field" id="fld-sexo">
+        <label>Sexo <span class="req">*</span></label>
+        <select id="pcf-sexo">
+          <option value="">Selecione</option>
+          <option value="Masculino">Masculino</option>
+          <option value="Feminino">Feminino</option>
+        </select>
+        <div class="field-error" id="fle-sexo">Campo obrigatório</div>
+      </div>
+      <div class="field" id="fld-estadoCivil">
+        <label>Estado Civil <span class="req">*</span></label>
+        <select id="pcf-estadoCivil">
+          <option value="">Selecione</option>
+          <option value="Solteiro(a)">Solteiro(a)</option>
+          <option value="Casado(a)">Casado(a)</option>
+          <option value="Divorciado(a)">Divorciado(a)</option>
+          <option value="Viúvo(a)">Viúvo(a)</option>
+        </select>
+        <div class="field-error" id="fle-estadoCivil">Campo obrigatório</div>
+      </div>
+    </div>
+
+    <div class="field" id="fld-nascimento">
+      <label>Data de Nascimento <span class="req">*</span></label>
+      <input type="text" id="pcf-nascimento" placeholder="DD/MM/AAAA" maxlength="10"
+             oninput="this.value=maskDate(this.value)" inputmode="numeric">
+      <div class="field-error" id="fle-nascimento">Campo obrigatório</div>
+    </div>
+
+    <div class="field" id="fld-nomeMae">
+      <label>Nome da Mãe <span class="req">*</span></label>
+      <input type="text" id="pcf-nomeMae" placeholder="Nome completo da mãe">
+      <div class="field-error" id="fle-nomeMae">Campo obrigatório</div>
+    </div>
+
+    <div class="field" id="fld-nomePai">
+      <label>Nome do Pai <span class="req">*</span></label>
+      <input type="text" id="pcf-nomePai" placeholder="Nome completo do pai">
+      <div class="field-error" id="fle-nomePai">Campo obrigatório</div>
+    </div>
+
+    <div class="field">
+      <label>RG</label>
+      <input type="text" id="pcf-rg" placeholder="Número do RG">
+    </div>
+
+    <div class="field">
+      <label>CPF</label>
+      <input type="text" id="pcf-cpf" placeholder="000.000.000-00" maxlength="14"
+             oninput="this.value=maskCpf(this.value)" inputmode="numeric">
+    </div>
+
+    <div class="pc-section-title">Batismo e Função</div>
+
+    <div class="row-2">
+      <div class="field" id="fld-batismo">
+        <label>Mês/Ano de Batismo <span class="req">*</span></label>
+        <input type="text" id="pcf-batismo" placeholder="MM/AAAA" maxlength="7"
+               oninput="this.value=maskMesAno(this.value)" inputmode="numeric">
+        <div class="field-error" id="fle-batismo">Campo obrigatório</div>
+      </div>
+      <div class="field" id="fld-Igreja">
+        <label>Igreja de Batismo <span class="req">*</span></label>
+        <input type="text" id="pcf-Igreja" placeholder="Nome da igreja">
+        <div class="field-error" id="fle-Igreja">Campo obrigatório</div>
+      </div>
+    </div>
+
+    <div class="field" id="fld-funcao">
+      <label>Função <span class="req">*</span></label>
+      <input type="text" id="pcf-funcao" placeholder="Ex: Membro, Diácono, Obreiro...">
+      <div class="field-error" id="fle-funcao">Campo obrigatório</div>
+    </div>
+
+    <div class="pc-section-title">Endereço</div>
+
+    <div class="field" id="fld-rua">
+      <label>Rua <span class="req">*</span></label>
+      <input type="text" id="pcf-rua" placeholder="Nome da rua">
+      <div class="field-error" id="fle-rua">Campo obrigatório</div>
+    </div>
+
+    <div class="row-3">
+      <div class="field" id="fld-bairro">
+        <label>Bairro <span class="req">*</span></label>
+        <input type="text" id="pcf-bairro" placeholder="Bairro">
+        <div class="field-error" id="fle-bairro">Campo obrigatório</div>
+      </div>
+      <div class="field" id="fld-numero">
+        <label>Nº <span class="req">*</span></label>
+        <input type="text" id="pcf-numero" placeholder="123">
+        <div class="field-error" id="fle-numero">Obrigatório</div>
+      </div>
+      <div class="field" id="fld-cep">
+        <label>CEP <span class="req">*</span></label>
+        <input type="text" id="pcf-cep" placeholder="00000-000" maxlength="9"
+               oninput="this.value=maskCep(this.value)" inputmode="numeric">
+        <div class="field-error" id="fle-cep">Campo obrigatório</div>
+      </div>
+    </div>
+
+    <div class="row-2">
+      <div class="field" id="fld-cidade">
+        <label>Cidade <span class="req">*</span></label>
+        <input type="text" id="pcf-cidade" placeholder="Cidade">
+        <div class="field-error" id="fle-cidade">Campo obrigatório</div>
+      </div>
+      <div class="field" id="fld-estado">
+        <label>UF <span class="req">*</span></label>
+        <select id="pcf-estado">
+          <option value="">UF</option>
+          <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+          <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+          <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+          <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+          <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+          <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+          <option>SP</option><option>SE</option><option>TO</option>
+        </select>
+        <div class="field-error" id="fle-estado">Campo obrigatório</div>
+      </div>
+    </div>
+
+    <div class="pc-section-title">Contato</div>
+
+    <div class="field" id="fld-celular">
+      <label>Celular <span class="req">*</span></label>
+      <input type="tel" id="pcf-celular" placeholder="(31) 99999-9999" maxlength="15"
+             oninput="this.value=maskPhone(this.value)" inputmode="numeric">
+      <div class="field-error" id="fle-celular">Campo obrigatório</div>
+    </div>
+
+    <div class="field">
+      <label>E-mail</label>
+      <input type="email" id="pcf-email" placeholder="email@exemplo.com" inputmode="email">
+    </div>
+
+    <button class="pc-btn" id="pc-submit-btn" onclick="pcEnviar()">
+      Enviar Solicitação
+    </button>
+
+  </form>
+</div>
+
+<div id="pc-toast"></div>
+
+<script>
+  // ── Máscaras ──────────────────────────────────────────────
+  function maskDate(v) {
+    var d = v.replace(/\D/g,'').slice(0,8);
+    if (d.length <= 2) return d;
+    if (d.length <= 4) return d.slice(0,2)+'/'+d.slice(2);
+    return d.slice(0,2)+'/'+d.slice(2,4)+'/'+d.slice(4);
+  }
+  function maskMesAno(v) {
+    var d = v.replace(/\D/g,'').slice(0,6);
+    if (d.length <= 2) return d;
+    return d.slice(0,2)+'/'+d.slice(2);
+  }
+  function maskPhone(v) {
+    var d = v.replace(/\D/g,'').slice(0,11);
+    if (d.length <= 2) return d;
+    if (d.length <= 7) return '('+d.slice(0,2)+') '+d.slice(2);
+    return '('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7);
+  }
+  function maskCep(v) {
+    var d = v.replace(/\D/g,'').slice(0,8);
+    if (d.length <= 5) return d;
+    return d.slice(0,5)+'-'+d.slice(5);
+  }
+  function maskCpf(v) {
+    var d = v.replace(/\D/g,'').slice(0,11);
+    if (d.length <= 3) return d;
+    if (d.length <= 6) return d.slice(0,3)+'.'+d.slice(3);
+    if (d.length <= 9) return d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6);
+    return d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6,9)+'-'+d.slice(9);
+  }
+
+  // ── Nome próprio ─────────────────────────────────────────
+  function nomeProprio(s) {
+    if (!s) return '';
+    var excl = ['da','de','di','do','du','das','dos','e','em','com'];
+    return s.trim().toLowerCase().split(' ').map(function(w,i){
+      if (i>0 && excl.indexOf(w)>=0) return w;
+      return w.charAt(0).toUpperCase()+w.slice(1);
+    }).join(' ');
+  }
+
+  // ── Toast ────────────────────────────────────────────────
+  var _toastTimer = null;
+  function pcToast(msg, tipo) {
+    var t = document.getElementById('pc-toast');
+    t.textContent = msg;
+    t.className = 'show ' + (tipo || '');
+    if (_toastTimer) clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(function(){ t.className = ''; }, 3500);
+  }
+
+  // ── Campos obrigatórios ──────────────────────────────────
+  var OBRIGATORIOS = ['nome','sexo','nascimento','nomeMae','nomePai','estadoCivil',
+                      'batismo','Igreja','funcao','rua','numero','bairro','cidade',
+                      'estado','cep','celular'];
+
+  function pcValidar() {
+    var ok = true;
+    OBRIGATORIOS.forEach(function(k) {
+      var el  = document.getElementById('pcf-'+k);
+      var err = document.getElementById('fle-'+k);
+      var fld = document.getElementById('fld-'+k);
+      var v   = el ? el.value.trim() : '';
+      if (!v) {
+        ok = false;
+        if (fld) fld.classList.add('has-error');
+        if (err) err.style.display = 'block';
+      } else {
+        if (fld) fld.classList.remove('has-error');
+        if (err) err.style.display = 'none';
+      }
+    });
+    return ok;
+  }
+
+  // ── Coleta dados do formulário ───────────────────────────
+  function pcColetarDados() {
+    var g = function(id){ var el = document.getElementById(id); return el ? el.value.trim() : ''; };
+    return {
+      nome:        nomeProprio(g('pcf-nome')),
+      sexo:        g('pcf-sexo'),
+      nascimento:  g('pcf-nascimento'),
+      nomeMae:     nomeProprio(g('pcf-nomeMae')),
+      nomePai:     nomeProprio(g('pcf-nomePai')),
+      estadoCivil: g('pcf-estadoCivil'),
+      rg:          g('pcf-rg'),
+      cpf:         g('pcf-cpf'),
+      batismo:     g('pcf-batismo'),
+      Igreja:      g('pcf-Igreja'),
+      funcao:      g('pcf-funcao'),
+      rua:         nomeProprio(g('pcf-rua')),
+      numero:      g('pcf-numero'),
+      bairro:      nomeProprio(g('pcf-bairro')),
+      cidade:      nomeProprio(g('pcf-cidade')),
+      estado:      g('pcf-estado'),
+      cep:         g('pcf-cep'),
+      celular:     g('pcf-celular'),
+      email:       g('pcf-email')
+    };
+  }
+
+  // ── Enviar ───────────────────────────────────────────────
+  function pcEnviar() {
+    if (!pcValidar()) {
+      pcToast('Preencha todos os campos obrigatórios.', 'warning');
+      // Scroll até o primeiro erro
+      var primeiro = document.querySelector('.has-error');
+      if (primeiro) primeiro.scrollIntoView({ behavior:'smooth', block:'center' });
+      return;
+    }
+
+    var btn = document.getElementById('pc-submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+
+    var dados = pcColetarDados();
+
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (res && res.success) {
+          document.getElementById('pc-form').style.display = 'none';
+          document.getElementById('pc-success').style.display = 'block';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          pcToast('Erro: ' + (res && res.error ? res.error : 'Tente novamente.'), 'error');
+          btn.disabled = false;
+          btn.textContent = 'Enviar Solicitação';
+        }
+      })
+      .withFailureHandler(function(err) {
+        pcToast('Erro de conexão. Tente novamente.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Enviar Solicitação';
+      })
+      .salvarSolicitacao(dados);
+  }
+
+  // ── Limpa erro ao editar campo ───────────────────────────
+  OBRIGATORIOS.forEach(function(k) {
+    var el  = document.getElementById('pcf-'+k);
+    var fld = document.getElementById('fld-'+k);
+    var err = document.getElementById('fle-'+k);
+    if (el) {
+      el.addEventListener('input', function() {
+        if (el.value.trim()) {
+          if (fld) fld.classList.remove('has-error');
+          if (err) err.style.display = 'none';
+        }
+      });
+    }
+  });
+</script>
+</body>
+</html>
