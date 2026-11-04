@@ -331,11 +331,11 @@ function renderUsuarios() {
           '<i data-lucide="home" style="width:20px;height:20px"></i><span>Início</span>'+
         '</button>'
       : '')+
-      (isAdmin ?
-        '<button class="usr-bnav-item" onclick="navigateTo(\'membros\')">'+
-          '<i data-lucide="contact" style="width:20px;height:20px"></i><span>Membros</span>'+
-        '</button>'
-      : '')+
+      (isAdmin ? MODULOS.map(function (m) {
+        return '<button class="usr-bnav-item" onclick="navigateTo(\'' + m.rota + '\')">'+
+          '<i data-lucide="' + m.icone + '" style="width:20px;height:20px"></i><span>' + m.nome + '</span>'+
+        '</button>';
+      }).join('') : '')+
       '<button class="usr-bnav-item active">'+
         '<i data-lucide="shield-check" style="width:20px;height:20px"></i><span>Usuários</span>'+
       '</button>'+
@@ -808,16 +808,6 @@ var _permModulos = [
     ]
   },
   {
-    name: 'Membros', desc: 'Cadastro e rol de membros', icon: 'contact', iconBg: 'rgba(77,163,255,.15)', iconColor: 'var(--cyan,#4da3ff)',
-    acoes: [
-      { id:'mb_ver',        label: 'Ver lista de membros',       admin: true,  secretaria: true },
-      { id:'mb_criar',      label: 'Cadastrar membro',           admin: true,  secretaria: true },
-      { id:'mb_editar',     label: 'Editar dados do membro',     admin: true,  secretaria: true },
-      { id:'mb_excluir',    label: 'Excluir membro',             admin: true,  secretaria: false },
-      { id:'mb_backup',     label: 'Exportar / importar backup', admin: true,  secretaria: true }
-    ]
-  },
-  {
     name: 'Usuários', desc: 'Gestão de acesso e perfis', icon: 'shield-check', iconBg: 'rgba(255,94,122,.15)', iconColor: 'var(--danger,#ff5e7a)',
     acoes: [
       { id:'usr_acessar',   label: 'Acessar módulo',             admin: true,  secretaria: true },
@@ -836,6 +826,15 @@ var _permModulos = [
     ]
   }
 ];
+
+// Módulos ativos declaram suas próprias ações no manifesto; entram na matriz logo após o Dashboard.
+(function () {
+  var extras = MODULOS.filter(function (m) { return m.permissoes; }).map(function (m) {
+    var p = m.permissoes;
+    return { name: m.nome, desc: m.descricao, icon: m.icone, iconBg: p.iconBg, iconColor: p.iconColor, acoes: p.acoes };
+  });
+  _permModulos.splice.apply(_permModulos, [1, 0].concat(extras));
+})();
 
 // Inicializa estado mutável a partir dos dados base
 function _permInitState() {

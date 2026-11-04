@@ -70,6 +70,7 @@ function doGet(e) {
   // Injeta no template — o JS do index.html lê com <?= recovToken ?> e <?= view ?>
   tmpl.recovToken = recovToken;
   tmpl.view       = view;
+  tmpl.modulosJson = Modulos.jsonParaHtml(); // módulos ativos (registro em Modulos.js)
 
   return tmpl.evaluate()
     .setTitle('AD Fonte da Salvação — Gestão Ministerial')

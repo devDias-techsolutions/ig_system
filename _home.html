@@ -194,7 +194,7 @@
 // ═══════════════════════════════════════════════════
 
 var HomeState = {
-  kpis: { membros: 0, inativos: 0, semFoto: 0, usuarios: 0 }
+  kpis: []
 };
 
 function renderHome() {
@@ -235,12 +235,12 @@ function renderHome() {
     '<div class=\"home-content\">' +
 
     /* ══ MÓDULOS ══ */
-    '<div style=\"padding:0 36px\">' +
+    (MODULOS.length ? '<div style=\"padding:0 36px\">' +
       '<div class=\"section-label\">Módulos</div>' +
       '<div class=\"modules-grid\">' +
-        _moduleBtn('contact',        'Membros',          'Cadastro de membros',         'membros') +
+        MODULOS.map(function (m) { return _moduleBtn(m.icone, m.nome, m.descricao, m.rota); }).join('') +
       '</div>' +
-    '</div>' +
+    '</div>' : '') +
 
     /* ══ ATIVIDADE RECENTE ══ */
     '<div style=\"padding:0 36px;margin-top:28px\">' +
@@ -275,10 +275,12 @@ function renderHome() {
         '<i data-lucide=\"layout-dashboard\" style=\"width:20px;height:20px\"></i>' +
         '<span>Início</span>' +
       '</button>' +
-      '<button class=\"bnav-item\" onclick=\"navigateTo(\'membros\')\">' +
-        '<i data-lucide=\"contact\" style=\"width:20px;height:20px\"></i>' +
-        '<span>Membros</span>' +
-      '</button>' +
+      MODULOS.map(function (m) {
+        return '<button class=\"bnav-item\" onclick=\"navigateTo(\'' + m.rota + '\')\">' +
+          '<i data-lucide=\"' + m.icone + '\" style=\"width:20px;height:20px\"></i>' +
+          '<span>' + m.nome + '</span>' +
+        '</button>';
+      }).join('') +
       '<button class=\"bnav-item\" onclick=\"handleLogout()\">' +
         '<i data-lucide=\"log-out\" style=\"width:20px;height:20px\"></i>' +
         '<span>Sair</span>' +
@@ -360,11 +362,9 @@ function _loadKpis() {
       var grid = document.getElementById('kpi-grid');
       if (!grid) return;
 
-      grid.innerHTML =
-        _kpiCard('users',        'kc-teal',  d.membros  || 0, 'Membros ativos',      'Ativos') +
-        _kpiCard('user-x',       'kc-gold',  d.inativos || 0, 'Membros inativos',    'Inativos') +
-        _kpiCard('camera',       'kc-blue',  d.semFoto  || 0, 'Membros sem foto',    'Sem foto') +
-        _kpiCard('shield-check', 'kc-green', d.usuarios || 0, 'Usuários do sistema', 'Usuários');
+      grid.innerHTML = (d || []).map(function (k) {
+        return _kpiCard(k.icone, k.cor, k.valor || 0, k.rotulo, k.curto);
+      }).join('');
 
       if (window.lucide) setTimeout(function(){ lucide.createIcons(); }, 0);
     })

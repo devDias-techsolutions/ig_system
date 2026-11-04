@@ -362,10 +362,47 @@ var Membros = (function () {
     salvarFotoMembro:     salvarFotoMembro,
     getFotoMembro:        getFotoMembro,
     corrigirIdsDuplicados: corrigirIdsDuplicados,
-    setupMembros:         setupMembros
+    setupMembros:         setupMembros,
+    HEADERS:              HEADERS
   };
 
 })();
+
+// ── MANIFESTO DO MÓDULO (registro independe da ordem de carga) ──
+var __MANIFESTOS__ = (typeof __MANIFESTOS__ === 'undefined') ? [] : __MANIFESTOS__;
+__MANIFESTOS__.push({
+  id: 'membros',
+  nome: 'Membros',
+  descricao: 'Cadastro de membros',
+  icone: 'contact',
+  rota: 'membros',
+  render: 'renderMembros',
+  html: '_membros',
+  perfis: ['admin', 'secretaria'],
+  ordem: 10,
+  permissoes: {
+    iconBg: 'rgba(77,163,255,.15)', iconColor: 'var(--cyan,#4da3ff)',
+    acoes: [
+      { id:'mb_ver',     label: 'Ver lista de membros',       admin: true, secretaria: true },
+      { id:'mb_criar',   label: 'Cadastrar membro',           admin: true, secretaria: true },
+      { id:'mb_editar',  label: 'Editar dados do membro',     admin: true, secretaria: true },
+      { id:'mb_excluir', label: 'Excluir membro',             admin: true, secretaria: false },
+      { id:'mb_backup',  label: 'Exportar / importar backup', admin: true, secretaria: true }
+    ]
+  },
+  abas: [{ nome: 'Membros', colunas: Membros.HEADERS, cor: '#00695C' }],
+  kpis: function () {
+    function ativo(v) { return v === true || v === 1 || String(v).trim().toUpperCase() === 'TRUE'; }
+    var todos = Util.sheetToObjects('Membros');
+    var ativos = todos.filter(function (r) { return ativo(r.ativo); });
+    return [
+      { icone: 'users',  cor: 'kc-teal', valor: ativos.length, rotulo: 'Membros ativos',   curto: 'Ativos' },
+      { icone: 'user-x', cor: 'kc-gold', valor: todos.length - ativos.length, rotulo: 'Membros inativos', curto: 'Inativos' },
+      { icone: 'camera', cor: 'kc-blue', valor: ativos.filter(function (r) { return !String(r.foto || '').trim(); }).length, rotulo: 'Membros sem foto', curto: 'Sem foto' }
+    ];
+  }
+});
+
 
 
 // ═══════════════════════════════════════════════════════════

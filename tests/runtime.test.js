@@ -128,7 +128,8 @@ test('núcleo: KPIs da home funcionam sem nenhuma aba da Escola Dominical', () =
   });
   const res = env.run("getKpisHome('tok')");
   assert.equal(res.success, true, JSON.stringify(res));
-  assert.deepEqual(res.data, { membros: 2, inativos: 1, semFoto: 1, usuarios: 1 });
+  const v = Object.fromEntries(res.data.map((k) => [k.curto, k.valor]));
+  assert.deepEqual(v, { Ativos: 2, Inativos: 1, 'Sem foto': 1, 'Usuários': 1 });
 });
 
 test('núcleo: atividade recente funciona sem nenhuma aba da Escola Dominical', () => {
@@ -151,4 +152,75 @@ test('núcleo: perfil professor não pode mais ser criado', () => {
   const res = env.run("usr_criar('tok', __dados)");
   assert.equal(res.success, false, JSON.stringify(res));
   assert.match(res.error, /Perfil inválido/);
+});
+
+// ═══ Registro de módulos (Etapa 3) ══════════════════════════
+const ESQ = (env) => JSON.parse(env.run('JSON.stringify(Modulos.ativos().map(function(m){return m.id}))'));
+
+test('módulos: Membros se registra e aparece como módulo ativo com rota, perfis e ícone', () => {
+  const env = freshEnv();
+  const mods = JSON.parse(env.run('JSON.stringify(Modulos.paraCliente())'));
+  assert.equal(mods.length, 1);
+  assert.deepEqual([mods[0].id, mods[0].rota, mods[0].render], ['membros', 'membros', 'renderMembros']);
+  assert.deepEqual(mods[0].perfis, ['admin', 'secretaria']);
+  assert.ok(mods[0].permissoes && mods[0].permissoes.acoes.length);
+});
+
+test('módulos: o registro não depende da ordem de carga dos arquivos', () => {
+  const { listFiles } = require('./helpers/gas');
+  const env = createEnv();
+  env.load(listFiles('.js').reverse());
+  assert.deepEqual(ESQ(env), ['membros']);
+});
+
+test('módulos: manifesto é serializável (sem funções) e o JSON do HTML é seguro', () => {
+  const env = freshEnv();
+  const js = env.run('Modulos.jsonParaHtml()');
+  assert.doesNotThrow(() => JSON.parse(js));
+  assert.ok(!js.includes('<'));
+});
+
+test('módulos: o esquema da planilha inclui as abas do núcleo e as declaradas pelos módulos ativos', () => {
+  const env = freshEnv();
+  const esq = JSON.parse(env.run('JSON.stringify(SetupSheets.schema())'));
+  assert.deepEqual(Object.keys(esq).sort(), ['Config', 'Membros', 'Sessoes', 'Usuarios']);
+  assert.equal(esq.Membros[0], 'id');
+  assert.ok(esq.Membros.includes('ativo'));
+});
+
+test('módulos: módulo desativado some do registro, das abas, dos KPIs e do HTML', () => {
+  const env = createEnv({ scriptProperties: { MODULOS_ATIVOS: 'outro' } });
+  env.load();
+  assert.deepEqual(ESQ(env), []);
+  assert.equal(env.run('Modulos.abas().length'), 0);
+  assert.equal(env.run('Modulos.kpis().length'), 0);
+  assert.equal(env.run('incluirModulos()'), '');
+  const esq = JSON.parse(env.run('JSON.stringify(SetupSheets.schema())'));
+  assert.deepEqual(Object.keys(esq).sort(), ['Config', 'Sessoes', 'Usuarios']);
+});
+
+test('módulos: núcleo sem nenhum módulo — KPIs mostram só usuários', () => {
+  const env = createEnv({ openByIdResult: ssComAbas({ Usuarios: [COLS_USUARIOS, ['u1', 'Ana', 'a@i.test', 'h', 'admin', false, true, '', '', '01/11/2026 10:00:00', '']] }), scriptProperties: { MODULOS_ATIVOS: 'nenhum' } });
+  env.load();
+  env.scriptCache.put('sess_tok', JSON.stringify({ token: 'tok', id: 'u1', nome: 'Ana', email: 'a@i.test', perfil: 'admin', expiraEm: new Date(Date.now() + 3600e3).toISOString(), primeiroAcesso: false }), 3600);
+  const res = env.run("getKpisHome('tok')");
+  assert.equal(res.success, true, JSON.stringify(res));
+  assert.deepEqual(res.data.map((k) => k.curto), ['Usuários']);
+});
+
+test('módulos: doGet injeta a lista de módulos no template', () => {
+  const env = freshEnv();
+  const out = env.run('doGet({parameter:{}})');
+  const mods = JSON.parse(out._tpl.modulosJson);
+  assert.deepEqual(mods.map((m) => m.id), ['membros']);
+});
+
+test('módulos: getModulos exige sessão', () => {
+  const env = freshEnv();
+  assert.equal(env.run("getModulos('')").success, false);
+});
+
+test('módulos: o HTML do módulo ativo é incluído no shell', () => {
+  const env = freshEnv();
+  assert.match(env.run('incluirModulos()'), /function renderMembros\s*\(/);
 });
