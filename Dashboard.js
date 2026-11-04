@@ -10,18 +10,13 @@ var Dashboard = (function () {
   }
 
   // ── KPIs DA HOME ─────────────────────────────────────────
+  // Núcleo (usuários) + KPIs que cada módulo ativo declara no seu manifesto.
   function getKpisHome(token) {
     return withAuth(token, function(sess) {
-      var membros  = Util.sheetToObjects('Membros');
-      var ativos   = membros.filter(function(r) { return _ativo(r.ativo); });
       var usuarios = Util.sheetToObjects('Usuarios').filter(function(r) { return _ativo(r.Ativo); });
-
-      return Util.ok({
-        membros:   ativos.length,
-        inativos:  membros.length - ativos.length,
-        semFoto:   ativos.filter(function(r) { return !String(r.foto || '').trim(); }).length,
-        usuarios:  usuarios.length
-      });
+      var kpis = Modulos.kpis();
+      kpis.push({ icone: 'shield-check', cor: 'kc-green', valor: usuarios.length, rotulo: 'Usuários do sistema', curto: 'Usuários' });
+      return Util.ok(kpis);
     });
   }
 

@@ -7,7 +7,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
-const { ROOT, listFiles, read } = require('./helpers/gas');
+const { ROOT, listFiles, read, createEnv } = require('./helpers/gas');
 
 const JS = listFiles('.js');
 const HTML = listFiles('.html');
@@ -154,37 +154,50 @@ test('recorte: módulos pendentes ficam em modulos-pendentes/, fora da raiz de d
     assert.ok(!fs.existsSync(path.join(ROOT, f)), f + ' não pode estar na raiz'));
 });
 
-test('rotas: toda rota de VIEWS tem função de renderização definida', () => {
+// Rotas agora vêm do registro de módulos (Modulos.js). O trecho de roteamento do index.html
+// é executado com os módulos reais carregados no backend.
+function roteamento(modulos) {
   const idx = read('index.html');
-  const bloco = /var VIEWS = \{([\s\S]*?)\};/.exec(idx);
-  assert.ok(bloco, 'bloco VIEWS não encontrado');
-  const pares = [...bloco[1].matchAll(/['"]?([\w-]+)['"]?\s*:\s*'(\w+)'/g)];
-  assert.ok(pares.length >= 5, 'VIEWS parece vazio');
+  const ini = idx.indexOf('// ── ROTEAMENTO');
+  const fim = idx.indexOf('function navigateTo(');
+  assert.ok(ini > 0 && fim > ini, 'bloco de roteamento não encontrado no index.html');
+  const ctx = vm.createContext({ MODULOS: modulos });
+  vm.runInContext(idx.slice(ini, fim), ctx);
+  return ctx;
+}
+function modulosReais() {
+  const env = createEnv();
+  env.load();
+  return JSON.parse(env.run('JSON.stringify(Modulos.paraCliente())'));
+}
+
+test('rotas: toda rota (núcleo e módulos) tem função de renderização definida', () => {
+  const { VIEWS } = roteamento(modulosReais());
   const todosHtml = HTML.map(read).join('\n');
-  const faltando = pares.filter(([, , fn]) => !new RegExp('function\\s+' + fn + '\\s*\\(').test(todosHtml)).map(([, rota, fn]) => `${rota} → ${fn}`);
+  const faltando = Object.entries(VIEWS).filter(([, fn]) => !new RegExp('function\\s+' + fn + '\\s*\\(').test(todosHtml)).map(([r, fn]) => `${r} → ${fn}`);
   assert.deepEqual(faltando, [], 'Rotas sem função de renderização:\n' + faltando.join('\n'));
 });
 
 test('rotas: permissões e autenticação só citam rotas que existem', () => {
-  const idx = read('index.html');
-  const views = [...(/var VIEWS = \{([\s\S]*?)\};/.exec(idx)[1]).matchAll(/['"]?([\w-]+)['"]?\s*:\s*'\w+'/g)].map((m) => m[1]);
-  const perm = [...(/var ROUTE_PERMISSIONS = \{([\s\S]*?)\};/.exec(idx)[1]).matchAll(/['"]([\w-]+)['"]\s*:/g)].map((m) => m[1]);
-  const auth = [...(/var authRequired = \[([^\]]*)\]/.exec(idx)[1]).matchAll(/['"]([\w-]+)['"]/g)].map((m) => m[1]);
-  const orfas = [...perm, ...auth].filter((r) => !views.includes(r));
-  assert.deepEqual(orfas, [], 'Rotas citadas mas inexistentes em VIEWS: ' + orfas.join(', '));
+  const c = roteamento(modulosReais());
+  const orfas = [...Object.keys(c.ROUTE_PERMISSIONS), ...c.authRequired].filter((r) => !(r in c.VIEWS));
+  assert.deepEqual(orfas, [], 'Rotas citadas mas inexistentes: ' + orfas.join(', '));
 });
 
-test('rotas: cada perfil do MVP cai numa tela que ele pode acessar', () => {
-  const idx = read('index.html');
-  const fn = /function _homeViewForPerfil\(perfil\) \{[\s\S]*?\n\}/.exec(idx);
-  assert.ok(fn, '_homeViewForPerfil não encontrada');
-  const home = vm.runInNewContext('(' + fn[0] + ')');
-  const perm = vm.runInNewContext('(' + /var ROUTE_PERMISSIONS = (\{[\s\S]*?\});/.exec(idx)[1] + ')');
-  ['admin', 'secretaria'].forEach((perfil) => {
-    const destino = home(perfil);
-    assert.ok(perm[destino], `destino "${destino}" de ${perfil} não tem permissão declarada`);
-    assert.ok(perm[destino].includes(perfil), `${perfil} não pode acessar o próprio destino "${destino}"`);
+test('rotas: cada perfil cai numa tela que ele pode acessar (com e sem módulos)', () => {
+  [modulosReais(), []].forEach((mods) => {
+    const c = roteamento(mods);
+    ['admin', 'secretaria'].forEach((perfil) => {
+      const destino = vm.runInContext('_homeViewForPerfil(' + JSON.stringify(perfil) + ')', c);
+      assert.ok(c.ROUTE_PERMISSIONS[destino], `destino "${destino}" de ${perfil} sem permissão declarada`);
+      assert.ok(c.ROUTE_PERMISSIONS[destino].includes(perfil), `${perfil} não pode acessar o próprio destino "${destino}"`);
+    });
   });
+});
+
+test('rotas: o núcleo não cita módulo pelo nome (nada de rota "membros" fixa no index/home/usuários)', () => {
+  const hits = findings(/navigateTo\(\\?'membros\\?'\)|renderMembros|_membros'/, ['index.html', '_home.html', '_usuarios.html']);
+  assert.deepEqual(hits, [], 'Acoplamento do núcleo com o módulo Membros:\n' + hits.join('\n'));
 });
 
 test('recorte: núcleo sem perfil professor e sem funcionalidades "Em breve"', () => {

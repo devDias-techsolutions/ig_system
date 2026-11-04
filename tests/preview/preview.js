@@ -8,15 +8,25 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { chromium } = require('playwright');
-const { ROOT, read } = require('../helpers/gas');
+const { ROOT, read, createEnv } = require('../helpers/gas');
 const mock = require('./mock-backend');
 
 const OUT = path.resolve(process.argv[2] || 'preview-out');
 const PERFIL = process.argv[3] || 'admin';
 const ORIGIN = 'http://preview.local/';
 
+// SEM_MODULOS=1 simula uma planilha sem nenhum módulo instalado (só o núcleo).
+function modulosAtivos() {
+  const env = createEnv({ scriptProperties: process.env.SEM_MODULOS ? { MODULOS_ATIVOS: 'nenhum' } : {} });
+  env.load();
+  return { json: env.run('Modulos.jsonParaHtml()'), html: env.run('incluirModulos()') };
+}
+
 function montarIndex() {
+  const mods = modulosAtivos();
   return read('index.html')
+    .replace(/<\?!=\s*modulosJson\s*\?>/g, () => mods.json)
+    .replace(/<\?!=\s*incluirModulos\(\);?\s*\?>/g, () => mods.html)
     .replace(/<\?!=\s*include\('([^']+)'\);?\s*\?>/g, (_, f) => read(f + '.html'))
     .replace(/<\?=\s*recovToken\s*\?>/g, '')
     .replace(/<\?=\s*view\s*\?>/g, '');
@@ -78,7 +88,7 @@ async function irPara(page, rota, esperada) {
   const telas = [
     { nome: 'login', rota: null, sessao: false },
     { nome: 'home', rota: 'home', sessao: true },
-    { nome: 'membros', rota: 'membros', sessao: true },
+    ...(process.env.SEM_MODULOS ? [] : [{ nome: 'membros', rota: 'membros', sessao: true }]),
     { nome: 'usuarios', rota: 'usuarios', sessao: true },
   ];
   const tamanhos = { mobile: { width: 390, height: 844 }, desktop: { width: 1280, height: 800 } };

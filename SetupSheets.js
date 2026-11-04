@@ -5,7 +5,7 @@
 
 var SetupSheets = (function () {
 
-  var SCHEMA = {
+  var CORE_SCHEMA = {
 
     Usuarios: [
       'ID', 'Nome', 'Email', 'SenhaHash', 'Perfil',
@@ -21,25 +21,28 @@ var SetupSheets = (function () {
 
     Config: [
       'Chave', 'Valor', 'Descricao', 'AtualizadoEm'
-    ],
-
-    Membros: [
-      'id', 'rol', 'nome', 'sexo', 'nascimento',
-      'nomeMae', 'nomePai', 'estadoCivil',
-      'batismo', 'Igreja', 'funcao',
-      'rua', 'numero', 'bairro', 'cidade', 'estado', 'cep',
-      'celular', 'email', 'rg', 'cpf',
-      'foto', 'fotoZoom', 'fotoX', 'fotoY', 'ativo'
     ]
   };
 
   // Cores de cabeçalho por aba
-  var HEADER_COLORS = {
+  var CORE_COLORS = {
     Usuarios:      '#1C353A',
     Sessoes:       '#0f2a2f',
-    Config:        '#2a2a2a',
-    Membros:       '#00695C'
+    Config:        '#2a2a2a'
   };
+
+  // Esquema = abas do núcleo + abas declaradas pelos módulos ativos (calculado a cada uso,
+  // pois a ordem de carga dos arquivos não é garantida).
+  function _schema() {
+    var s = {}; Object.keys(CORE_SCHEMA).forEach(function (k) { s[k] = CORE_SCHEMA[k]; });
+    Modulos.abas().forEach(function (a) { s[a.nome] = a.colunas; });
+    return s;
+  }
+  function _colors() {
+    var c = {}; Object.keys(CORE_COLORS).forEach(function (k) { c[k] = CORE_COLORS[k]; });
+    Modulos.abas().forEach(function (a) { if (a.cor) c[a.nome] = a.cor; });
+    return c;
+  }
 
   // ─────────────────────────────────────────────────────────────
   //  Migração segura: adiciona colunas ausentes em abas existentes
@@ -47,13 +50,13 @@ var SetupSheets = (function () {
   // ─────────────────────────────────────────────────────────────
   function migrateColumns() {
     var report = [];
-    Object.keys(SCHEMA).forEach(function(name) {
+    Object.keys(_schema()).forEach(function(name) {
       var sheet = SS.getSheetByName(name);
       if (!sheet) {
         report.push('⏭️  "' + name + '" não existe — rode createAllSheets() primeiro.');
         return;
       }
-      var expected = SCHEMA[name];
+      var expected = _schema()[name];
       var existing = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(String);
       var toAdd = expected.filter(function(col) { return existing.indexOf(col) === -1; });
       if (!toAdd.length) {
@@ -63,7 +66,7 @@ var SetupSheets = (function () {
       toAdd.forEach(function(col) {
         var nextCol = sheet.getLastColumn() + 1;
         sheet.getRange(1, nextCol).setValue(col)
-          .setBackground(HEADER_COLORS[name] || '#1C353A')
+          .setBackground(_colors()[name] || '#1C353A')
           .setFontColor('#00A99C')
           .setFontWeight('bold')
           .setFontSize(11)
@@ -81,7 +84,7 @@ var SetupSheets = (function () {
     var created = [];
     var skipped = [];
 
-    Object.keys(SCHEMA).forEach(function (name) {
+    Object.keys(_schema()).forEach(function (name) {
       var existing = SS.getSheetByName(name);
       if (existing) {
         skipped.push(name);
@@ -89,7 +92,7 @@ var SetupSheets = (function () {
       }
 
       var sheet = SS.insertSheet(name);
-      var headers = SCHEMA[name];
+      var headers = _schema()[name];
 
       // Escrever cabeçalhos
       sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
@@ -97,7 +100,7 @@ var SetupSheets = (function () {
       // Estilo do cabeçalho
       var headerRange = sheet.getRange(1, 1, 1, headers.length);
       headerRange
-        .setBackground(HEADER_COLORS[name] || '#1C353A')
+        .setBackground(_colors()[name] || '#1C353A')
         .setFontColor('#00A99C')
         .setFontWeight('bold')
         .setFontSize(11)
@@ -180,7 +183,8 @@ var SetupSheets = (function () {
 
   return {
     createAllSheets: createAllSheets,
-    migrateColumns:  migrateColumns
+    migrateColumns:  migrateColumns,
+    schema:          _schema
   };
 
 })();

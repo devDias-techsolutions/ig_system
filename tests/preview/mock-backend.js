@@ -36,11 +36,16 @@ function usuarios() {
 // Devolve o código JS (string) com as funções simuladas, para ser injetado na página.
 function serializar(perfil) {
   const sessao = { token: 'tok', id: 'u1', nome: 'Ana Souza', email: 'ana@igreja.test', perfil, primeiroAcesso: false };
+  const kpis = (process.env.SEM_MODULOS ? [] : [
+    { icone: 'users', cor: 'kc-teal', valor: 128, rotulo: 'Membros ativos', curto: 'Ativos' },
+    { icone: 'user-x', cor: 'kc-gold', valor: 14, rotulo: 'Membros inativos', curto: 'Inativos' },
+    { icone: 'camera', cor: 'kc-blue', valor: 37, rotulo: 'Membros sem foto', curto: 'Sem foto' },
+  ]).concat([{ icone: 'shield-check', cor: 'kc-green', valor: 3, rotulo: 'Usuários do sistema', curto: 'Usuários' }]);
   const fns = {
     getSession: () => ok(SESSAO),
     login: () => ok(SESSAO),
     logout: () => ok(true),
-    getKpisHome: () => ok({ membros: 128, inativos: 14, semFoto: 37, usuarios: 3 }),
+    getKpisHome: () => ok(KPIS),
     getAtividadeRecente: () => ok(ATIVIDADE),
     mb_listarMembros: () => ok(MEMBROS),
     mb_getProximoRol: () => ok('0129'),
@@ -53,7 +58,7 @@ function serializar(perfil) {
     { icon: 'user-plus', texto: 'Usuário adicionado: Rita Gomes', tempo: '6d atrás', ts: 1 },
   ];
   const corpo = Object.entries(fns).map(([k, f]) => `${JSON.stringify(k)}: ${f.toString()}`).join(',\n');
-  return `(function(){ var SESSAO=${JSON.stringify(sessao)}, ATIVIDADE=${JSON.stringify(atividade)}, MEMBROS=${JSON.stringify(membros())}, USUARIOS=${JSON.stringify(usuarios())};
+  return `(function(){ var SESSAO=${JSON.stringify(sessao)}, ATIVIDADE=${JSON.stringify(atividade)}, KPIS=${JSON.stringify(kpis)}, MEMBROS=${JSON.stringify(membros())}, USUARIOS=${JSON.stringify(usuarios())};
     function ok(d){ return {success:true,data:d}; }
     return {\n${corpo}\n}; })()`;
 }

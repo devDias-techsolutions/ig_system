@@ -1053,33 +1053,46 @@ var App = {
   TOKEN_KEY: 'ad_sess_token'
 };
 
+// ── MÓDULOS ATIVOS (vêm do registro Modulos.js, injetados pelo servidor) ──
+var MODULOS = <?!= modulosJson ?>;
+
 // ── ROTEAMENTO ───────────────────────────────────────────
+// Rotas fixas do núcleo + uma rota por módulo ativo.
 var VIEWS = {
   login:             'renderLogin',
   'primeiro-acesso': 'renderPrimeiroAcesso',
   'recuperar-senha': 'renderRecuperarSenha',
   home:              'renderHome',
-  'membros':         'renderMembros',
   'usuarios':        'renderUsuarios'
 };
 
 // ── PERMISSÕES POR ROTA ───────────────────────────────────
 // Define quais perfis podem acessar cada view protegida.
-// 'admin' sempre tem acesso total — não precisa ser listado
-// explicitamente; a regra abaixo já contempla.
+// 'admin' sempre tem acesso total.
 var ROUTE_PERMISSIONS = {
   'home':              ['admin'],
-  'membros':           ['admin', 'secretaria'],
   'usuarios':          ['admin', 'secretaria']
 };
 
 // Views que exigem sessão ativa (topnav visível nestas)
-var authRequired = ['home', 'membros', 'usuarios'];
+var authRequired = ['home', 'usuarios'];
+
+MODULOS.forEach(function (m) {
+  VIEWS[m.rota] = m.render;
+  ROUTE_PERMISSIONS[m.rota] = m.perfis;
+  authRequired.push(m.rota);
+});
+
+// Módulos que o perfil pode abrir
+function modulosDoPerfil(perfil) {
+  return MODULOS.filter(function (m) { return m.perfis.indexOf(perfil) !== -1; });
+}
 
 // Retorna a view de destino padrão para cada perfil após login
 function _homeViewForPerfil(perfil) {
-  if (perfil === 'secretaria') return 'membros';
-  return 'home'; // admin
+  if (ROUTE_PERMISSIONS.home.indexOf(perfil) !== -1) return 'home';
+  var mods = modulosDoPerfil(perfil);
+  return mods.length ? mods[0].rota : 'usuarios';
 }
 
 function navigateTo(view, params) {
@@ -1548,7 +1561,7 @@ if (document.readyState === 'loading') {
 <?!= include('_primeiro-acesso'); ?>
 <?!= include('_recuperar-senha'); ?>
 <?!= include('_home'); ?>
-<?!= include('_membros'); ?>
+<?!= incluirModulos(); ?>
 <?!= include('_usuarios'); ?>
 
 </body>
