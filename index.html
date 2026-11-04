@@ -883,11 +883,6 @@ textarea { height: auto; min-height: 110px; padding: 16px 18px; resize: vertical
 }
 .topnav-icon-btn:hover { background: var(--bg4); color: var(--text); }
 .topnav-avatar-wrap { position: relative; }
-.notif-dot {
-  position: absolute; top: 6px; right: 6px;
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--danger); border: 1.5px solid var(--bg);
-}
 #topnav-usuarios-btn {
   display: none; align-items: center; gap: 6px;
   padding: 0 14px; height: 34px; border-radius: 100px;
@@ -931,16 +926,12 @@ textarea { height: auto; min-height: 110px; padding: 16px 18px; resize: vertical
     <!-- Slot: ação primária do módulo ativo (ex.: aniversariantes com badge) -->
     <div id="topnav-module-actions"></div>
 
-    <!-- Mais opções: notificações, tema e ações secundárias do módulo -->
+    <!-- Mais opções: tema e ações secundárias do módulo -->
     <div class="topnav-more-wrap" style="position:relative">
       <button class="topnav-icon-btn" onclick="toggleMoreMenu()" id="topnav-more-btn" title="Mais opções">
-        <div class="notif-dot"></div>
         <i data-lucide="more-vertical" style="width:18px;height:18px"></i>
       </button>
       <div class="user-dropdown" id="topnav-more-dd" style="right:0">
-        <button class="user-dd-item" onclick="closeMoreMenu();showToast('Em breve: notificações!','info')">
-          <i data-lucide="bell" style="width:15px;height:15px"></i> Notificações
-        </button>
         <button class="user-dd-item" onclick="closeMoreMenu();toggleTheme()">
           <i data-lucide="moon" style="width:15px;height:15px"></i> Alternar tema
         </button>
@@ -1396,7 +1387,7 @@ document.addEventListener('click', function(e) {
   if (!dd.contains(e.target)) dd.classList.remove('open');
 });
 
-// ── DROPDOWN "MAIS OPÇÕES" — notificações, tema, ações secundárias do módulo ──
+// ── DROPDOWN "MAIS OPÇÕES" — tema, ações secundárias do módulo ──
 function toggleMoreMenu() {
   var dd = document.getElementById('topnav-more-dd');
   if (dd) dd.classList.toggle('open');
