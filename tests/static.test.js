@@ -186,3 +186,11 @@ test('rotas: cada perfil do MVP cai numa tela que ele pode acessar', () => {
     assert.ok(perm[destino].includes(perfil), `${perfil} não pode acessar o próprio destino "${destino}"`);
   });
 });
+
+test('recorte: núcleo sem perfil professor e sem funcionalidades "Em breve"', () => {
+  const hits = [
+    ...findings(/professor/i),
+    ...findings(/Em breve|notif-dot/),
+  ].filter((h) => !/data:image/.test(h));
+  assert.deepEqual(hits, [], 'Itens fora do MVP encontrados:\n' + hits.join('\n'));
+});
