@@ -19,3 +19,14 @@ aparecem como `# TODO` e não quebram a suíte. Ao concluir uma etapa:
 
 Se um teste pendente já estiver passando, o relatório avisa nos diagnósticos.
 Teste que não está listado no `roadmap.json` precisa passar sempre.
+
+## Preview das telas
+
+```
+LUCIDE_JS=/caminho/lucide.min.js npm run preview -- <pasta-de-saida> [admin|secretaria]
+```
+
+Monta o `index.html`, simula o backend (`tests/preview/mock-backend.js`) e gera capturas de celular e
+desktop. O script confere em qual tela está e falha se estiver na errada. Usa dados simulados e não
+carrega fontes do Google nem as bibliotecas de PDF: serve para conferir estrutura e visual, não
+substitui o teste real no Apps Script. Requer o Playwright com Chromium instalado.

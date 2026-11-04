@@ -19,45 +19,6 @@ var SetupSheets = (function () {
       'CriadoEm', 'ExpiraEm', 'Ativo'
     ],
 
-    Classes: [
-      'ID', 'Nome', 'FaixaEtaria', 'LicaoCPAD', 'Ativo', 'CriadoEm'
-    ],
-
-    Alunos: [
-      'ID', 'Nome', 'DataNasc', 'ClasseID',
-      'Telefone', 'Endereco', 'Email',
-      'TotalPontos', 'Ativo', 'CriadoEm'
-    ],
-
-    Professores: [
-      'ID', 'AlunoOrigemID', 'UsuarioID', 'Nome',
-      'ClasseID', 'Telefone', 'DataNasc',
-      'Endereco', 'Email', 'Cursos',
-      'Ativo', 'CriadoEm'
-    ],
-
-    Aulas: [
-      'ID', 'Data', 'Trimestre', 'NumLicao',
-      'Titulo', 'Ano', 'CriadoPor', 'CriadoEm'
-    ],
-
-    Chamadas: [
-      'ID', 'AulaID', 'ClasseID', 'AlunoID',
-      'Presente', 'Biblia', 'Revista',
-      'PontosExtrasJSON', 'TotalPontos',
-      'TotalOfertas', 'LancadoPor', 'CriadoEm'
-    ],
-
-    ChamadasInfo: [
-      'ID', 'AulaID', 'ClasseID',
-      'NumVisitantes', 'TotalOferta', 'Observacoes',
-      'LancadoPor', 'CriadoEm'
-    ],
-
-    PontosExtras: [
-      'ID', 'Nome', 'Pontos', 'Ativo'
-    ],
-
     Config: [
       'Chave', 'Valor', 'Descricao', 'AtualizadoEm'
     ],
@@ -76,13 +37,6 @@ var SetupSheets = (function () {
   var HEADER_COLORS = {
     Usuarios:      '#1C353A',
     Sessoes:       '#0f2a2f',
-    Classes:       '#1a3a2a',
-    Alunos:        '#1a2a3a',
-    Professores:   '#2a1a3a',
-    Aulas:         '#2a2a1a',
-    Chamadas:      '#2a1a1a',
-    ChamadasInfo:  '#1a2a3a',
-    PontosExtras:  '#1a2a2a',
     Config:        '#2a2a2a',
     Membros:       '#00695C'
   };
@@ -161,9 +115,6 @@ var SetupSheets = (function () {
     // Seed: Usuário admin padrão
     _seedAdmin();
 
-    // Seed: Pontos extras padrão
-    _seedPontosExtras();
-
     // Seed: Config padrão
     _seedConfig();
 
@@ -208,38 +159,13 @@ var SetupSheets = (function () {
     Logger.log('🌱 Admin padrão criado: admin@adfontesalvacao.com / Admin@1234');
   }
 
-  function _seedPontosExtras() {
-    var sheet = SS.getSheetByName('PontosExtras');
-    var data  = sheet.getDataRange().getValues();
-    if (data.length > 1) return;
-
-    var extras = [
-      { Nome: 'Questionário respondido', Pontos: 5 },
-      { Nome: 'Versículo memorizado',    Pontos: 3 },
-      { Nome: 'Tarefa da lição entregue', Pontos: 3 }
-    ];
-
-    extras.forEach(function (e) {
-      Util.insertRow('PontosExtras', {
-        ID:     Util.uuid(),
-        Nome:   e.Nome,
-        Pontos: e.Pontos,
-        Ativo:  true
-      });
-    });
-  }
-
   function _seedConfig() {
     var sheet = SS.getSheetByName('Config');
     var data  = sheet.getDataRange().getValues();
     if (data.length > 1) return;
 
     var configs = [
-      { Chave: 'NOME_IGREJA',      Valor: 'AD Fonte da Salvação',  Descricao: 'Nome da igreja exibido na plataforma' },
-      { Chave: 'ANO_LETIVO',       Valor: new Date().getFullYear(), Descricao: 'Ano letivo ativo da Escola Dominical'  },
-      { Chave: 'PONTOS_PRESENCA',  Valor: 1,                        Descricao: 'Pontos por presença'                  },
-      { Chave: 'PONTOS_BIBLIA',    Valor: 2,                        Descricao: 'Pontos por bíblia levada'             },
-      { Chave: 'PONTOS_REVISTA',   Valor: 2,                        Descricao: 'Pontos por revista levada'            }
+      { Chave: 'NOME_IGREJA',      Valor: 'AD Fonte da Salvação',  Descricao: 'Nome da igreja exibido na plataforma' }
     ];
 
     configs.forEach(function (c) {

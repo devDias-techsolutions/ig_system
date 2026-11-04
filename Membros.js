@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════
 //  Membros.gs · Módulo Membros — AD Fonte da Salvação
-//  Arquitetura idêntica ao EscolaDominical.gs
+//  Padrão de módulo: IIFE + Util + Auth._auth
 //  Aba: 'Membros'  ·  Cabeçalho (lowercase, exatamente como na planilha):
 //  id  rol  nome  sexo  nascimento  nomeMae  nomePai  estadoCivil
 //  batismo  Igreja  funcao  rua  numero  bairro  cidade  estado  cep
@@ -370,7 +370,7 @@ var Membros = (function () {
 
 // ═══════════════════════════════════════════════════════════
 //  FUNCOES PUBLICAS — frontend via google.script.run
-//  Wrapper _safe identico ao padrao EscolaDominical.gs
+//  Wrapper _safe: serializa a resposta para o google.script.run
 // ═══════════════════════════════════════════════════════════
 
 function _safe_mb(fn) {

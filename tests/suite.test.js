@@ -12,9 +12,9 @@ test('roadmap: toda entrada de roadmap.json corresponde a um teste existente', (
   assert.deepEqual(orfas, [], 'Entradas sem teste correspondente (erro de digitação?):\n' + orfas.join('\n'));
 });
 
-test('roadmap: etapas válidas (inteiros de 1 a 17) e etapaAtual coerente', () => {
+test('roadmap: etapas válidas (inteiros de 1 a 21) e etapaAtual coerente', () => {
   Object.entries(cfg.pendentes).forEach(([k, v]) => {
-    assert.ok(Number.isInteger(v) && v >= 1 && v <= 17, `etapa inválida para "${k}": ${v}`);
+    assert.ok(Number.isInteger(v) && v >= 1 && v <= 21, `etapa inválida para "${k}": ${v}`);
   });
-  assert.ok(Number.isInteger(cfg.etapaAtual) && cfg.etapaAtual >= 1 && cfg.etapaAtual <= 17);
+  assert.ok(Number.isInteger(cfg.etapaAtual) && cfg.etapaAtual >= 1 && cfg.etapaAtual <= 21);
 });

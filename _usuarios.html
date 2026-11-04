@@ -150,7 +150,6 @@
 /* ── PERFIL COLORS ── */
 .perfil-admin      { background:rgba(255,94,122,.12); color:var(--danger); border:1px solid rgba(255,94,122,.25); }
 .perfil-secretaria { background:rgba(155,124,255,0.12); color:var(--purple); border:1px solid rgba(155,124,255,.25); }
-.perfil-professor  { background:var(--teal-dim); color:var(--teal); border:1px solid var(--teal-border); }
 
 /* ── TABS ── */
 .usr-tabs-wrap {
@@ -220,7 +219,6 @@
 }
 .perm-check.yes { background: rgba(54,211,153,.15); color: var(--success); border: 1px solid rgba(54,211,153,.3); }
 .perm-check.no  { background: rgba(255,94,122,.10); color: var(--danger);  border: 1px solid rgba(255,94,122,.2); opacity: .6; }
-.perm-check.partial { background: rgba(255,200,87,.12); color: var(--warning,#FFC857); border: 1px solid rgba(255,200,87,.3); }
 
 .perm-perfil-badge {
   display: inline-flex; align-items: center; gap: 6px;
@@ -243,7 +241,7 @@
 
 var UsrState = {
   usuarios:    [],
-  filtro:      'todos',   // todos | admin | secretaria | professor | inativos
+  filtro:      'todos',   // todos | admin | secretaria | inativos
   busca:       ''
 };
 
@@ -251,22 +249,15 @@ var UsrState = {
 function renderUsuarios() {
   if (!App.session) { navigateTo('login'); return; }
   var perfil = App.session.perfil || '';
-  if (perfil === 'professor') {
-    showToast('Acesso restrito.', 'error');
-    navigateTo(_homeViewForPerfil(perfil));
-    return;
-  }
-
   var isAdmin = perfil === 'admin';
   var isSec   = perfil === 'secretaria'; // secretaria pura (sem admin)
-  var perfilLabel = { admin: 'Admin', secretaria: 'Secretaria', professor: 'Professor' }[perfil] || perfil;
+  var perfilLabel = { admin: 'Admin', secretaria: 'Secretaria' }[perfil] || perfil;
   var _thIcon = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark' ? 'moon' : 'sun';
 
   // Ícone SVG inline por perfil — não depende de lucide.createIcons() para renderizar
   var perfilIcons = {
     admin:      '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
-    secretaria: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>',
-    professor:  '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>'
+    secretaria: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>'
   };
   var perfilIcon = perfilIcons[perfil] || '';
 
@@ -323,7 +314,6 @@ function renderUsuarios() {
         '<button class="usr-filter-btn active" id="ufbtn-todos"      onclick="usrSetFiltro(\'todos\')">Todos</button>'+
         '<button class="usr-filter-btn"        id="ufbtn-admin"      onclick="usrSetFiltro(\'admin\')">Admin</button>'+
         '<button class="usr-filter-btn"        id="ufbtn-secretaria" onclick="usrSetFiltro(\'secretaria\')">Secretaria</button>'+
-        '<button class="usr-filter-btn"        id="ufbtn-professor"  onclick="usrSetFiltro(\'professor\')">Professor</button>'+
         '<button class="usr-filter-btn"        id="ufbtn-inativos"   onclick="usrSetFiltro(\'inativos\')">Inativos</button>'+
       '</div>'+
 
@@ -341,9 +331,6 @@ function renderUsuarios() {
           '<i data-lucide="home" style="width:20px;height:20px"></i><span>Início</span>'+
         '</button>'
       : '')+
-      '<button class="usr-bnav-item" onclick="navigateTo(\'escola-dominical\')">'+
-        '<i data-lucide="graduation-cap" style="width:20px;height:20px"></i><span>E. Dom.</span>'+
-      '</button>'+
       (isAdmin ?
         '<button class="usr-bnav-item" onclick="navigateTo(\'membros\')">'+
           '<i data-lucide="contact" style="width:20px;height:20px"></i><span>Membros</span>'+
@@ -440,17 +427,16 @@ function _usrRenderLista() {
 
   var colors = {
     admin:      { bg:'rgba(255,94,122,.14)',    fg:'#FF5E7A' },
-    secretaria: { bg:'rgba(155,124,255,.14)',   fg:'#9B7CFF' },
-    professor:  { bg:'rgba(0,217,198,.14)',     fg:'#00D9C6' }
+    secretaria: { bg:'rgba(155,124,255,.14)',   fg:'#9B7CFF' }
   };
 
   var html = '';
   lista.forEach(function(u) {
     var ativo = u.Ativo === true || u.Ativo === 'TRUE' || u.Ativo === true;
-    var cor   = colors[u.Perfil] || colors['professor'];
+    var cor   = colors[u.Perfil] || colors['secretaria'];
     var ini   = getInitials(u.Nome || '');
-    var perfilLabel = { admin:'Admin', secretaria:'Secretaria', professor:'Professor' }[u.Perfil] || u.Perfil;
-    var perfilClass = 'perfil-'+(u.Perfil||'professor');
+    var perfilLabel = { admin:'Admin', secretaria:'Secretaria' }[u.Perfil] || u.Perfil;
+    var perfilClass = 'perfil-'+(u.Perfil||'secretaria');
 
     var isSelf = (u.Email || '').toLowerCase() === (App.session.email || '').toLowerCase();
 
@@ -520,7 +506,6 @@ function _modalNovoUsuario() {
         '<div class="field"><label>Perfil *</label>'+
           '<select id="nusr-perfil">'+
             '<option value="">Selecione o perfil</option>'+
-            '<option value="professor">Professor</option>'+
             '<option value="secretaria">Secretaria</option>'+
             '<option value="admin">Admin</option>'+
           '</select>'+
@@ -594,7 +579,6 @@ function _modalEditarUsuario() {
         '<div class="field"><label>Nome completo *</label><input type="text" id="eusr-nome" placeholder="Nome do usuário"></div>'+
         '<div class="field"><label>Perfil *</label>'+
           '<select id="eusr-perfil">'+
-            '<option value="professor">Professor</option>'+
             '<option value="secretaria">Secretaria</option>'+
             '<option value="admin">Admin</option>'+
           '</select>'+
@@ -617,7 +601,7 @@ function usrOpenEditar(id) {
   if (!u) { showToast('Usuário não encontrado.','error'); return; }
   document.getElementById('eusr-id').value          = id;
   document.getElementById('eusr-nome').value         = u.Nome||'';
-  document.getElementById('eusr-perfil').value       = u.Perfil||'professor';
+  document.getElementById('eusr-perfil').value       = u.Perfil||'secretaria';
   document.getElementById('eusr-email-label').textContent = u.Email||'';
   var err = document.getElementById('eusr-err'); if(err) err.style.display='none';
   usrOpenModal('modal-editar-usr');
@@ -771,7 +755,7 @@ function usrSetTab(tab) {
         '<input type="text" class="usr-search" id="usr-busca" placeholder="Buscar por nome ou e-mail…" oninput="usrSetBusca(this.value)" value="'+_usrEsc(UsrState.busca||'')+'">'+
       '</div>'+
       '<div class="usr-filter-row">'+
-        ['todos','admin','secretaria','professor','inativos'].map(function(f){
+        ['todos','admin','secretaria','inativos'].map(function(f){
           var a = UsrState.filtro===f?' active':'';
           return '<button class="usr-filter-btn'+a+'" id="ufbtn-'+f+'" onclick="usrSetFiltro(\''+f+'\')">'+f.charAt(0).toUpperCase()+f.slice(1)+'</button>';
         }).join('')+
@@ -819,49 +803,36 @@ var _permModulos = [
   {
     name: 'Dashboard / Home', desc: 'Visão geral da plataforma', icon: 'layout-dashboard', iconBg: 'rgba(0,217,198,.15)', iconColor: 'var(--teal)',
     acoes: [
-      { id:'home_acessar',  label: 'Acessar dashboard',          admin: true,  secretaria: true,  professor: true  },
-      { id:'home_modulos',  label: 'Ver todos os módulos',       admin: true,  secretaria: true,  professor: false }
-    ]
-  },
-  {
-    name: 'Escola Dominical', desc: 'Classes, alunos, chamadas', icon: 'graduation-cap', iconBg: 'rgba(155,124,255,.15)', iconColor: 'var(--purple,#9b7cff)',
-    acoes: [
-      { id:'ed_ver',        label: 'Ver classes',                admin: true,  secretaria: true,  professor: true  },
-      { id:'ed_criar',      label: 'Criar / editar classes',     admin: true,  secretaria: true,  professor: false },
-      { id:'ed_excluir',    label: 'Excluir classes',            admin: true,  secretaria: false, professor: false },
-      { id:'ed_alunos',     label: 'Gerenciar alunos',           admin: true,  secretaria: true,  professor: true  },
-      { id:'ed_promover',   label: 'Promover / regrediar alunos',admin: true,  secretaria: true,  professor: false },
-      { id:'ed_chamada',    label: 'Registrar chamada',          admin: true,  secretaria: true,  professor: true  },
-      { id:'ed_historico',  label: 'Ver histórico de chamadas',  admin: true,  secretaria: true,  professor: 'partial' },
-      { id:'ed_alertas',    label: 'Configurar alertas de email',admin: true,  secretaria: true,  professor: false }
+      { id:'home_acessar',  label: 'Acessar dashboard',          admin: true,  secretaria: true },
+      { id:'home_modulos',  label: 'Ver todos os módulos',       admin: true,  secretaria: true }
     ]
   },
   {
     name: 'Membros', desc: 'Cadastro e rol de membros', icon: 'contact', iconBg: 'rgba(77,163,255,.15)', iconColor: 'var(--cyan,#4da3ff)',
     acoes: [
-      { id:'mb_ver',        label: 'Ver lista de membros',       admin: true,  secretaria: true,  professor: false },
-      { id:'mb_criar',      label: 'Cadastrar membro',           admin: true,  secretaria: true,  professor: false },
-      { id:'mb_editar',     label: 'Editar dados do membro',     admin: true,  secretaria: true,  professor: false },
-      { id:'mb_excluir',    label: 'Excluir membro',             admin: true,  secretaria: false, professor: false },
-      { id:'mb_backup',     label: 'Exportar / importar backup', admin: true,  secretaria: true,  professor: false }
+      { id:'mb_ver',        label: 'Ver lista de membros',       admin: true,  secretaria: true },
+      { id:'mb_criar',      label: 'Cadastrar membro',           admin: true,  secretaria: true },
+      { id:'mb_editar',     label: 'Editar dados do membro',     admin: true,  secretaria: true },
+      { id:'mb_excluir',    label: 'Excluir membro',             admin: true,  secretaria: false },
+      { id:'mb_backup',     label: 'Exportar / importar backup', admin: true,  secretaria: true }
     ]
   },
   {
     name: 'Usuários', desc: 'Gestão de acesso e perfis', icon: 'shield-check', iconBg: 'rgba(255,94,122,.15)', iconColor: 'var(--danger,#ff5e7a)',
     acoes: [
-      { id:'usr_acessar',   label: 'Acessar módulo',             admin: true,  secretaria: true,  professor: false },
-      { id:'usr_criar',     label: 'Criar usuário',              admin: true,  secretaria: false, professor: false },
-      { id:'usr_editar',    label: 'Editar usuário (nome/perfil)',admin: true,  secretaria: false, professor: false },
-      { id:'usr_reset',     label: 'Resetar senha de outro',     admin: true,  secretaria: false, professor: false },
-      { id:'usr_status',    label: 'Ativar / desativar usuário', admin: true,  secretaria: false, professor: false },
-      { id:'usr_matriz',    label: 'Ver matriz de permissões',   admin: true,  secretaria: false, professor: false }
+      { id:'usr_acessar',   label: 'Acessar módulo',             admin: true,  secretaria: true },
+      { id:'usr_criar',     label: 'Criar usuário',              admin: true,  secretaria: false },
+      { id:'usr_editar',    label: 'Editar usuário (nome/perfil)',admin: true,  secretaria: false },
+      { id:'usr_reset',     label: 'Resetar senha de outro',     admin: true,  secretaria: false },
+      { id:'usr_status',    label: 'Ativar / desativar usuário', admin: true,  secretaria: false },
+      { id:'usr_matriz',    label: 'Ver matriz de permissões',   admin: true,  secretaria: false }
     ]
   },
   {
     name: 'Conta própria', desc: 'Ações sobre o próprio perfil', icon: 'user-cog', iconBg: 'rgba(54,211,153,.15)', iconColor: 'var(--success,#36d399)',
     acoes: [
-      { id:'conta_senha',   label: 'Alterar própria senha',      admin: true,  secretaria: true,  professor: true  },
-      { id:'conta_ver',     label: 'Ver dados da própria conta', admin: true,  secretaria: true,  professor: true  }
+      { id:'conta_senha',   label: 'Alterar própria senha',      admin: true,  secretaria: true },
+      { id:'conta_ver',     label: 'Ver dados da própria conta', admin: true,  secretaria: true }
     ]
   }
 ];
@@ -872,23 +843,19 @@ function _permInitState() {
   _permState = {};
   _permModulos.forEach(function(mod) {
     mod.acoes.forEach(function(a) {
-      _permState[a.id] = { admin: a.admin, secretaria: a.secretaria, professor: a.professor };
+      _permState[a.id] = { admin: a.admin, secretaria: a.secretaria };
     });
   });
 }
 
-// Cicla entre os 3 estados: true → false → 'partial' → true
-// (admin só alterna true/false — não faz sentido 'partial')
-function _permCycle(current, perfil) {
-  if (perfil === 'admin') return !current;
-  if (current === true)    return false;
-  if (current === false)   return 'partial';
-  return true; // partial → true
+// Alterna a permissão: permitido ⇄ sem acesso
+function _permCycle(current) {
+  return !current;
 }
 
 function _permToggle(acaoId, perfil) {
   if (!_permState || !_permState[acaoId]) return;
-  _permState[acaoId][perfil] = _permCycle(_permState[acaoId][perfil], perfil);
+  _permState[acaoId][perfil] = _permCycle(_permState[acaoId][perfil]);
   // Re-renderizar só a célula (sem rebuildar a tabela toda)
   var el = document.getElementById('pcell-' + acaoId + '-' + perfil);
   if (el) el.innerHTML = _permCellHtml(acaoId, perfil);
@@ -899,18 +866,13 @@ function _permToggle(acaoId, perfil) {
 
 function _permCellHtml(acaoId, perfil) {
   var val = _permState[acaoId][perfil];
-  var isAdmin = perfil === 'admin';
-  // Admin não pode ser 'partial'
-  if (isAdmin && val === 'partial') val = true;
 
   var svgCheck   = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
   var svgX       = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-  var svgMinus   = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>';
 
   var cls, icon, title;
-  if (val === true)      { cls = 'yes';     icon = svgCheck; title = 'Permitido — clique para alterar'; }
-  else if (val === false){ cls = 'no';      icon = svgX;     title = 'Sem acesso — clique para alterar'; }
-  else                   { cls = 'partial'; icon = svgMinus; title = 'Parcial — clique para alterar'; }
+  if (val === true) { cls = 'yes'; icon = svgCheck; title = 'Permitido — clique para alterar'; }
+  else              { cls = 'no';  icon = svgX;     title = 'Sem acesso — clique para alterar'; }
 
   // Admin locked (não pode perder acesso)
   var locked = perfil === 'admin';
@@ -968,13 +930,11 @@ function usrRenderPermissoes() {
 
   var perfilBadges = {
     admin:      '<span class="perm-perfil-badge perfil-admin"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:3px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin</span>',
-    secretaria: '<span class="perm-perfil-badge perfil-secretaria"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:3px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Secretaria</span>',
-    professor:  '<span class="perm-perfil-badge perfil-professor"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:3px"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>Professor</span>'
+    secretaria: '<span class="perm-perfil-badge perfil-secretaria"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:3px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Secretaria</span>'
   };
 
   var svgCheck = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
   var svgX     = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-  var svgMinus = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>';
 
   var html =
     '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">'+
@@ -1015,7 +975,6 @@ function usrRenderPermissoes() {
             '<th>Ação</th>'+
             '<th class="col-perfil">'+perfilBadges.admin+'</th>'+
             '<th class="col-perfil">'+perfilBadges.secretaria+'</th>'+
-            '<th class="col-perfil">'+perfilBadges.professor+'</th>'+
           '</tr></thead>'+
           '<tbody>'+
           mod.acoes.map(function(a) {
@@ -1023,7 +982,6 @@ function usrRenderPermissoes() {
               '<td>'+a.label+'</td>'+
               '<td><span class="perm-check yes" title="Admin sempre tem acesso">'+svgCheck+'</span></td>'+
               '<td>'+_permCellHtml(a.id, 'secretaria')+'</td>'+
-              '<td>'+_permCellHtml(a.id, 'professor')+'</td>'+
             '</tr>';
           }).join('')+
           '</tbody>'+
@@ -1031,7 +989,6 @@ function usrRenderPermissoes() {
         '</div>'+
         '<div class="perm-legend">'+
           '<span class="perm-legend-item"><span class="perm-check yes">'+svgCheck+'</span> Permitido</span>'+
-          '<span class="perm-legend-item"><span class="perm-check partial">'+svgMinus+'</span> Parcial (própria classe)</span>'+
           '<span class="perm-legend-item"><span class="perm-check no">'+svgX+'</span> Sem acesso</span>'+
           (isAdmin ? '<span class="perm-legend-item" style="color:var(--text-muted);font-size:10px;margin-left:auto">Clique para editar</span>' : '')+
         '</div>'+
@@ -1045,7 +1002,6 @@ function usrRenderPermissoes() {
 function _permModuleIconPath(icon) {
   var paths = {
     'layout-dashboard': '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>',
-    'graduation-cap':   '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
     'contact':          '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
     'shield-check':     '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/>',
     'user-cog':         '<circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4"/><circle cx="19" cy="19" r="3"/><path d="M19 16v.01M19 22v.01M22 19h.01M16 19h.01M21 17l-.01.01M17 21l.01-.01M21 21l-.01-.01M17 17l.01.01"/>'

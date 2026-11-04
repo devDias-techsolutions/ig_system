@@ -4,19 +4,23 @@
 
 var Dashboard = (function () {
 
+  // ── HELPER: valor de "ativo" vindo da planilha (booleano, 1 ou 'TRUE') ──
+  function _ativo(v) {
+    return v === true || v === 1 || String(v).trim().toUpperCase() === 'TRUE';
+  }
+
   // ── KPIs DA HOME ─────────────────────────────────────────
   function getKpisHome(token) {
     return withAuth(token, function(sess) {
-      var membros     = Util.sheetToObjects('Membros').filter(function(r)     { return r.ativo === true || r.ativo === 1 || String(r.ativo).trim().toUpperCase() === 'TRUE'; });
-      var alunos      = Util.sheetToObjects('Alunos').filter(function(r)      { return r.Ativo === true || r.Ativo === 'TRUE'; });
-      var professores = Util.sheetToObjects('Professores').filter(function(r) { return r.Ativo === true || r.Ativo === 'TRUE'; });
-      var turmas      = Util.sheetToObjects('Classes').filter(function(r)     { return r.Ativo === true || r.Ativo === 'TRUE'; });
+      var membros  = Util.sheetToObjects('Membros');
+      var ativos   = membros.filter(function(r) { return _ativo(r.ativo); });
+      var usuarios = Util.sheetToObjects('Usuarios').filter(function(r) { return _ativo(r.Ativo); });
 
       return Util.ok({
-        membros:     membros.length,
-        alunos:      alunos.length,
-        professores: professores.length,
-        turmas:      turmas.length
+        membros:   ativos.length,
+        inativos:  membros.length - ativos.length,
+        semFoto:   ativos.filter(function(r) { return !String(r.foto || '').trim(); }).length,
+        usuarios:  usuarios.length
       });
     });
   }
@@ -26,34 +30,10 @@ var Dashboard = (function () {
     return withAuth(token, function(sess) {
       var atividades = [];
 
-      // Últimas aulas criadas
-      var aulas = Util.sheetToObjects('Aulas');
-      aulas.sort(function(a, b) { return new Date(b.CriadoEm) - new Date(a.CriadoEm); });
-      aulas.slice(0, 3).forEach(function(a) {
-        atividades.push({
-          icon:  'book-open',
-          texto: 'Aula registrada: Trimestre ' + a.Trimestre + ' · Lição ' + a.NumLicao,
-          tempo: _tempoRelativo(a.CriadoEm),
-          ts:    new Date(a.CriadoEm).getTime() || 0
-        });
-      });
-
-      // Últimos alunos cadastrados
-      var alunos = Util.sheetToObjects('Alunos');
-      alunos.sort(function(a, b) { return new Date(b.CriadoEm) - new Date(a.CriadoEm); });
-      alunos.slice(0, 2).forEach(function(a) {
-        atividades.push({
-          icon:  'backpack',
-          texto: 'Novo aluno cadastrado: ' + a.Nome,
-          tempo: _tempoRelativo(a.CriadoEm),
-          ts:    new Date(a.CriadoEm).getTime() || 0
-        });
-      });
-
       // Últimos usuários criados
       var usuarios = Util.sheetToObjects('Usuarios');
       usuarios.sort(function(a, b) { return new Date(b.CriadoEm) - new Date(a.CriadoEm); });
-      usuarios.slice(0, 2).forEach(function(u) {
+      usuarios.slice(0, 5).forEach(function(u) {
         atividades.push({
           icon:  'user-plus',
           texto: 'Usuário adicionado: ' + u.Nome,
@@ -62,7 +42,6 @@ var Dashboard = (function () {
         });
       });
 
-      // Ordenar por mais recente
       atividades.sort(function(a, b) { return b.ts - a.ts; });
 
       return Util.ok(atividades.slice(0, 5));

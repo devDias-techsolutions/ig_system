@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node --test tests/suite.test.js",
     "test:static": "node --test tests/static.test.js",
-    "test:runtime": "node --test tests/runtime.test.js"
+    "test:runtime": "node --test tests/runtime.test.js",
+    "preview": "node tests/preview/preview.js"
   },
   "engines": {
     "node": ">=18"
