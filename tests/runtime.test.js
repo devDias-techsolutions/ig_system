@@ -18,19 +18,39 @@ test('carga: todos os arquivos .js carregam sem erro', () => {
   assert.doesNotThrow(() => freshEnv());
 });
 
+// Estes dois testes isolam o bug do `SS` indefinido (Etapa 4): a planilha vem por openById
+// (como hoje). Como a planilha é escolhida passa a ser assunto da Etapa 5.
+function envSetup() {
+  const ss = makeSpreadsheet();
+  const env = createEnv({ openByIdResult: ss });
+  env.load();
+  return { env, ss };
+}
+
 test('setup: setupSpreadsheet() cria todas as abas numa planilha vazia', () => {
-  const env = freshEnv();
+  const { env, ss } = envSetup();
   assert.doesNotThrow(() => env.run('setupSpreadsheet()'));
-  ['Usuarios', 'Sessoes', 'Config', 'Membros']
-    .forEach((n) => assert.ok(env.activeSS.getSheetByName(n), `aba ${n} ausente`));
+  ['Usuarios', 'Sessoes', 'Config', 'Membros'].forEach((n) => assert.ok(ss.getSheetByName(n), `aba ${n} ausente`));
+  const cab = ss.getSheetByName('Membros')._rows[0];
+  assert.equal(cab[0], 'id');
+  assert.ok(cab.includes('ativo'));
 });
 
 test('setup: rodar setupSpreadsheet() duas vezes não duplica abas nem usuários', () => {
-  const env = freshEnv();
+  const { env, ss } = envSetup();
   env.run('setupSpreadsheet()');
   env.run('setupSpreadsheet()');
-  const users = env.activeSS.getSheetByName('Usuarios')._rows.length - 1;
+  const users = ss.getSheetByName('Usuarios')._rows.length - 1;
   assert.ok(users <= 1, `usuários após 2 execuções: ${users}`);
+});
+
+test('setup: runMigrate() adiciona colunas ausentes sem apagar dados', () => {
+  const { env, ss } = envSetup();
+  env.run('setupSpreadsheet()');
+  const m = ss.getSheetByName('Membros');
+  m.appendRow(['m1', '0001', 'Maria']);
+  assert.doesNotThrow(() => env.run('runMigrate()'));
+  assert.equal(ss.getSheetByName('Membros')._rows[1][2], 'Maria');
 });
 
 test('setup: nenhum usuário nasce com a senha padrão antiga', () => {
