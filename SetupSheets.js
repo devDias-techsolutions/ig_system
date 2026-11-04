@@ -49,6 +49,7 @@ var SetupSheets = (function () {
   //  NÃO apaga dados. Execute após atualizar o SCHEMA acima.
   // ─────────────────────────────────────────────────────────────
   function migrateColumns() {
+    var SS = getSSInstance();
     var report = [];
     Object.keys(_schema()).forEach(function(name) {
       var sheet = SS.getSheetByName(name);
@@ -81,6 +82,7 @@ var SetupSheets = (function () {
   }
 
   function createAllSheets() {
+    var SS = getSSInstance();
     var created = [];
     var skipped = [];
 
@@ -135,6 +137,7 @@ var SetupSheets = (function () {
   }
 
   function _seedAdmin() {
+    var SS = getSSInstance();
     var sheet = SS.getSheetByName('Usuarios');
     var data  = sheet.getDataRange().getValues();
 
@@ -163,6 +166,7 @@ var SetupSheets = (function () {
   }
 
   function _seedConfig() {
+    var SS = getSSInstance();
     var sheet = SS.getSheetByName('Config');
     var data  = sheet.getDataRange().getValues();
     if (data.length > 1) return;

@@ -118,9 +118,15 @@ var Auth = (function () {
   function getSession(token) {
     try {
       if (!token) return Util.err('Token ausente.');
-      var sessao = _auth(token);
-      if (!sessao) return Util.err('Sessão inválida.');
-      return Util.ok(sessao);
+      var sessao = _auth(token); // lança se token ausente/inválido/expirado
+      return Util.ok({
+        token:          token,
+        id:             sessao.id,
+        nome:           sessao.nome,
+        email:          sessao.email,
+        perfil:         sessao.perfil,
+        primeiroAcesso: sessao.primeiroAcesso || false
+      });
     } catch(e) {
       return Util.err(e.message || 'Sessão inválida.');
     }
