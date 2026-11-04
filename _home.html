@@ -195,7 +195,7 @@
 // ═══════════════════════════════════════════════════
 
 var HomeState = {
-  kpis: { membros: 0, alunos: 0, professores: 0, turmas: 0 }
+  kpis: { membros: 0, inativos: 0, semFoto: 0, usuarios: 0 }
 };
 
 function renderHome() {
@@ -209,8 +209,7 @@ function renderHome() {
 
   var perfilLabel = {
     admin:      'Administrador',
-    secretaria: 'Secretaria',
-    professor:  'Professor(a)'
+    secretaria: 'Secretaria'
   }[perfil] || perfil;
 
 
@@ -240,7 +239,6 @@ function renderHome() {
     '<div style=\"padding:0 36px\">' +
       '<div class=\"section-label\">Módulos</div>' +
       '<div class=\"modules-grid\">' +
-        _moduleBtn('graduation-cap', 'Escola Dominical', 'Classes, alunos e chamadas', 'escola-dominical', false) +
         _moduleBtn('contact',        'Membros',          'Cadastro de membros',         'membros', false, '') +
         _moduleBtn('wallet',         'Financeiro',       'Tesouraria e relatórios',     null, true, 'Em breve') +
         _moduleBtn('calendar-days',  'Agenda',           'Eventos e escalas',           null, true, 'Em breve') +
@@ -281,10 +279,6 @@ function renderHome() {
         '<i data-lucide=\"layout-dashboard\" style=\"width:20px;height:20px\"></i>' +
         '<span>Início</span>' +
       '</button>' +
-      '<button class=\"bnav-item\" onclick=\"navigateTo(\'escola-dominical\')\">' +
-        '<i data-lucide=\"graduation-cap\" style=\"width:20px;height:20px\"></i>' +
-        '<span>E. Dominical</span>' +
-      '</button>' +
       '<button class=\"bnav-item\" onclick=\"navigateTo(\'membros\')\">' +
         '<i data-lucide=\"contact\" style=\"width:20px;height:20px\"></i>' +
         '<span>Membros</span>' +
@@ -324,7 +318,7 @@ function renderHome() {
 }
 
 /* ── HELPERS ── */
-var PERFIS_CLIENT = { ADMIN: 'admin', SECRETARIA: 'secretaria', PROFESSOR: 'professor' };
+var PERFIS_CLIENT = { ADMIN: 'admin', SECRETARIA: 'secretaria' };
 
 function _kpiSkeleton() {
   return '<div class="kpi-card kc-teal">' +
@@ -374,10 +368,10 @@ function _loadKpis() {
       if (!grid) return;
 
       grid.innerHTML =
-        _kpiCard('users',        'kc-teal',  d.membros     || 0, 'Membros cadastrados', 'Membros') +
-        _kpiCard('backpack',     'kc-blue',  d.alunos      || 0, 'Alunos na ED',        'Alunos ED') +
-        _kpiCard('user-check',   'kc-gold',  d.professores || 0, 'Professores ativos',  'Professores') +
-        _kpiCard('school',       'kc-green', d.turmas      || 0, 'Turmas ativas',       'Turmas');
+        _kpiCard('users',        'kc-teal',  d.membros  || 0, 'Membros ativos',      'Ativos') +
+        _kpiCard('user-x',       'kc-gold',  d.inativos || 0, 'Membros inativos',    'Inativos') +
+        _kpiCard('camera',       'kc-blue',  d.semFoto  || 0, 'Membros sem foto',    'Sem foto') +
+        _kpiCard('shield-check', 'kc-green', d.usuarios || 0, 'Usuários do sistema', 'Usuários');
 
       if (window.lucide) setTimeout(function(){ lucide.createIcons(); }, 0);
     })

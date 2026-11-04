@@ -87,7 +87,7 @@ var Usuarios = (function () {
       if (!Util.isValidEmail(email)) {
         return Util.err('E-mail inválido.');
       }
-      if ([PERFIS.ADMIN, PERFIS.SECRETARIA, PERFIS.PROFESSOR].indexOf(perfil) === -1) {
+      if ([PERFIS.ADMIN, PERFIS.SECRETARIA].indexOf(perfil) === -1) {
         return Util.err('Perfil inválido.');
       }
       // Secretaria não pode criar admin
@@ -148,7 +148,7 @@ var Usuarios = (function () {
 
       var changes = {};
       if (dados.Nome  && dados.Nome.trim())  changes.Nome  = dados.Nome.trim();
-      if (dados.Perfil && [PERFIS.ADMIN, PERFIS.SECRETARIA, PERFIS.PROFESSOR].indexOf(dados.Perfil) !== -1) {
+      if (dados.Perfil && [PERFIS.ADMIN, PERFIS.SECRETARIA].indexOf(dados.Perfil) !== -1) {
         changes.Perfil = dados.Perfil;
       }
 

@@ -21,7 +21,7 @@ test('carga: todos os arquivos .js carregam sem erro', () => {
 test('setup: setupSpreadsheet() cria todas as abas numa planilha vazia', () => {
   const env = freshEnv();
   assert.doesNotThrow(() => env.run('setupSpreadsheet()'));
-  ['Usuarios', 'Sessoes', 'Classes', 'Alunos', 'Professores', 'Aulas', 'Chamadas', 'PontosExtras', 'Config', 'Membros']
+  ['Usuarios', 'Sessoes', 'Config', 'Membros']
     .forEach((n) => assert.ok(env.activeSS.getSheetByName(n), `aba ${n} ausente`));
 });
 
@@ -82,13 +82,6 @@ test('rota: manifest PWA usa nome da igreja configurada e ícone configurável',
   assert.ok(!JSON.stringify(m).includes('1D9uYwzWawJPpdcCp2hAtr0u20RnmOpQf'), 'ícone do Drive do autor');
 });
 
-test('rota: pré-cadastro público renderiza (_precadastro.html existe e é servido)', () => {
-  const env = freshEnv();
-  env.run('setupSpreadsheet()');
-  const out = env.run("doGet({parameter:{view:'precadastro'}})");
-  assert.equal(out._file, '_precadastro');
-});
-
 // ═══ Regressão de autenticação ══════════════════════════════
 test('auth: login com credenciais válidas retorna sessão e senha errada é recusada', () => {
   const env = freshEnv();
@@ -100,4 +93,62 @@ test('auth: login com credenciais válidas retorna sessão e senha errada é rec
   assert.equal(ok.success, true, JSON.stringify(ok));
   const bad = env.run("login('t@igreja.test', Util.sha256('errada'))");
   assert.equal(bad.success, false);
+});
+
+// ═══ Núcleo + Membros sem módulos pendentes (Etapa 2) ═══════
+function ssComAbas(abas) {
+  const ss = makeSpreadsheet();
+  Object.entries(abas).forEach(([nome, linhas]) => {
+    const s = ss.insertSheet(nome);
+    linhas.forEach((l) => s.appendRow(l));
+  });
+  return ss;
+}
+const COLS_USUARIOS = ['ID', 'Nome', 'Email', 'SenhaHash', 'Perfil', 'PrimeiroAcesso', 'Ativo', 'TokenRecupSenha', 'ExpirToken', 'CriadoEm', 'UltimoLogin'];
+
+function envComSessao(abas) {
+  const env = createEnv({ openByIdResult: ssComAbas(abas) });
+  env.load();
+  env.scriptCache.put('sess_tok', JSON.stringify({
+    token: 'tok', id: 'u1', nome: 'Ana', email: 'ana@igreja.test', perfil: 'admin',
+    expiraEm: new Date(Date.now() + 3600e3).toISOString(), primeiroAcesso: false,
+  }), 3600);
+  return env;
+}
+
+test('núcleo: perfis do MVP são apenas admin e secretaria', () => {
+  const env = freshEnv();
+  assert.deepEqual(Object.keys(JSON.parse(env.run('JSON.stringify(PERFIS)'))).sort(), ['ADMIN', 'SECRETARIA']);
+});
+
+test('núcleo: KPIs da home funcionam sem nenhuma aba da Escola Dominical', () => {
+  const env = envComSessao({
+    Usuarios: [COLS_USUARIOS, ['u1', 'Ana', 'ana@igreja.test', 'h', 'admin', false, true, '', '', '01/11/2026 10:00:00', '']],
+    Membros: [['id', 'nome', 'foto', 'ativo'], ['1', 'A', 'x.png', true], ['2', 'B', '', true], ['3', 'C', 'y.png', false]],
+  });
+  const res = env.run("getKpisHome('tok')");
+  assert.equal(res.success, true, JSON.stringify(res));
+  assert.deepEqual(res.data, { membros: 2, inativos: 1, semFoto: 1, usuarios: 1 });
+});
+
+test('núcleo: atividade recente funciona sem nenhuma aba da Escola Dominical', () => {
+  const env = envComSessao({
+    Usuarios: [COLS_USUARIOS, ['u1', 'Ana', 'ana@igreja.test', 'h', 'admin', false, true, '', '', '01/11/2026 10:00:00', '']],
+    Membros: [['id', 'nome', 'foto', 'ativo']],
+  });
+  const res = env.run("getAtividadeRecente('tok')");
+  assert.equal(res.success, true, JSON.stringify(res));
+  assert.equal(res.data.length, 1);
+  assert.match(res.data[0].texto, /Ana/);
+});
+
+test('núcleo: perfil professor não pode mais ser criado', () => {
+  const env = envComSessao({
+    Usuarios: [COLS_USUARIOS, ['u1', 'Ana', 'ana@igreja.test', 'h', 'admin', false, true, '', '', '01/11/2026 10:00:00', '']],
+    Membros: [['id', 'nome', 'foto', 'ativo']],
+  });
+  env.ctx.__dados = { Nome: 'Prof', Email: 'prof@igreja.test', Perfil: 'professor' };
+  const res = env.run("usr_criar('tok', __dados)");
+  assert.equal(res.success, false, JSON.stringify(res));
+  assert.match(res.error, /Perfil inválido/);
 });

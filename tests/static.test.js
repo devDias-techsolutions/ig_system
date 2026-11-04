@@ -131,3 +131,58 @@ test('tema: sem rgba/hex do teal original solto fora da definição de variávei
   const hits = findings(raw, HTML.filter((f) => f !== 'index.html'));
   assert.deepEqual(hits.slice(0, 15), [], `Cores soltas (${hits.length} no total, mostrando até 15):\n` + hits.slice(0, 15).join('\n'));
 });
+
+// ═══ 4. RECORTE DO MVP (Etapa 2) ════════════════════════════
+test('recorte: núcleo não referencia Escola Dominical nem Pré-cadastro', () => {
+  const re = /EscolaDominical|escola-dominical|Escola Dominical|\bed_[a-z]|precadastro|pré-cadastro|Solicitac|'(?:Alunos|Classes|Professores|Aulas|Chamadas|PontosExtras)'|\bEBD\b|CPAD/i;
+  const hits = findings(re).filter((h) => !/data:image/.test(h));
+  assert.deepEqual(hits, [], 'Referências a módulos fora do MVP:\n' + hits.join('\n'));
+});
+
+test('recorte: módulos pendentes ficam em modulos-pendentes/, fora da raiz de deploy', () => {
+  const esperados = [
+    'escola-dominical/EscolaDominical.js',
+    'escola-dominical/_escola-dominical.html',
+    'escola-dominical/ImportarAlunosParaMembros.js',
+    'escola-dominical/membros-importar-ebd.js',
+    'pre-cadastro/_precadastro.html',
+    'pre-cadastro/PreCadastro.js',
+    'pre-cadastro/membros-painel-solicitacoes.js',
+  ];
+  esperados.forEach((f) => assert.ok(fs.existsSync(path.join(ROOT, 'modulos-pendentes', f)), 'faltando modulos-pendentes/' + f));
+  ['EscolaDominical.js', '_escola-dominical.html', '_precadastro.html', 'PreCadastro.js'].forEach((f) =>
+    assert.ok(!fs.existsSync(path.join(ROOT, f)), f + ' não pode estar na raiz'));
+});
+
+test('rotas: toda rota de VIEWS tem função de renderização definida', () => {
+  const idx = read('index.html');
+  const bloco = /var VIEWS = \{([\s\S]*?)\};/.exec(idx);
+  assert.ok(bloco, 'bloco VIEWS não encontrado');
+  const pares = [...bloco[1].matchAll(/['"]?([\w-]+)['"]?\s*:\s*'(\w+)'/g)];
+  assert.ok(pares.length >= 5, 'VIEWS parece vazio');
+  const todosHtml = HTML.map(read).join('\n');
+  const faltando = pares.filter(([, , fn]) => !new RegExp('function\\s+' + fn + '\\s*\\(').test(todosHtml)).map(([, rota, fn]) => `${rota} → ${fn}`);
+  assert.deepEqual(faltando, [], 'Rotas sem função de renderização:\n' + faltando.join('\n'));
+});
+
+test('rotas: permissões e autenticação só citam rotas que existem', () => {
+  const idx = read('index.html');
+  const views = [...(/var VIEWS = \{([\s\S]*?)\};/.exec(idx)[1]).matchAll(/['"]?([\w-]+)['"]?\s*:\s*'\w+'/g)].map((m) => m[1]);
+  const perm = [...(/var ROUTE_PERMISSIONS = \{([\s\S]*?)\};/.exec(idx)[1]).matchAll(/['"]([\w-]+)['"]\s*:/g)].map((m) => m[1]);
+  const auth = [...(/var authRequired = \[([^\]]*)\]/.exec(idx)[1]).matchAll(/['"]([\w-]+)['"]/g)].map((m) => m[1]);
+  const orfas = [...perm, ...auth].filter((r) => !views.includes(r));
+  assert.deepEqual(orfas, [], 'Rotas citadas mas inexistentes em VIEWS: ' + orfas.join(', '));
+});
+
+test('rotas: cada perfil do MVP cai numa tela que ele pode acessar', () => {
+  const idx = read('index.html');
+  const fn = /function _homeViewForPerfil\(perfil\) \{[\s\S]*?\n\}/.exec(idx);
+  assert.ok(fn, '_homeViewForPerfil não encontrada');
+  const home = vm.runInNewContext('(' + fn[0] + ')');
+  const perm = vm.runInNewContext('(' + /var ROUTE_PERMISSIONS = (\{[\s\S]*?\});/.exec(idx)[1] + ')');
+  ['admin', 'secretaria'].forEach((perfil) => {
+    const destino = home(perfil);
+    assert.ok(perm[destino], `destino "${destino}" de ${perfil} não tem permissão declarada`);
+    assert.ok(perm[destino].includes(perfil), `${perfil} não pode acessar o próprio destino "${destino}"`);
+  });
+});

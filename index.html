@@ -104,7 +104,7 @@
 
   /* Largura máxima padrão da coluna de conteúdo central — usada por TODOS os
      módulos (tabs + área de conteúdo) para garantir alinhamento consistente
-     entre Escola Dominical, Membros, Usuários, etc. */
+     entre Membros, Usuários, etc. */
   --content-max: 960px;
 }
 
@@ -1068,7 +1068,6 @@ var VIEWS = {
   'primeiro-acesso': 'renderPrimeiroAcesso',
   'recuperar-senha': 'renderRecuperarSenha',
   home:              'renderHome',
-  'escola-dominical':'renderEscolaDominical',
   'membros':         'renderMembros',
   'usuarios':        'renderUsuarios'
 };
@@ -1079,18 +1078,16 @@ var VIEWS = {
 // explicitamente; a regra abaixo já contempla.
 var ROUTE_PERMISSIONS = {
   'home':              ['admin'],
-  'escola-dominical':  ['admin', 'secretaria', 'professor'],
   'membros':           ['admin', 'secretaria'],
   'usuarios':          ['admin', 'secretaria']
 };
 
 // Views que exigem sessão ativa (topnav visível nestas)
-var authRequired = ['home', 'escola-dominical', 'membros', 'usuarios'];
+var authRequired = ['home', 'membros', 'usuarios'];
 
 // Retorna a view de destino padrão para cada perfil após login
 function _homeViewForPerfil(perfil) {
-  if (perfil === 'secretaria') return 'escola-dominical';
-  if (perfil === 'professor')  return 'escola-dominical';
+  if (perfil === 'secretaria') return 'membros';
   return 'home'; // admin
 }
 
@@ -1150,7 +1147,7 @@ function updateTopnav(sessao) {
   var nome   = sessao.nome   || '';
   var email  = sessao.email  || '';
   var perfil = sessao.perfil || '';
-  var labels = { admin: 'Administrador', secretaria: 'Secretaria', professor: 'Professor(a)' };
+  var labels = { admin: 'Administrador', secretaria: 'Secretaria' };
   var isSec  = perfil === 'admin' || perfil === 'secretaria';
 
   var el = function(id) { return document.getElementById(id); };
@@ -1480,7 +1477,7 @@ var _navStack = [];    // pilha interna para diagnóstico
 // ── Empurra estado na pilha (chamado a cada mudança de tela) ──
 function navPush(state) {
   // state = objeto com as propriedades do estado atual
-  // ex: { view:'escola-dominical', tab:'aulas', step:'classes', aulaId:'abc' }
+  // ex: { view:'membros', tab:'lista', step:'form', id:'abc' }
   _navStack.push(state);
   try {
     _navLock = true;
@@ -1560,7 +1557,6 @@ if (document.readyState === 'loading') {
 <?!= include('_primeiro-acesso'); ?>
 <?!= include('_recuperar-senha'); ?>
 <?!= include('_home'); ?>
-<?!= include('_escola-dominical'); ?>
 <?!= include('_membros'); ?>
 <?!= include('_usuarios'); ?>
 
