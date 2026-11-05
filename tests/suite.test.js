@@ -3,6 +3,7 @@
 
 require('./static.test.js');
 require('./runtime.test.js');
+require('./deploy.test.js');
 
 const assert = require('node:assert/strict');
 const { test, cfg, registered } = require('./helpers/roadmap');
