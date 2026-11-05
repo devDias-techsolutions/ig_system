@@ -252,8 +252,7 @@ var Membros = (function () {
   function setupMembros(token) {
     try {
       if (token) Auth._auth(token);
-      var ss = (typeof getSSInstance === 'function') ? getSSInstance() : SS;
-      if (!ss) throw new Error('Planilha nao encontrada. Verifique SPREADSHEET_ID.');
+      var ss = getSSInstance();
       var sheet = ss.getSheetByName(SHEET);
       if (!sheet) {
         sheet = ss.insertSheet(SHEET);
