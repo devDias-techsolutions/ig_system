@@ -18,11 +18,9 @@ test('carga: todos os arquivos .js carregam sem erro', () => {
   assert.doesNotThrow(() => freshEnv());
 });
 
-// Estes dois testes isolam o bug do `SS` indefinido (Etapa 4): a planilha vem por openById
-// (como hoje). Como a planilha é escolhida passa a ser assunto da Etapa 5.
 function envSetup() {
   const ss = makeSpreadsheet();
-  const env = createEnv({ openByIdResult: ss });
+  const env = createEnv({ spreadsheet: ss });
   env.load();
   return { env, ss };
 }
@@ -66,12 +64,27 @@ test('planilha: usa a planilha ativa (script vinculado) em vez de ID fixo', () =
   const env = freshEnv();
   env.run('getSSInstance()');
   assert.ok(!env.calls.openById.includes(LEGACY_ID), 'abriu a planilha da igreja original');
+  assert.deepEqual(env.calls.openById, []);
+  assert.equal(env.run('getSSInstance()'), env.activeSS);
 });
 
 test('planilha: sem planilha ativa e sem configuração, falha com mensagem clara (nunca abre a do autor)', () => {
   const env = freshEnv({ noActiveSpreadsheet: true });
   assert.throws(() => env.run('getSSInstance()'), /planilha/i);
   assert.ok(!env.calls.openById.includes(LEGACY_ID));
+});
+
+test('planilha: configurarPlanilha(id) grava o ID e o getSSInstance passa a usá-lo', () => {
+  const env = freshEnv({ noActiveSpreadsheet: true });
+  env.run("configurarPlanilha('OUTRA_PLANILHA')");
+  assert.equal(env.scriptProps.getProperty('SPREADSHEET_ID'), 'OUTRA_PLANILHA');
+  env.run('getSSInstance()');
+  assert.ok(env.calls.openById.includes('OUTRA_PLANILHA'));
+});
+
+test('planilha: configurarPlanilha() sem ID falha', () => {
+  const env = freshEnv({ noActiveSpreadsheet: true });
+  assert.throws(() => env.run('configurarPlanilha("")'), /Informe/);
 });
 
 test('planilha: sem planilha ativa, usa SPREADSHEET_ID gravado em ScriptProperties', () => {
@@ -127,7 +140,7 @@ function ssComAbas(abas) {
 const COLS_USUARIOS = ['ID', 'Nome', 'Email', 'SenhaHash', 'Perfil', 'PrimeiroAcesso', 'Ativo', 'TokenRecupSenha', 'ExpirToken', 'CriadoEm', 'UltimoLogin'];
 
 function envComSessao(abas) {
-  const env = createEnv({ openByIdResult: ssComAbas(abas) });
+  const env = createEnv({ spreadsheet: ssComAbas(abas) });
   env.load();
   env.scriptCache.put('sess_tok', JSON.stringify({
     token: 'tok', id: 'u1', nome: 'Ana', email: 'ana@igreja.test', perfil: 'admin',
@@ -220,7 +233,7 @@ test('módulos: módulo desativado some do registro, das abas, dos KPIs e do HTM
 });
 
 test('módulos: núcleo sem nenhum módulo — KPIs mostram só usuários', () => {
-  const env = createEnv({ openByIdResult: ssComAbas({ Usuarios: [COLS_USUARIOS, ['u1', 'Ana', 'a@i.test', 'h', 'admin', false, true, '', '', '01/11/2026 10:00:00', '']] }), scriptProperties: { MODULOS_ATIVOS: 'nenhum' } });
+  const env = createEnv({ spreadsheet: ssComAbas({ Usuarios: [COLS_USUARIOS, ['u1', 'Ana', 'a@i.test', 'h', 'admin', false, true, '', '', '01/11/2026 10:00:00', '']] }), scriptProperties: { MODULOS_ATIVOS: 'nenhum' } });
   env.load();
   env.scriptCache.put('sess_tok', JSON.stringify({ token: 'tok', id: 'u1', nome: 'Ana', email: 'a@i.test', perfil: 'admin', expiraEm: new Date(Date.now() + 3600e3).toISOString(), primeiroAcesso: false }), 3600);
   const res = env.run("getKpisHome('tok')");

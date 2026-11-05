@@ -39,8 +39,7 @@ var Util = (function () {
 
   // ── getSheet: usa getSSInstance() para evitar dependência de SS global ──
   function getSheet(name) {
-    var ss = (typeof getSSInstance === 'function') ? getSSInstance() : SS;
-    if (!ss) throw new Error('Planilha não encontrada. Verifique o SPREADSHEET_ID.');
+    var ss = getSSInstance();
     var sheet = ss.getSheetByName(name);
     if (!sheet) throw new Error('Aba "' + name + '" não encontrada. Execute setupSpreadsheet() primeiro.');
     return sheet;

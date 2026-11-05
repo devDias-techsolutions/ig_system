@@ -2,7 +2,6 @@
 //  Code.gs · Entry Point & Router
 // ═══════════════════════════════════════════════════════════
 
-var SPREADSHEET_ID     = '16Es1ybDiTm90HL75c6rRgqQv98AcZ7W33WMrfhksxkg';
 var SESSION_TTL_SECONDS = 21600; // 6 horas (limite real do CacheService)
 
 var SHEETS = {
@@ -17,13 +16,35 @@ var PERFIS = {
 };
 var MEMBROS_FOTO_FOLDER_ID = ''; // fallback: usa/cria pasta "Fotos Membros AD" na raiz do Drive
 
-// ── SS: inicialização LAZY (evita crash global) ──────────────
+// ── PLANILHA ─────────────────────────────────────────────────
+// Ordem de resolução (nunca há ID embutido no código):
+//   1) planilha à qual o script está vinculado (o caso normal: copiou a planilha, copiou o script);
+//   2) ID gravado em Propriedades do script (SPREADSHEET_ID) — para script avulso, via configurarPlanilha(id);
+//   3) nenhuma das duas → erro claro.
 var _SS = null;
 function getSSInstance() {
-  if (!_SS) {
-    _SS = SpreadsheetApp.openById(SPREADSHEET_ID);
+  if (_SS) return _SS;
+  var ss = null;
+  try { ss = SpreadsheetApp.getActiveSpreadsheet(); } catch (e) { ss = null; }
+  if (!ss) {
+    var id = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
+    if (id) ss = SpreadsheetApp.openById(id);
   }
+  if (!ss) {
+    throw new Error('Planilha não encontrada. Abra o script pela própria planilha (Extensões > Apps Script) ' +
+      'ou, em script avulso, execute configurarPlanilha("ID_DA_PLANILHA") uma vez.');
+  }
+  _SS = ss;
   return _SS;
+}
+
+// Uso único em script avulso (não vinculado a uma planilha): grava o ID da planilha.
+function configurarPlanilha(id) {
+  if (!id) throw new Error('Informe o ID da planilha.');
+  SpreadsheetApp.openById(id); // falha aqui se o ID estiver errado ou sem acesso
+  PropertiesService.getScriptProperties().setProperty('SPREADSHEET_ID', id);
+  _SS = null;
+  return 'Planilha configurada.';
 }
 
 // ── ENTRY POINT ─────────────────────────────────────────────
