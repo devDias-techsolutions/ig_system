@@ -44,8 +44,8 @@ function criarBackend() {
   return { env, ss };
 }
 
-async function abrir(browser, backend, { viewport = { width: 1280, height: 800 } } = {}) {
-  const ctx = await browser.newContext({ viewport });
+async function abrir(browser, backend, { viewport = { width: 1280, height: 800 }, permissions = [] } = {}) {
+  const ctx = await browser.newContext({ viewport, permissions });
   const page = await ctx.newPage();
   const erros = [];
   page.on('pageerror', (e) => erros.push(String(e.message || e)));
