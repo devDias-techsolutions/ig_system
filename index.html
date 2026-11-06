@@ -1419,7 +1419,22 @@ function saveSession(sessao) {
 
 function clearSession() {
   App.session = null;
-  try { sessionStorage.removeItem(App.TOKEN_KEY); } catch(e) {}
+  try {
+    sessionStorage.removeItem(App.TOKEN_KEY);
+    // rascunhos de formulário dos módulos (draft_*) e rota a retomar não sobrevivem ao logout
+    Object.keys(sessionStorage).forEach(function(k) {
+      if (k.indexOf('draft_') === 0 || k === 'ad_retomar') sessionStorage.removeItem(k);
+    });
+  } catch(e) {}
+}
+
+// Rota a retomar após o navegador recarregar a página (ex.: voltar da câmera do celular).
+// Um módulo grava 'ad_retomar' junto com seu rascunho; só vale se o perfil puder abrir a rota.
+function _rotaParaRetomar(perfil) {
+  var r = null;
+  try { r = sessionStorage.getItem('ad_retomar'); } catch(e) {}
+  if (r && VIEWS[r] && ROUTE_PERMISSIONS[r] && ROUTE_PERMISSIONS[r].indexOf(perfil) !== -1) return r;
+  return null;
 }
 
 function getSavedToken() {
@@ -1593,7 +1608,7 @@ function initApp() {
           if (res.data.primeiroAcesso) {
             navigateTo('primeiro-acesso');
           } else {
-            navigateTo(_homeViewForPerfil(res.data.perfil || ''));
+            navigateTo(_rotaParaRetomar(res.data.perfil || '') || _homeViewForPerfil(res.data.perfil || ''));
           }
         } else {
           clearSession();
