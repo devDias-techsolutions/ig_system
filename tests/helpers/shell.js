@@ -6,9 +6,11 @@ function montarIndex(opts = {}) {
   const env = createEnv({ scriptProperties: opts.semModulos ? { MODULOS_ATIVOS: 'nenhum' } : {} });
   env.load();
   const json = env.run('Modulos.jsonParaHtml()');
+  const identidade = opts.identidadeJson || env.run('Config.identidadeJson()');
   const html = env.run('incluirModulos()');
   return read('index.html')
     .replace(/<\?!=\s*modulosJson\s*\?>/g, () => json)
+    .replace(/<\?!=\s*identidadeJson\s*\?>/g, () => identidade)
     .replace(/<\?!=\s*incluirModulos\(\);?\s*\?>/g, () => html)
     .replace(/<\?!=\s*include\('([^']+)'\);?\s*\?>/g, (_, f) => read(f + '.html'))
     .replace(/<\?=\s*recovToken\s*\?>/g, '')

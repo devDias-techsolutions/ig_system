@@ -106,6 +106,12 @@
      módulos (tabs + área de conteúdo) para garantir alinhamento consistente
      entre Membros, Usuários, etc. */
   --content-max: 960px;
+
+  /* Escala de espaçamento (múltiplos de 4px) e de texto — use estes tokens, não números soltos */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
+  --fs-xs: 11px; --fs-sm: 13px; --fs-md: 15px; --fs-lg: 18px; --fs-xl: 24px; --fs-2xl: 32px;
+  --sidebar-w: 264px;
 }
 
 /* Notebooks/tablets — começa a abrir respiro nas laterais */
@@ -690,14 +696,6 @@ textarea { height: auto; min-height: 110px; padding: 16px 18px; resize: vertical
 
 .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
 
-/* ── BOTTOM DOCK NAV INTEGRATED ── */
-.bottom-nav {
-  background: var(--bg-glass-strong);
-  backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-  border: 1px solid var(--border);
-  box-shadow: 0 15px 45px rgba(0,0,0,0.45), 0 0 35px rgba(0, 217, 198, 0.06);
-  border-radius: 24px;
-}
 
 /* ─────────────────────────────────────────────
    LIGHT MODE BACKGROUND — INSPIRAÇÃO SaaS
@@ -901,6 +899,96 @@ textarea { height: auto; min-height: 110px; padding: 16px 18px; resize: vertical
   #topnav-usuarios-btn span { display: none; }
 }
 #topnav-module-actions { display: flex; align-items: center; gap: 6px; }
+
+/* ═════════════════════════════════════════════
+   MARCA DA IGREJA (logo ou iniciais)
+═════════════════════════════════════════════ */
+.brand-mark {
+  position: relative; width: 100%; height: 100%;
+  display: grid; place-items: center; overflow: hidden;
+  font-weight: 800; font-size: 15px; letter-spacing: -.02em; color: #fff;
+}
+.brand-mark img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #fff; }
+
+/* ═════════════════════════════════════════════
+   NAVEGAÇÃO: sidebar (desktop) + menu inferior (celular)
+   Os itens vêm dos módulos ativos e do perfil — nenhum módulo é citado aqui.
+═════════════════════════════════════════════ */
+.app-sidebar, .app-bnav { display: none; }
+
+.app-sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0; width: var(--sidebar-w);
+  flex-direction: column; gap: var(--sp-2);
+  padding: var(--sp-5) var(--sp-4) var(--sp-4);
+  background: var(--bg-glass-strong);
+  border-right: 1px solid var(--border);
+  backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);
+  z-index: 150; overflow-y: auto;
+}
+[data-theme="light"] .app-sidebar { background: #FFFFFF; }
+.sb-brand { display: flex; align-items: center; gap: var(--sp-3); padding: 0 var(--sp-2) var(--sp-4); border-bottom: 1px solid var(--border); margin-bottom: var(--sp-2); }
+.sb-logo { width: 44px; height: 44px; border-radius: 14px; flex-shrink: 0; overflow: hidden; background: linear-gradient(135deg, var(--teal-dark), var(--teal)); box-shadow: 0 6px 18px var(--teal-glow); }
+.sb-brand-txt { min-width: 0; }
+.sb-brand-name { font-size: var(--fs-md); font-weight: 800; letter-spacing: -.02em; line-height: 1.2; color: var(--text); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.sb-brand-sub { font-size: var(--fs-xs); color: var(--text-muted); margin-top: 2px; }
+.sb-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.sb-group { font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); padding: var(--sp-4) var(--sp-3) var(--sp-2); }
+.sb-item {
+  position: relative; display: flex; align-items: center; gap: var(--sp-3);
+  width: 100%; padding: 11px var(--sp-3); border: none; border-radius: var(--radius-sm);
+  background: transparent; color: var(--text-muted); cursor: pointer; text-align: left;
+  font-family: inherit; font-size: var(--fs-sm); font-weight: 600;
+  transition: background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+}
+.sb-item i { width: 18px; height: 18px; flex-shrink: 0; }
+.sb-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sb-item:hover { background: var(--bg-glass); color: var(--text); }
+[data-theme="light"] .sb-item:hover { background: #F1F5F9; }
+.sb-item.active { background: var(--teal-dim); color: var(--teal); font-weight: 700; }
+.sb-item.active::before { content: ''; position: absolute; left: -16px; top: 9px; bottom: 9px; width: 3px; border-radius: 0 3px 3px 0; background: var(--teal); }
+.sb-item:focus-visible, .bn-item:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.sb-foot { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3); margin-top: var(--sp-2); border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-glass); }
+[data-theme="light"] .sb-foot { background: #F8FAFC; }
+.sb-foot-txt { flex: 1; min-width: 0; }
+.sb-foot-nome { font-size: var(--fs-sm); font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sb-foot-perfil { font-size: var(--fs-xs); color: var(--text-muted); }
+
+/* Celular: menu inferior */
+.app-bnav {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 150;
+  align-items: stretch; justify-content: space-around; gap: 2px;
+  padding: var(--sp-2) var(--sp-2) max(var(--sp-2), env(safe-area-inset-bottom));
+  background: var(--bg-glass-strong); border-top: 1px solid var(--border);
+  backdrop-filter: blur(28px) saturate(200%); -webkit-backdrop-filter: blur(28px) saturate(200%);
+}
+[data-theme="light"] .app-bnav { background: rgba(255,255,255,.96); }
+.bn-item {
+  flex: 1; max-width: 88px; min-width: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 4px; border: none; border-radius: var(--radius-sm); background: none; cursor: pointer;
+  font-family: inherit; font-size: 10px; font-weight: 700; color: var(--text-dim);
+  transition: color .18s var(--ease), background .18s var(--ease);
+}
+.bn-item i { width: 22px; height: 22px; }
+.bn-item span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bn-item.active { color: var(--teal); background: var(--teal-dim); }
+
+@media (max-width: 1023px) {
+  body.nav-on .app-bnav { display: flex; }
+  body.nav-on #app { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+}
+@media (min-width: 1024px) {
+  body.nav-on .app-sidebar { display: flex; }
+  body.nav-on #app, body.nav-on #main-topnav { margin-left: var(--sidebar-w); }
+  body.nav-on { --gutter: 32px; --gutter-lg: 40px; }
+  /* a marca já está na sidebar */
+  body.nav-on .topnav-left { visibility: hidden; }
+}
+/* "Usuários" já está na sidebar (desktop) e no menu inferior (celular) */
+body.nav-on #topnav-usuarios-btn { display: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .sb-item, .bn-item { transition: none; }
+}
 </style>
 </head>
 <body>
@@ -915,10 +1003,10 @@ textarea { height: auto; min-height: 110px; padding: 16px 18px; resize: vertical
 <header id="main-topnav" class="topnav" style="display:none" role="banner">
   <div class="topnav-left">
     <div class="topnav-logo-icon">
-      <img src="" alt="Logo AD" class="app-logo-img" style="width:28px;height:28px;object-fit:contain">
+      <span id="topnav-mark" class="brand-mark"></span>
     </div>
     <div>
-      <div class="topnav-name">AD Fonte da Salvação</div>
+      <div class="topnav-name"></div>
       <div class="topnav-sub">gestão ministerial</div>
     </div>
   </div>
@@ -970,6 +1058,16 @@ textarea { height: auto; min-height: 110px; padding: 16px 18px; resize: vertical
     </div>
   </div>
 </header>
+
+<!-- ══ NAVEGAÇÃO (montada por renderNav) ══ -->
+<aside id="app-sidebar" class="app-sidebar" aria-label="Navegação principal"></aside>
+<nav id="app-bnav" class="app-bnav" aria-label="Navegação principal"></nav>
+<div class="modal-overlay" id="modal-mais" onclick="if(event.target===this)fecharMaisNav()">
+  <div class="modal-box">
+    <h3 style="font-size:var(--fs-lg);font-weight:800;color:var(--text);margin-bottom:var(--sp-4)">Mais opções</h3>
+    <div id="bnav-more-list" style="display:flex;flex-direction:column;gap:var(--sp-2)"></div>
+  </div>
+</div>
 
 <div id="app-loader">
   <div class="loader-logo">
@@ -1056,6 +1154,11 @@ var App = {
 // ── MÓDULOS ATIVOS (vêm do registro Modulos.js, injetados pelo servidor) ──
 var MODULOS = <?!= modulosJson ?>;
 
+// ── IDENTIDADE DA IGREJA (vem da aba Config, injetada pelo servidor) ──
+// { nome, nomeCurto, lema, corPrimaria, logoUrl }
+var IDENTIDADE = <?!= identidadeJson ?>;
+var PERFIL_LABEL = { admin: 'Administrador', secretaria: 'Secretaria' };
+
 // ── ROTEAMENTO ───────────────────────────────────────────
 // Rotas fixas do núcleo + uma rota por módulo ativo.
 var VIEWS = {
@@ -1070,7 +1173,7 @@ var VIEWS = {
 // Define quais perfis podem acessar cada view protegida.
 // 'admin' sempre tem acesso total.
 var ROUTE_PERMISSIONS = {
-  'home':              ['admin'],
+  'home':              ['admin', 'secretaria'],
   'usuarios':          ['admin', 'secretaria']
 };
 
@@ -1134,6 +1237,10 @@ function renderView(html) {
   var topnav  = document.getElementById('main-topnav');
   var isAuth  = authRequired.indexOf(App.currentView || '') !== -1;
   if (topnav) topnav.style.display = isAuth ? '' : 'none';
+  renderNav(isAuth);
+
+  // Tela nova começa no topo (senão herda a rolagem da anterior e o topo fica sob a barra)
+  if (App._telaRenderizada !== App.currentView) { window.scrollTo(0, 0); App._telaRenderizada = App.currentView; }
 
   // Limpar slot de ações do módulo anterior
   var slot = document.getElementById('topnav-module-actions');
@@ -1143,6 +1250,140 @@ function renderView(html) {
 
   applyLogoSrc();
   if (window.lucide) lucide.createIcons();
+}
+
+
+// ── IDENTIDADE: cor da marca, nome e logo ────────────────
+function escHtml(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function _hexRgb(h) { return [parseInt(h.substr(1, 2), 16), parseInt(h.substr(3, 2), 16), parseInt(h.substr(5, 2), 16)]; }
+function _rgbHex(c) {
+  return '#' + c.map(function (v) { v = Math.max(0, Math.min(255, Math.round(v))); return (v < 16 ? '0' : '') + v.toString(16); }).join('');
+}
+function _mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+function _lum(c) {
+  var f = c.map(function (v) { v = v / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+  return 0.2126 * f[0] + 0.7152 * f[1] + 0.0722 * f[2];
+}
+
+// Garante que a cor da marca seja legível sobre o fundo do tema (clareia no escuro, escurece no claro)
+function _corLegivel(c, tema) {
+  for (var i = 0; i < 10; i++) {
+    var l = _lum(c);
+    if (tema === 'light' ? l <= 0.17 : l >= 0.19) break;
+    c = _mix(c, tema === 'light' ? [0, 0, 0] : [255, 255, 255], 0.12);
+  }
+  return c;
+}
+
+// Aplica a cor primária da Config nas variáveis de tema (reaplicada ao trocar claro/escuro)
+function aplicarIdentidade() {
+  var root = document.documentElement.style;
+  if (IDENTIDADE.corPrimaria) {
+    var tema = document.documentElement.getAttribute('data-theme') || 'dark';
+    var c  = _corLegivel(_hexRgb(IDENTIDADE.corPrimaria), tema);
+    var rgba = function (a) { return 'rgba(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ',' + a + ')'; };
+    root.setProperty('--teal',           _rgbHex(c));
+    root.setProperty('--teal-light',     _rgbHex(_mix(c, [255, 255, 255], 0.35)));
+    root.setProperty('--teal-dark',      _rgbHex(_mix(c, [0, 0, 0], 0.25)));
+    root.setProperty('--teal-dim',       rgba(0.12));
+    root.setProperty('--teal-border',    rgba(0.25));
+    root.setProperty('--teal-glow',      rgba(0.30));
+    root.setProperty('--teal-glow-soft', rgba(0.08));
+  }
+  document.title = IDENTIDADE.nome + ' — Gestão Ministerial';
+  var nm = document.querySelector('.topnav-name');
+  if (nm) nm.textContent = IDENTIDADE.nome;
+  var mk = document.getElementById('topnav-mark');
+  if (mk) mk.innerHTML = brandMarkInner();
+}
+
+// Iniciais para o logo provisório: "Igreja Vida Nova" → VN · "AD Central" → AD · "Minha Igreja" → MI
+function iniciaisIgreja(nome) {
+  var w = String(nome || '').trim().split(/\s+/).filter(function (x) { return x && !/^(de|da|do|das|dos|e)$/i.test(x); });
+  if (!w.length) return '?';
+  if (/^[A-Z\u00C0-\u00DD]{2,3}$/.test(w[0])) return w[0];
+  if (w.length > 2 && /^igreja$/i.test(w[0])) w.shift();
+  return (w[0].charAt(0) + (w[1] ? w[1].charAt(0) : '')).toUpperCase();
+}
+
+// Logo configurado ou, na falta dele, as iniciais da igreja (o logo por cima; se falhar, aparecem as iniciais)
+function brandMarkInner() {
+  return '<span>' + escHtml(iniciaisIgreja(IDENTIDADE.nomeCurto || IDENTIDADE.nome)) + '</span>' +
+    (IDENTIDADE.logoUrl ? '<img src="' + escHtml(IDENTIDADE.logoUrl) + '" alt="" onerror="this.style.display=\'none\'">' : '');
+}
+
+// ── NAVEGAÇÃO (sidebar no desktop, menu inferior no celular) ──
+// Itens = Início (se o perfil tem home) + módulos do perfil + Usuários (se permitido)
+function navItens() {
+  var perfil = App.session ? App.session.perfil : '';
+  var itens = [];
+  if (ROUTE_PERMISSIONS.home.indexOf(perfil) !== -1) itens.push({ rota: 'home', nome: 'Início', icone: 'layout-dashboard', grupo: 'Principal' });
+  modulosDoPerfil(perfil).forEach(function (m) { itens.push({ rota: m.rota, nome: m.nome, icone: m.icone, grupo: 'Módulos' }); });
+  if (ROUTE_PERMISSIONS.usuarios.indexOf(perfil) !== -1) itens.push({ rota: 'usuarios', nome: 'Usuários', icone: 'shield-check', grupo: 'Administração' });
+  return itens;
+}
+
+var NAV_BNAV_MAX = 5; // acima disso, o excedente vai para "Mais"
+
+function renderNav(isAuth) {
+  var sb = document.getElementById('app-sidebar');
+  var bn = document.getElementById('app-bnav');
+  var ativo = !!(isAuth && App.session);
+  document.body.classList.toggle('nav-on', ativo);
+  if (!ativo || !sb || !bn) return;
+
+  var atual = App.currentView;
+  var itens = navItens();
+
+  // Sidebar
+  var grupo = '';
+  var lista = itens.map(function (it) {
+    var cab = '';
+    if (it.grupo !== grupo) { grupo = it.grupo; cab = '<div class="sb-group">' + grupo + '</div>'; }
+    return cab + '<button class="sb-item' + (it.rota === atual ? ' active' : '') + '"' + (it.rota === atual ? ' aria-current="page"' : '') +
+      ' onclick="navNavegar(\'' + it.rota + '\')"><i data-lucide="' + it.icone + '"></i><span>' + escHtml(it.nome) + '</span></button>';
+  }).join('');
+  var nome = App.session.nome || '';
+  sb.innerHTML =
+    '<div class="sb-brand"><div class="sb-logo"><span class="brand-mark">' + brandMarkInner() + '</span></div>' +
+      '<div class="sb-brand-txt"><div class="sb-brand-name">' + escHtml(IDENTIDADE.nome) + '</div><div class="sb-brand-sub">Gestão ministerial</div></div></div>' +
+    '<div class="sb-nav">' + lista + '</div>' +
+    '<div class="sb-foot"><div class="avatar" style="width:36px;height:36px;font-size:12px">' + escHtml(getInitials(nome)) + '</div>' +
+      '<div class="sb-foot-txt"><div class="sb-foot-nome">' + escHtml(nome) + '</div><div class="sb-foot-perfil">' + escHtml(PERFIL_LABEL[App.session.perfil] || App.session.perfil) + '</div></div>' +
+      '<button class="topnav-icon-btn" onclick="handleLogout()" title="Sair" aria-label="Sair"><i data-lucide="log-out" style="width:17px;height:17px"></i></button></div>';
+
+  // Menu inferior: cabem NAV_BNAV_MAX itens; se passar, o último vira "Mais"
+  var visiveis = itens, extras = [];
+  if (itens.length > NAV_BNAV_MAX) { visiveis = itens.slice(0, NAV_BNAV_MAX - 1); extras = itens.slice(NAV_BNAV_MAX - 1); }
+  var html = visiveis.map(function (it) {
+    return '<button class="bn-item' + (it.rota === atual ? ' active' : '') + '" onclick="navNavegar(\'' + it.rota + '\')">' +
+      '<i data-lucide="' + it.icone + '"></i><span>' + escHtml(it.nome) + '</span></button>';
+  }).join('');
+  if (extras.length) {
+    var emExtra = extras.some(function (it) { return it.rota === atual; });
+    html += '<button class="bn-item' + (emExtra ? ' active' : '') + '" onclick="abrirMaisNav()"><i data-lucide="layout-grid"></i><span>Mais</span></button>';
+    document.getElementById('bnav-more-list').innerHTML = extras.map(function (it) {
+      return '<button class="sb-item' + (it.rota === atual ? ' active' : '') + '" onclick="navNavegar(\'' + it.rota + '\')">' +
+        '<i data-lucide="' + it.icone + '"></i><span>' + escHtml(it.nome) + '</span></button>';
+    }).join('');
+  }
+  bn.innerHTML = html;
+}
+
+function navNavegar(rota) {
+  fecharMaisNav();
+  if (App.currentView !== rota) navigateTo(rota);
+}
+function abrirMaisNav() {
+  var m = document.getElementById('modal-mais');
+  if (m) { m.classList.add('open'); if (window.lucide) lucide.createIcons(); }
+}
+function fecharMaisNav() {
+  var m = document.getElementById('modal-mais');
+  if (m) m.classList.remove('open');
 }
 
 // ── TOPNAV — DADOS DE SESSÃO ─────────────────────────────
@@ -1437,6 +1678,7 @@ function toggleTheme() {
   var next = current === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem(THEME_KEY, next);
+  aplicarIdentidade(); // recalcula a legibilidade da cor da marca no novo tema
 
   var btns = document.querySelectorAll('.theme-toggle-btn');
   btns.forEach(function(btn) {
@@ -1454,6 +1696,7 @@ function toggleTheme() {
 // ── START ─────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', function() {
   initTheme();
+  aplicarIdentidade();
   setTimeout(initApp, 300);
 });
 

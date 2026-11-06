@@ -208,24 +208,9 @@ var SetupSheets = (function () {
     return { email: email, emailEnviado: enviado };
   }
 
+  // Config da igreja: cria só as chaves que faltam (não altera o que já foi preenchido)
   function _seedConfig() {
-    var SS = getSSInstance();
-    var sheet = SS.getSheetByName('Config');
-    var data  = sheet.getDataRange().getValues();
-    if (data.length > 1) return;
-
-    var configs = [
-      { Chave: 'NOME_IGREJA',      Valor: 'AD Fonte da Salvação',  Descricao: 'Nome da igreja exibido na plataforma' }
-    ];
-
-    configs.forEach(function (c) {
-      Util.insertRow('Config', {
-        Chave:        c.Chave,
-        Valor:        c.Valor,
-        Descricao:    c.Descricao,
-        AtualizadoEm: Util.now()
-      });
-    });
+    Config.garantirChaves();
   }
 
   return {

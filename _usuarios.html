@@ -124,29 +124,6 @@
 .usr-empty-icon { opacity:.2; margin-bottom:12px; display:flex; align-items:center; justify-content:center; color:var(--text-muted); }
 .usr-empty-title { font-size:16px; font-weight:800; color:var(--text); margin-bottom:6px; }
 
-/* ── BOTTOM NAV (reutiliza estilos home) ── */
-.usr-bottom-nav {
-  position:fixed; bottom:0; left:0; right:0;
-  background:var(--bg-glass-strong);
-  backdrop-filter:blur(28px) saturate(200%);
-  -webkit-backdrop-filter:blur(28px) saturate(200%);
-  border-top:1px solid var(--border);
-  display:flex; align-items:center; justify-content:space-around;
-  padding:8px; padding-bottom:max(8px,env(safe-area-inset-bottom));
-  z-index:90;
-}
-.usr-bnav-item {
-  flex:1; max-width:80px;
-  display:flex; flex-direction:column; align-items:center; gap:3px;
-  background:none; border:none; cursor:pointer;
-  font-size:10px; font-weight:700; color:var(--text-dim);
-  font-family:'Plus Jakarta Sans',sans-serif;
-  border-radius:10px; padding:6px 4px;
-  transition:color .15s;
-}
-.usr-bnav-item.active { color:var(--teal); }
-.usr-bnav-item i { width:22px; height:22px; display:block; }
-
 /* ── PERFIL COLORS ── */
 .perfil-admin      { background:rgba(255,94,122,.12); color:var(--danger); border:1px solid rgba(255,94,122,.25); }
 .perfil-secretaria { background:rgba(155,124,255,0.12); color:var(--purple); border:1px solid rgba(155,124,255,.25); }
@@ -323,23 +300,6 @@ function renderUsuarios() {
       '</div>'+
 
     '</div>'+
-
-    /* ── BOTTOM NAV ── */
-    '<nav class="usr-bottom-nav">'+
-      (isAdmin ?
-        '<button class="usr-bnav-item" onclick="navigateTo(\'home\')">'+
-          '<i data-lucide="home" style="width:20px;height:20px"></i><span>Início</span>'+
-        '</button>'
-      : '')+
-      (isAdmin ? MODULOS.map(function (m) {
-        return '<button class="usr-bnav-item" onclick="navigateTo(\'' + m.rota + '\')">'+
-          '<i data-lucide="' + m.icone + '" style="width:20px;height:20px"></i><span>' + m.nome + '</span>'+
-        '</button>';
-      }).join('') : '')+
-      '<button class="usr-bnav-item active">'+
-        '<i data-lucide="shield-check" style="width:20px;height:20px"></i><span>Usuários</span>'+
-      '</button>'+
-    '</nav>'+
 
     /* ── MODAIS ── */
     _modalNovoUsuario()+
