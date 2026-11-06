@@ -1,410 +1,360 @@
 <style>
 /* ══════════════════════════════════════════════════
-   HOME DASHBOARD PREMIUM v4 — COMPLETO E INTEGRADO
+   HOME · cabeçalho da igreja + indicadores + módulos + atividade
+   Usa só os tokens do shell (cores, --sp-*, --fs-*). Nada de cor fixa:
+   a paleta da igreja (aba Config) chega pelas variáveis --teal*.
 ══════════════════════════════════════════════════ */
 
-:root {
-  --topnav-bg:       rgba(5, 11, 16, 0.90);
-  --bg-glass2:       rgba(20, 32, 44, 0.72);
-  --teal-dim2:       rgba(0, 217, 198, 0.20);
-  --teal-glow2:      rgba(0, 217, 198, 0.22);
-  --shadow-teal:     0 8px 32px rgba(0, 217, 198, 0.14), 0 0 0 1px rgba(0, 217, 198, 0.08);
-  --shadow-teal2:    0 14px 44px rgba(0, 217, 198, 0.22), 0 0 0 1px rgba(0, 217, 198, 0.14);
-  --red:             var(--danger);
-  --red-dim:         var(--danger-dim);
-  --green:           var(--success);
-  --green-dim:       var(--success-dim);
-  --glass-bg-premium:     linear-gradient(180deg, rgba(255,255,255,.05) 0%, rgba(255,255,255,.01) 100%);
-  --glass-border-premium: 1px solid rgba(255, 255, 255, 0.08);
-}
+.hm { max-width: 1120px; margin: 0 auto; padding: var(--sp-5) var(--gutter) var(--sp-7); }
 
-[data-theme="light"] {
-  --topnav-bg:            rgba(255, 255, 255, 0.92);
-  --bg-glass2:            #FFFFFF;
-  --teal-dim2:            rgba(0, 137, 123, 0.12);
-  --teal-glow2:           rgba(0, 137, 123, 0.05);
-  --shadow-teal:          0 10px 25px -5px rgba(0, 137, 123, 0.08);
-  --shadow-teal2:         0 20px 30px -10px rgba(0, 137, 123, 0.12);
-  --glass-bg-premium:     linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
-  --glass-border-premium: 1px solid #E2E8F0;
-}
+/* ── Entrada suave, escalonada ── */
+.hm-rise { opacity: 0; transform: translateY(12px); animation: hmRise .55s var(--ease-spring) forwards; animation-delay: calc(var(--i, 0) * 70ms); }
+@keyframes hmRise { to { opacity: 1; transform: translateY(0); } }
 
-/* ── HERO ── */
-.home-hero {
-  padding: 32px var(--gutter) 52px; position: relative;
-  background: linear-gradient(175deg, #050e18 0%, #071825 55%, #050e18 100%);
+/* ── Cabeçalho de identidade ── */
+.hm-head {
+  position: relative; overflow: hidden; padding: var(--sp-5);
+  border: 1px solid var(--border); border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, var(--teal-dim) 0%, transparent 58%), var(--bg-glass);
 }
-[data-theme="light"] .home-hero {
-  background: linear-gradient(135deg, #034840 0%, #096358 100%) !important;
+[data-theme="light"] .hm-head {
+  background: linear-gradient(135deg, var(--teal-dim) 0%, transparent 58%), #FFFFFF;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 12px 28px -16px rgba(15, 23, 42, .12);
 }
-.home-hero::before {
-  content: ''; position: absolute; top: -80px; right: -60px; width: 340px; height: 340px;
-  border-radius: 50%; background: radial-gradient(circle, rgba(0,217,198,.18) 0%, transparent 65%); pointer-events: none;
-  clip-path: inset(0);
+.hm-head::after {
+  content: ''; position: absolute; right: -90px; top: -90px; width: 280px; height: 280px; border-radius: 50%;
+  background: radial-gradient(circle, var(--teal-glow-soft), transparent 66%); pointer-events: none;
 }
-.hero-profile-badge {
-  display: inline-flex; align-items: center; gap: 10px; background: rgba(0,217,198,.08);
-  border: 1px solid rgba(0,217,198,.18); border-radius: 100px; padding: 5px 14px 5px 5px; margin-bottom: 20px; position: relative; z-index: 1;
+.hm-id { position: relative; z-index: 1; display: flex; align-items: center; gap: var(--sp-4); }
+.hm-logo {
+  width: 64px; height: 64px; border-radius: 20px; flex-shrink: 0; overflow: hidden;
+  background: linear-gradient(135deg, var(--teal-dark), var(--teal)); box-shadow: 0 10px 26px var(--teal-glow);
 }
-.hero-badge-avatar {
-  width: 30px; height: 30px; border-radius: 50%; background: var(--teal-dim);
-  border: 1.5px solid var(--teal-border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: var(--teal);
+.hm-logo .brand-mark { font-size: 22px; }
+.hm-id-txt { min-width: 0; }
+.hm-greet { font-size: var(--fs-sm); font-weight: 600; color: var(--text-muted); }
+.hm-title { margin-top: 2px; font-size: clamp(20px, 3.2vw, var(--fs-2xl)); font-weight: 800; letter-spacing: -.03em; line-height: 1.15; color: var(--text); overflow-wrap: anywhere; }
+.hm-lema { margin-top: var(--sp-2); padding-left: var(--sp-3); border-left: 2px solid var(--teal); font-size: var(--fs-sm); font-style: italic; line-height: 1.5; color: var(--text-muted); }
+.hm-sub {
+  position: relative; z-index: 1; display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap;
+  margin-top: var(--sp-4); padding-top: var(--sp-4); border-top: 1px solid var(--border);
+  font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.5;
 }
-.hero-badge-name { font-size: 12px; font-weight: 700; color: #ffffff; }
-.hero-badge-role { font-size: 10px; color: rgba(0,220,210,.7); font-family: 'DM Mono',monospace; }
+.hm-sub b { color: var(--text); font-weight: 700; }
 
-.home-hero-greeting { font-size: 15px; color: #fff; font-weight: 700; letter-spacing: -.2px; margin-bottom: 2px; position: relative; z-index: 1; }
-.home-hero-title { font-size: clamp(22px,5vw,30px); font-weight: 900; color: #fff; line-height: 1.1; letter-spacing: -.6px; margin-bottom: 8px; position: relative; z-index: 1; }
-.home-hero-sub { font-size: 12px; color: rgba(255,255,255,.55); line-height: 1.4; position: relative; z-index: 1; }
+/* ── Títulos de seção ── */
+.hm-sec { margin: var(--sp-6) 0 var(--sp-3); display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
+.hm-sec-title { font-size: var(--fs-xs); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); }
+.hm-sec-hint { font-size: var(--fs-xs); color: var(--text-dim); }
 
-/* Forçar cores claras no Hero durante o Light Mode (Garante o contraste) */
-[data-theme="light"] .home-hero .hero-badge-name,
-[data-theme="light"] .home-hero .home-hero-title { color: #FFFFFF !important; }
-[data-theme="light"] .home-hero .home-hero-sub { color: rgba(255,255,255,0.7) !important; }
-[data-theme="light"] .home-hero .home-hero-greeting,
-[data-theme="light"] .home-hero .hero-badge-role { color: #00FFF0 !important; }
-
-/* ── KPI GRID ── */
-.kpi-grid-wrapper { padding: 0 var(--gutter); margin-top: -32px; position: relative; z-index: 10; margin-bottom: 28px; }
-.kpi-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
-@media (min-width: 640px) { .kpi-grid { grid-template-columns: repeat(4,1fr); } }
-
+/* ── Indicadores ── */
+.kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-3); }
+@media (min-width: 720px) { .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); } }
 .kpi-card {
-  background: #08131A; border: 1px solid var(--border); border-radius: var(--radius-lg);
-  padding: 18px 16px 16px; display: flex; flex-direction: column; gap: 0;
-  transition: border-color .22s, transform .22s, box-shadow .22s; cursor: default;
-  position: relative; overflow: hidden; box-shadow: var(--shadow-sm);
+  --kpi-color: var(--teal); --kpi-dim: var(--teal-dim); --kpi-border: var(--teal-border); --kpi-shadow: var(--teal-glow);
+  position: relative; overflow: hidden; display: flex; flex-direction: column; gap: var(--sp-3);
+  padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-glass);
+  transition: transform .28s var(--ease-spring), border-color .2s var(--ease), box-shadow .28s var(--ease);
 }
-[data-theme="light"] .kpi-card {
-  background: #FFFFFF; border-color: #E2E8F0;
-  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.03), 0 2px 4px -1px rgba(15, 23, 42, 0.02);
+[data-theme="light"] .kpi-card { background: #FFFFFF; box-shadow: 0 1px 2px rgba(15, 23, 42, .04); }
+.kpi-card:hover { transform: translateY(-3px); border-color: var(--kpi-border); box-shadow: 0 16px 32px -18px var(--kpi-shadow); }
+.kpi-card.kc-blue  { --kpi-color: var(--cyan);    --kpi-dim: rgba(77, 163, 255, .12);  --kpi-border: rgba(77, 163, 255, .35);  --kpi-shadow: rgba(77, 163, 255, .45); }
+.kpi-card.kc-gold  { --kpi-color: var(--gold);    --kpi-dim: rgba(215, 177, 91, .14);  --kpi-border: rgba(215, 177, 91, .38);  --kpi-shadow: rgba(215, 177, 91, .45); }
+.kpi-card.kc-green { --kpi-color: var(--success); --kpi-dim: rgba(54, 211, 153, .12);  --kpi-border: rgba(54, 211, 153, .35);  --kpi-shadow: rgba(54, 211, 153, .40); }
+.kpi-top { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
+.kpi-icon { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; background: var(--kpi-dim); color: var(--kpi-color); }
+.kpi-icon i { width: 18px; height: 18px; }
+.kpi-tag { font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); }
+.kpi-value { font-size: clamp(28px, 4vw, 36px); font-weight: 800; letter-spacing: -.04em; line-height: 1; color: var(--text); font-variant-numeric: tabular-nums; }
+.kpi-label { font-size: var(--fs-sm); font-weight: 600; color: var(--text-muted); line-height: 1.3; }
+
+/* ── Colunas: módulos | atividade ── */
+.hm-cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 var(--sp-6); }
+@media (min-width: 1100px) { .hm-cols.com-atividade { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); } }
+
+/* ── Módulos ── */
+.hm-mods { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--sp-3); }
+.hm-mod {
+  position: relative; display: flex; align-items: center; gap: var(--sp-3); width: 100%; text-align: left;
+  padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-glass);
+  color: inherit; font-family: inherit; cursor: pointer;
+  transition: transform .28s var(--ease-spring), border-color .2s var(--ease), box-shadow .28s var(--ease), background .2s var(--ease);
 }
+[data-theme="light"] .hm-mod { background: #FFFFFF; box-shadow: 0 1px 2px rgba(15, 23, 42, .04); }
+.hm-mod:hover { transform: translateY(-3px); border-color: var(--teal-border); box-shadow: 0 16px 32px -18px var(--teal-glow); }
+.hm-mod:active { transform: translateY(-1px) scale(.99); }
+.hm-mod:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.hm-mod-icon { width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0; display: grid; place-items: center; background: var(--teal-dim); color: var(--teal); }
+.hm-mod-icon i { width: 22px; height: 22px; }
+.hm-mod-txt { flex: 1; min-width: 0; }
+.hm-mod-name { font-size: var(--fs-md); font-weight: 800; letter-spacing: -.02em; color: var(--text); }
+.hm-mod-desc { margin-top: 2px; font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.4; }
+.hm-mod-go { width: 16px; height: 16px; color: var(--text-dim); flex-shrink: 0; transition: transform .25s var(--ease-spring), color .2s; }
+.hm-mod:hover .hm-mod-go { transform: translateX(3px); color: var(--teal); }
 
-/* Linha pulsante na base */
-.kpi-card::after {
-  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--kpi-color), transparent);
-  animation: kpi-pulse-line 2.4s ease-in-out infinite;
-}
-@keyframes kpi-pulse-line {
-  0%,100% { opacity: .25; } 50% { opacity: .8; }
-}
-
-.kpi-card:hover { border-color: var(--kpi-border); transform: translateY(-4px); box-shadow: 0 16px 40px var(--kpi-shadow); }
-[data-theme="light"] .kpi-card:hover { box-shadow: 0 12px 24px -8px rgba(15,23,42,0.10); }
-
-/* Tokens por cor */
-.kpi-card.kc-teal  {
-  --kpi-color: var(--teal);
-  --kpi-border: rgba(0,217,198,0.32);
-  --kpi-shadow: rgba(0,217,198,0.14);
-  --kpi-glow: rgba(0,217,198,0.35);
-}
-.kpi-card.kc-blue  {
-  --kpi-color: var(--cyan);
-  --kpi-border: rgba(77,179,255,0.32);
-  --kpi-shadow: rgba(77,179,255,0.14);
-  --kpi-glow: rgba(77,179,255,0.35);
-}
-.kpi-card.kc-gold  {
-  --kpi-color: var(--gold);
-  --kpi-border: rgba(215,177,91,0.32);
-  --kpi-shadow: rgba(215,177,91,0.14);
-  --kpi-glow: rgba(215,177,91,0.35);
-}
-.kpi-card.kc-green {
-  --kpi-color: var(--success);
-  --kpi-border: rgba(54,211,153,0.32);
-  --kpi-shadow: rgba(54,211,153,0.14);
-  --kpi-glow: rgba(54,211,153,0.35);
-}
-[data-theme="light"] .kpi-card.kc-teal  { --kpi-color: var(--teal);    --kpi-border: rgba(0,137,123,0.28);  --kpi-shadow: rgba(0,137,123,0.10);  --kpi-glow: rgba(0,137,123,0.2); }
-[data-theme="light"] .kpi-card.kc-blue  { --kpi-color: var(--cyan);    --kpi-border: rgba(2,132,199,0.28);  --kpi-shadow: rgba(2,132,199,0.10);  --kpi-glow: rgba(2,132,199,0.2); }
-[data-theme="light"] .kpi-card.kc-gold  { --kpi-color: var(--gold);    --kpi-border: rgba(180,83,9,0.28);   --kpi-shadow: rgba(180,83,9,0.10);   --kpi-glow: rgba(180,83,9,0.2); }
-[data-theme="light"] .kpi-card.kc-green { --kpi-color: var(--success); --kpi-border: rgba(22,163,74,0.28);  --kpi-shadow: rgba(22,163,74,0.10);  --kpi-glow: rgba(22,163,74,0.2); }
-
-/* Topo do card: ponto + tag */
-.kpi-top { display: flex; align-items: center; gap: 7px; margin-bottom: 12px; }
-.kpi-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--kpi-color); box-shadow: 0 0 8px var(--kpi-color); flex-shrink: 0; }
-.kpi-tag { font-size: 8px; font-weight: 800; letter-spacing: 1.2px; font-family: 'DM Mono',monospace; color: var(--kpi-color); opacity: .8; text-transform: uppercase; }
-
-/* Número oversized */
-.kpi-value {
-  font-size: 44px; font-weight: 900; font-family: 'DM Mono',monospace;
-  color: #F4FBFF; line-height: .9; letter-spacing: -3px;
-  text-shadow: 0 0 40px var(--kpi-glow);
-  position: relative; z-index: 1;
-}
-[data-theme="light"] .kpi-value { color: #0F172A; }
-.kpi-label { font-size: 10.5px; font-weight: 700; color: var(--text-muted); margin-top: 8px; line-height: 1.3; position: relative; z-index: 1; }
-
-/* Ghost / marca d'água */
-.kpi-ghost {
-  position: absolute; right: -12px; bottom: -12px;
-  color: var(--kpi-color); opacity: 0.06; pointer-events: none; z-index: 0;
-  transform: rotate(-8deg);
-  transition: opacity .3s;
-}
-.kpi-card:hover .kpi-ghost { opacity: .11; }
-.kpi-ghost i { width: 90px; height: 90px; display: block; }
-
-/* ── MÓDULOS & SEÇÕES ── */
-.home-section { padding: 0 var(--gutter-lg); margin-bottom: 28px; }
-.section-label { font-size: 10px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-dim); font-family: 'DM Mono',monospace; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
-.section-label::after { content:''; flex:1; height:1px; background: var(--border); }
-
-.modules-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
-@media (min-width: 600px) { .modules-grid { grid-template-columns: repeat(3,1fr); } }
-
-.module-btn {
-  background: var(--bg-glass); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 16px 18px;
-  cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; transition: all .22s var(--ease); position: relative; overflow: hidden; text-align: left;
-}
-[data-theme="light"] .module-btn { background: #FFFFFF; border-color: #E2E8F0; }
-.module-btn:hover { background: var(--bg-glass2); border-color: var(--border2); transform: translateY(-3px); box-shadow: var(--shadow-teal); }
-[data-theme="light"] .module-btn:hover { border-color: rgba(0,137,123,0.3); box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.04); }
-
-.module-btn-icon { width: 48px; height: 48px; border-radius: var(--radius-sm); background: var(--teal-dim); border: 1px solid var(--teal-border); display: flex; align-items: center; justify-content: center; color: var(--teal); }
-.module-btn-name { font-size: 13px; font-weight: 800; color: var(--text); letter-spacing: -.2px; line-height: 1.2; }
-.module-btn-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
-
-/* ── ATIVIDADES ── */
-.activity-list { display: flex; flex-direction: column; gap: 4px; }
-.activity-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg-glass); border: 1px solid transparent; border-radius: var(--radius-sm); transition: all .15s; cursor: pointer; }
-[data-theme="light"] .activity-item { background: #FFFFFF; border-color: #E2E8F0; }
-.activity-item:hover { background: var(--bg-glass2); border-color: var(--border); }
-.activity-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+/* ── Atividade ── */
+.activity-list { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-glass); overflow: hidden; }
+[data-theme="light"] .activity-list { background: #FFFFFF; }
+.activity-item { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--border); }
+.activity-item:last-child { border-bottom: none; }
+.activity-icon { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; background: var(--teal-dim); color: var(--teal); }
+.activity-icon i { width: 17px; height: 17px; }
 .activity-body { flex: 1; min-width: 0; }
-.activity-text { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.activity-time { font-size: 11px; color: var(--text-dim); margin-top: 1px; font-family: 'DM Mono',monospace; }
-.activity-arrow { color: var(--text-dim); flex-shrink: 0; }
+.activity-text { font-size: var(--fs-sm); font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.activity-time { margin-top: 2px; font-size: var(--fs-xs); color: var(--text-dim); }
 
-/* ── BOTTOM NAV ── */
-.bottom-nav {
-  position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-glass-strong); backdrop-filter: blur(28px) saturate(200%);
-  border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-around; padding: 8px 8px; z-index: 90; box-shadow: 0 -8px 40px rgba(0,0,0,.3);
+/* ── Estados vazios / erro ── */
+.hm-empty {
+  grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--sp-2);
+  padding: var(--sp-6) var(--sp-5); border: 1px dashed var(--border2); border-radius: var(--radius-lg); background: var(--bg-glass);
 }
-.bnav-item { flex: 1; max-width: 80px; display: flex; flex-direction: column; align-items: center; gap: 3px; background: none; border: none; cursor: pointer; font-size: 10px; font-weight: 700; color: var(--text-dim); bnav-item.active { color: var(--teal); } }
-.bnav-item i { width: 22px; height: 22px; display: block; }
+[data-theme="light"] .hm-empty { background: #F8FAFC; }
+.hm-empty-icon { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; margin-bottom: var(--sp-2); background: var(--teal-dim); color: var(--teal); }
+.hm-empty.erro .hm-empty-icon { background: var(--danger-dim); color: var(--danger); }
+.hm-empty-icon i { width: 24px; height: 24px; }
+.hm-empty-title { font-size: var(--fs-md); font-weight: 800; color: var(--text); }
+.hm-empty-desc { max-width: 340px; font-size: var(--fs-sm); line-height: 1.6; color: var(--text-muted); }
+.hm-empty .btn { margin-top: var(--sp-3); }
+
+/* ── Esqueletos (mesmas medidas do conteúdo, sem "pulo" na troca) ── */
+.kpi-card.is-loading { pointer-events: none; }
+.kpi-card.is-loading:hover { transform: none; box-shadow: none; border-color: var(--border); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hm-rise { animation: none; opacity: 1; transform: none; }
+  .kpi-card, .hm-mod, .hm-mod-go { transition: none; }
+  .kpi-card:hover, .hm-mod:hover { transform: none; }
+}
 </style>
 
 <script>
 // ═══════════════════════════════════════════════════
-//  HOME DASHBOARD VIEW — v4
+//  HOME — identidade da igreja, indicadores, módulos e atividade
+//  O conteúdo muda conforme o perfil (HOME_PERFIL).
+//  ES5 · sem crase · sem alert/confirm (avisos = toast/modal da plataforma)
 // ═══════════════════════════════════════════════════
 
-var HomeState = {
-  kpis: []
+// O que cada perfil vê. Para um perfil novo, basta acrescentar uma linha aqui.
+//   secoes: blocos exibidos · admin: mostra o bloco "Administração" (Usuários)
+var HOME_PERFIL = {
+  admin:      { visao: 'Visão geral da igreja', sub: 'Indicadores, módulos e administração do sistema.', secoes: ['kpis', 'modulos', 'atividade'], admin: true },
+  secretaria: { visao: 'Seu espaço de trabalho', sub: 'Atalhos para os módulos que você utiliza.',         secoes: ['kpis', 'modulos'],              admin: false }
 };
+var HOME_PERFIL_PADRAO = { visao: 'Início', sub: 'Acesse os módulos liberados para você.', secoes: ['kpis', 'modulos'], admin: false };
+
+function _homeTem(cfg, secao) { return cfg.secoes.indexOf(secao) !== -1; }
+
+function _homeEstado(icone, titulo, desc, extra, erro) {
+  return '<div class="hm-empty' + (erro ? ' erro' : '') + '">' +
+    '<div class="hm-empty-icon"><i data-lucide="' + icone + '"></i></div>' +
+    '<div class="hm-empty-title">' + titulo + '</div>' +
+    '<div class="hm-empty-desc">' + desc + '</div>' + (extra || '') +
+  '</div>';
+}
 
 function renderHome() {
   if (!App.session) { navigateTo('login'); return; }
 
-  var nome   = App.session.nome || '';
   var perfil = App.session.perfil || '';
+  var cfg    = HOME_PERFIL[perfil] || HOME_PERFIL_PADRAO;
+  var nome   = String(App.session.nome || '').split(' ')[0];
+  var hora   = new Date().getHours();
+  var sauda  = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
+  var mods   = modulosDoPerfil(perfil);
+  var podeUsuarios = cfg.admin && ROUTE_PERMISSIONS.usuarios.indexOf(perfil) !== -1;
+  var comAtividade = _homeTem(cfg, 'atividade');
+  var i = 0; // ordem da entrada escalonada
 
-  var hora  = new Date().getHours();
-  var sauda = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
-
-  var perfilLabel = {
-    admin:      'Administrador',
-    secretaria: 'Secretaria'
-  }[perfil] || perfil;
-
-
-  renderView(
-    /* ══ HERO COMPACTO ══ */
-    '<div class=\"home-hero\">' +
-      '<div class=\"hero-lines\"></div>' +
-      '<div style=\"display:flex;align-items:center;justify-content:space-between;gap:12px\">' +
-        '<div>' +
-          '<div class=\"home-hero-greeting\">' + sauda + ', <strong>' + nome.split(' ')[0] + '</strong> 👋</div>' +
-          '<div class=\"home-hero-sub\" style=\"margin-top:4px\">Aqui está um resumo do sistema</div>' +
-        '</div>' +
-        '<span class=\"badge badge-teal\" style=\"flex-shrink:0;font-size:11px;padding:5px 12px\">' + perfilLabel + '</span>' +
-      '</div>' +
-    '</div>' +
-
-    /* ══ KPI GRID (sobrepostos ao hero) ══ */
-    '</div>' +
-    '<div class=\"kpi-grid-wrapper\">' +
-      '<div class=\"kpi-grid\" id=\"kpi-grid\">' +
-        _kpiSkeleton() + _kpiSkeleton() + _kpiSkeleton() + _kpiSkeleton() +
-      '</div>' +
-    '</div>' +
-    '<div class=\"home-content\">' +
-
-    /* ══ MÓDULOS ══ */
-    (MODULOS.length ? '<div style=\"padding:0 36px\">' +
-      '<div class=\"section-label\">Módulos</div>' +
-      '<div class=\"modules-grid\">' +
-        MODULOS.map(function (m) { return _moduleBtn(m.icone, m.nome, m.descricao, m.rota); }).join('') +
-      '</div>' +
-    '</div>' : '') +
-
-    /* ══ ATIVIDADE RECENTE ══ */
-    '<div style=\"padding:0 36px;margin-top:28px\">' +
-      '<div class=\"section-label\">Atividade Recente</div>' +
-      '<div class=\"activity-list\" id=\"activity-list\">' +
-        '<div class=\"activity-item\">' +
-          '<div class=\"activity-icon\" style=\"background:var(--bg3)\">' +
-            '<span class=\"skeleton\" style=\"width:20px;height:20px;border-radius:6px\"></span>' +
-          '</div>' +
-          '<div class=\"activity-body\">' +
-            '<div class=\"skeleton\" style=\"width:70%;height:13px;margin-bottom:6px\"></div>' +
-            '<div class=\"skeleton\" style=\"width:40%;height:11px\"></div>' +
-          '</div>' +
-        '</div>' +
-        '<div class=\"activity-item\">' +
-          '<div class=\"activity-icon\" style=\"background:var(--bg3)\">' +
-            '<span class=\"skeleton\" style=\"width:20px;height:20px;border-radius:6px\"></span>' +
-          '</div>' +
-          '<div class=\"activity-body\">' +
-            '<div class=\"skeleton\" style=\"width:55%;height:13px;margin-bottom:6px\"></div>' +
-            '<div class=\"skeleton\" style=\"width:30%;height:11px\"></div>' +
-          '</div>' +
+  /* ══ Cabeçalho de identidade (nome, logo, lema e cor vêm da aba Config) ══ */
+  var html =
+    '<div class="hm">' +
+    '<header class="hm-head hm-rise" style="--i:' + (i++) + '">' +
+      '<div class="hm-id">' +
+        '<div class="hm-logo"><span class="brand-mark">' + brandMarkInner() + '</span></div>' +
+        '<div class="hm-id-txt">' +
+          '<div class="hm-greet">' + sauda + (nome ? ', ' + escHtml(nome) : '') + '</div>' +
+          '<h1 class="hm-title">' + escHtml(IDENTIDADE.nome) + '</h1>' +
+          (IDENTIDADE.lema ? '<p class="hm-lema">' + escHtml(IDENTIDADE.lema) + '</p>' : '') +
         '</div>' +
       '</div>' +
+      '<div class="hm-sub">' +
+        '<span class="badge badge-teal">' + escHtml(PERFIL_LABEL[perfil] || perfil) + '</span>' +
+        '<span><b>' + cfg.visao + '</b> · ' + cfg.sub + '</span>' +
+      '</div>' +
+    '</header>';
+
+  /* ══ Indicadores ══ */
+  if (_homeTem(cfg, 'kpis')) {
+    html +=
+      '<div class="hm-rise" style="--i:' + (i++) + '">' +
+        '<div class="hm-sec"><span class="hm-sec-title">Indicadores</span></div>' +
+        '<div class="kpi-grid" id="kpi-grid">' + _kpiSkeleton() + _kpiSkeleton() + _kpiSkeleton() + _kpiSkeleton() + '</div>' +
+      '</div>';
+  }
+
+  /* ══ Módulos (+ Administração) | Atividade ══ */
+  html += '<div class="hm-cols' + (comAtividade ? ' com-atividade' : '') + '">';
+
+  html += '<section class="hm-rise" style="--i:' + (i++) + '">' +
+    '<div class="hm-sec"><span class="hm-sec-title">Módulos</span></div>' +
+    '<div class="hm-mods">' +
+      (mods.length
+        ? mods.map(function (m) { return _moduleBtn(m.icone, m.nome, m.descricao, m.rota); }).join('')
+        : _homeEstado('layout-grid', 'Nenhum módulo disponível',
+            perfil === 'admin'
+              ? 'Ative módulos na aba <b>Config</b> da planilha (chave <b>MODULOS_ATIVOS</b>) ou instale um módulo.'
+              : 'Peça ao administrador para liberar módulos para o seu perfil.')) +
     '</div>' +
+    (podeUsuarios
+      ? '<div class="hm-sec"><span class="hm-sec-title">Administração</span></div>' +
+        '<div class="hm-mods">' + _moduleBtn('shield-check', 'Usuários', 'Acessos, perfis e permissões', 'usuarios') + '</div>'
+      : '') +
+  '</section>';
 
-    '</div>' + /* /home-content */
+  if (comAtividade) {
+    html += '<section class="hm-rise" style="--i:' + (i++) + '">' +
+      '<div class="hm-sec"><span class="hm-sec-title">Atividade recente</span></div>' +
+      '<div class="activity-list" id="activity-list">' + _activitySkeleton() + _activitySkeleton() + _activitySkeleton() + '</div>' +
+    '</section>';
+  }
 
-    /* ══ BOTTOM NAV ══ */
-    '<nav class=\"bottom-nav\">' +
-      '<button class=\"bnav-item active\" onclick=\"navigateTo(\'home\')\">' +
-        '<i data-lucide=\"layout-dashboard\" style=\"width:20px;height:20px\"></i>' +
-        '<span>Início</span>' +
-      '</button>' +
-      MODULOS.map(function (m) {
-        return '<button class=\"bnav-item\" onclick=\"navigateTo(\'' + m.rota + '\')\">' +
-          '<i data-lucide=\"' + m.icone + '\" style=\"width:20px;height:20px\"></i>' +
-          '<span>' + m.nome + '</span>' +
-        '</button>';
-      }).join('') +
-      '<button class=\"bnav-item\" onclick=\"handleLogout()\">' +
-        '<i data-lucide=\"log-out\" style=\"width:20px;height:20px\"></i>' +
-        '<span>Sair</span>' +
-      '</button>' +
-    '</nav>'
-  );
+  html += '</div></div>'; /* /hm-cols /hm */
 
-  /* Fechar dropdown ao clicar fora */
-  document.addEventListener('click', function onDocClick(e) {
-    var dd  = document.getElementById('user-dropdown');
-    var btn = document.getElementById('avatar-btn');
-    if (dd && btn && !btn.contains(e.target) && !dd.contains(e.target)) {
-      dd.classList.remove('open');
-    }
-  });
+  renderView(html);
 
-  /* Carregar dados */
-  _loadKpis();
-  _loadActivity();
-
-  /* Sincronizar tema + lucide */
-  setTimeout(function() {
-    var theme = document.documentElement.getAttribute('data-theme') || 'dark';
-    var themeBtns = document.querySelectorAll('.theme-toggle-btn');
-    themeBtns.forEach(function(btn) {
-      btn.innerHTML = theme === 'dark'
-        ? '<i data-lucide=\"sun\" style=\"width:17px;height:17px\"></i>'
-        : '<i data-lucide=\"moon\" style=\"width:17px;height:17px\"></i>';
+  /* Fechar dropdown ao clicar fora (registrado uma única vez) */
+  if (!window.__homeDocClick) {
+    window.__homeDocClick = true;
+    document.addEventListener('click', function (e) {
+      var dd  = document.getElementById('user-dropdown');
+      var btn = document.getElementById('avatar-btn');
+      if (dd && btn && !btn.contains(e.target) && !dd.contains(e.target)) dd.classList.remove('open');
     });
-    if (window.lucide) lucide.createIcons();
-    applyLogoSrc();
-  }, 0);
+  }
+
+  if (_homeTem(cfg, 'kpis')) _loadKpis();
+  if (comAtividade) _loadActivity();
 }
 
 /* ── HELPERS ── */
-var PERFIS_CLIENT = { ADMIN: 'admin', SECRETARIA: 'secretaria' };
-
 function _kpiSkeleton() {
-  return '<div class="kpi-card kc-teal">' +
-    '<div class="kpi-top">' +
-      '<div class="skeleton" style="width:6px;height:6px;border-radius:50%;flex-shrink:0"></div>' +
-      '<div class="skeleton" style="width:60px;height:9px;border-radius:4px"></div>' +
-    '</div>' +
-    '<div class="skeleton" style="width:70%;height:40px;border-radius:6px;margin-bottom:8px"></div>' +
-    '<div class="skeleton" style="width:85%;height:10px;border-radius:4px"></div>' +
+  return '<div class="kpi-card is-loading">' +
+    '<div class="kpi-top"><div class="skeleton" style="width:36px;height:36px;border-radius:11px"></div>' +
+    '<div class="skeleton" style="width:48px;height:10px;border-radius:4px"></div></div>' +
+    '<div class="skeleton" style="width:55%;height:32px;border-radius:8px"></div>' +
+    '<div class="skeleton" style="width:80%;height:12px;border-radius:4px"></div>' +
   '</div>';
 }
 
+function _activitySkeleton() {
+  return '<div class="activity-item">' +
+    '<div class="skeleton" style="width:36px;height:36px;border-radius:50%;flex-shrink:0"></div>' +
+    '<div class="activity-body">' +
+      '<div class="skeleton" style="width:70%;height:13px;margin-bottom:6px"></div>' +
+      '<div class="skeleton" style="width:35%;height:11px"></div>' +
+    '</div>' +
+  '</div>';
+}
 
 function _kpiCard(icon, colorClass, value, label, tag) {
-  var tagText = tag || label.split(' ')[0];
-  return '<div class="kpi-card ' + colorClass + '">' +
+  var tagText = tag || String(label).split(' ')[0];
+  return '<div class="kpi-card ' + escHtml(colorClass || 'kc-teal') + '">' +
     '<div class="kpi-top">' +
-      '<div class="kpi-dot"></div>' +
-      '<span class="kpi-tag">' + tagText + '</span>' +
+      '<div class="kpi-icon"><i data-lucide="' + escHtml(icon || 'activity') + '"></i></div>' +
+      '<span class="kpi-tag">' + escHtml(tagText) + '</span>' +
     '</div>' +
-    '<div class="kpi-value">' + value + '</div>' +
-    '<div class="kpi-label">' + label + '</div>' +
-    '<div class="kpi-ghost">' +
-      '<i data-lucide="' + icon + '" style="width:90px;height:90px"></i>' +
-    '</div>' +
+    '<div class="kpi-value">' + escHtml(value) + '</div>' +
+    '<div class="kpi-label">' + escHtml(label) + '</div>' +
   '</div>';
 }
 
-
 function _moduleBtn(icon, name, desc, view) {
-  return '<button class=\"module-btn\" onclick=\"navigateTo(\'' + view + '\')\">' +
-    '<div class=\"module-btn-icon\"><i data-lucide=\"' + icon + '\" style=\"width:22px;height:22px\"></i></div>' +
-    '<div class=\"module-btn-name\">' + name + '</div>' +
-    '<div class=\"module-btn-desc\">' + desc + '</div>' +
+  return '<button class="hm-mod" onclick="navigateTo(\'' + view + '\')">' +
+    '<div class="hm-mod-icon"><i data-lucide="' + escHtml(icon) + '"></i></div>' +
+    '<div class="hm-mod-txt">' +
+      '<div class="hm-mod-name">' + escHtml(name) + '</div>' +
+      (desc ? '<div class="hm-mod-desc">' + escHtml(desc) + '</div>' : '') +
+    '</div>' +
+    '<i data-lucide="arrow-right" class="hm-mod-go"></i>' +
   '</button>';
 }
 
+function _homeRetry(fn) {
+  return '<button class="btn btn-ghost btn-sm" onclick="' + fn + '()"><i data-lucide="refresh-cw" style="width:14px;height:14px"></i> Tentar de novo</button>';
+}
+
 function _loadKpis() {
+  function mostrar(html) {
+    var grid = document.getElementById('kpi-grid');
+    if (!grid) return;
+    grid.innerHTML = html;
+    if (window.lucide) setTimeout(function () { lucide.createIcons(); }, 0);
+  }
   google.script.run
-    .withSuccessHandler(function(res) {
-      if (!res || !res.success) return;
-      var d    = res.data;
-      var grid = document.getElementById('kpi-grid');
-      if (!grid) return;
-
-      grid.innerHTML = (d || []).map(function (k) {
-        return _kpiCard(k.icone, k.cor, k.valor || 0, k.rotulo, k.curto);
-      }).join('');
-
-      if (window.lucide) setTimeout(function(){ lucide.createIcons(); }, 0);
+    .withSuccessHandler(function (res) {
+      if (!res || !res.success) {
+        mostrar(_homeEstado('alert-triangle', 'Não foi possível carregar os indicadores',
+          (res && res.error) ? escHtml(res.error) : 'Tente novamente em instantes.', _homeRetry('_homeRecarregarKpis'), true));
+        return;
+      }
+      var d = res.data || [];
+      if (!d.length) {
+        mostrar(_homeEstado('bar-chart-3', 'Sem indicadores por enquanto',
+          'Quando houver módulos com dados para o seu perfil, os números aparecem aqui.'));
+        return;
+      }
+      mostrar(d.map(function (k) { return _kpiCard(k.icone, k.cor, k.valor || 0, k.rotulo, k.curto); }).join(''));
     })
-    .withFailureHandler(function() {})
+    .withFailureHandler(function () {
+      mostrar(_homeEstado('wifi-off', 'Sem conexão com o servidor',
+        'Verifique sua internet e tente novamente.', _homeRetry('_homeRecarregarKpis'), true));
+    })
     .getKpisHome(App.session.token);
+}
+function _homeRecarregarKpis() {
+  var grid = document.getElementById('kpi-grid');
+  if (grid) grid.innerHTML = _kpiSkeleton() + _kpiSkeleton() + _kpiSkeleton() + _kpiSkeleton();
+  _loadKpis();
 }
 
 function _loadActivity() {
+  function mostrar(html, lista) {
+    var el = document.getElementById('activity-list');
+    if (!el) return;
+    el.innerHTML = html;
+    if (window.lucide) setTimeout(function () { lucide.createIcons(); }, 0);
+  }
   google.script.run
-    .withSuccessHandler(function(res) {
-      var list = document.getElementById('activity-list');
-      if (!list) return;
-      if (!res || !res.success || !res.data || !res.data.length) {
-        list.innerHTML =
-          '<div class=\"empty-state\">' +
-            '<div class=\"empty-state-icon\"><i data-lucide=\"clipboard-list\" style=\"width:36px;height:36px\"></i></div>' +
-            '<div class=\"empty-state-title\">Nenhuma atividade recente</div>' +
-            '<div class=\"empty-state-desc\">As ações recentes aparecerão aqui.</div>' +
-          '</div>';
+    .withSuccessHandler(function (res) {
+      if (!res || !res.success) {
+        mostrar(_homeEstado('alert-triangle', 'Não foi possível carregar a atividade',
+          'Tente novamente em instantes.', _homeRetry('_homeRecarregarAtividade'), true));
         return;
       }
-      var html = '';
-      res.data.forEach(function(item) {
-        html +=
-          '<div class=\"activity-item\">' +
-            '<div class=\"activity-icon\" style=\"background:var(--teal-dim);color:var(--teal)\">' +
-              '<i data-lucide=\"' + (item.icon || 'file-text') + '\" style=\"width:18px;height:18px\"></i>' +
-            '</div>' +
-            '<div class=\"activity-body\">' +
-              '<div class=\"activity-text\">' + item.texto + '</div>' +
-              '<div class=\"activity-time\">' + (item.tempo || '') + '</div>' +
-            '</div>' +
-            '<i data-lucide=\"chevron-right\" class=\"activity-arrow\" style=\"width:15px;height:15px\"></i>' +
-          '</div>';
-      });
-      list.innerHTML = html;
-      if (window.lucide) setTimeout(function(){ lucide.createIcons(); }, 0);
+      if (!res.data || !res.data.length) {
+        mostrar(_homeEstado('clipboard-list', 'Nenhuma atividade recente', 'As ações recentes aparecerão aqui.'));
+        return;
+      }
+      mostrar(res.data.map(function (item) {
+        return '<div class="activity-item">' +
+          '<div class="activity-icon"><i data-lucide="' + escHtml(item.icon || 'file-text') + '"></i></div>' +
+          '<div class="activity-body">' +
+            '<div class="activity-text">' + escHtml(item.texto) + '</div>' +
+            '<div class="activity-time">' + escHtml(item.tempo || '') + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join(''));
     })
-    .withFailureHandler(function() {})
+    .withFailureHandler(function () {
+      mostrar(_homeEstado('wifi-off', 'Sem conexão com o servidor',
+        'Verifique sua internet e tente novamente.', _homeRetry('_homeRecarregarAtividade'), true));
+    })
     .getAtividadeRecente(App.session.token);
+}
+function _homeRecarregarAtividade() {
+  var el = document.getElementById('activity-list');
+  if (el) el.innerHTML = _activitySkeleton() + _activitySkeleton() + _activitySkeleton();
+  _loadActivity();
 }
 
 /* ── DROPDOWN ── */

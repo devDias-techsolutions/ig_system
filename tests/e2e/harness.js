@@ -56,7 +56,7 @@ async function abrir(browser, backend, { viewport = { width: 1280, height: 800 }
   });
   await page.route('**/*', async (route) => {
     const url = route.request().url();
-    if (url === ORIGIN) return route.fulfill({ contentType: 'text/html; charset=utf-8', body: montarIndex() });
+    if (url === ORIGIN) return route.fulfill({ contentType: 'text/html; charset=utf-8', body: montarIndex({ identidadeJson: backend.env.run('Config.identidadeJson()') }) });
     if (/lucide/.test(url) && process.env.LUCIDE_JS) return route.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(process.env.LUCIDE_JS, 'utf8') });
     if (/fonts\.googleapis|fonts\.gstatic/.test(url)) return route.fulfill({ contentType: 'text/css', body: '' });
     if (url.startsWith('http')) return route.fulfill({ contentType: 'application/javascript', body: '' });
@@ -85,6 +85,13 @@ async function entrar(page, email, senha) {
   throw new Error('não consegui preencher o login (a tela continua sendo redesenhada)');
 }
 
+// Preenche uma chave da aba Config (como a pessoa faria na planilha) antes de abrir a tela
+function definirConfig(backend, chave, valor) {
+  backend.env.ctx.__c = { Chave: chave, Valor: valor, Descricao: '', AtualizadoEm: '' };
+  const linha = backend.env.run(`Util.findRow('Config', 'Chave', ${JSON.stringify(chave)})`);
+  backend.env.run(linha ? `Util.updateRow('Config', ${linha._rowIndex}, __c)` : "Util.insertRow('Config', __c)");
+}
+
 const tela = (page) => page.evaluate(() => App.currentView);
 async function esperarTela(page, nome, ms = 6000) {
   await page.waitForFunction((n) => App.currentView === n, nome, { timeout: ms }).catch(async () => {
@@ -92,4 +99,4 @@ async function esperarTela(page, nome, ms = 6000) {
   });
 }
 
-module.exports = { chromium, criarBackend, abrir, entrar, esperarTela, tela, sha };
+module.exports = { chromium, criarBackend, abrir, entrar, esperarTela, tela, sha, definirConfig };

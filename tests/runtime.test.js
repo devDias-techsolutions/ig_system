@@ -90,6 +90,110 @@ test('admin: criarAdministrador recusa e-mail inválido e segundo administrador'
   assert.throws(() => env.run("SetupSheets.criarAdministrador('B', 'b@igreja.org')"), /administrador/i);
 });
 
+// ═══ Identidade da igreja e Home por perfil ═════════════════
+const CFG_COLS = ['Chave', 'Valor', 'Descricao', 'AtualizadoEm'];
+const cfgLinhas = (obj) => [CFG_COLS, ...Object.entries(obj).map(([k, v]) => [k, v, '', ''])];
+function envComConfig(cfg, abas) {
+  const env = createEnv({ spreadsheet: ssComAbas({ Config: cfgLinhas(cfg), ...(abas || {}) }) });
+  env.load();
+  return env;
+}
+
+test('config: sem a aba Config a identidade tem valores neutros (nunca derruba a tela)', () => {
+  const env = freshEnv();
+  const id = JSON.parse(env.run('Config.identidadeJson()'));
+  assert.deepEqual(id, { nome: 'Minha Igreja', nomeCurto: 'Minha Igreja', lema: '', corPrimaria: '', logoUrl: '' });
+});
+
+test('config: lê nome, lema, cor e logo da aba Config', () => {
+  const env = envComConfig({
+    NOME_IGREJA: 'Igreja Vida Nova', NOME_CURTO: 'Vida Nova', LEMA_IGREJA: 'O Senhor é meu pastor',
+    COR_PRIMARIA: '#0F766E', LOGO_URL: 'https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQ/view?usp=sharing',
+  });
+  assert.deepEqual(JSON.parse(env.run('Config.identidadeJson()')), {
+    nome: 'Igreja Vida Nova', nomeCurto: 'Vida Nova', lema: 'O Senhor é meu pastor', corPrimaria: '#0f766e',
+    logoUrl: 'https://drive.google.com/thumbnail?id=1AbCdEfGhIjKlMnOpQ&sz=w256',
+  });
+});
+
+test('config: cor inválida e logo fora de https são ignorados', () => {
+  ['javascript:alert(1)', 'http://x.com/a.png', 'data:image/png;base64,AAAA', 'ftp://x'].forEach((logo) => {
+    const env = envComConfig({ COR_PRIMARIA: 'vermelho', LOGO_URL: logo });
+    const id = JSON.parse(env.run('Config.identidadeJson()'));
+    assert.equal(id.corPrimaria, '', 'cor inválida passou');
+    assert.equal(id.logoUrl, '', 'logo inseguro passou: ' + logo);
+  });
+});
+
+test('config: o JSON da identidade é seguro dentro de <script> (nome com </script>)', () => {
+  const env = envComConfig({ NOME_IGREJA: 'Igreja </script><b>x' });
+  const json = env.run('Config.identidadeJson()');
+  assert.ok(!json.includes('<'), json);
+  assert.equal(JSON.parse(json).nome, 'Igreja </script><b>x');
+});
+
+test('config: setupSpreadsheet() cria as chaves, não repete e não apaga o que já foi preenchido', () => {
+  const env = freshEnv();
+  env.run('setupSpreadsheet()');
+  env.run("Util.updateRow('Config', Util.findRow('Config', 'Chave', 'NOME_IGREJA')._rowIndex, { Chave: 'NOME_IGREJA', Valor: 'Minha Congregação', Descricao: '', AtualizadoEm: '' })");
+  env.run('setupSpreadsheet()');
+  const chaves = env.activeSS.getSheetByName('Config')._rows.slice(1).map((r) => r[0]);
+  ['NOME_IGREJA', 'NOME_CURTO', 'LEMA_IGREJA', 'COR_PRIMARIA', 'LOGO_URL', 'MODULOS_ATIVOS'].forEach((k) => assert.equal(chaves.filter((c) => c === k).length, 1, k));
+  assert.equal(JSON.parse(env.run('Config.identidadeJson()')).nome, 'Minha Congregação');
+});
+
+test('config: doGet injeta a identidade e usa o nome da igreja no título', () => {
+  const env = envComConfig({ NOME_IGREJA: 'Igreja Vida Nova' });
+  const out = env.run('doGet({parameter:{}})');
+  assert.equal(JSON.parse(out._tpl.identidadeJson).nome, 'Igreja Vida Nova');
+  assert.match(out._title, /^Igreja Vida Nova/);
+});
+
+test('módulos: MODULOS_ATIVOS da aba Config escolhe os módulos (vazio = todos; outro id = nenhum)', () => {
+  assert.deepEqual(ESQ(envComConfig({ MODULOS_ATIVOS: '' })), ['membros']);
+  assert.deepEqual(ESQ(envComConfig({ MODULOS_ATIVOS: ' membros , financeiro' })), ['membros']);
+  assert.deepEqual(ESQ(envComConfig({ MODULOS_ATIVOS: 'financeiro' })), []);
+});
+
+function envComPerfil(perfil, abas) {
+  const env = createEnv({ spreadsheet: ssComAbas(abas) });
+  env.load();
+  env.scriptCache.put('sess_tok', JSON.stringify({
+    token: 'tok', id: 'u9', nome: 'Pessoa', email: 'p@igreja.test', perfil,
+    expiraEm: new Date(Date.now() + 3600e3).toISOString(), primeiroAcesso: false,
+  }), 3600);
+  return env;
+}
+const ABAS_HOME = () => ({
+  Usuarios: [COLS_USUARIOS, ['u1', 'Ana', 'ana@igreja.test', 'h', 'admin', false, true, '', '', '01/11/2026 10:00:00', '']],
+  Membros: [['id', 'nome', 'foto', 'ativo'], ['1', 'A', 'x.png', true], ['2', 'B', '', false]],
+});
+
+test('home por perfil: secretaria vê os indicadores dos seus módulos, sem o de usuários', () => {
+  const res = envComPerfil('secretaria', ABAS_HOME()).run("getKpisHome('tok')");
+  assert.equal(res.success, true, JSON.stringify(res));
+  assert.deepEqual(res.data.map((k) => k.curto), ['Ativos', 'Inativos', 'Sem foto']);
+});
+
+test('home por perfil: administrador vê também o indicador de usuários', () => {
+  const res = envComPerfil('admin', ABAS_HOME()).run("getKpisHome('tok')");
+  assert.deepEqual(res.data.map((k) => k.curto), ['Ativos', 'Inativos', 'Sem foto', 'Usuários']);
+});
+
+test('home por perfil: movimento de administração (usuários criados) só aparece para o administrador', () => {
+  assert.equal(envComPerfil('admin', ABAS_HOME()).run("getAtividadeRecente('tok')").data.length, 1);
+  assert.deepEqual(envComPerfil('secretaria', ABAS_HOME()).run("getAtividadeRecente('tok')").data, []);
+});
+
+test('home por perfil: módulo que o perfil não pode abrir não entra nos indicadores dele', () => {
+  const env = envComPerfil('secretaria', ABAS_HOME());
+  env.run("__MANIFESTOS__.push({ id: 'tesouraria', nome: 'Tesouraria', rota: 'tesouraria', render: 'renderT', perfis: ['admin'], ordem: 50, kpis: function () { return [{ icone: 'x', cor: 'kc-teal', valor: 9, rotulo: 'Dízimos', curto: 'Dízimos' }]; } })");
+  assert.ok(!env.run("getKpisHome('tok')").data.some((k) => k.curto === 'Dízimos'));
+  const adm = envComPerfil('admin', ABAS_HOME());
+  adm.run("__MANIFESTOS__.push({ id: 'tesouraria', nome: 'Tesouraria', rota: 'tesouraria', render: 'renderT', perfis: ['admin'], ordem: 50, kpis: function () { return [{ icone: 'x', cor: 'kc-teal', valor: 9, rotulo: 'Dízimos', curto: 'Dízimos' }]; } })");
+  assert.ok(adm.run("getKpisHome('tok')").data.some((k) => k.curto === 'Dízimos'));
+});
+
 // ═══ Planilha: nunca apontar para a planilha do autor ═══════
 test('planilha: usa a planilha ativa (script vinculado) em vez de ID fixo', () => {
   const env = freshEnv();

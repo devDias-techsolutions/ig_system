@@ -18,9 +18,13 @@ var __MANIFESTOS__ = (typeof __MANIFESTOS__ === 'undefined') ? [] : __MANIFESTOS
 
 var Modulos = (function () {
 
-  // Módulos ativos = todos os registrados, a menos que a propriedade de script
-  // MODULOS_ATIVOS (ids separados por vírgula) restrinja (usado no setup guiado, etapa 16).
+  // Módulos ativos = todos os registrados, a menos que MODULOS_ATIVOS (ids separados por vírgula)
+  // restrinja. Fonte: aba Config (chave MODULOS_ATIVOS); se vazia, a propriedade de script de mesmo nome.
   function _idsPermitidos() {
+    try {
+      var daConfig = Config.get('MODULOS_ATIVOS');
+      if (daConfig) return daConfig.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+    } catch (e) {}
     try {
       var v = PropertiesService.getScriptProperties().getProperty('MODULOS_ATIVOS');
       if (v && String(v).trim()) return String(v).split(',').map(function (s) { return s.trim(); }).filter(Boolean);
@@ -68,10 +72,12 @@ var Modulos = (function () {
   }
 
   // KPIs dos módulos ativos (cada módulo calcula os seus; falha de um não derruba a home)
-  function kpis() {
+  // Com `perfil`, só entram os módulos que esse perfil pode abrir.
+  function kpis(perfil) {
     var out = [];
     ativos().forEach(function (m) {
       if (typeof m.kpis !== 'function') return;
+      if (perfil && (m.perfis || ['admin']).indexOf(perfil) === -1) return;
       try { (m.kpis() || []).forEach(function (k) { out.push(k); }); }
       catch (e) { Logger.log('[Modulos.kpis ' + m.id + '] ' + e.message); }
     });

@@ -92,9 +92,10 @@ function doGet(e) {
   tmpl.recovToken = recovToken;
   tmpl.view       = view;
   tmpl.modulosJson = Modulos.jsonParaHtml(); // módulos ativos (registro em Modulos.js)
+  tmpl.identidadeJson = Config.identidadeJson(); // nome, lema, cor e logo (aba Config)
 
   return tmpl.evaluate()
-    .setTitle('AD Fonte da Salvação — Gestão Ministerial')
+    .setTitle(Config.identidade().nome + ' — Gestão Ministerial')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }

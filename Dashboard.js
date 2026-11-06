@@ -13,9 +13,13 @@ var Dashboard = (function () {
   // Núcleo (usuários) + KPIs que cada módulo ativo declara no seu manifesto.
   function getKpisHome(token) {
     return withAuth(token, function(sess) {
-      var usuarios = Util.sheetToObjects('Usuarios').filter(function(r) { return _ativo(r.Ativo); });
-      var kpis = Modulos.kpis();
-      kpis.push({ icone: 'shield-check', cor: 'kc-green', valor: usuarios.length, rotulo: 'Usuários do sistema', curto: 'Usuários' });
+      // Cada perfil vê só os indicadores dos módulos que pode abrir
+      var kpis = Modulos.kpis(sess.perfil);
+      // Indicador de administração: só para quem administra o sistema
+      if (sess.perfil === PERFIS.ADMIN) {
+        var usuarios = Util.sheetToObjects('Usuarios').filter(function(r) { return _ativo(r.Ativo); });
+        kpis.push({ icone: 'shield-check', cor: 'kc-green', valor: usuarios.length, rotulo: 'Usuários do sistema', curto: 'Usuários' });
+      }
       return Util.ok(kpis);
     });
   }
@@ -25,17 +29,19 @@ var Dashboard = (function () {
     return withAuth(token, function(sess) {
       var atividades = [];
 
-      // Últimos usuários criados
-      var usuarios = Util.sheetToObjects('Usuarios');
-      usuarios.sort(function(a, b) { return new Date(b.CriadoEm) - new Date(a.CriadoEm); });
-      usuarios.slice(0, 5).forEach(function(u) {
-        atividades.push({
-          icon:  'user-plus',
-          texto: 'Usuário adicionado: ' + u.Nome,
-          tempo: _tempoRelativo(u.CriadoEm),
-          ts:    new Date(u.CriadoEm).getTime() || 0
+      // Últimos usuários criados (movimento de administração: só o administrador vê)
+      if (sess.perfil === PERFIS.ADMIN) {
+        var usuarios = Util.sheetToObjects('Usuarios');
+        usuarios.sort(function(a, b) { return new Date(b.CriadoEm) - new Date(a.CriadoEm); });
+        usuarios.slice(0, 5).forEach(function(u) {
+          atividades.push({
+            icon:  'user-plus',
+            texto: 'Usuário adicionado: ' + u.Nome,
+            tempo: _tempoRelativo(u.CriadoEm),
+            ts:    new Date(u.CriadoEm).getTime() || 0
+          });
         });
-      });
+      }
 
       atividades.sort(function(a, b) { return b.ts - a.ts; });
 

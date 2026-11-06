@@ -3,7 +3,7 @@
 // Rodar: npm run e2e   (requer Playwright + Chromium)
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
-const { chromium, criarBackend, abrir, entrar, esperarTela } = require('./harness');
+const { chromium, criarBackend, abrir, entrar, esperarTela, definirConfig } = require('./harness');
 
 let browser;
 before(async () => { browser = await chromium.launch(); });
@@ -57,14 +57,141 @@ test('login: senha errada mostra erro e certa leva à Home; sair e entrar de nov
   assert.deepEqual(erros, []);
 });
 
-test('perfil secretaria cai direto em Membros e não consegue abrir a Home', async () => {
+test('perfil secretaria entra na Home do seu perfil (sem administração) e abre os módulos liberados', async () => {
+  const backend = criarBackend();
+  const { page, erros } = await abrir(browser, backend);
+  await entrar(page, 'sec@igreja.test', 'Sec#Teste1');
+  await esperarTela(page, 'home');
+  await page.waitForFunction(() => !document.querySelector('#kpi-grid .is-loading'), null, { timeout: 6000 });
+  const texto = await page.evaluate(() => document.querySelector('.hm').innerText.replace(/\s+/g, ' '));
+  assert.match(texto, /Seu espaço de trabalho/);
+  assert.ok(!/Administração/.test(texto), 'secretaria não vê o bloco de administração na Home');
+  assert.ok(!/Usuários do sistema/.test(texto), 'secretaria não vê o indicador de usuários');
+  assert.ok(!/Atividade recente/.test(texto), 'secretaria não vê atividade de administração');
+  assert.match(texto, /Membros ativos/);
+  await page.evaluate(() => navigateTo('membros'));
+  await esperarTela(page, 'membros');
+  assert.deepEqual(erros, []);
+});
+
+// ── Identidade da igreja (aba Config) ───────────────────────
+test('Home: nome, lema e cor da igreja vêm da aba Config; sem logo aparecem as iniciais', async () => {
+  const backend = criarBackend();
+  definirConfig(backend, 'NOME_IGREJA', 'Igreja Vida Nova');
+  definirConfig(backend, 'LEMA_IGREJA', 'O Senhor é o meu pastor');
+  definirConfig(backend, 'COR_PRIMARIA', '#0f766e');
+  const { page, erros } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1');
+  await esperarTela(page, 'home');
+  assert.equal(await page.textContent('.hm-title'), 'Igreja Vida Nova');
+  assert.equal(await page.textContent('.hm-lema'), 'O Senhor é o meu pastor');
+  assert.match(await page.title(), /^Igreja Vida Nova/);
+  assert.equal(await page.textContent('.hm-logo .brand-mark span'), 'VN');
+  assert.equal(await page.locator('.hm-logo img').count(), 0);
+  const cor = await page.evaluate(() => document.documentElement.style.getPropertyValue('--teal').trim());
+  assert.ok(cor.length === 7 && cor[0] === '#', 'cor da marca aplicada: ' + cor);
+  assert.deepEqual(erros, []);
+});
+
+test('Home: cor muito escura é clareada no tema escuro (legibilidade) e volta a valer no claro', async () => {
+  const backend = criarBackend();
+  definirConfig(backend, 'COR_PRIMARIA', '#1a237e');
+  const { page } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1');
+  await esperarTela(page, 'home');
+  const lum = (h) => { const c = [1, 3, 5].map((i) => parseInt(h.substr(i, 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4))); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+  const escuro = await page.evaluate(() => document.documentElement.style.getPropertyValue('--teal').trim());
+  assert.ok(lum(escuro) >= 0.19, 'no tema escuro a cor precisa ser clareada: ' + escuro);
+  await page.evaluate(() => toggleTheme());
+  const claro = await page.evaluate(() => document.documentElement.style.getPropertyValue('--teal').trim());
+  assert.ok(lum(claro) <= 0.17, 'no tema claro a cor escura serve: ' + claro);
+});
+
+test('Home: conteúdo do nome da igreja é escapado (sem HTML injetado)', async () => {
+  const backend = criarBackend();
+  definirConfig(backend, 'NOME_IGREJA', '<img src=x onerror="window.__xss=1">Igreja');
+  const { page } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1');
+  await esperarTela(page, 'home');
+  await page.waitForTimeout(300);
+  assert.equal(await page.evaluate(() => window.__xss), undefined);
+  assert.match(await page.textContent('.hm-title'), /<img src=x/);
+});
+
+// ── Navegação: sidebar no desktop, menu inferior no celular ──
+test('desktop: sidebar com Início, módulos e Usuários; o item ativo acompanha a tela', async () => {
+  const { page, erros } = await comoAdmin();
+  assert.ok(await page.isVisible('#app-sidebar'));
+  assert.ok(!(await page.isVisible('#app-bnav')));
+  const itens = await page.$$eval('#app-sidebar .sb-item', (els) => els.map((e) => e.innerText.trim()));
+  assert.deepEqual(itens, ['Início', 'Membros', 'Usuários']);
+  assert.equal(await page.$eval('#app-sidebar .sb-item.active', (e) => e.innerText.trim()), 'Início');
+  await page.click('#app-sidebar .sb-item:has-text("Membros")');
+  await esperarTela(page, 'membros');
+  assert.equal(await page.$eval('#app-sidebar .sb-item.active', (e) => e.innerText.trim()), 'Membros');
+  assert.deepEqual(erros, []);
+});
+
+test('celular: menu inferior no lugar da sidebar, sem duplicar navegação nas telas', async () => {
+  const backend = criarBackend();
+  const { page, erros } = await abrir(browser, backend, { viewport: { width: 390, height: 844 } });
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1');
+  await esperarTela(page, 'home');
+  assert.ok(!(await page.isVisible('#app-sidebar')));
+  assert.ok(await page.isVisible('#app-bnav'));
+  assert.deepEqual(await page.$$eval('#app-bnav .bn-item', (els) => els.map((e) => e.innerText.trim())), ['Início', 'Membros', 'Usuários']);
+  await page.click('#app-bnav .bn-item:has-text("Usuários")');
+  await esperarTela(page, 'usuarios');
+  assert.equal(await page.locator('#app-bnav').count(), 1);
+  assert.equal(await page.locator('.usr-bottom-nav, .bottom-nav').count(), 0);
+  assert.deepEqual(erros, []);
+});
+
+test('celular: com mais de 5 destinos os excedentes vão para "Mais"', async () => {
+  const backend = criarBackend();
+  const { page, erros } = await abrir(browser, backend, { viewport: { width: 390, height: 844 } });
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1');
+  await esperarTela(page, 'home');
+  await page.evaluate(() => {
+    ['a', 'b', 'c', 'd'].forEach((x) => { MODULOS.push({ id: x, nome: 'Mod ' + x, descricao: '', icone: 'box', rota: 'mod-' + x, render: 'renderHome', perfis: ['admin', 'secretaria'] }); });
+    renderNav(true);
+  });
+  const barra = await page.$$eval('#app-bnav .bn-item', (els) => els.map((e) => e.innerText.trim()));
+  assert.equal(barra.length, 5);
+  assert.equal(barra[4], 'Mais');
+  await page.click('#app-bnav .bn-item:has-text("Mais")');
+  await page.waitForSelector('#modal-mais.open');
+  const extras = await page.$$eval('#bnav-more-list .sb-item', (els) => els.map((e) => e.innerText.trim()));
+  assert.ok(extras.includes('Usuários') && extras.length === 3, extras.join(','));
+  assert.deepEqual(erros, []);
+});
+
+// ── Home: estados vazios e erro ─────────────────────────────
+test('Home: sem módulos ativos mostra estado vazio explicando como ativar', async () => {
+  const backend = criarBackend();
+  const { page, erros } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1');
+  await esperarTela(page, 'home');
+  await page.evaluate(() => { MODULOS.length = 0; renderHome(); });
+  const texto = await page.evaluate(() => document.querySelector('.hm-mods').innerText);
+  assert.match(texto, /Nenhum módulo disponível/);
+  assert.match(texto, /MODULOS_ATIVOS/);
+  assert.deepEqual(erros, []);
+});
+
+test('Home: falha ao carregar indicadores mostra erro com "Tentar de novo" que funciona', async () => {
   const backend = criarBackend();
   const { page } = await abrir(browser, backend);
-  await entrar(page, 'sec@igreja.test', 'Sec#Teste1');
-  await esperarTela(page, 'membros');
-  await page.evaluate(() => navigateTo('home'));
-  await page.waitForTimeout(500);
-  assert.notEqual(await page.evaluate(() => App.currentView), 'home');
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1');
+  await esperarTela(page, 'home');
+  let falhar = true;
+  const original = backend.env.ctx.getKpisHome;
+  backend.env.ctx.getKpisHome = (...a) => { if (falhar) throw new Error('queda'); return original(...a); };
+  await page.evaluate(() => renderHome());
+  await page.waitForSelector('#kpi-grid .hm-empty.erro', { timeout: 6000 });
+  falhar = false;
+  await page.click('#kpi-grid .hm-empty.erro .btn');
+  await page.waitForSelector('#kpi-grid .kpi-card:not(.is-loading)', { timeout: 6000 });
 });
 
 // ── Membros × Home (o defeito do cache apareceu aqui) ───────
