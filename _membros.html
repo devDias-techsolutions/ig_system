@@ -918,14 +918,24 @@ function _mbBuildLista() {
 }
 
 // ── Filtra membros conforme MB.search e MB.filtroAtivo ───
+// Busca por nome, função, celular ou ROL. O ROL aceita "22", "0022", "ROL 22" ou "Nº 22"
+// e casa pelo número exato (22 não traz 122); o celular só entra com 4+ dígitos.
+function _mbCasaBusca(m, busca) {
+  var q = String(busca || '').trim().toLowerCase();
+  if (!q) return true;
+  if (String(m.nome || '').toLowerCase().indexOf(q) !== -1) return true;
+  if (String(m.funcao || '').toLowerCase().indexOf(q) !== -1) return true;
+  var num = q.replace(/^(rol)?\s*(n[º°o]\.?)?\s*/, '');
+  if (/^\d+$/.test(num)) {
+    if (m.rol !== '' && m.rol != null && parseInt(m.rol, 10) === parseInt(num, 10)) return true;
+    return num.length >= 4 && String(m.celular || '').replace(/\D/g, '').indexOf(num) !== -1;
+  }
+  return String(m.celular || '').indexOf(q) !== -1;
+}
+
 function _mbFiltrarLista() {
   return MB.membros.filter(function(m){
-    var q = (MB.search || '').toLowerCase();
-    var ok = !q ||
-      String(m.nome||'').toLowerCase().indexOf(q) !== -1 ||
-      String(m.rol||'').toLowerCase().indexOf(q) !== -1 ||
-      String(m.funcao||'').toLowerCase().indexOf(q) !== -1 ||
-      String(m.celular||'').indexOf(q) !== -1;
+    var ok = _mbCasaBusca(m, MB.search);
     if (MB.filtroAtivo === 'ativos')   return ok && m.ativo !== false;
     if (MB.filtroAtivo === 'inativos') return ok && m.ativo === false;
     return ok;

@@ -125,3 +125,28 @@ test('usuários: a tela lista os usuários existentes', async () => {
   await page.waitForFunction(() => document.body.innerText.includes('Sara Secretaria'), null, { timeout: 6000 });
   assert.deepEqual(erros, []);
 });
+
+// ── Busca na lista de Membros (defeito achado no teste manual: ROL não filtrava) ──
+test('membros: a busca encontra pelo ROL (22, 0022, "ROL 22"), pelo nome e pela função', async () => {
+  const { page, backend } = await comoAdmin();
+  const token = await page.evaluate(() => App.session.token);
+  backend.env.ctx.__t = token;
+  [['Ana Lima', 11, 'Diácono'], ['Bruno Souza', 22, 'Presbítero'], ['Carla Dias', 122, 'Membro']].forEach(([nome, rol, funcao]) => {
+    backend.env.ctx.__m = { nome, rol, funcao, ativo: true };
+    assert.equal(backend.env.run('mb_salvarMembro(__t, __m)').success, true);
+  });
+  await irParaMembros(page);
+  await page.waitForSelector('#mb-search-input');
+  const lista = async (q) => {
+    await page.fill('#mb-search-input', q);
+    await page.waitForTimeout(150);
+    return page.evaluate(() => ['Ana', 'Bruno', 'Carla'].filter((n) => document.getElementById('mb-lista-container').innerText.includes(n)));
+  };
+  assert.deepEqual(await lista('22'), ['Bruno'], '"22" não deve trazer o ROL 122');
+  assert.deepEqual(await lista('0022'), ['Bruno']);
+  assert.deepEqual(await lista('ROL 22'), ['Bruno']);
+  assert.deepEqual(await lista('Nº 11'), ['Ana']);
+  assert.deepEqual(await lista('presb'), ['Bruno']);
+  assert.deepEqual(await lista('carla'), ['Carla']);
+  assert.deepEqual(await lista(''), ['Ana', 'Bruno', 'Carla']);
+});
