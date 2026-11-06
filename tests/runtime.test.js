@@ -257,3 +257,54 @@ test('módulos: o HTML do módulo ativo é incluído no shell', () => {
   const env = freshEnv();
   assert.match(env.run('incluirModulos()'), /function renderMembros\s*\(/);
 });
+
+// ═══ Consistência de leitura após escrita (bug real: lista/KPIs velhos após inativar/excluir) ═══
+function envMembros() {
+  const ss = makeSpreadsheet();
+  const env = createEnv({ spreadsheet: ss });
+  env.load();
+  env.run('setupSpreadsheet()');
+  env.scriptCache.put('sess_tok', JSON.stringify({ token: 'tok', id: 'u1', nome: 'Ana', email: 'a@i.test', perfil: 'admin', expiraEm: new Date(Date.now() + 3600e3).toISOString(), primeiroAcesso: false }), 3600);
+  return { env, ss };
+}
+const kpis = (env) => Object.fromEntries(env.run("getKpisHome('tok')").data.map((k) => [k.curto, k.valor]));
+
+test('membros: cadastrar, inativar e excluir refletem na hora na lista e nos KPIs da Home', () => {
+  const { env } = envMembros();
+  env.ctx.__m = { nome: 'Evaldo', ativo: true };
+  const id = env.run("mb_salvarMembro('tok', __m)").data.id;
+  assert.deepEqual([kpis(env).Ativos, kpis(env).Inativos], [1, 0]);
+
+  env.ctx.__m = { id, nome: 'Evaldo', ativo: false };
+  assert.equal(env.run("mb_salvarMembro('tok', __m)").success, true);
+  assert.deepEqual([kpis(env).Ativos, kpis(env).Inativos], [0, 1], 'KPIs não refletiram a inativação');
+  assert.equal(env.run("mb_listarMembros('tok')").data[0].ativo, false);
+
+  env.ctx.__id = id;
+  assert.equal(env.run("mb_deletarMembro('tok', __id)").success, true);
+  assert.equal(env.run("mb_listarMembros('tok')").data.length, 0, 'excluído continua na lista');
+  assert.deepEqual([kpis(env).Ativos, kpis(env).Inativos], [0, 0], 'KPIs não refletiram a exclusão');
+  assert.equal(env.run("mb_deletarMembro('tok', __id)").success, false);
+});
+
+test('membros: leitura não usa cache entre execuções (escrita feita por outra execução aparece)', () => {
+  const { env, ss } = envMembros();
+  env.ctx.__m = { nome: 'Ana Lima', ativo: true };
+  env.run("mb_salvarMembro('tok', __m)");
+  env.run("mb_listarMembros('tok')"); // "enche" qualquer cache
+  // outra execução altera a planilha sem passar pela invalidação (corrida real no Apps Script)
+  const sh = ss.getSheetByName('Membros');
+  const ativoCol = sh._rows[0].indexOf('ativo');
+  sh._rows[1][ativoCol] = false;
+  env.run('Util.novaExecucao()'); // nova chamada do cliente = nova execução
+  assert.equal(env.run("mb_listarMembros('tok')").data[0].ativo, false, 'leu cache velho');
+});
+
+test('membros: dados de cadastro nunca são guardados no cache entre execuções', () => {
+  const { env } = envMembros();
+  env.ctx.__m = { nome: 'Ana Lima', ativo: true };
+  env.run("mb_salvarMembro('tok', __m)");
+  env.run("mb_listarMembros('tok')");
+  assert.ok(!env.scriptCache.get('sheet_Membros'), 'Membros foi parar no CacheService');
+  assert.ok(!env.scriptCache.get('sheet_Usuarios'), 'Usuarios foi parar no CacheService');
+});

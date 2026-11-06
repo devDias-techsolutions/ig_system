@@ -30,3 +30,12 @@ Monta o `index.html`, simula o backend (`tests/preview/mock-backend.js`) e gera 
 desktop. O script confere em qual tela está e falha se estiver na errada. Usa dados simulados e não
 carrega fontes do Google nem as bibliotecas de PDF: serve para conferir estrutura e visual, não
 substitui o teste real no Apps Script. Requer o Playwright com Chromium instalado.
+
+## Testes ponta a ponta (`npm run e2e`)
+
+Abrem a tela real (index.html + módulos) num Chromium e ligam o `google.script.run` ao backend real
+(os `.js` do projeto, com a planilha e o CacheService simulados). Substituem testes manuais: login/sair,
+perfil secretaria, cadastrar/inativar/excluir membro conferindo lista e Home, editar sem duplicar, tela de usuários.
+Requer `playwright` + Chromium (`npm i --no-save playwright && npx playwright install chromium`).
+Para ícones, aponte `LUCIDE_JS` para um `lucide.min.js` local (opcional). Cada defeito encontrado no teste manual
+vira um teste aqui, para nunca voltar.

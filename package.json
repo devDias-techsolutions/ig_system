@@ -7,7 +7,8 @@
     "test": "node --test tests/suite.test.js",
     "test:static": "node --test tests/static.test.js",
     "test:runtime": "node --test tests/runtime.test.js",
-    "preview": "node tests/preview/preview.js"
+    "preview": "node tests/preview/preview.js",
+    "e2e": "node --test tests/e2e/fluxos.e2e.js"
   },
   "engines": {
     "node": ">=18"

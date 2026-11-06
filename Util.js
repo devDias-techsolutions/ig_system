@@ -6,8 +6,13 @@ var Util = (function () {
 
   var _executionCache = {};
   var CACHE_PREFIX = 'sheet_';
-  var CACHE_TTL    = 120; // segundos — backstop contra edição manual direta na planilha;
-                          // escritas via insertRow/updateRow invalidam na hora, sempre.
+  var CACHE_TTL    = 120; // segundos
+
+  // Só abas que quase nunca mudam usam o cache entre execuções (CacheService).
+  // Dados de cadastro (Membros, Usuarios...) são sempre lidos da planilha: o cache entre
+  // execuções podia servir lista antiga logo após inativar/excluir (leitura e escrita rodam
+  // em execuções separadas e simultâneas; uma leitura em andamento regravava o cache velho).
+  var CACHE_L2_SHEETS = { Config: true };
 
   // CacheService pode estar indisponível em alguns contextos de execução
   // (ex.: triggers simples) — getOrNull nunca deixa isso quebrar o fluxo.
@@ -16,6 +21,7 @@ var Util = (function () {
   }
 
   function _invalidateCache(sheetName) {
+    try { SpreadsheetApp.flush(); } catch (e) {} // grava pendências antes de a execução terminar
     _executionCache[sheetName] = null;
     var c = _scriptCacheOrNull();
     if (c) { try { c.remove(CACHE_PREFIX + sheetName); } catch (e) {} }
@@ -50,7 +56,7 @@ var Util = (function () {
     if (_executionCache[sheetName]) return _executionCache[sheetName];
 
     // L2 — CacheService (persiste entre chamadas/execuções diferentes)
-    var c = _scriptCacheOrNull();
+    var c = CACHE_L2_SHEETS[sheetName] ? _scriptCacheOrNull() : null;
     if (c) {
       try {
         var cached = c.get(CACHE_PREFIX + sheetName);
@@ -149,12 +155,18 @@ var Util = (function () {
     return uuid().replace(/-/g,'') + uuid().replace(/-/g,'');
   }
 
+  // Descarta leituras guardadas em memória: chamado no início de cada chamada do cliente,
+  // para nunca depender de a plataforma reiniciar as variáveis globais entre execuções.
+  function novaExecucao() { _executionCache = {}; }
+
   return {
+    novaExecucao:   novaExecucao,
     uuid:           uuid,
     now:            now,
     nowISO:         nowISO,
     getSheet:       getSheet,
     sheetToObjects: sheetToObjects,
+    invalidarCache: _invalidateCache,
     findRow:        findRow,
     findById:       findById,
     insertRow:      insertRow,
