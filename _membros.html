@@ -396,6 +396,24 @@ svg.kico { display: block; }
   transition: border-color .2s, background .2s;
 }
 .mb-foto-btn:hover { border-color: var(--teal); background: var(--teal-dim); color: var(--teal); }
+.mb-foto-btns { display: flex; gap: 8px; }
+.mb-foto-btns .mb-foto-btn { flex: 1; }
+
+/* ── Câmera com moldura 3×4 ── */
+.mb-cam { position: fixed; inset: 0; z-index: 10000; background: #000; display: flex; flex-direction: column; }
+.mb-cam-stage { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+.mb-cam-video { width: 100%; height: 100%; object-fit: cover; }
+.mb-cam-video.espelhado { transform: scaleX(-1); }
+.mb-cam-frame {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  height: 80%; aspect-ratio: 3 / 4; max-width: 92%;
+  border: 3px solid #fff; border-radius: 10px;
+  box-shadow: 0 0 0 100vmax rgba(0,0,0,.6); pointer-events: none;
+}
+.mb-cam-hint { position: absolute; left: 0; right: 0; top: 10px; text-align: center; color: #fff; font-size: 13px; font-weight: 600; text-shadow: 0 1px 3px #000; padding: 0 16px; }
+.mb-cam-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px calc(14px + env(safe-area-inset-bottom)); background: #000; }
+.mb-cam-bar button { background: none; border: 0; color: #fff; font: 600 14px 'Plus Jakarta Sans', sans-serif; min-width: 84px; padding: 10px 0; cursor: pointer; }
+.mb-cam-bar .mb-cam-shot { width: 68px; height: 68px; min-width: 68px; border-radius: 50%; border: 4px solid #fff; background: #fff; padding: 0; box-shadow: inset 0 0 0 4px #000; }
 .mb-foto-preview {
   width: 64px; height: 84px; border-radius: 8px; overflow: hidden;
   border: 2px solid var(--border); flex-shrink: 0; background: var(--bg4);
@@ -756,6 +774,7 @@ function _mbBuildTabs() {
 // ── Render principal ─────────────────────────────────────
 function renderMembros() {
   if (!App.session) { navigateTo('login'); return; }
+  mbFecharCamera(); // nunca deixa a câmera ligada ao trocar de tela
   MB.tab = 'lista'; MB.editId = null; MB.selected = null;
   MB.search = ''; MB.filtroAtivo = 'todos';
   MB.fotoData = ''; MB.fotoZoom = 1; MB.fotoX = 50; MB.fotoY = 50; MB.fotoNova = false;
@@ -1328,9 +1347,15 @@ function _mbBuildForm() {
         '<div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">'+
           '<div style="flex:1;min-width:180px">'+
             '<input type="file" id="mb-foto-input" accept="image/*" style="display:none" onchange="mbFotoChange(event)">'+
-            '<button type="button" class="mb-foto-btn" onclick="document.getElementById(\'mb-foto-input\').click()">'+
-              '<i data-lucide="camera" style="width:16px;height:16px"></i> Escolher foto'+
-            '</button>'+
+            '<input type="file" id="mb-foto-input-cam" accept="image/*" capture="user" style="display:none" onchange="mbFotoChange(event)">'+
+            '<div class="mb-foto-btns">'+
+              '<button type="button" class="mb-foto-btn" id="mb-btn-camera" onclick="mbAbrirCamera()">'+
+                '<i data-lucide="camera" style="width:16px;height:16px"></i> Tirar foto'+
+              '</button>'+
+              '<button type="button" class="mb-foto-btn" onclick="document.getElementById(\'mb-foto-input\').click()">'+
+                '<i data-lucide="image" style="width:16px;height:16px"></i> Escolher foto'+
+              '</button>'+
+            '</div>'+
             '<div id="mb-zoom-wrap" style="margin-top:10px;display:'+(MB.fotoData?'block':'none')+'">'+
               '<div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:4px">Zoom</div>'+
               '<input type="range" min="1" max="3" step="0.1" value="'+MB.fotoZoom+'" oninput="MB.fotoZoom=parseFloat(this.value);mbAtualizarFotoPreview()" style="width:100%">'+
@@ -1379,6 +1404,10 @@ function _mbBuildForm() {
 /* ── Foto handlers ── */
 function mbFotoChange(e) {
   var file = e.target.files[0]; if (!file) return;
+  _mbFotoDeArquivo(file);
+  e.target.value = ''; // permite escolher/tirar a mesma foto de novo
+}
+function _mbFotoDeArquivo(file) {
   // Preserva resolução alta (800x1066) para garantir qualidade na impressão de carteirinhas
   var reader = new FileReader();
   reader.onloadend = function(){
@@ -1430,6 +1459,95 @@ function mbFotoChange(e) {
   };
   reader.readAsDataURL(file);
 }
+/* ── Câmera com moldura 3×4 ──
+   Abre a câmera do aparelho com uma moldura 3×4; ao capturar, recorta exatamente a área da moldura
+   e entrega ao mesmo fluxo da foto escolhida (validação, zoom, Drive e cadastro).
+   Se o navegador não liberar a câmera ao vivo (ex.: permissão negada), abre a câmera nativa do celular. */
+var MB_CAM = { stream: null, frente: true };
+
+function mbAbrirCamera() {
+  var nav = window.navigator;
+  if (!nav.mediaDevices || !nav.mediaDevices.getUserMedia) { _mbCameraNativa(); return; }
+  var ov = document.createElement('div');
+  ov.className = 'mb-cam'; ov.id = 'mb-cam';
+  ov.innerHTML =
+    '<div class="mb-cam-stage">' +
+      '<video class="mb-cam-video espelhado" id="mb-cam-video" autoplay playsinline muted></video>' +
+      '<div class="mb-cam-frame" id="mb-cam-frame"></div>' +
+      '<div class="mb-cam-hint">Enquadre o rosto e os ombros dentro da moldura 3×4</div>' +
+    '</div>' +
+    '<div class="mb-cam-bar">' +
+      '<button type="button" onclick="mbFecharCamera()">Cancelar</button>' +
+      '<button type="button" class="mb-cam-shot" id="mb-cam-shot" onclick="mbCapturarFoto()" aria-label="Capturar"></button>' +
+      '<button type="button" onclick="mbTrocarCamera()">Virar</button>' +
+    '</div>';
+  document.body.appendChild(ov);
+  _mbIniciarStream();
+}
+
+function _mbIniciarStream() {
+  _mbPararStream();
+  var video = document.getElementById('mb-cam-video');
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: MB_CAM.frente ? 'user' : 'environment', width: { ideal: 1920 }, height: { ideal: 1440 } },
+    audio: false
+  }).then(function(stream) {
+    if (!document.getElementById('mb-cam')) { stream.getTracks().forEach(function(t){ t.stop(); }); return; }
+    MB_CAM.stream = stream;
+    video.classList.toggle('espelhado', MB_CAM.frente);
+    video.srcObject = stream;
+  }).catch(function() {
+    mbFecharCamera();
+    showToast('Não foi possível usar a câmera ao vivo. Abrindo a câmera do aparelho…', 'warning');
+    setTimeout(_mbCameraNativa, 400);
+  });
+}
+
+function _mbPararStream() {
+  if (MB_CAM.stream) { MB_CAM.stream.getTracks().forEach(function(t){ t.stop(); }); MB_CAM.stream = null; }
+}
+
+function _mbCameraNativa() {
+  var inp = document.getElementById('mb-foto-input-cam');
+  if (inp) inp.click();
+}
+
+function mbTrocarCamera() { MB_CAM.frente = !MB_CAM.frente; _mbIniciarStream(); }
+
+function mbFecharCamera() {
+  _mbPararStream();
+  var ov = document.getElementById('mb-cam'); if (ov) ov.remove();
+}
+
+// Converte o retângulo da moldura (na tela) para pixels do vídeo (object-fit: cover) e recorta.
+function mbCapturarFoto() {
+  var video = document.getElementById('mb-cam-video');
+  var stage = video && video.parentNode;
+  var frame = document.getElementById('mb-cam-frame');
+  if (!video || !video.videoWidth) { showToast('A câmera ainda está iniciando. Aguarde um instante.', 'info'); return; }
+  var vw = video.videoWidth, vh = video.videoHeight;
+  var sr = stage.getBoundingClientRect(), fr = frame.getBoundingClientRect();
+  var escala = Math.max(sr.width / vw, sr.height / vh);
+  var ox = (sr.width  - vw * escala) / 2;
+  var oy = (sr.height - vh * escala) / 2;
+  var sx = (fr.left - sr.left - ox) / escala;
+  var sy = (fr.top  - sr.top  - oy) / escala;
+  var sw = fr.width  / escala;
+  var sh = fr.height / escala;
+  if (MB_CAM.frente) sx = vw - sx - sw; // a prévia é espelhada; a foto sai no sentido normal
+  var alvoW = Math.min(Math.round(sw), 960);
+  var alvoH = Math.round(alvoW * 4 / 3);
+  var canvas = document.createElement('canvas');
+  canvas.width = alvoW; canvas.height = alvoH;
+  canvas.getContext('2d').drawImage(video, sx, sy, sw, sh, 0, 0, alvoW, alvoH);
+  canvas.toBlob(function(blob) {
+    if (!blob) { showToast('Não foi possível capturar a foto.', 'error'); return; }
+    mbFecharCamera();
+    var arq = new File([blob], 'foto-camera.jpg', { type: 'image/jpeg' });
+    _mbFotoDeArquivo(arq);
+  }, 'image/jpeg', 0.95);
+}
+
 function mbAtualizarFotoPreview() {
   var wrap = document.getElementById('mb-foto-preview');
   if (!wrap) return;
