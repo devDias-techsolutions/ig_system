@@ -261,6 +261,7 @@ var Usuarios = (function () {
         sheet.getRange(targetRow, dataCol  + 1).setValue(agora);
       }
 
+      Util.invalidarCache('Config');
       SpreadsheetApp.flush();
       Logger.log('[Permissoes] Matriz salva por ' + sessao.email + ' em ' + agora);
       return Util.ok(true);

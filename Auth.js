@@ -278,6 +278,7 @@ function _safeCall(fn) {
 //   }
 function withAuth(token, fn) {
   try {
+    Util.novaExecucao(); // cada chamada do cliente começa sem leituras guardadas
     var sess = Auth._auth(token); // lança se token ausente/inválido/expirado
     var r = fn(sess);
     return r != null ? r : Util.err('Resposta vazia do servidor.');

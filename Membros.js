@@ -173,9 +173,11 @@ var Membros = (function () {
 
       if (foundRow > 0) {
         sh.getRange(foundRow, 1, 1, HEADERS.length).setValues([row]);
+        Util.invalidarCache(SHEET);
         return Util.ok({ id: dados.id, mensagem: 'Membro atualizado com sucesso.' });
       } else {
         sh.appendRow(row);
+        Util.invalidarCache(SHEET);
         return Util.ok({ id: dados.id, mensagem: 'Membro cadastrado com sucesso.' });
       }
     });
@@ -189,6 +191,7 @@ var Membros = (function () {
       for (var i = 1; i < data.length; i++) {
         if (String(data[i][0]).trim() === String(id).trim()) {
           sh.deleteRow(i + 1);
+          Util.invalidarCache(SHEET);
           return Util.ok({ mensagem: 'Membro excluido com sucesso.' });
         }
       }
@@ -228,6 +231,7 @@ var Membros = (function () {
         if (precisaCorrigir) {
           var novoId = Util.uuid();
           sh.getRange(i + 1, 1).setValue(novoId);
+          Util.invalidarCache(SHEET);
           vistos[novoId] = true;
           corrigidos++;
           Logger.log('[Membros] corrigirIds: linha ' + (i+1) + ' id "' + idAtual + '" -> "' + novoId + '"');
@@ -513,6 +517,7 @@ function mb_corrigirBatismoMesAno() {
 
     if (novo && novo !== original) {
       sh.getRange(i + 1, colBatismo + 1).setValue(novo);
+      Util.invalidarCache(SHEET);
       Logger.log('[mb_corrigirBatismoMesAno] Linha ' + (i+1) +
         ' | "' + original + '" → "' + novo + '"');
       corrigidos++;
