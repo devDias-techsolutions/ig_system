@@ -194,6 +194,47 @@ test('home por perfil: módulo que o perfil não pode abrir não entra nos indic
   assert.ok(adm.run("getKpisHome('tok')").data.some((k) => k.curto === 'Dízimos'));
 });
 
+// ═══ Pasta de fotos dos membros (Etapa 8) ═══════════════════
+function envUploadFoto(cfg) {
+  const env = envComConfig(cfg, {
+    Usuarios: [COLS_USUARIOS, ['u1', 'Ana', 'ana@igreja.test', 'h', 'admin', false, true, '', '', '01/11/2026 10:00:00', '']],
+    Membros: [['id', 'nome', 'foto', 'ativo'], ['1', 'A', '', true]],
+  });
+  env.scriptCache.put('sess_tok', JSON.stringify({
+    token: 'tok', id: 'u1', nome: 'Ana', email: 'ana@igreja.test', perfil: 'admin',
+    expiraEm: new Date(Date.now() + 3600e3).toISOString(), primeiroAcesso: false,
+  }), 3600);
+  env.run(`
+    var __pastas = [];
+    var __arquivo = { getId: function () { return 'FILE1'; }, setSharing: function () {} };
+    var __pasta = { getFilesByName: function () { return { hasNext: function () { return false; } }; }, createFile: function () { return __arquivo; } };
+    DriveApp.getFoldersByName = function (n) { __pastas.push('busca:' + n); return { hasNext: function () { return false; } }; };
+    DriveApp.createFolder = function (n) { __pastas.push('cria:' + n); return __pasta; };
+    DriveApp.getFileById = function () { return { getBlob: function () { return { getBytes: function () { return [1, 2, 3]; } }; } }; };
+  `);
+  return env;
+}
+const pastasUsadas = (env) => JSON.parse(env.run('JSON.stringify(__pastas)'));
+
+test('fotos: sem configuração a pasta criada tem nome neutro (sem o nome da igreja original)', () => {
+  const env = envUploadFoto({});
+  const res = env.run("mb_salvarFotoMembro('tok', '1', 'AQID', 'image/png', 'f.png')");
+  assert.equal(res.success, true, JSON.stringify(res));
+  assert.deepEqual(pastasUsadas(env), ['busca:Fotos de Membros', 'cria:Fotos de Membros']);
+});
+
+test('fotos: PASTA_FOTOS da aba Config define o nome da pasta (permite manter uma pasta antiga)', () => {
+  const env = envUploadFoto({ PASTA_FOTOS: 'Fotos Membros AD' });
+  assert.equal(env.run("mb_salvarFotoMembro('tok', '1', 'AQID', 'image/png', 'f.png')").success, true);
+  assert.deepEqual(pastasUsadas(env), ['busca:Fotos Membros AD', 'cria:Fotos Membros AD']);
+});
+
+test('config: se a chave aparece mais de uma vez, a última linha vale', () => {
+  const env = envComConfig({ NOME_IGREJA: 'Primeiro' });
+  env.run("Util.insertRow('Config', {Chave:'NOME_IGREJA', Valor:'Segundo', Descricao:'', AtualizadoEm:''})");
+  assert.equal(JSON.parse(env.run('Config.identidadeJson()')).nome, 'Segundo');
+});
+
 // ═══ Planilha: nunca apontar para a planilha do autor ═══════
 test('planilha: usa a planilha ativa (script vinculado) em vez de ID fixo', () => {
   const env = freshEnv();
