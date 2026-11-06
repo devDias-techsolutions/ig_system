@@ -15,8 +15,7 @@ after(async () => { await browser.close(); });
 async function abrirFormulario(opts) {
   const backend = criarBackend();
   const s = await abrir(browser, backend, opts);
-  await entrar(s.page, 'admin@igreja.test', 'Admin#Teste1');
-  await esperarTela(s.page, 'home');
+  await entrar(s.page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   await s.page.evaluate(() => navigateTo('membros'));
   await esperarTela(s.page, 'membros');
   await s.page.waitForSelector('.mb-tab');

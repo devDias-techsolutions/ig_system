@@ -68,10 +68,11 @@ async function abrir(browser, backend, { viewport = { width: 1280, height: 800 }
   return { ctx, page, erros };
 }
 
-// A tela de login pode ser redesenhada uma vez logo após o "ready" (a inicialização ainda
-// navega); por isso só clica quando os campos preenchidos sobreviveram ao redesenho.
-async function entrar(page, email, senha) {
-  for (let i = 0; i < 5; i++) {
+// A tela de login pode ser redesenhada logo após o "ready" (a inicialização ainda navega), e em
+// máquinas lentas (CI) isso cai entre o preenchimento e o clique. Por isso: preenche, confere,
+// clica e, se informado `destino`, só considera feito quando a tela mudou; senão repete tudo.
+async function entrar(page, email, senha, destino) {
+  for (let i = 0; i < 6; i++) {
     await page.waitForSelector('#login-email');
     await page.fill('#login-email', email);
     await page.fill('#login-senha', senha);
@@ -80,9 +81,13 @@ async function entrar(page, email, senha) {
       const a = document.getElementById('login-email'), b = document.getElementById('login-senha');
       return !!a && !!b && a.value === e && b.value === p;
     }, [email, senha]);
-    if (mantido) return page.click('#btn-login');
+    if (!mantido) continue;
+    await page.click('#btn-login').catch(() => {});
+    if (!destino) return;
+    const chegou = await page.waitForFunction((d) => App.currentView === d, destino, { timeout: 2500 }).then(() => true, () => false);
+    if (chegou) return;
   }
-  throw new Error('não consegui preencher o login (a tela continua sendo redesenhada)');
+  throw new Error(destino ? `login não levou à tela "${destino}"` : 'não consegui preencher o login (a tela continua sendo redesenhada)');
 }
 
 // Preenche uma chave da aba Config (como a pessoa faria na planilha) antes de abrir a tela
