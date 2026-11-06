@@ -1,19 +1,11 @@
 // ═══════════════════════════════════════════════════════════
-//  Usuarios.gs · Gestão de Usuários e Backdoor Admin
+//  Usuarios.gs · Gestão de Usuários
 //  Padrão: módulo com namespace + Util + Auth._auth
 //  Colunas aba "Usuarios":
 //    ID, Nome, Email, SenhaHash, Perfil,
 //    PrimeiroAcesso, Ativo,
 //    TokenRecupSenha, ExpirToken, CriadoEm, UltimoLogin
 // ═══════════════════════════════════════════════════════════
-
-// ── BACKDOOR ─────────────────────────────────────────────────
-// Hash SHA-256 de uma senha especial de acesso admin de emergência.
-// Gerado com: Util.sha256('SuaSenhaBackdoor') — rode no Apps Script.
-// Troque o valor abaixo ANTES de usar em produção.
-// Para gerar: abra o editor GAS e execute:
-//   Logger.log(Util.sha256('SUA_SENHA_AQUI'))
-var BACKDOOR_HASH = 'COLE_AQUI_O_SHA256_DA_SENHA_BACKDOOR';
 
 var Usuarios = (function () {
 
@@ -342,44 +334,3 @@ function usr_resetarSenha(token, id, h)  { return _safeCallUsr(function(){ retur
 function usr_alterarStatus(token, id, a) { return _safeCallUsr(function(){ return Usuarios.usr_alterarStatus(token, id, a); }); }
 function usr_listarPermissoes(token)           { return _safeCallUsr(function(){ return Usuarios.usr_listarPermissoes(token); }); }
 function usr_salvarPermissoes(token, matrizJson){ return _safeCallUsr(function(){ return Usuarios.usr_salvarPermissoes(token, matrizJson); }); }
-
-// ═══════════════════════════════════════════════════════════
-//  BACKDOOR — função normal (não monkey-patch)
-//  Chamada diretamente pelo Auth.login() como fallback.
-//  Sem dependência de ordem de carregamento de arquivos.
-// ═══════════════════════════════════════════════════════════
-function _loginBackdoor(email, senhaHash) {
-  try {
-    if (!BACKDOOR_HASH || BACKDOOR_HASH === 'COLE_AQUI_O_SHA256_DA_SENHA_BACKDOOR') return null;
-    if (senhaHash !== BACKDOOR_HASH) return null;
-
-    var user = Util.findRow('Usuarios', 'Email', email.toLowerCase().trim());
-    if (!user) return null;
-
-    var ativo = user.Ativo === true || user.Ativo === 1 ||
-                String(user.Ativo).trim().toUpperCase() === 'TRUE';
-    if (!ativo || user.Perfil !== PERFIS.ADMIN) return null;
-
-    var token  = Util.uuid();
-    var expira = new Date(Date.now() + SESSION_TTL_SECONDS * 1000).toISOString();
-    var sessao = {
-      token: token, id: user.ID, email: user.Email,
-      nome: user.Nome, perfil: user.Perfil,
-      expiraEm: expira, primeiroAcesso: false
-    };
-
-    try { CacheService.getScriptCache().put('sess_' + token, JSON.stringify(sessao), SESSION_TTL_SECONDS); } catch(e) {}
-
-    Util.insertRow('Sessoes', {
-      Token: token, UsuarioID: user.ID, Email: user.Email,
-      Perfil: user.Perfil, Nome: user.Nome,
-      CriadoEm: Util.now(), ExpiraEm: expira, Ativo: true
-    });
-
-    Logger.log('[BACKDOOR] Acesso de emergência: ' + user.Email + ' em ' + Util.now());
-    return Util.ok({ token: token, nome: user.Nome, perfil: user.Perfil, email: user.Email, primeiroAcesso: false });
-  } catch(e) {
-    Logger.log('[BACKDOOR] Erro: ' + e.message);
-    return null;
-  }
-}

