@@ -1,5 +1,5 @@
 {
-  "etapaAtual": 5,
+  "etapaAtual": 6,
   "pendentes": {
     "setup: setupSpreadsheet() cria todas as abas": 4,
     "setup: rodar setupSpreadsheet() duas vezes": 4,

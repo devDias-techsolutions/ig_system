@@ -1,6 +1,7 @@
 // ═══════════════════════════════════════════════════════════
 //  SetupSheets.gs · Criação das abas do Google Sheets
 //  Execute setupSpreadsheet() UMA VEZ para inicializar o banco
+//  e depois criarPrimeiroAdmin() para criar o administrador
 // ═══════════════════════════════════════════════════════════
 
 var SetupSheets = (function () {
@@ -117,9 +118,6 @@ var SetupSheets = (function () {
       created.push(name);
     });
 
-    // Seed: Usuário admin padrão
-    _seedAdmin();
-
     // Seed: Config padrão
     _seedConfig();
 
@@ -131,38 +129,83 @@ var SetupSheets = (function () {
 
     Logger.log('✅ Abas criadas: ' + created.join(', '));
     Logger.log('⏭️  Abas já existentes: ' + skipped.join(', '));
-    Logger.log('🌱 Seed de admin e dados iniciais aplicado.');
+    Logger.log('🌱 Dados iniciais aplicados. Próximo passo: execute criarPrimeiroAdmin().');
 
     return { created: created, skipped: skipped };
   }
 
-  function _seedAdmin() {
-    var SS = getSSInstance();
+  // ── Primeiro administrador ─────────────────────────────────
+  // Nenhum usuário nasce pronto: a senha é gerada na hora, aleatória,
+  // enviada por e-mail e o administrador é obrigado a trocá-la no 1º acesso.
+  // Use pela função criarPrimeiroAdmin() (Code.js).
+  function _gerarSenhaTemporaria() {
+    var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    var hex   = (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, '');
+    var s = '';
+    for (var i = 0; i < 12; i++) {
+      s += chars.charAt(parseInt(hex.substr(i * 2, 2), 16) % chars.length);
+    }
+    return s;
+  }
+
+  function criarAdministrador(nome, email) {
+    nome  = String(nome  || '').trim();
+    email = String(email || '').toLowerCase().trim();
+    if (!nome || !Util.isValidEmail(email)) {
+      throw new Error('Informe um nome e um e-mail válido para o administrador.');
+    }
+
+    var SS    = getSSInstance();
     var sheet = SS.getSheetByName('Usuarios');
-    var data  = sheet.getDataRange().getValues();
+    if (!sheet) throw new Error('Aba "Usuarios" não encontrada. Execute setupSpreadsheet() primeiro.');
 
-    // Só cria se ainda não houver nenhum usuário
-    if (data.length > 1) return;
+    if (Util.findRow('Usuarios', 'Email', email)) {
+      throw new Error('Já existe um usuário com este e-mail.');
+    }
+    var existeAdmin = Util.sheetToObjects('Usuarios').some(function (u) {
+      return u.Perfil === PERFIS.ADMIN;
+    });
+    if (existeAdmin) {
+      throw new Error('Já existe um administrador. Crie novos usuários pela tela Usuários.');
+    }
 
-    // Senha padrão: "Admin@1234" — hash SHA-256
-    // O admin DEVE trocar na primeira entrada (PrimeiroAcesso = TRUE)
-    var senhaHash = Util.sha256('Admin@1234');
-
+    var senha = _gerarSenhaTemporaria();
     Util.insertRow('Usuarios', {
       ID:               Util.uuid(),
-      Nome:             'Administrador',
-      Email:            'admin@adfontesalvacao.com',
-      SenhaHash:        senhaHash,
+      Nome:             nome,
+      Email:            email,
+      SenhaHash:        Util.sha256(senha),
       Perfil:           PERFIS.ADMIN,
       PrimeiroAcesso:   true,
       Ativo:            true,
       TokenRecupSenha:  '',
       ExpirToken:       '',
-      CriadoEm:        Util.now(),
-      UltimoLogin:     ''
+      CriadoEm:         Util.now(),
+      UltimoLogin:      ''
     });
 
-    Logger.log('🌱 Admin padrão criado: admin@adfontesalvacao.com / Admin@1234');
+    var enviado = false;
+    try {
+      var appUrl = ScriptApp.getService().getUrl();
+      GmailApp.sendEmail(email, 'Seu acesso de administrador', '', {
+        htmlBody: '<p>Olá, ' + nome + '!</p>' +
+                  '<p>Seu acesso de administrador foi criado.</p>' +
+                  '<p>E-mail: <b>' + email + '</b><br>Senha temporária: <b>' + senha + '</b></p>' +
+                  '<p>Você precisará criar uma nova senha no primeiro acesso.</p>' +
+                  (appUrl ? '<p><a href="' + appUrl + '">Abrir o sistema</a></p>' : '')
+      });
+      enviado = true;
+    } catch (e) {
+      Logger.log('⚠️ Não foi possível enviar o e-mail: ' + e.message);
+    }
+
+    if (enviado) {
+      Logger.log('🌱 Administrador criado: ' + email + '. A senha temporária foi enviada por e-mail.');
+    } else {
+      // Plano B: sem o e-mail a pessoa ficaria sem acesso. A senha aparece só neste log do editor.
+      Logger.log('🌱 Administrador criado: ' + email + ' · Senha temporária: ' + senha);
+    }
+    return { email: email, emailEnviado: enviado };
   }
 
   function _seedConfig() {
@@ -188,6 +231,7 @@ var SetupSheets = (function () {
   return {
     createAllSheets: createAllSheets,
     migrateColumns:  migrateColumns,
+    criarAdministrador: criarAdministrador,
     schema:          _schema
   };
 

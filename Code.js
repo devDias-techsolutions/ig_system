@@ -109,6 +109,14 @@ function setupSpreadsheet() {
   SetupSheets.createAllSheets();
 }
 
+// Cria o primeiro administrador. Edite NOME e EMAIL abaixo e execute UMA VEZ.
+// A senha temporária é gerada na hora e enviada para o e-mail informado.
+function criarPrimeiroAdmin() {
+  var NOME  = 'Nome do Administrador';
+  var EMAIL = 'email@exemplo.com';
+  return SetupSheets.criarAdministrador(NOME, EMAIL);
+}
+
 function runMigrate() {
   SetupSheets.migrateColumns();
 }

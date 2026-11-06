@@ -59,6 +59,37 @@ test('setup: nenhum usuário nasce com a senha padrão antiga', () => {
   rows.forEach((r) => assert.ok(!r.includes(oldHash), 'admin com a senha padrão Admin@1234'));
 });
 
+test('setup: setupSpreadsheet() não cria nenhum usuário', () => {
+  const env = freshEnv();
+  env.run('setupSpreadsheet()');
+  assert.equal(env.activeSS.getSheetByName('Usuarios')._rows.length, 1);
+});
+
+test('admin: criarAdministrador gera senha aleatória, exige troca e envia por e-mail', () => {
+  const env = freshEnv();
+  env.run('setupSpreadsheet()');
+  env.run("SetupSheets.criarAdministrador('Fulano', 'Fulano@Igreja.org')");
+  const rows = env.activeSS.getSheetByName('Usuarios')._rows;
+  assert.equal(rows.length, 2);
+  const linha = rows[1].map(String);
+  assert.ok(linha.includes('fulano@igreja.org'));
+  assert.ok(linha.includes('admin'));
+  assert.ok(!linha.includes(env.run("Util.sha256('Admin@1234')")));
+  const email = env.calls.emails[0];
+  assert.equal(email[0], 'fulano@igreja.org');
+  const senha = /Senha temporária: <b>([^<]+)<\/b>/.exec(email[3].htmlBody)[1];
+  assert.equal(senha.length, 12);
+  assert.ok(linha.includes(env.run(`Util.sha256('${senha}')`)), 'o hash gravado não corresponde à senha enviada');
+});
+
+test('admin: criarAdministrador recusa e-mail inválido e segundo administrador', () => {
+  const env = freshEnv();
+  env.run('setupSpreadsheet()');
+  assert.throws(() => env.run("SetupSheets.criarAdministrador('X', 'email@exemplo')"), /e-mail/i);
+  env.run("SetupSheets.criarAdministrador('A', 'a@igreja.org')");
+  assert.throws(() => env.run("SetupSheets.criarAdministrador('B', 'b@igreja.org')"), /administrador/i);
+});
+
 // ═══ Planilha: nunca apontar para a planilha do autor ═══════
 test('planilha: usa a planilha ativa (script vinculado) em vez de ID fixo', () => {
   const env = freshEnv();
