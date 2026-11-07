@@ -126,6 +126,12 @@ test('tema: :root de cores definido só no shell (index.html), sem redeclaraçã
   assert.deepEqual(offenders, [], 'Módulos que redeclaram a paleta: ' + offenders.join(', '));
 });
 
+test('tema: shell e login sem o teal original solto (só nas variáveis --teal*)', () => {
+  const raw = /rgba\(\s*0\s*,\s*(?:217|196|169|137)\s*,\s*(?:198|181|156|123)|#00D9C6|#00A99C|#00C4B5|#00FFF0|#00897E|#00BFA5|#00b8ad|#007d78/i;
+  const hits = findings(raw, ['index.html', '_login.html']).filter((h) => !/--teal[\w-]*\s*:/.test(h));
+  assert.deepEqual(hits, [], 'Cores soltas no shell/login:\n' + hits.join('\n'));
+});
+
 test('tema: sem rgba/hex do teal original solto fora da definição de variáveis', () => {
   const raw = /rgba\(\s*0\s*,\s*(?:217|196|169)\s*,\s*(?:198|181|156)|#00D9C6|#00A99C|#00C4B5|#00FFF0/i;
   const hits = findings(raw, HTML.filter((f) => f !== 'index.html'));

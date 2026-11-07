@@ -8,7 +8,7 @@
 .login-bg {
   position: fixed; inset: 0; z-index: 0;
   background:
-    radial-gradient(ellipse 85% 65% at 50% -8%, rgba(0,196,181,.20) 0%, transparent 60%),
+    radial-gradient(ellipse 85% 65% at 50% -8%, color-mix(in srgb, var(--teal) 20%, transparent) 0%, transparent 60%),
     radial-gradient(ellipse 55% 45% at 90% 95%, rgba(0,150,180,.08) 0%, transparent 55%),
     var(--bg);
   pointer-events: none;
@@ -16,8 +16,8 @@
 .login-bg-grid {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background-image:
-    linear-gradient(rgba(0,196,181,.028) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,196,181,.028) 1px, transparent 1px);
+    linear-gradient(color-mix(in srgb, var(--teal) 2.8%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--teal) 2.8%, transparent) 1px, transparent 1px);
   background-size: 56px 56px;
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 75%);
@@ -30,7 +30,7 @@
   content: ''; position: absolute;
   top: 20vh; left: 10vw;
   width: 300px; height: 300px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(0,196,181,.07) 0%, transparent 65%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--teal) 7%, transparent) 0%, transparent 65%);
   animation: floatGlow 8s ease-in-out infinite;
 }
 .login-bg-glow::after {
@@ -107,22 +107,22 @@
 }
 .login-logo-bg {
   position: absolute; inset: 0; border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #00b8ad, #007d78);
-  border: 2px solid rgba(0,196,181,.55);
-  box-shadow: 0 4px 24px rgba(0,196,181,.30), inset 0 1px 0 rgba(255,255,255,.12);
+  background: radial-gradient(circle at 40% 35%, var(--teal-light), var(--teal-dark));
+  border: 2px solid color-mix(in srgb, var(--teal) 55%, transparent);
+  box-shadow: 0 4px 24px color-mix(in srgb, var(--teal) 30%, transparent), inset 0 1px 0 rgba(255,255,255,.12);
   animation: ringPulse 3s ease-in-out infinite;
 }
 @keyframes ringPulse {
-  0%,100% { box-shadow: 0 4px 24px rgba(0,196,181,.30), inset 0 1px 0 rgba(255,255,255,.12), 0 0 0 0 rgba(0,196,181,.35); }
-  50%      { box-shadow: 0 4px 32px rgba(0,196,181,.45), inset 0 1px 0 rgba(255,255,255,.12), 0 0 0 14px transparent; }
+  0%,100% { box-shadow: 0 4px 24px color-mix(in srgb, var(--teal) 30%, transparent), inset 0 1px 0 rgba(255,255,255,.12), 0 0 0 0 color-mix(in srgb, var(--teal) 35%, transparent); }
+  50%      { box-shadow: 0 4px 32px color-mix(in srgb, var(--teal) 45%, transparent), inset 0 1px 0 rgba(255,255,255,.12), 0 0 0 14px transparent; }
 }
 .login-logo-ring::before, .login-logo-ring::after {
   content: ''; position: absolute; border-radius: 50%;
-  border: 1px solid rgba(0,196,181,.14);
+  border: 1px solid color-mix(in srgb, var(--teal) 14%, transparent);
   animation: orbitRing 12s linear infinite;
 }
 .login-logo-ring::before { inset: -14px; }
-.login-logo-ring::after  { inset: -26px; animation-direction: reverse; animation-duration: 18s; border-color: rgba(0,196,181,.07); }
+.login-logo-ring::after  { inset: -26px; animation-direction: reverse; animation-duration: 18s; border-color: color-mix(in srgb, var(--teal) 7%, transparent); }
 @keyframes orbitRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 .login-logo-icon {
@@ -148,7 +148,7 @@
   border: 1px solid var(--border2);
   border-radius: var(--r-xl);
   padding: 36px 28px;
-  box-shadow: var(--shadow-lg), 0 0 60px rgba(0,196,181,.06);
+  box-shadow: var(--shadow-lg), 0 0 60px color-mix(in srgb, var(--teal) 6%, transparent);
   position: relative; overflow: hidden;
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
 }
@@ -163,7 +163,7 @@
   content: ''; position: absolute;
   top: -60px; left: 50%; transform: translateX(-50%);
   width: 200px; height: 200px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(0,196,181,.08) 0%, transparent 65%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--teal) 8%, transparent) 0%, transparent 65%);
   pointer-events: none;
 }
 
@@ -280,7 +280,7 @@
 }
 [data-theme="light"] .login-card .input-icon,
 [data-theme="light"] .pa-card    .input-icon {
-  color: var(--teal, #007d78);
+  color: var(--teal);
   opacity: 0.9;
 }
 </style>

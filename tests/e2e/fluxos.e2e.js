@@ -368,3 +368,28 @@ test('carteirinha: nome da igreja com HTML não injeta marcação', async () => 
   await cartao(page);
   assert.equal(await page.evaluate(() => window.__xss || 0), 0);
 });
+
+// ── Tema pela cor da igreja (Etapa 12) ──────────────────────
+const TEAL_ORIGINAL = /rgba?\(\s*0\s*,\s*(?:217|196|169|137)\s*,\s*(?:198|181|156|123)|color\(srgb 0 0\.(?:85|77|66|54)/;
+const coresTeal = (page) => page.evaluate((reTxt) => {
+  const re = new RegExp(reTxt);
+  const props = ['backgroundImage', 'backgroundColor', 'boxShadow', 'borderTopColor', 'color', 'outlineColor'];
+  const achados = [];
+  document.querySelectorAll('body *').forEach((el) => {
+    const cs = getComputedStyle(el);
+    props.forEach((p) => { if (re.test(cs[p])) achados.push((el.id || el.className || el.tagName) + ' · ' + p); });
+  });
+  return achados.slice(0, 10);
+}, TEAL_ORIGINAL.source);
+
+test('tema: com COR_PRIMARIA roxa, login e Home não mostram nenhum teal original', async () => {
+  const backend = criarBackend();
+  definirConfig(backend, 'COR_PRIMARIA', '#7c3aed');
+  const { page } = await abrir(browser, backend);
+  await page.waitForSelector('.login-church-name');
+  await page.addStyleTag({ content: '*{transition:none!important;animation:none!important}' });
+  assert.deepEqual(await coresTeal(page), [], 'login com teal solto');
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  await page.waitForTimeout(300);
+  assert.deepEqual(await coresTeal(page), [], 'shell/Home com teal solto');
+});
