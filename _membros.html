@@ -539,6 +539,7 @@ var MB = {
   fotoMimeType: 'image/jpeg',
   fotoNome:     'foto.jpg',
   fotoNova:     false,   // true quando usuário selecionou nova foto nesta sessão
+  fotoRemovida: false,   // true quando o usuário tirou a foto já salva do membro (✕) e ainda não salvou
   proximoRol: '0001',
   // Cache: fileId → 'data:<mime>;base64,...'
   // Evita CORS ao carregar fotos do Drive no iframe GAS.
@@ -782,7 +783,7 @@ function renderMembros() {
   mbFecharCamera(); mbFecharEditorFoto(); // nunca deixa câmera/editor abertos ao trocar de tela
   MB.tab = 'lista'; MB.editId = null; MB.selected = null;
   MB.search = ''; MB.filtroAtivo = 'todos';
-  MB.fotoData = ''; MB.fotoZoom = 1; MB.fotoX = 50; MB.fotoY = 50; MB.fotoNova = false;
+  MB.fotoData = ''; MB.fotoZoom = 1; MB.fotoX = 50; MB.fotoY = 50; MB.fotoNova = false; MB.fotoRemovida = false;
 
   renderView(
     _mbBuildTopnav() +
@@ -836,7 +837,7 @@ function mbSetTab(tab) {
   if (tab === 'lista') {
     _mbLoad(function(){ _mbRenderPanel(); });
   } else if (tab === 'form') {
-    MB.editId = null; MB.fotoData = ''; MB.fotoZoom = 1; MB.fotoX = 50; MB.fotoY = 50; MB.fotoNova = false;
+    MB.editId = null; MB.fotoData = ''; MB.fotoZoom = 1; MB.fotoX = 50; MB.fotoY = 50; MB.fotoNova = false; MB.fotoRemovida = false;
     _mbLoadProximoRol(function(){ _mbRenderPanel(); });
   } else if (tab === 'carteirinha') {
     MB.cardSelected = null; MB.cardSelecionados = {}; MB.cardSearch = '';
@@ -1172,7 +1173,7 @@ function _mbBuildAniversariantes() {
 // ── Navegação interna ────────────────────────────────────
 function mbNovoMembro() {
   MB.tab = 'form'; MB.editId = null;
-  MB.fotoData = ''; MB.fotoZoom = 1; MB.fotoX = 50; MB.fotoY = 50; MB.fotoNova = false;
+  MB.fotoData = ''; MB.fotoZoom = 1; MB.fotoX = 50; MB.fotoY = 50; MB.fotoNova = false; MB.fotoRemovida = false;
   document.querySelectorAll('.mb-tab').forEach(function(b){
     b.classList.toggle('active', b.getAttribute('onclick') === "mbSetTab('form')");
   });
@@ -1189,7 +1190,7 @@ function mbEditarMembro(id) {
   MB.fotoZoom = parseFloat(m.fotoZoom) || 1;
   MB.fotoX    = parseFloat(m.fotoX)    || 50;
   MB.fotoY    = parseFloat(m.fotoY)    || 50;
-  MB.fotoNova = false; // foto existente — não re-envia a menos que o usuário troque
+  MB.fotoNova = false; MB.fotoRemovida = false; // foto existente — não re-envia a menos que o usuário troque
   MB.tab = 'form';
   document.querySelectorAll('.mb-tab').forEach(function(b){
     b.classList.toggle('active', b.getAttribute('onclick') === "mbSetTab('form')");
@@ -1493,7 +1494,7 @@ function _mbAplicarFoto(canvas, nome) {
   MB.fotoData     = canvas.toDataURL('image/jpeg', 0.9);
   MB.fotoMimeType = 'image/jpeg';
   MB.fotoNome     = nome || 'foto.jpg';
-  MB.fotoNova     = true;
+  MB.fotoNova     = true; MB.fotoRemovida = false;
   MB.fotoZoom = 1; MB.fotoX = 50; MB.fotoY = 50; // o enquadramento já está "assado" na imagem
   mbAtualizarFotoPreview();
   var zw = document.getElementById('mb-zoom-wrap');
@@ -1719,6 +1720,7 @@ function mbAtualizarFotoPreview() {
 }
 function mbRemoverFoto() {
   MB.fotoData = ''; MB.fotoZoom = 1; MB.fotoX = 50; MB.fotoY = 50; MB.fotoNova = false;
+  MB.fotoRemovida = true; // sem isto o salvar mantinha o arquivo antigo e a remoção nunca valia
   mbAtualizarFotoPreview();
   var zw = document.getElementById('mb-zoom-wrap'); if (zw) zw.style.display = 'none';
 }
@@ -1776,7 +1778,7 @@ function mbSalvarForm() {
   var ativo   = MB.editId ? (ativoEl ? ativoEl.value !== 'false' : mAtual.ativo !== false) : true;
 
   // Foto: mantém fileId existente; substitui apenas se usuário escolheu nova foto
-  var fotoAtual = MB.fotoNova ? null : (mAtual.foto || '');
+  var fotoAtual = MB.fotoNova ? null : (MB.fotoRemovida ? '' : (mAtual.foto || ''));
 
   // ── Função interna que finaliza o salvamento com a URL da foto já resolvida ──
   function _doSalvar(fotoUrl) {
@@ -1820,7 +1822,7 @@ function mbSalvarForm() {
         if (!_mbHandleResponse(r, 'salvarMembro')) return;
         _mbLimparRascunho();
         showToast(MB.editId ? 'Membro atualizado!' : 'Membro cadastrado!', 'success');
-        MB.editId = null; MB.fotoData = ''; MB.fotoZoom = 1; MB.fotoX = 50; MB.fotoY = 50; MB.fotoNova = false;
+        MB.editId = null; MB.fotoData = ''; MB.fotoZoom = 1; MB.fotoX = 50; MB.fotoY = 50; MB.fotoNova = false; MB.fotoRemovida = false;
         MB.tab = 'lista';
         document.querySelectorAll('.mb-tab').forEach(function(b){
           b.classList.toggle('active', b.getAttribute('onclick') === "mbSetTab('lista')");
