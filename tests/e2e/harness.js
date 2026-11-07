@@ -56,7 +56,7 @@ async function abrir(browser, backend, { viewport = { width: 1280, height: 800 }
   });
   await page.route('**/*', async (route) => {
     const url = route.request().url();
-    if (url === ORIGIN) return route.fulfill({ contentType: 'text/html; charset=utf-8', body: montarIndex({ identidadeJson: backend.env.run('Config.identidadeJson()') }) });
+    if (url === ORIGIN) return route.fulfill({ contentType: 'text/html; charset=utf-8', body: montarIndex({ cfgEnv: backend.env, identidadeJson: backend.env.run('Config.identidadeJson()') }) });
     if (/lucide/.test(url) && process.env.LUCIDE_JS) return route.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(process.env.LUCIDE_JS, 'utf8') });
     if (/fonts\.googleapis|fonts\.gstatic/.test(url)) return route.fulfill({ contentType: 'text/css', body: '' });
     if (url.startsWith('http')) return route.fulfill({ contentType: 'application/javascript', body: '' });

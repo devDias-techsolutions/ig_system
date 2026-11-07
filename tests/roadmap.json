@@ -1,5 +1,5 @@
 {
-  "etapaAtual": 6,
+  "etapaAtual": 10,
   "pendentes": {
     "setup: setupSpreadsheet() cria todas as abas": 4,
     "setup: rodar setupSpreadsheet() duas vezes": 4,
@@ -18,7 +18,6 @@
     "neutralidade: sem pasta \"Fotos Membros AD\"": 8,
     "neutralidade: sem prefixo ADFS_": 2,
     "rota: manifest PWA": 10,
-    "neutralidade: sem ícone do PWA no Drive do autor": 10,
     "neutralidade: sem nome da igreja original": 11,
     "neutralidade: sem CNPJ da igreja original": 11,
     "neutralidade: sem endereço da igreja original": 11,
