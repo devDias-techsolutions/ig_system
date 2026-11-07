@@ -67,17 +67,19 @@ function doGet(e) {
 
   // ── Rota: manifest PWA ──────────────────────────────────────
   if (params.page === 'manifest') {
-    var iconUrl = 'https://drive.google.com/thumbnail?id=1D9uYwzWawJPpdcCp2hAtr0u20RnmOpQf&sz=w512';
+    var idt = Config.identidade();
+    var iconUrl = Config.iconeUrl();
+    var tipoIcone = iconUrl.indexOf('data:image/svg') === 0 ? 'image/svg+xml' : 'image/png';
     var manifest = {
-      name: 'AD Fonte da Salvação',
-      short_name: 'AD Fonte',
+      name: idt.nome,
+      short_name: idt.nomeCurto,
       start_url: ScriptApp.getService().getUrl(),
       display: 'standalone',
       background_color: '#050B10',
-      theme_color: '#050B10',
+      theme_color: idt.corPrimaria || '#050B10',
       icons: [
-        { src: iconUrl, sizes: '192x192', type: 'image/png' },
-        { src: iconUrl, sizes: '512x512', type: 'image/png' }
+        { src: iconUrl, sizes: '192x192', type: tipoIcone, purpose: 'any' },
+        { src: iconUrl, sizes: '512x512', type: tipoIcone, purpose: 'any' }
       ]
     };
     return ContentService
@@ -92,10 +94,14 @@ function doGet(e) {
   tmpl.recovToken = recovToken;
   tmpl.view       = view;
   tmpl.modulosJson = Modulos.jsonParaHtml(); // módulos ativos (registro em Modulos.js)
+  var idt = Config.identidade();
+  tmpl.nomeIgreja = idt.nome;
+  tmpl.nomeCurtoIgreja = idt.nomeCurto;
+  tmpl.iconeIgreja = Config.iconeUrl();
   tmpl.identidadeJson = Config.identidadeJson(); // nome, lema, cor e logo (aba Config)
 
   return tmpl.evaluate()
-    .setTitle(Config.identidade().nome + ' — Gestão Ministerial')
+    .setTitle(idt.nome + ' — Gestão Ministerial')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }

@@ -15,8 +15,6 @@
     "neutralidade: sem senha ou e-mail de administrador padrão": 6,
     "segurança: sem backdoor": 6,
     "neutralidade: sem prefixo ADFS_": 2,
-    "rota: manifest PWA": 10,
-    "neutralidade: sem ícone do PWA no Drive do autor": 10,
     "neutralidade: sem nome da igreja original": 11,
     "neutralidade: sem CNPJ da igreja original": 11,
     "neutralidade: sem endereço da igreja original": 11,

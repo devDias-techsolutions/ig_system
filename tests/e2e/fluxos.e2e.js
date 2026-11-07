@@ -12,8 +12,7 @@ after(async () => { await browser.close(); });
 async function comoAdmin() {
   const backend = criarBackend();
   const s = await abrir(browser, backend);
-  await entrar(s.page, 'admin@igreja.test', 'Admin#Teste1');
-  await esperarTela(s.page, 'home');
+  await entrar(s.page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   return { ...s, backend };
 }
 
@@ -52,16 +51,14 @@ test('login: senha errada mostra erro e certa leva à Home; sair e entrar de nov
   await esperarTela(page, 'home');
   await page.evaluate(() => handleLogout());
   await esperarTela(page, 'login');
-  await entrar(page, 'admin@igreja.test', 'Admin#Teste1');
-  await esperarTela(page, 'home');
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   assert.deepEqual(erros, []);
 });
 
 test('perfil secretaria entra na Home do seu perfil (sem administração) e abre os módulos liberados', async () => {
   const backend = criarBackend();
   const { page, erros } = await abrir(browser, backend);
-  await entrar(page, 'sec@igreja.test', 'Sec#Teste1');
-  await esperarTela(page, 'home');
+  await entrar(page, 'sec@igreja.test', 'Sec#Teste1', 'home');
   await page.waitForFunction(() => !document.querySelector('#kpi-grid .is-loading'), null, { timeout: 6000 });
   const texto = await page.evaluate(() => document.querySelector('.hm').innerText.replace(/\s+/g, ' '));
   assert.match(texto, /Seu espaço de trabalho/);
@@ -81,8 +78,7 @@ test('Home: nome, lema e cor da igreja vêm da aba Config; sem logo aparecem as 
   definirConfig(backend, 'LEMA_IGREJA', 'O Senhor é o meu pastor');
   definirConfig(backend, 'COR_PRIMARIA', '#0f766e');
   const { page, erros } = await abrir(browser, backend);
-  await entrar(page, 'admin@igreja.test', 'Admin#Teste1');
-  await esperarTela(page, 'home');
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   assert.equal(await page.textContent('.hm-title'), 'Igreja Vida Nova');
   assert.equal(await page.textContent('.hm-lema'), 'O Senhor é o meu pastor');
   assert.match(await page.title(), /^Igreja Vida Nova/);
@@ -93,12 +89,39 @@ test('Home: nome, lema e cor da igreja vêm da aba Config; sem logo aparecem as 
   assert.deepEqual(erros, []);
 });
 
+test('Login e loader: nome, marca e ícone vêm da Config, nada da igreja original', async () => {
+  const backend = criarBackend();
+  definirConfig(backend, 'NOME_IGREJA', 'Igreja Vida Nova');
+  definirConfig(backend, 'COR_PRIMARIA', '#0f766e');
+  const { page, erros } = await abrir(browser, backend);
+  await page.waitForSelector('.login-church-name');
+  assert.equal(await page.textContent('.login-church-name'), 'Igreja Vida Nova');
+  assert.equal(await page.textContent('.login-logo-icon .brand-mark span'), 'VN');
+  assert.match(await page.textContent('.login-footer'), /Igreja Vida Nova/);
+  assert.match(await page.title(), /Igreja Vida Nova/);
+  assert.match(await page.getAttribute('#app-icon', 'href'), /^data:image\/svg\+xml;base64,/);
+  assert.equal(await page.getAttribute('meta[name="apple-mobile-web-app-title"]', 'content'), 'Igreja Vida Nova');
+  assert.equal(await page.textContent('#loader-mark span'), 'VN');
+  // Tela e <head> (a carteirinha, no módulo Membros, só é parametrizada na Etapa 11)
+  const visivel = await page.evaluate(() => document.head.outerHTML + document.body.innerText + [...document.images].map((i) => i.outerHTML.slice(0, 200)).join(''));
+  assert.doesNotMatch(visivel, /Fonte da Salva|Logo AD|iVBORw0KGgo/);
+  assert.deepEqual(erros, []);
+});
+
+test('Login: com LOGO_URL a imagem do logo aparece no lugar das iniciais', async () => {
+  const backend = criarBackend();
+  definirConfig(backend, 'LOGO_URL', 'https://exemplo.test/logo.png');
+  const { page } = await abrir(browser, backend);
+  await page.waitForSelector('.login-church-name');
+  assert.equal(await page.getAttribute('.login-logo-icon .brand-mark img', 'src'), 'https://exemplo.test/logo.png');
+  assert.equal(await page.getAttribute('#app-icon', 'href'), 'https://exemplo.test/logo.png');
+});
+
 test('Home: cor muito escura é clareada no tema escuro (legibilidade) e volta a valer no claro', async () => {
   const backend = criarBackend();
   definirConfig(backend, 'COR_PRIMARIA', '#1a237e');
   const { page } = await abrir(browser, backend);
-  await entrar(page, 'admin@igreja.test', 'Admin#Teste1');
-  await esperarTela(page, 'home');
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   const lum = (h) => { const c = [1, 3, 5].map((i) => parseInt(h.substr(i, 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4))); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
   const escuro = await page.evaluate(() => document.documentElement.style.getPropertyValue('--teal').trim());
   assert.ok(lum(escuro) >= 0.19, 'no tema escuro a cor precisa ser clareada: ' + escuro);
@@ -111,8 +134,7 @@ test('Home: conteúdo do nome da igreja é escapado (sem HTML injetado)', async 
   const backend = criarBackend();
   definirConfig(backend, 'NOME_IGREJA', '<img src=x onerror="window.__xss=1">Igreja');
   const { page } = await abrir(browser, backend);
-  await entrar(page, 'admin@igreja.test', 'Admin#Teste1');
-  await esperarTela(page, 'home');
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   await page.waitForTimeout(300);
   assert.equal(await page.evaluate(() => window.__xss), undefined);
   assert.match(await page.textContent('.hm-title'), /<img src=x/);
@@ -135,8 +157,7 @@ test('desktop: sidebar com Início, módulos e Usuários; o item ativo acompanha
 test('celular: menu inferior no lugar da sidebar, sem duplicar navegação nas telas', async () => {
   const backend = criarBackend();
   const { page, erros } = await abrir(browser, backend, { viewport: { width: 390, height: 844 } });
-  await entrar(page, 'admin@igreja.test', 'Admin#Teste1');
-  await esperarTela(page, 'home');
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   assert.ok(!(await page.isVisible('#app-sidebar')));
   assert.ok(await page.isVisible('#app-bnav'));
   assert.deepEqual(await page.$$eval('#app-bnav .bn-item', (els) => els.map((e) => e.innerText.trim())), ['Início', 'Membros', 'Usuários']);
@@ -150,8 +171,7 @@ test('celular: menu inferior no lugar da sidebar, sem duplicar navegação nas t
 test('celular: com mais de 5 destinos os excedentes vão para "Mais"', async () => {
   const backend = criarBackend();
   const { page, erros } = await abrir(browser, backend, { viewport: { width: 390, height: 844 } });
-  await entrar(page, 'admin@igreja.test', 'Admin#Teste1');
-  await esperarTela(page, 'home');
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   await page.evaluate(() => {
     ['a', 'b', 'c', 'd'].forEach((x) => { MODULOS.push({ id: x, nome: 'Mod ' + x, descricao: '', icone: 'box', rota: 'mod-' + x, render: 'renderHome', perfis: ['admin', 'secretaria'] }); });
     renderNav(true);
@@ -170,8 +190,7 @@ test('celular: com mais de 5 destinos os excedentes vão para "Mais"', async () 
 test('Home: sem módulos ativos mostra estado vazio explicando como ativar', async () => {
   const backend = criarBackend();
   const { page, erros } = await abrir(browser, backend);
-  await entrar(page, 'admin@igreja.test', 'Admin#Teste1');
-  await esperarTela(page, 'home');
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   await page.evaluate(() => { MODULOS.length = 0; renderHome(); });
   const texto = await page.evaluate(() => document.querySelector('.hm-mods').innerText);
   assert.match(texto, /Nenhum módulo disponível/);
@@ -182,8 +201,7 @@ test('Home: sem módulos ativos mostra estado vazio explicando como ativar', asy
 test('Home: falha ao carregar indicadores mostra erro com "Tentar de novo" que funciona', async () => {
   const backend = criarBackend();
   const { page } = await abrir(browser, backend);
-  await entrar(page, 'admin@igreja.test', 'Admin#Teste1');
-  await esperarTela(page, 'home');
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   let falhar = true;
   const original = backend.env.ctx.getKpisHome;
   backend.env.ctx.getKpisHome = (...a) => { if (falhar) throw new Error('queda'); return original(...a); };
