@@ -319,3 +319,52 @@ test('celular: modal de aniversariantes fica inteiro na tela e a lista rola dent
   assert.ok(m.rolavel && m.rolou, 'a lista rola dentro do modal: ' + JSON.stringify(m));
   assert.deepEqual(s.erros, []);
 });
+
+// ── Carteirinha parametrizada (Etapa 11) ────────────────────
+const cartao = (page) => page.evaluate(() => {
+  const m = { nome: 'Maria da Silva', rol: '12', funcao: 'Membro', nascimento: '01/01/1990' };
+  const el = document.createElement('div');
+  el.innerHTML = mbCard_htmlFrente(m, false) + mbCard_htmlVerso(m, false);
+  return { texto: el.innerText || el.textContent, html: el.innerHTML };
+});
+
+test('carteirinha: nome, endereço, CNPJ, pastor e imagens vêm da Config', async () => {
+  const backend = criarBackend();
+  definirConfig(backend, 'NOME_IGREJA', 'Igreja Vida Nova');
+  definirConfig(backend, 'PASTOR', 'Pr. João Silva');
+  definirConfig(backend, 'CARGO_PASTOR', 'Presidente');
+  definirConfig(backend, 'ENDERECO_IGREJA', 'Rua das Flores, 10 - Centro');
+  definirConfig(backend, 'CNPJ_IGREJA', '12.345.678/0001-90');
+  definirConfig(backend, 'MARCA_DAGUA_URL', 'https://exemplo.test/marca.png');
+  definirConfig(backend, 'ASSINATURA_URL', 'https://exemplo.test/assinatura.png');
+  const { page, erros } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  const c = await cartao(page);
+  for (const t of ['Igreja Vida Nova', 'Pr. João Silva', 'Presidente', 'Rua das Flores, 10 - Centro', 'CNPJ: 12.345.678/0001-90']) {
+    assert.ok(c.texto.includes(t), 'faltou na carteirinha: ' + t);
+  }
+  assert.ok(c.html.includes('https://exemplo.test/marca.png') && c.html.includes('https://exemplo.test/assinatura.png'));
+  assert.doesNotMatch(c.html + c.texto, /Fonte da Salva|imgur|49\.482/);
+  assert.deepEqual(erros, []);
+});
+
+test('carteirinha: sem dados opcionais na Config não imprime CNPJ, endereço, assinatura nem "undefined"', async () => {
+  const backend = criarBackend();
+  definirConfig(backend, 'NOME_IGREJA', 'Igreja Vida Nova');
+  const { page } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  const c = await cartao(page);
+  assert.ok(c.texto.includes('Igreja Vida Nova'));
+  assert.doesNotMatch(c.texto, /CNPJ|Sede -|undefined|null/);
+  assert.equal(c.html.includes('back-sign'), false, 'assinatura sem pastor informado');
+  assert.ok(c.html.includes('card-logo-ini'), 'sem logo, mostra as iniciais');
+});
+
+test('carteirinha: nome da igreja com HTML não injeta marcação', async () => {
+  const backend = criarBackend();
+  definirConfig(backend, 'PASTOR', '<img src=x onerror="window.__xss=1">Pr');
+  const { page } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  await cartao(page);
+  assert.equal(await page.evaluate(() => window.__xss || 0), 0);
+});

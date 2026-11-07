@@ -102,7 +102,10 @@ function envComConfig(cfg, abas) {
 test('config: sem a aba Config a identidade tem valores neutros (nunca derruba a tela)', () => {
   const env = freshEnv();
   const id = JSON.parse(env.run('Config.identidadeJson()'));
-  assert.deepEqual(id, { nome: 'Minha Igreja', nomeCurto: 'Minha Igreja', lema: '', corPrimaria: '', logoUrl: '' });
+  assert.deepEqual(id, {
+    nome: 'Minha Igreja', nomeCurto: 'Minha Igreja', lema: '', corPrimaria: '', logoUrl: '',
+    pastor: '', cargoPastor: 'Pastor Presidente', endereco: '', cnpj: '', marcaDagua: '', assinatura: '',
+  });
 });
 
 test('config: lê nome, lema, cor e logo da aba Config', () => {
@@ -110,10 +113,25 @@ test('config: lê nome, lema, cor e logo da aba Config', () => {
     NOME_IGREJA: 'Igreja Vida Nova', NOME_CURTO: 'Vida Nova', LEMA_IGREJA: 'O Senhor é meu pastor',
     COR_PRIMARIA: '#0F766E', LOGO_URL: 'https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQ/view?usp=sharing',
   });
-  assert.deepEqual(JSON.parse(env.run('Config.identidadeJson()')), {
+  const id = JSON.parse(env.run('Config.identidadeJson()'));
+  assert.deepEqual({ nome: id.nome, nomeCurto: id.nomeCurto, lema: id.lema, corPrimaria: id.corPrimaria, logoUrl: id.logoUrl }, {
     nome: 'Igreja Vida Nova', nomeCurto: 'Vida Nova', lema: 'O Senhor é meu pastor', corPrimaria: '#0f766e',
     logoUrl: 'https://drive.google.com/thumbnail?id=1AbCdEfGhIjKlMnOpQ&sz=w256',
   });
+});
+
+test('config: dados da carteirinha (pastor, cargo, endereço, CNPJ, marca d\'água, assinatura) vêm da Config', () => {
+  const env = envComConfig({
+    PASTOR: 'Pr. João Silva', CARGO_PASTOR: 'Presidente', ENDERECO_IGREJA: 'Rua A, 10 - Centro', CNPJ_IGREJA: '00.000.000/0001-00',
+    MARCA_DAGUA_URL: 'https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQ/view', ASSINATURA_URL: 'javascript:alert(1)',
+  });
+  const id = JSON.parse(env.run('Config.identidadeJson()'));
+  assert.equal(id.pastor, 'Pr. João Silva');
+  assert.equal(id.cargoPastor, 'Presidente');
+  assert.equal(id.endereco, 'Rua A, 10 - Centro');
+  assert.equal(id.cnpj, '00.000.000/0001-00');
+  assert.equal(id.marcaDagua, 'https://drive.google.com/thumbnail?id=1AbCdEfGhIjKlMnOpQ&sz=w1024');
+  assert.equal(id.assinatura, '', 'assinatura insegura passou');
 });
 
 test('config: cor inválida e logo fora de https são ignorados', () => {
