@@ -444,11 +444,15 @@ svg.kico { display: block; }
 #modal-mb-confirm .modal-box { max-width: 400px; }
 
 /* ── Modal Aniversariantes ── */
+/* Centralizado e com altura limitada à área visível (dvh): no celular não encosta embaixo nem some atrás da barra do navegador */
+#modal-mb-aniv { align-items: center; padding: 12px; }
 #modal-mb-aniv .modal-box {
-  max-width: 560px; width: 95vw;
-  max-height: 80vh; display: flex; flex-direction: column;
+  max-width: 560px; width: 100%;
+  max-height: min(80vh, 80dvh); display: flex; flex-direction: column;
   padding: 0; overflow: hidden;
+  border-radius: var(--radius-lg);
 }
+#modal-mb-aniv .modal-box::before { display: none; }
 .mb-aniv-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 18px 20px 14px; border-bottom: 1px solid var(--border);
@@ -457,7 +461,9 @@ svg.kico { display: block; }
 .mb-aniv-header-left { display: flex; align-items: center; gap: 10px; }
 .mb-aniv-title { font-size: 15px; font-weight: 800; color: var(--text); }
 .mb-aniv-body {
-  overflow-y: auto; padding: 14px 16px 18px;
+  flex: 1 1 auto; min-height: 0; /* sem isso o corpo não encolhe e a lista fica cortada, sem rolagem */
+  overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  padding: 14px 16px 18px;
   display: flex; flex-direction: column; gap: 8px;
 }
 .mb-aniv-close {
