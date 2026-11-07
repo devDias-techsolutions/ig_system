@@ -393,3 +393,20 @@ test('tema: com COR_PRIMARIA roxa, login e Home não mostram nenhum teal origina
   await page.waitForTimeout(300);
   assert.deepEqual(await coresTeal(page), [], 'shell/Home com teal solto');
 });
+
+test('logo: PNG transparente não ganha fundo próprio e esconde as iniciais ao carregar', async () => {
+  const backend = criarBackend();
+  definirConfig(backend, 'LOGO_URL', 'https://exemplo.test/logo.png');
+  const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
+  const { page } = await abrir(browser, backend);
+  await page.route('https://exemplo.test/logo.png', (r) => r.fulfill({ contentType: 'image/png', body: PNG }));
+  await page.reload();
+  await page.waitForSelector('.login-logo-icon .brand-mark img');
+  await page.waitForFunction(() => document.querySelector('.login-logo-icon .brand-mark img').complete);
+  const r = await page.evaluate(() => {
+    const img = document.querySelector('.login-logo-icon .brand-mark img');
+    return { fundo: getComputedStyle(img).backgroundColor, iniciais: getComputedStyle(img.previousElementSibling).visibility };
+  });
+  assert.equal(r.fundo, 'rgba(0, 0, 0, 0)', 'a imagem não pode ter fundo próprio');
+  assert.equal(r.iniciais, 'hidden', 'iniciais devem sumir quando o logo carrega');
+});
