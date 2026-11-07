@@ -69,6 +69,27 @@ var Config = (function () {
     };
   }
 
+  // Iniciais para o logo provisório: "Igreja Vida Nova" → VN · "AD Central" → AD
+  function iniciais(nome) {
+    var w = String(nome || '').trim().split(/\s+/).filter(function (x) { return x && !/^(de|da|do|das|dos|e)$/i.test(x); });
+    if (!w.length) return '?';
+    if (/^[A-Z\u00C0-\u00DD]{2,3}$/.test(w[0])) return w[0];
+    if (w.length > 2 && /^igreja$/i.test(w[0])) w.shift();
+    return (w[0].charAt(0) + (w[1] ? w[1].charAt(0) : '')).toUpperCase();
+  }
+
+  // Ícone do app (aba do navegador, tela inicial do celular, PWA): o logo da Config
+  // em tamanho grande ou, sem logo, um quadrado com as iniciais na cor da marca.
+  function iconeUrl() {
+    var id = identidade();
+    if (id.logoUrl) return id.logoUrl.replace(/([?&]sz=)w\d+/, '$1w512');
+    var cor = id.corPrimaria || '#0f766e';
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="' + cor + '"/>' +
+      '<text x="256" y="256" fill="#fff" font-family="Arial,sans-serif" font-weight="700" font-size="220" text-anchor="middle" dominant-baseline="central">' +
+      iniciais(id.nomeCurto || id.nome).replace(/[<>&"']/g, '') + '</text></svg>';
+    return 'data:image/svg+xml;base64,' + Utilities.base64Encode(svg, Utilities.Charset.UTF_8);
+  }
+
   // JSON seguro para embutir dentro de <script>
   function identidadeJson() {
     return JSON.stringify(identidade()).replace(/</g, '\\u003c').replace(/\u2028|\u2029/g, '');
@@ -91,7 +112,7 @@ var Config = (function () {
   }
 
   return {
-    get: get, identidade: identidade, identidadeJson: identidadeJson,
+    get: get, identidade: identidade, iniciais: iniciais, iconeUrl: iconeUrl, identidadeJson: identidadeJson,
     garantirChaves: garantirChaves, chaves: CHAVES
   };
 })();

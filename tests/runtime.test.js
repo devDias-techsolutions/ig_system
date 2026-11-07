@@ -250,6 +250,45 @@ test('rota: manifest PWA usa nome da igreja configurada e ícone configurável',
   assert.ok(!JSON.stringify(m).includes('1D9uYwzWawJPpdcCp2hAtr0u20RnmOpQf'), 'ícone do Drive do autor');
 });
 
+function definirConfigUnit(env, chave, valor) {
+  env.ctx.__c = { Chave: chave, Valor: valor, Descricao: '', AtualizadoEm: '' };
+  const linha = env.run(`Util.findRow('Config', 'Chave', ${JSON.stringify(chave)})`);
+  env.run(linha ? `Util.updateRow('Config', ${linha._rowIndex}, __c)` : "Util.insertRow('Config', __c)");
+}
+
+test('ícone: sem logo usa um SVG com as iniciais na cor da marca; com logo usa o logo grande', () => {
+  const env = freshEnv();
+  env.run('setupSpreadsheet()');
+  definirConfigUnit(env, 'NOME_IGREJA', 'Igreja Vida Nova');
+  definirConfigUnit(env, 'COR_PRIMARIA', '#1a237e');
+  const url = env.run('Config.iconeUrl()');
+  const svg = Buffer.from(url.split(',')[1], 'base64').toString('utf8');
+  assert.match(url, /^data:image\/svg\+xml;base64,/);
+  assert.match(svg, />VN</);
+  assert.match(svg, /#1a237e/);
+  const m = JSON.parse(env.run("doGet({parameter:{page:'manifest'}})").getContent());
+  assert.equal(m.name, 'Igreja Vida Nova');
+  assert.equal(m.theme_color, '#1a237e');
+  assert.equal(m.icons[0].type, 'image/svg+xml');
+  definirConfigUnit(env, 'LOGO_URL', 'https://drive.google.com/file/d/ABCDEFGHIJKLMNOP/view');
+  assert.equal(env.run('Config.iconeUrl()'), 'https://drive.google.com/thumbnail?id=ABCDEFGHIJKLMNOP&sz=w512');
+});
+
+test('e-mail de boas-vindas usa o nome da igreja da Config', () => {
+  const env = envComSessao({
+    Usuarios: [COLS_USUARIOS, ['u1', 'Ana', 'ana@igreja.test', 'h', 'admin', false, true, '', '', '01/11/2026 10:00:00', '']],
+    Config: [['Chave', 'Valor', 'Descricao', 'AtualizadoEm'], ['NOME_IGREJA', 'Igreja Vida Nova', '', '']],
+  });
+  env.ctx.__dados = { Nome: 'Bia', Email: 'bia@igreja.test', Perfil: 'secretaria' };
+  const res = env.run("usr_criar('tok', __dados)");
+  assert.equal(res.success, true, JSON.stringify(res));
+  const [para, assunto, , opts] = env.calls.emails[0];
+  assert.equal(para, 'bia@igreja.test');
+  assert.match(assunto, /Igreja Vida Nova/);
+  assert.match(opts.htmlBody, /Igreja Vida Nova/);
+  assert.doesNotMatch(assunto + opts.htmlBody, /Fonte da Salva/);
+});
+
 // ═══ Regressão de autenticação ══════════════════════════════
 test('auth: login com credenciais válidas retorna sessão e senha errada é recusada', () => {
   const env = freshEnv();

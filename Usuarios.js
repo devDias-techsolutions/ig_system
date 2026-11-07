@@ -285,17 +285,18 @@ var Usuarios = (function () {
         : '<p>Seu acesso foi criado com e-mail <strong>' + email + '</strong> e a senha provisória fornecida pelo administrador.</p>' +
           '<p style="color:#c0392b;font-size:13px">⚠️ Você deverá criar uma nova senha no primeiro acesso.</p>';
 
-      GmailApp.sendEmail(email, '[AD Fonte da Salvação] Bem-vindo ao sistema!', '', {
+      var igreja = String(Config.identidade().nome).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      GmailApp.sendEmail(email, '[' + igreja + '] Bem-vindo ao sistema!', '', {
         htmlBody:
           '<div style="font-family:sans-serif;max-width:480px;margin:auto">' +
           '<h2 style="color:#1C353A">Bem-vindo(a), ' + nome + '!</h2>' +
-          '<p>Seu acesso ao <strong>Sistema de Gestão Ministerial — AD Fonte da Salvação</strong> foi criado.</p>' +
+          '<p>Seu acesso ao <strong>Sistema de Gestão Ministerial — ' + igreja + '</strong> foi criado.</p>' +
           corpo +
           '<p style="text-align:center;margin:24px 0">' +
             '<a href="' + appUrl + '" style="display:inline-block;background:#00A99C;color:#fff;' +
             'padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:bold">Acessar o sistema</a>' +
           '</p>' +
-          '<p style="color:#888;font-size:12px">AD Fonte da Salvação — Gestão Ministerial</p>' +
+          '<p style="color:#888;font-size:12px">' + igreja + ' — Gestão Ministerial</p>' +
           '</div>'
       });
     } catch(e) {

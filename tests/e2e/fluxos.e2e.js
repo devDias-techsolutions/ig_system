@@ -89,6 +89,34 @@ test('Home: nome, lema e cor da igreja vêm da aba Config; sem logo aparecem as 
   assert.deepEqual(erros, []);
 });
 
+test('Login e loader: nome, marca e ícone vêm da Config, nada da igreja original', async () => {
+  const backend = criarBackend();
+  definirConfig(backend, 'NOME_IGREJA', 'Igreja Vida Nova');
+  definirConfig(backend, 'COR_PRIMARIA', '#0f766e');
+  const { page, erros } = await abrir(browser, backend);
+  await page.waitForSelector('.login-church-name');
+  assert.equal(await page.textContent('.login-church-name'), 'Igreja Vida Nova');
+  assert.equal(await page.textContent('.login-logo-icon .brand-mark span'), 'VN');
+  assert.match(await page.textContent('.login-footer'), /Igreja Vida Nova/);
+  assert.match(await page.title(), /Igreja Vida Nova/);
+  assert.match(await page.getAttribute('#app-icon', 'href'), /^data:image\/svg\+xml;base64,/);
+  assert.equal(await page.getAttribute('meta[name="apple-mobile-web-app-title"]', 'content'), 'Igreja Vida Nova');
+  assert.equal(await page.textContent('#loader-mark span'), 'VN');
+  // Tela e <head> (a carteirinha, no módulo Membros, só é parametrizada na Etapa 11)
+  const visivel = await page.evaluate(() => document.head.outerHTML + document.body.innerText + [...document.images].map((i) => i.outerHTML.slice(0, 200)).join(''));
+  assert.doesNotMatch(visivel, /Fonte da Salva|Logo AD|iVBORw0KGgo/);
+  assert.deepEqual(erros, []);
+});
+
+test('Login: com LOGO_URL a imagem do logo aparece no lugar das iniciais', async () => {
+  const backend = criarBackend();
+  definirConfig(backend, 'LOGO_URL', 'https://exemplo.test/logo.png');
+  const { page } = await abrir(browser, backend);
+  await page.waitForSelector('.login-church-name');
+  assert.equal(await page.getAttribute('.login-logo-icon .brand-mark img', 'src'), 'https://exemplo.test/logo.png');
+  assert.equal(await page.getAttribute('#app-icon', 'href'), 'https://exemplo.test/logo.png');
+});
+
 test('Home: cor muito escura é clareada no tema escuro (legibilidade) e volta a valer no claro', async () => {
   const backend = criarBackend();
   definirConfig(backend, 'COR_PRIMARIA', '#1a237e');
