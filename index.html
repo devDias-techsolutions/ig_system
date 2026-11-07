@@ -908,7 +908,7 @@ textarea { height: auto; min-height: 110px; padding: 16px 18px; resize: vertical
   display: grid; place-items: center; overflow: hidden;
   font-weight: 800; font-size: 15px; letter-spacing: -.02em; color: #fff;
 }
-.brand-mark img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #fff; }
+.brand-mark img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 3px; } /* sem fundo próprio: PNG transparente deixa a cor da marca aparecer */
 
 /* ═════════════════════════════════════════════
    NAVEGAÇÃO: sidebar (desktop) + menu inferior (celular)
@@ -1312,7 +1312,7 @@ function iniciaisIgreja(nome) {
 // Logo configurado ou, na falta dele, as iniciais da igreja (o logo por cima; se falhar, aparecem as iniciais)
 function brandMarkInner() {
   return '<span>' + escHtml(iniciaisIgreja(IDENTIDADE.nomeCurto || IDENTIDADE.nome)) + '</span>' +
-    (IDENTIDADE.logoUrl ? '<img src="' + escHtml(IDENTIDADE.logoUrl) + '" alt="" onerror="this.style.display=\'none\'">' : '');
+    (IDENTIDADE.logoUrl ? '<img src="' + escHtml(IDENTIDADE.logoUrl) + '" alt="" onload="this.previousElementSibling.style.visibility=\'hidden\'" onerror="this.style.display=\'none\'">' : '');
 }
 
 // ── NAVEGAÇÃO (sidebar no desktop, menu inferior no celular) ──
