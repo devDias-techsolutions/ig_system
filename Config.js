@@ -23,6 +23,12 @@ var Config = (function () {
     { Chave: 'LEMA_IGREJA',    Valor: '',          Descricao: 'Versículo ou lema exibido no cabeçalho da tela inicial (opcional)' },
     { Chave: 'COR_PRIMARIA',   Valor: '',          Descricao: 'Cor da marca no formato #RRGGBB, ex.: #0F766E (vazio = cor padrão)' },
     { Chave: 'LOGO_URL',       Valor: '',          Descricao: 'Link do logo: compartilhamento do Google Drive (qualquer pessoa com o link) ou endereço https://. Vazio = iniciais da igreja' },
+    { Chave: 'PASTOR',         Valor: '',          Descricao: 'Nome do pastor presidente (assinatura no verso da carteirinha; vazio = sem assinatura)' },
+    { Chave: 'CARGO_PASTOR',   Valor: 'Pastor Presidente', Descricao: 'Cargo exibido abaixo do nome do pastor na carteirinha' },
+    { Chave: 'ENDERECO_IGREJA', Valor: '',         Descricao: 'Endereço da sede, impresso no rodapé da carteirinha (opcional)' },
+    { Chave: 'CNPJ_IGREJA',    Valor: '',          Descricao: 'CNPJ da igreja, impresso na carteirinha (opcional)' },
+    { Chave: 'MARCA_DAGUA_URL', Valor: '',         Descricao: 'Imagem de fundo (marca d\'água) da carteirinha: link do Drive ou https:// (opcional)' },
+    { Chave: 'ASSINATURA_URL', Valor: '',          Descricao: 'Imagem da assinatura do pastor para o verso da carteirinha: link do Drive ou https:// (opcional)' },
     { Chave: 'PASTA_FOTOS',    Valor: PASTA_FOTOS_PADRAO, Descricao: 'Nome da pasta do Google Drive onde as fotos dos membros são guardadas (criada automaticamente)' },
     { Chave: 'MODULOS_ATIVOS', Valor: '',          Descricao: 'Módulos liberados, separados por vírgula, ex.: membros. Vazio = todos os módulos instalados' }
   ];
@@ -53,13 +59,14 @@ var Config = (function () {
 
   // Aceita link de compartilhamento do Drive (/d/ID ou ?id=ID) e converte para miniatura;
   // aceita https:// direto; qualquer outra coisa é ignorada (nunca http:, data:, javascript:).
-  function _logoUrl(v) {
+  function _imgUrl(v, tamanho) {
     v = String(v || '').trim();
     if (!v) return '';
     var drive = /drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:[^#]*&)?id=|thumbnail\?(?:[^#]*&)?id=)([\w-]{10,})/.exec(v);
-    if (drive) return 'https://drive.google.com/thumbnail?id=' + drive[1] + '&sz=w256';
+    if (drive) return 'https://drive.google.com/thumbnail?id=' + drive[1] + '&sz=w' + tamanho;
     return /^https:\/\/[^\s"'<>]+$/i.test(v) ? v : '';
   }
+  function _logoUrl(v) { return _imgUrl(v, 256); }
 
   // Dados de identidade usados pela tela (sempre válidos, mesmo sem Config)
   function identidade() {
@@ -69,7 +76,14 @@ var Config = (function () {
       nomeCurto:   get('NOME_CURTO', '') || nome,
       lema:        get('LEMA_IGREJA', ''),
       corPrimaria: _corValida(get('COR_PRIMARIA', '')),
-      logoUrl:     _logoUrl(get('LOGO_URL', ''))
+      logoUrl:     _logoUrl(get('LOGO_URL', '')),
+      // Dados da carteirinha (todos opcionais: o que estiver vazio simplesmente não é impresso)
+      pastor:      get('PASTOR', ''),
+      cargoPastor: get('CARGO_PASTOR', 'Pastor Presidente'),
+      endereco:    get('ENDERECO_IGREJA', ''),
+      cnpj:        get('CNPJ_IGREJA', ''),
+      marcaDagua:  _imgUrl(get('MARCA_DAGUA_URL', ''), 1024),
+      assinatura:  _imgUrl(get('ASSINATURA_URL', ''), 512)
     };
   }
 

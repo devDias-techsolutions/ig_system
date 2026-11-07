@@ -1,5 +1,5 @@
 {
-  "etapaAtual": 8,
+  "etapaAtual": 11,
   "pendentes": {
     "setup: setupSpreadsheet() cria todas as abas": 4,
     "setup: rodar setupSpreadsheet() duas vezes": 4,
@@ -15,11 +15,6 @@
     "neutralidade: sem senha ou e-mail de administrador padrão": 6,
     "segurança: sem backdoor": 6,
     "neutralidade: sem prefixo ADFS_": 2,
-    "neutralidade: sem nome da igreja original": 11,
-    "neutralidade: sem CNPJ da igreja original": 11,
-    "neutralidade: sem endereço da igreja original": 11,
-    "neutralidade: sem pastor da igreja original": 11,
-    "neutralidade: sem imagens da carteirinha no imgur do autor": 11,
     "tema: :root de cores definido só no shell": 14,
     "tema: sem rgba/hex do teal original solto": 14
   }

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════
-//  Membros.gs · Módulo Membros — AD Fonte da Salvação
+//  Membros.gs · Módulo Membros
 //  Padrão de módulo: IIFE + Util + Auth._auth
 //  Aba: 'Membros'  ·  Cabeçalho (lowercase, exatamente como na planilha):
 //  id  rol  nome  sexo  nascimento  nomeMae  nomePai  estadoCivil

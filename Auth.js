@@ -165,10 +165,12 @@ var Auth = (function () {
       var updated = _buildUserUpdate(user, { TokenRecupSenha: token, ExpirToken: expira });
       Util.updateRow('Usuarios', user._rowIndex, updated);
       var link = ScriptApp.getService().getUrl() + '?view=recuperar-senha&token=' + token;
-      GmailApp.sendEmail(user.Email, '[AD Fonte da Salvação] Recuperação de senha', '', {
+      var igreja = String(Config.identidade().nome).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      GmailApp.sendEmail(user.Email, '[' + igreja + '] Recuperação de senha', '', {
         htmlBody:
           '<div style="font-family:sans-serif;max-width:480px;margin:auto">' +
           '<h2 style="color:#1C353A">Recuperação de Senha</h2>' +
+          '<p style="color:#888;font-size:12px;margin-top:-8px">' + igreja + '</p>' +
           '<p>Olá, <strong>' + user.Nome + '</strong>!</p>' +
           '<p>Clique no botão abaixo para redefinir sua senha (válido por 1 hora):</p>' +
           '<a href="' + link + '" style="display:inline-block;background:#00A99C;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:bold;margin:16px 0">Redefinir minha senha</a>' +
