@@ -310,9 +310,10 @@ var Membros = (function () {
           );
         }
       } else {
-        // Fallback: cria/usa subpasta "Fotos Membros AD" na raiz do Drive
-        var rootFolders = DriveApp.getFoldersByName('Fotos Membros AD');
-        folder = rootFolders.hasNext() ? rootFolders.next() : DriveApp.createFolder('Fotos Membros AD');
+        // Fallback: cria/usa na raiz do Drive a pasta definida na aba Config (chave PASTA_FOTOS)
+        var nomePasta = Config.pastaFotos();
+        var rootFolders = DriveApp.getFoldersByName(nomePasta);
+        folder = rootFolders.hasNext() ? rootFolders.next() : DriveApp.createFolder(nomePasta);
       }
 
       // Remove arquivos antigos do mesmo membro (evita acúmulo)
