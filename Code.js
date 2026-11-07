@@ -14,7 +14,7 @@ var PERFIS = {
   ADMIN:      'admin',
   SECRETARIA: 'secretaria'
 };
-var MEMBROS_FOTO_FOLDER_ID = ''; // fallback: usa/cria pasta "Fotos Membros AD" na raiz do Drive
+var MEMBROS_FOTO_FOLDER_ID = ''; // fallback: usa/cria na raiz do Drive a pasta da aba Config (chave PASTA_FOTOS)
 
 // ── PLANILHA ─────────────────────────────────────────────────
 // Ordem de resolução (nunca há ID embutido no código):

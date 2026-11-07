@@ -8,11 +8,13 @@
 //    COR_PRIMARIA    cor da marca no formato #RRGGBB (vazio = cor padrão)
 //    LOGO_URL        link do logo (Drive ou https://...)
 //    MODULOS_ATIVOS  ids dos módulos separados por vírgula (vazio = todos)
+//    PASTA_FOTOS     nome da pasta do Drive onde ficam as fotos dos membros
 // ═══════════════════════════════════════════════════════════
 
 var Config = (function () {
 
   var NOME_PADRAO = 'Minha Igreja';
+  var PASTA_FOTOS_PADRAO = 'Fotos de Membros';
 
   // Chaves criadas na aba Config (setupSpreadsheet) com a explicação para quem edita a planilha
   var CHAVES = [
@@ -21,6 +23,7 @@ var Config = (function () {
     { Chave: 'LEMA_IGREJA',    Valor: '',          Descricao: 'Versículo ou lema exibido no cabeçalho da tela inicial (opcional)' },
     { Chave: 'COR_PRIMARIA',   Valor: '',          Descricao: 'Cor da marca no formato #RRGGBB, ex.: #0F766E (vazio = cor padrão)' },
     { Chave: 'LOGO_URL',       Valor: '',          Descricao: 'Link do logo: compartilhamento do Google Drive (qualquer pessoa com o link) ou endereço https://. Vazio = iniciais da igreja' },
+    { Chave: 'PASTA_FOTOS',    Valor: PASTA_FOTOS_PADRAO, Descricao: 'Nome da pasta do Google Drive onde as fotos dos membros são guardadas (criada automaticamente)' },
     { Chave: 'MODULOS_ATIVOS', Valor: '',          Descricao: 'Módulos liberados, separados por vírgula, ex.: membros. Vazio = todos os módulos instalados' }
   ];
 
@@ -31,8 +34,9 @@ var Config = (function () {
 
   // Valor da chave (texto sem espaços nas pontas) ou o padrão se não existir / estiver vazio
   function get(chave, padrao) {
+    // Se a chave aparecer mais de uma vez na aba, a ÚLTIMA linha vale
     var rows = _linhas();
-    for (var i = 0; i < rows.length; i++) {
+    for (var i = rows.length - 1; i >= 0; i--) {
       if (String(rows[i].Chave).trim() === chave) {
         var v = rows[i].Valor;
         v = (v === null || v === undefined) ? '' : String(v).trim();
@@ -92,6 +96,6 @@ var Config = (function () {
 
   return {
     get: get, identidade: identidade, identidadeJson: identidadeJson,
-    garantirChaves: garantirChaves, chaves: CHAVES
+    garantirChaves: garantirChaves, chaves: CHAVES, pastaFotos: function () { return get('PASTA_FOTOS', PASTA_FOTOS_PADRAO); }
   };
 })();
