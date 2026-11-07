@@ -295,3 +295,27 @@ test('membros: a busca encontra pelo ROL (22, 0022, "ROL 22"), pelo nome e pela 
   assert.deepEqual(await lista('carla'), ['Carla']);
   assert.deepEqual(await lista(''), ['Ana', 'Bruno', 'Carla']);
 });
+
+test('celular: modal de aniversariantes fica inteiro na tela e a lista rola dentro dele', async () => {
+  const backend = criarBackend();
+  const s = await abrir(browser, backend, { viewport: { width: 390, height: 700 } });
+  await entrar(s.page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  await irParaMembros(s.page);
+  await s.page.addStyleTag({ content: '*{transition:none!important;animation:none!important}' }); // mede a posição final, não a animação
+  await s.page.evaluate(() => {
+    const mes = String(new Date().getMonth() + 1).padStart(2, '0');
+    MB.membros = Array.from({ length: 40 }, (_, i) => ({ id: 'x' + i, nome: 'Aniversariante ' + i, nascimento: String(1 + (i % 27)).padStart(2, '0') + '/' + mes + '/1990', foto: '' }));
+    mbAbrirModalAniv();
+  });
+  await s.page.waitForTimeout(300);
+  const m = await s.page.evaluate(() => {
+    const box = document.querySelector('#modal-mb-aniv .modal-box').getBoundingClientRect();
+    const body = document.getElementById('mb-aniv-body');
+    const antes = body.scrollTop; body.scrollTop = 400;
+    return { top: box.top, bottom: box.bottom, vh: innerHeight, rolavel: body.scrollHeight > body.clientHeight, rolou: body.scrollTop > antes };
+  });
+  assert.ok(m.top >= 0 && m.bottom <= m.vh, 'modal cabe na tela: ' + JSON.stringify(m));
+  assert.ok(m.top > 20 && m.vh - m.bottom > 20, 'modal não encosta nas bordas: ' + JSON.stringify(m));
+  assert.ok(m.rolavel && m.rolou, 'a lista rola dentro do modal: ' + JSON.stringify(m));
+  assert.deepEqual(s.erros, []);
+});
