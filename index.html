@@ -82,7 +82,7 @@
   --shadow-glow:
     0 0 0 1px rgba(255, 255, 255, 0.03),
     0 12px 48px rgba(0, 0, 0, 0.5),
-    0 0 40px rgba(0, 217, 198, 0.06);
+    0 0 40px color-mix(in srgb, var(--teal) 6%, transparent);
 
   --radius-sm:        12px;
   --radius:           18px;
@@ -93,7 +93,7 @@
   --ease-spring:      cubic-bezier(.16, 1, .3, 1);
 
   --noise-opacity:    0.04;
-  --logo-filter:      drop-shadow(0 0 12px rgba(0, 217, 198, 0.2));
+  --logo-filter:      drop-shadow(0 0 12px color-mix(in srgb, var(--teal) 20%, transparent));
   --logo-filter2: #000000;
   --scrollbar:        rgba(255, 255, 255, 0.16);
 
@@ -188,7 +188,7 @@
 /* Ajuste de Orbes de fundo para o Light Mode não parecer sujo */
 [data-theme="light"] body::before {
   background:
-    radial-gradient(circle at 0% 0%, rgba(0, 137, 123, 0.06), transparent 40%),
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--teal) 6%, transparent), transparent 40%),
     radial-gradient(circle at 100% 0%, rgba(2, 132, 199, 0.05), transparent 40%),
     var(--bg);
 }
@@ -233,7 +233,7 @@ body::before {
   z-index: -3;
   pointer-events: none;
   background:
-    radial-gradient(circle at 10% 10%, rgba(0, 217, 198, 0.12), transparent 35%),
+    radial-gradient(circle at 10% 10%, color-mix(in srgb, var(--teal) 12%, transparent), transparent 35%),
     radial-gradient(circle at 90% 20%, rgba(84, 184, 255, 0.10), transparent 35%),
     radial-gradient(circle at 50% 80%, rgba(155, 124, 255, 0.08), transparent 40%),
     var(--bg);
@@ -529,7 +529,7 @@ body::after {
   box-shadow: 0 8px 24px var(--teal-glow-soft), inset 0 1px 0 rgba(255,255,255,.2);
 }
 .btn-primary:hover:not(:disabled) {
-  box-shadow: 0 16px 48px var(--teal-glow), 0 0 25px rgba(0, 217, 198, 0.25);
+  box-shadow: 0 16px 48px var(--teal-glow), 0 0 25px color-mix(in srgb, var(--teal) 25%, transparent);
 }
 
 .btn-secondary {
@@ -605,9 +605,9 @@ select, textarea {
 input.has-icon-left  { padding-left: 48px; }
 input.has-icon-right { padding-right: 48px; }
 input:focus, select:focus, textarea:focus {
-  outline: none; border-color: rgba(0, 217, 198, 0.45);
+  outline: none; border-color: color-mix(in srgb, var(--teal) 45%, transparent);
   background: var(--bg-glass-strong);
-  box-shadow: 0 0 0 4px var(--teal-glow-soft), 0 0 24px rgba(0, 217, 198, 0.06);
+  box-shadow: 0 0 0 4px var(--teal-glow-soft), 0 0 24px color-mix(in srgb, var(--teal) 6%, transparent);
 }
 input::placeholder { color: var(--text-dim); }
 textarea { height: auto; min-height: 110px; padding: 16px 18px; resize: vertical; }
@@ -628,7 +628,7 @@ textarea { height: auto; min-height: 110px; padding: 16px 18px; resize: vertical
   transition: border-color .24s, box-shadow .24s;
   box-shadow: var(--shadow-glow);
 }
-.card:hover { border-color: var(--border-strong); box-shadow: 0 15px 45px rgba(0, 217, 198, 0.05), var(--shadow-glow); }
+.card:hover { border-color: var(--border-strong); box-shadow: 0 15px 45px color-mix(in srgb, var(--teal) 5%, transparent), var(--shadow-glow); }
 
 .card::after {
   content: ''; position: absolute; inset: 0;
@@ -654,7 +654,7 @@ textarea { height: auto; min-height: 110px; padding: 16px 18px; resize: vertical
 
 .avatar {
   width: 42px; height: 42px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--teal-dim), rgba(0, 217, 198, 0.2));
+  background: linear-gradient(135deg, var(--teal-dim), color-mix(in srgb, var(--teal) 20%, transparent));
   border: 2px solid var(--teal-border);
   display: flex; align-items: center; justify-content: center;
   font-weight: 800; font-size: 14px; color: var(--teal);
@@ -702,7 +702,7 @@ textarea { height: auto; min-height: 110px; padding: 16px 18px; resize: vertical
 ───────────────────────────────────────────── */
 [data-theme="light"] body::before {
   background:
-    radial-gradient(ellipse at 5% 0%, rgba(0,217,198,0.13) 0%, transparent 40%),
+    radial-gradient(ellipse at 5% 0%, color-mix(in srgb, var(--teal) 13%, transparent) 0%, transparent 40%),
     radial-gradient(ellipse at 95% 5%, rgba(47,128,237,0.10) 0%, transparent 40%),
     radial-gradient(ellipse at 50% 100%, rgba(139,110,255,0.07) 0%, transparent 45%),
     linear-gradient(150deg, #DFF0F8 0%, #EBF1FA 40%, #E3EDF6 100%);
@@ -734,16 +734,16 @@ textarea { height: auto; min-height: 110px; padding: 16px 18px; resize: vertical
 }
 .topnav-logo-icon {
   width: 44px; height: 44px; border-radius: 14px;
-  background: linear-gradient(135deg, #00897E 0%, #00C4B5 100%);
-  border: 2px solid rgba(0,217,198,0.35);
+  background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal-light) 100%);
+  border: 2px solid color-mix(in srgb, var(--teal) 35%, transparent);
   display: flex; align-items: center; justify-content: center;
   overflow: hidden; flex-shrink: 0;
-  box-shadow: 0 4px 16px rgba(0,169,156,0.30);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--teal-dark) 30%, transparent);
   padding: 3px;
 }
 [data-theme="light"] .topnav-logo-icon {
-  background: linear-gradient(135deg, #00897E 0%, #00A99C 100%);
-  box-shadow: 0 4px 16px rgba(0,169,156,0.28);
+  background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 100%);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--teal-dark) 28%, transparent);
 }
 .topnav-logo-icon .app-logo-img {
   width: 100% !important; height: 100% !important;
@@ -824,7 +824,7 @@ textarea { height: auto; min-height: 110px; padding: 16px 18px; resize: vertical
 .module-btn:hover {
   border-color: var(--teal-border);
   transform: translateY(-3px);
-  box-shadow: 0 12px 36px rgba(0,217,198,0.08), var(--glass-shadow-premium);
+  box-shadow: 0 12px 36px color-mix(in srgb, var(--teal) 8%, transparent), var(--glass-shadow-premium);
 }
 [data-theme="light"] .module-btn {
   background: #FFFFFF;
@@ -832,8 +832,8 @@ textarea { height: auto; min-height: 110px; padding: 16px 18px; resize: vertical
   box-shadow: 0 2px 12px rgba(15,23,42,0.07);
 }
 [data-theme="light"] .module-btn:hover {
-  border-color: rgba(0,169,156,0.30);
-  box-shadow: 0 8px 28px rgba(0,169,156,0.12);
+  border-color: color-mix(in srgb, var(--teal-dark) 30%, transparent);
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--teal-dark) 12%, transparent);
 }
 .module-btn-icon {
   width: 52px; height: 52px; border-radius: 16px;
@@ -842,9 +842,9 @@ textarea { height: auto; min-height: 110px; padding: 16px 18px; resize: vertical
   color: var(--teal); transition: background .2s;
 }
 [data-theme="light"] .module-btn-icon {
-  background: rgba(0,169,156,0.10);
-  border-color: rgba(0,169,156,0.20);
-  box-shadow: 0 4px 14px rgba(0,169,156,0.15);
+  background: color-mix(in srgb, var(--teal-dark) 10%, transparent);
+  border-color: color-mix(in srgb, var(--teal-dark) 20%, transparent);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--teal-dark) 15%, transparent);
 }
 .module-btn-name {
   font-size: 12px; font-weight: 700; color: var(--text-muted);
