@@ -57,13 +57,14 @@ var Config = (function () {
     return /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : '';
   }
 
-  // Aceita link de compartilhamento do Drive (/d/ID ou ?id=ID) e converte para miniatura;
+  // Aceita link de compartilhamento do Drive (/d/ID ou ?id=ID) e converte para o endereço de imagem do Google (googleusercontent), que preserva PNG transparente
+  // (a miniatura drive.google.com/thumbnail vira JPEG e ganha fundo preto);
   // aceita https:// direto; qualquer outra coisa é ignorada (nunca http:, data:, javascript:).
   function _imgUrl(v, tamanho) {
     v = String(v || '').trim();
     if (!v) return '';
     var drive = /drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:[^#]*&)?id=|thumbnail\?(?:[^#]*&)?id=)([\w-]{10,})/.exec(v);
-    if (drive) return 'https://drive.google.com/thumbnail?id=' + drive[1] + '&sz=w' + tamanho;
+    if (drive) return 'https://lh3.googleusercontent.com/d/' + drive[1] + '=w' + tamanho;
     return /^https:\/\/[^\s"'<>]+$/i.test(v) ? v : '';
   }
   function _logoUrl(v) { return _imgUrl(v, 256); }
@@ -100,7 +101,7 @@ var Config = (function () {
   // em tamanho grande ou, sem logo, um quadrado com as iniciais na cor da marca.
   function iconeUrl() {
     var id = identidade();
-    if (id.logoUrl) return id.logoUrl.replace(/([?&]sz=)w\d+/, '$1w512');
+    if (id.logoUrl) return id.logoUrl.replace(/=w\d+$/, '=w512');
     var cor = id.corPrimaria || '#0f766e';
     var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="' + cor + '"/>' +
       '<text x="256" y="256" fill="#fff" font-family="Arial,sans-serif" font-weight="700" font-size="220" text-anchor="middle" dominant-baseline="central">' +
