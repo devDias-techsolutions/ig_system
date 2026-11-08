@@ -518,6 +518,8 @@ body::after {
   padding: 10px 12px 10px 16px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   box-shadow: var(--shadow-lg);
 }
+/* ao rolar até um item, deixa folga para a barra fixa não cobri-lo */
+.page :is(button, input, select, textarea, label, a) { scroll-margin-bottom: 110px; }
 .action-bar-status { font-size: 12px; color: var(--text-muted); }
 .action-bar-status.pendente { color: var(--warning); font-weight: 700; }
 .action-bar-btns { display: flex; gap: 8px; flex-shrink: 0; }
