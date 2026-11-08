@@ -574,3 +574,31 @@ test('identidade: cor salva vira "cor recente" e pode ser reaplicada; sem recent
   await page.click('.idt-recente[data-cor="#7C3AED"]');
   assert.equal(await page.inputValue('#idt-cor-hex'), '#7C3AED');
 });
+
+test('layout: botões da barra de ações não mudam de lugar entre "tudo salvo" e "alterações pendentes" (celular e desktop)', async () => {
+  const backend = criarBackend();
+  for (const vp of [{ width: 412, height: 860 }, { width: 1280, height: 800 }]) {
+    const { page } = await abrir(browser, backend, { viewport: vp });
+    await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+    await page.evaluate(() => navigateTo('identidade'));
+    await page.waitForSelector('#idt-salvar');
+    await page.addStyleTag({ content: '*,*::before,*::after{animation:none!important;transition:none!important}' }); // mede a posição final, sem animação de entrada
+    const caixa = async () => page.evaluate(() => ['idt-descartar', 'idt-salvar'].map((id) => { const r = document.getElementById(id).getBoundingClientRect(); return [Math.round(r.x), Math.round(r.y), Math.round(r.width)]; }));
+    const limpo = await caixa();
+    await page.fill('#idt-lema', 'Um lema qualquer');
+    await page.waitForFunction(() => !document.getElementById('idt-salvar').disabled);
+    await page.waitForTimeout(600);
+    const sujo = await caixa();
+    assert.deepEqual(sujo.map((c) => c.slice(0, 2)), limpo.map((c) => c.slice(0, 2)), 'posição dos botões mudou em ' + vp.width + 'px');
+    assert.ok(limpo[0][0] < limpo[1][0], 'Descartar fica à esquerda de Salvar');
+    if (vp.width < 1024) {
+      // espera a barra parar de se mover (animações de entrada) antes de medir
+      let ant = -1, atual = -2;
+      for (let i = 0; i < 25 && ant !== atual; i++) { ant = atual; await page.waitForTimeout(200); atual = await page.evaluate(() => document.querySelector('.action-bar').getBoundingClientRect().bottom); }
+      const nav = await page.evaluate(() => document.querySelector('.app-bnav').getBoundingClientRect().top);
+      const info = await page.evaluate(() => ({ sy: window.scrollY, h: document.documentElement.scrollHeight, ih: innerHeight, ab: document.querySelector('.action-bar').getBoundingClientRect().top, cssBottom: getComputedStyle(document.querySelector('.action-bar')).bottom, pos: getComputedStyle(document.querySelector('.action-bar')).position, mq: matchMedia('(max-width: 1023px)').matches, iw: innerWidth, scrollers: Array.from(document.querySelectorAll('*')).filter((n) => n.scrollTop > 0).map((n) => n.tagName + '.' + n.className + ':' + n.scrollTop).slice(0, 5), vv: window.visualViewport && [visualViewport.height, visualViewport.offsetTop] }));
+      assert.ok(atual <= nav, 'barra de ações acima do menu inferior: ' + JSON.stringify({ barra: atual, nav, ...info }));
+    }
+    await page.context().close();
+  }
+});
