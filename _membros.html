@@ -2289,26 +2289,13 @@ function mbImportarJSON(e) {
   margin-bottom: 8px; 
 }
 
-.mb-card-front .card-logo {
-  width: 38px; height: 38px; flex-shrink: 0;
-}
-.mb-card-front .card-logo img {
-  /* Fixamos a altura. Se achar que 45px ainda está pequeno, aumente para 50px ou 55px */
-  height:60px;
-  position:absolute;
-  top:0px;
-  left:10px;
-  width: auto;
-  object-fit: contain;
-  /* Retorne o seu filtro de cor para o branco puro */
-  filter: brightness(0) invert(1) grayscale(100%) contrast(1000%) drop-shadow(0 0 0 white);
-}
+.mb-card-front .card-logo { width: 48px; height: 48px; flex-shrink: 0; display: grid; place-items: center; }
+.mb-card-front .card-logo img { width: 100%; height: 100%; object-fit: contain; } /* o logo enviado já é claro; o tamanho é sempre o da caixa */
 .mb-card-front .card-logo-ini {
-  display: grid; place-items: center; width: 38px; height: 38px; border-radius: 10px;
-  border: 1.5px solid #fff; color: #fff; font-size: 14px; font-weight: 800;
+  display: grid; place-items: center; width: 44px; height: 44px; border-radius: 10px;
+  border: 1.5px solid #fff; color: #fff; font-size: 15px; font-weight: 800;
 }
 .mb-card-front .card-church-name { display: flex; flex-direction: column; }
-.mb-card-front .card-church-name .line1 { font-size: 10px; font-weight: 800; letter-spacing: 0.3px; line-height: 1.2; white-space: nowrap; }
 .mb-card-front .card-church-name .line2 { font-size: 12px; font-weight: 800; letter-spacing: .5px; line-height: 1.15; max-width: 220px; }
 
 .mb-card-front .card-member-row {
