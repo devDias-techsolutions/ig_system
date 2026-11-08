@@ -57,17 +57,17 @@ var Config = (function () {
     return /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : '';
   }
 
-  // Aceita link de compartilhamento do Drive (/d/ID ou ?id=ID) e converte para o endereço de imagem do Google (googleusercontent) com o sufixo -rp ("request PNG"), que força PNG e preserva a transparência
-  // (a miniatura drive.google.com/thumbnail vira JPEG e ganha fundo preto);
-  // aceita https:// direto; qualquer outra coisa é ignorada (nunca http:, data:, javascript:).
-  function _imgUrl(v, tamanho) {
+  // Aceita link de compartilhamento do Drive (/d/ID ou ?id=ID) e usa o arquivo ORIGINAL (uc?export=view),
+  // que preserva PNG transparente: miniaturas (drive.google.com/thumbnail) e googleusercontent viram JPEG
+  // e ganham fundo preto. Aceita https:// direto (ex.: GitHub raw); o resto é ignorado (nunca http:, data:, javascript:).
+  function _imgUrl(v) {
     v = String(v || '').trim();
     if (!v) return '';
-    var drive = /drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:[^#]*&)?id=|thumbnail\?(?:[^#]*&)?id=)([\w-]{10,})/.exec(v);
-    if (drive) return 'https://lh3.googleusercontent.com/d/' + drive[1] + '=w' + tamanho + '-rp';
+    var drive = /(?:drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:[^#]*&)?id=|thumbnail\?(?:[^#]*&)?id=)|lh3\.googleusercontent\.com\/d\/)([\w-]{10,})/.exec(v);
+    if (drive) return 'https://drive.google.com/uc?export=view&id=' + drive[1];
     return /^https:\/\/[^\s"'<>]+$/i.test(v) ? v : '';
   }
-  function _logoUrl(v) { return _imgUrl(v, 256); }
+  function _logoUrl(v) { return _imgUrl(v); }
 
   // Dados de identidade usados pela tela (sempre válidos, mesmo sem Config)
   function identidade() {
@@ -83,8 +83,8 @@ var Config = (function () {
       cargoPastor: get('CARGO_PASTOR', 'Pastor Presidente'),
       endereco:    get('ENDERECO_IGREJA', ''),
       cnpj:        get('CNPJ_IGREJA', ''),
-      marcaDagua:  _imgUrl(get('MARCA_DAGUA_URL', ''), 1024),
-      assinatura:  _imgUrl(get('ASSINATURA_URL', ''), 512)
+      marcaDagua:  _imgUrl(get('MARCA_DAGUA_URL', '')),
+      assinatura:  _imgUrl(get('ASSINATURA_URL', ''))
     };
   }
 
@@ -101,7 +101,7 @@ var Config = (function () {
   // em tamanho grande ou, sem logo, um quadrado com as iniciais na cor da marca.
   function iconeUrl() {
     var id = identidade();
-    if (id.logoUrl) return id.logoUrl.replace(/=w\d+(-rp)?$/, '=w512$1');
+    if (id.logoUrl) return id.logoUrl;
     var cor = id.corPrimaria || '#0f766e';
     var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="' + cor + '"/>' +
       '<text x="256" y="256" fill="#fff" font-family="Arial,sans-serif" font-weight="700" font-size="220" text-anchor="middle" dominant-baseline="central">' +

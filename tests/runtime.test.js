@@ -116,7 +116,7 @@ test('config: lê nome, lema, cor e logo da aba Config', () => {
   const id = JSON.parse(env.run('Config.identidadeJson()'));
   assert.deepEqual({ nome: id.nome, nomeCurto: id.nomeCurto, lema: id.lema, corPrimaria: id.corPrimaria, logoUrl: id.logoUrl }, {
     nome: 'Igreja Vida Nova', nomeCurto: 'Vida Nova', lema: 'O Senhor é meu pastor', corPrimaria: '#0f766e',
-    logoUrl: 'https://lh3.googleusercontent.com/d/1AbCdEfGhIjKlMnOpQ=w256-rp',
+    logoUrl: 'https://drive.google.com/uc?export=view&id=1AbCdEfGhIjKlMnOpQ',
   });
 });
 
@@ -130,7 +130,7 @@ test('config: dados da carteirinha (pastor, cargo, endereço, CNPJ, marca d\'ág
   assert.equal(id.cargoPastor, 'Presidente');
   assert.equal(id.endereco, 'Rua A, 10 - Centro');
   assert.equal(id.cnpj, '00.000.000/0001-00');
-  assert.equal(id.marcaDagua, 'https://lh3.googleusercontent.com/d/1AbCdEfGhIjKlMnOpQ=w1024-rp');
+  assert.equal(id.marcaDagua, 'https://drive.google.com/uc?export=view&id=1AbCdEfGhIjKlMnOpQ');
   assert.equal(id.assinatura, '', 'assinatura insegura passou');
 });
 
@@ -330,7 +330,7 @@ test('ícone: sem logo usa um SVG com as iniciais na cor da marca; com logo usa 
   assert.equal(m.theme_color, '#1a237e');
   assert.equal(m.icons[0].type, 'image/svg+xml');
   definirConfigUnit(env, 'LOGO_URL', 'https://drive.google.com/file/d/ABCDEFGHIJKLMNOP/view');
-  assert.equal(env.run('Config.iconeUrl()'), 'https://lh3.googleusercontent.com/d/ABCDEFGHIJKLMNOP=w512-rp');
+  assert.equal(env.run('Config.iconeUrl()'), 'https://drive.google.com/uc?export=view&id=ABCDEFGHIJKLMNOP');
 });
 
 test('e-mail de boas-vindas usa o nome da igreja da Config', () => {
