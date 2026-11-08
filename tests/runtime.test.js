@@ -611,3 +611,39 @@ test('identidade: ícone do app não embute o logo enviado (grande demais para o
   env.run("idt_enviarImagem('tok', 'logo', __b)");
   assert.match(env.run('Config.iconeUrl()'), /^data:image\/svg\+xml/);
 });
+
+test('identidade: admin salva nome, cor, pastor e demais ajustes; a última linha da chave vale e o cache é atualizado', () => {
+  const env = envIdentidade();
+  definirConfigUnit(env, 'NOME_IGREJA', 'Nome Antigo');
+  env.ctx.__d = { NOME_IGREJA: 'Igreja Vida Nova', NOME_CURTO: 'Vida Nova', LEMA_IGREJA: 'O Senhor é meu pastor', COR_PRIMARIA: '#7C3AED', PASTOR: 'Pr. João', CARGO_PASTOR: 'Presidente', ENDERECO_IGREJA: 'Rua A, 10', CNPJ_IGREJA: '00.000.000/0001-00', PASTA_FOTOS: 'Fotos VN' };
+  const r = env.run("idt_salvarAjustes('tok', __d)");
+  assert.equal(r.success, true, JSON.stringify(r));
+  assert.equal(r.data.nome, 'Igreja Vida Nova');
+  assert.equal(r.data.corPrimaria, '#7c3aed');
+  assert.equal(r.data.pastor, 'Pr. João');
+  assert.equal(r.data.pastaFotos, 'Fotos VN');
+  assert.equal(env.run('Config.identidade().nome'), 'Igreja Vida Nova');
+  const linhas = env.run("Util.sheetToObjects('Config').filter(function (x) { return x.Chave === 'NOME_IGREJA'; }).length");
+  assert.equal(linhas, 1, 'atualiza a linha existente em vez de duplicar');
+});
+
+test('identidade: ajustes inválidos são recusados sem gravar nada; secretaria não grava', () => {
+  const env = envIdentidade();
+  const tenta = (d) => { env.ctx.__d = d; return env.run("idt_salvarAjustes('tok', __d)"); };
+  assert.match(tenta({ NOME_IGREJA: 'Boa', COR_PRIMARIA: 'roxo' }).error, /Cor inválida/);
+  assert.match(tenta({ NOME_IGREJA: '   ' }).error, /obrigatório/);
+  assert.match(tenta({ NOME_IGREJA: 'x'.repeat(81) }).error, /80/);
+  assert.match(tenta({ MODULOS_ATIVOS: 'membros' }).error, /não editável/);
+  assert.match(tenta({ PASTA_FOTOS: '' }).error, /obrigatório/);
+  assert.equal(env.run('Config.identidade().nome'), 'Minha Igreja', 'nada foi gravado');
+  const sec = envIdentidade('secretaria');
+  sec.ctx.__d = { NOME_IGREJA: 'Invasora' };
+  assert.equal(sec.run("idt_salvarAjustes('tok', __d)").success, false);
+  assert.equal(sec.run('Config.identidade().nome'), 'Minha Igreja');
+});
+
+test('identidade: texto digitado é guardado como texto (sem caracteres de controle)', () => {
+  const env = envIdentidade();
+  env.ctx.__d = { NOME_IGREJA: 'Igreja\u0000 <b>Boa</b>\n' };
+  assert.equal(env.run("idt_salvarAjustes('tok', __d)").data.nome, 'Igreja  <b>Boa</b>');
+});
