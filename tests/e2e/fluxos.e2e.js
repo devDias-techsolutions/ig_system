@@ -141,12 +141,12 @@ test('Home: conteúdo do nome da igreja é escapado (sem HTML injetado)', async 
 });
 
 // ── Navegação: sidebar no desktop, menu inferior no celular ──
-test('desktop: sidebar com Início, módulos e Usuários; o item ativo acompanha a tela', async () => {
+test('desktop: sidebar com Início, módulos, Usuários e Identidade; o item ativo acompanha a tela', async () => {
   const { page, erros } = await comoAdmin();
   assert.ok(await page.isVisible('#app-sidebar'));
   assert.ok(!(await page.isVisible('#app-bnav')));
   const itens = await page.$$eval('#app-sidebar .sb-item', (els) => els.map((e) => e.innerText.trim()));
-  assert.deepEqual(itens, ['Início', 'Membros', 'Usuários']);
+  assert.deepEqual(itens, ['Início', 'Membros', 'Usuários', 'Identidade']);
   assert.equal(await page.$eval('#app-sidebar .sb-item.active', (e) => e.innerText.trim()), 'Início');
   await page.click('#app-sidebar .sb-item:has-text("Membros")');
   await esperarTela(page, 'membros');
@@ -160,7 +160,7 @@ test('celular: menu inferior no lugar da sidebar, sem duplicar navegação nas t
   await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   assert.ok(!(await page.isVisible('#app-sidebar')));
   assert.ok(await page.isVisible('#app-bnav'));
-  assert.deepEqual(await page.$$eval('#app-bnav .bn-item', (els) => els.map((e) => e.innerText.trim())), ['Início', 'Membros', 'Usuários']);
+  assert.deepEqual(await page.$$eval('#app-bnav .bn-item', (els) => els.map((e) => e.innerText.trim())), ['Início', 'Membros', 'Usuários', 'Identidade']);
   await page.click('#app-bnav .bn-item:has-text("Usuários")');
   await esperarTela(page, 'usuarios');
   assert.equal(await page.locator('#app-bnav').count(), 1);
@@ -182,7 +182,7 @@ test('celular: com mais de 5 destinos os excedentes vão para "Mais"', async () 
   await page.click('#app-bnav .bn-item:has-text("Mais")');
   await page.waitForSelector('#modal-mais.open');
   const extras = await page.$$eval('#bnav-more-list .sb-item', (els) => els.map((e) => e.innerText.trim()));
-  assert.ok(extras.includes('Usuários') && extras.length === 3, extras.join(','));
+  assert.ok(extras.includes('Usuários') && extras.includes('Identidade') && extras.length === 4, extras.join(','));
   assert.deepEqual(erros, []);
 });
 
@@ -409,4 +409,50 @@ test('logo: PNG transparente não ganha fundo próprio e esconde as iniciais ao 
   });
   assert.equal(r.fundo, 'rgba(0, 0, 0, 0)', 'a imagem não pode ter fundo próprio');
   assert.equal(r.iniciais, 'hidden', 'iniciais devem sumir quando o logo carrega');
+});
+
+// ── Tela Identidade: enviar logo pelo aparelho (Etapa 21 em partes) ──
+const PNG_1X1 = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
+
+test('identidade: admin envia o logo, ele aparece na tela e continua depois de recarregar', async () => {
+  const backend = criarBackend();
+  const { page, erros } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  await page.evaluate(() => navigateTo('identidade'));
+  await page.waitForSelector('#idt-logo');
+  assert.equal(await page.locator('#idt-previa-logo img').count(), 0, 'começa sem imagem');
+  await page.setInputFiles('#idt-arq-logo', { name: 'logo.png', mimeType: 'image/png', buffer: PNG_1X1 });
+  await page.waitForSelector('#idt-previa-logo img');
+  assert.match(await page.getAttribute('#idt-previa-logo img', 'src'), /^data:image\/png;base64,/);
+  assert.match(await page.getAttribute('#app-icon', 'href'), /^data:image\/png;base64,/, 'ícone da aba usa o logo');
+  assert.ok(await page.locator('.sb-logo .brand-mark img').count() >= 1, 'barra lateral mostra o logo');
+  // sobrevive ao recarregamento: a próxima abertura do sistema já traz o logo na página de login (vem da planilha)
+  assert.match(JSON.parse(backend.env.run('Config.identidadeJson()')).logoUrl, /^data:image\/png;base64,/);
+  // remover volta às iniciais
+  await page.click('#idt-remover-logo');
+  await page.waitForFunction(() => !document.querySelector('#idt-previa-logo img'));
+  assert.deepEqual(erros, []);
+});
+
+test('identidade: arquivo que não é imagem mostra aviso e nada é salvo', async () => {
+  const backend = criarBackend();
+  const { page } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  await page.evaluate(() => navigateTo('identidade'));
+  await page.waitForSelector('#idt-logo');
+  await page.setInputFiles('#idt-arq-logo', { name: 'x.png', mimeType: 'image/png', buffer: Buffer.from('isto não é uma imagem') });
+  await page.waitForSelector('.toast, [class*="toast"]');
+  assert.equal(await page.locator('#idt-previa-logo img').count(), 0);
+});
+
+test('identidade: secretaria não vê o item no menu e não abre a tela nem envia pela API', async () => {
+  const backend = criarBackend();
+  const { page } = await abrir(browser, backend);
+  await entrar(page, 'sec@igreja.test', 'Sec#Teste1', 'home');
+  assert.equal(await page.locator('.sb-nav :text("Identidade")').count(), 0);
+  await page.evaluate(() => navigateTo('identidade'));
+  await page.waitForTimeout(300);
+  assert.notEqual(await page.evaluate(() => App.currentView), 'identidade');
+  const r = await page.evaluate((png) => new Promise((ok) => google.script.run.withSuccessHandler(ok).idt_enviarImagem(App.session.token, 'logo', png)), PNG_1X1.toString('base64'));
+  assert.equal(r.success, false);
 });

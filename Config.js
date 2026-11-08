@@ -69,6 +69,12 @@ var Config = (function () {
   }
   function _logoUrl(v) { return _imgUrl(v); }
 
+  // Imagem enviada pela tela Identidade (aba Imagens) tem prioridade sobre o link da Config
+  function _imagem(tipo, chaveUrl) {
+    var enviada = (typeof Imagens !== 'undefined') ? Imagens.dataUri(tipo) : '';
+    return enviada || _imgUrl(get(chaveUrl, ''));
+  }
+
   // Dados de identidade usados pela tela (sempre válidos, mesmo sem Config)
   function identidade() {
     var nome = get('NOME_IGREJA', NOME_PADRAO);
@@ -77,14 +83,14 @@ var Config = (function () {
       nomeCurto:   get('NOME_CURTO', '') || nome,
       lema:        get('LEMA_IGREJA', ''),
       corPrimaria: _corValida(get('COR_PRIMARIA', '')),
-      logoUrl:     _logoUrl(get('LOGO_URL', '')),
+      logoUrl:     _imagem('logo', 'LOGO_URL'),
       // Dados da carteirinha (todos opcionais: o que estiver vazio simplesmente não é impresso)
       pastor:      get('PASTOR', ''),
       cargoPastor: get('CARGO_PASTOR', 'Pastor Presidente'),
       endereco:    get('ENDERECO_IGREJA', ''),
       cnpj:        get('CNPJ_IGREJA', ''),
-      marcaDagua:  _imgUrl(get('MARCA_DAGUA_URL', '')),
-      assinatura:  _imgUrl(get('ASSINATURA_URL', ''))
+      marcaDagua:  _imagem('marcaDagua', 'MARCA_DAGUA_URL'),
+      assinatura:  _imagem('assinatura', 'ASSINATURA_URL')
     };
   }
 
@@ -101,7 +107,7 @@ var Config = (function () {
   // em tamanho grande ou, sem logo, um quadrado com as iniciais na cor da marca.
   function iconeUrl() {
     var id = identidade();
-    if (id.logoUrl) return id.logoUrl;
+    if (id.logoUrl && id.logoUrl.indexOf('data:') !== 0) return id.logoUrl; // logo enviado (data:) é grande demais para o <head>
     var cor = id.corPrimaria || '#0f766e';
     var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="' + cor + '"/>' +
       '<text x="256" y="256" fill="#fff" font-family="Arial,sans-serif" font-weight="700" font-size="220" text-anchor="middle" dominant-baseline="central">' +
@@ -110,8 +116,12 @@ var Config = (function () {
   }
 
   // JSON seguro para embutir dentro de <script>
+  // Página de login é pública: a assinatura do pastor só vai depois do login (idt_obter)
+  function identidadeCompleta() { return identidade(); }
   function identidadeJson() {
-    return JSON.stringify(identidade()).replace(/</g, '\\u003c').replace(/\u2028|\u2029/g, '');
+    var id = identidade();
+    id.assinatura = '';
+    return JSON.stringify(id).replace(/</g, '\\u003c').replace(/\u2028|\u2029/g, '');
   }
 
   // Cria as chaves que ainda não existem (não altera valores já preenchidos).
@@ -131,7 +141,7 @@ var Config = (function () {
   }
 
   return {
-    get: get, identidade: identidade, iniciais: iniciais, iconeUrl: iconeUrl, identidadeJson: identidadeJson,
+    get: get, identidade: identidade, iniciais: iniciais, iconeUrl: iconeUrl, identidadeJson: identidadeJson, identidadeCompleta: identidadeCompleta,
     garantirChaves: garantirChaves, chaves: CHAVES, pastaFotos: function () { return get('PASTA_FOTOS', PASTA_FOTOS_PADRAO); }
   };
 })();
