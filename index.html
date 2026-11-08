@@ -1209,6 +1209,7 @@ function _homeViewForPerfil(perfil) {
 }
 
 function navigateTo(view, params) {
+  if (App.currentView === 'identidade' && view !== 'identidade' && typeof idtSair === 'function') idtSair();
 
   // 1. Sem sessão → login
   if (authRequired.indexOf(view) !== -1 && !App.session) {
@@ -1302,6 +1303,8 @@ function aplicarIdentidade() {
     root.setProperty('--teal-border',    rgba(0.25));
     root.setProperty('--teal-glow',      rgba(0.30));
     root.setProperty('--teal-glow-soft', rgba(0.08));
+  } else {
+    ['--teal','--teal-light','--teal-dark','--teal-dim','--teal-border','--teal-glow','--teal-glow-soft'].forEach(function (v) { root.removeProperty(v); });
   }
   document.title = IDENTIDADE.nome + ' — Gestão Ministerial';
   if (IDENTIDADE.logoUrl) {

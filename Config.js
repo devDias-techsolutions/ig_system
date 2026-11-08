@@ -22,13 +22,13 @@ var Config = (function () {
     { Chave: 'NOME_CURTO',     Valor: '',          Descricao: 'Nome curto (opcional). Usado onde há pouco espaço' },
     { Chave: 'LEMA_IGREJA',    Valor: '',          Descricao: 'Versículo ou lema exibido no cabeçalho da tela inicial (opcional)' },
     { Chave: 'COR_PRIMARIA',   Valor: '',          Descricao: 'Cor da marca no formato #RRGGBB, ex.: #0F766E (vazio = cor padrão)' },
-    { Chave: 'LOGO_URL',       Valor: '',          Descricao: 'Link do logo: compartilhamento do Google Drive (qualquer pessoa com o link) ou endereço https://. Vazio = iniciais da igreja' },
+    { Chave: 'LOGO_URL',       Valor: '',          Descricao: 'Avançado: link do logo (https://). O ideal é enviar a imagem pela tela Identidade, que tem prioridade sobre este link' },
     { Chave: 'PASTOR',         Valor: '',          Descricao: 'Nome do pastor presidente (assinatura no verso da carteirinha; vazio = sem assinatura)' },
     { Chave: 'CARGO_PASTOR',   Valor: 'Pastor Presidente', Descricao: 'Cargo exibido abaixo do nome do pastor na carteirinha' },
     { Chave: 'ENDERECO_IGREJA', Valor: '',         Descricao: 'Endereço da sede, impresso no rodapé da carteirinha (opcional)' },
     { Chave: 'CNPJ_IGREJA',    Valor: '',          Descricao: 'CNPJ da igreja, impresso na carteirinha (opcional)' },
-    { Chave: 'MARCA_DAGUA_URL', Valor: '',         Descricao: 'Imagem de fundo (marca d\'água) da carteirinha: link do Drive ou https:// (opcional)' },
-    { Chave: 'ASSINATURA_URL', Valor: '',          Descricao: 'Imagem da assinatura do pastor para o verso da carteirinha: link do Drive ou https:// (opcional)' },
+    { Chave: 'MARCA_DAGUA_URL', Valor: '',         Descricao: 'Avançado: link da marca d\'água da carteirinha (https://). A imagem enviada pela tela Identidade tem prioridade' },
+    { Chave: 'ASSINATURA_URL', Valor: '',          Descricao: 'Avançado: link da assinatura do pastor (https://). A imagem enviada pela tela Identidade tem prioridade' },
     { Chave: 'PASTA_FOTOS',    Valor: PASTA_FOTOS_PADRAO, Descricao: 'Nome da pasta do Google Drive onde as fotos dos membros são guardadas (criada automaticamente)' },
     { Chave: 'MODULOS_ATIVOS', Valor: '',          Descricao: 'Módulos liberados, separados por vírgula, ex.: membros. Vazio = todos os módulos instalados' }
   ];
@@ -116,8 +116,51 @@ var Config = (function () {
   }
 
   // JSON seguro para embutir dentro de <script>
+  // Ajustes editáveis pela tela Identidade: chave da Config → [rótulo, tamanho máximo, obrigatório]
+  var EDITAVEIS = {
+    NOME_IGREJA:     ['Nome da igreja', 80, true],
+    NOME_CURTO:      ['Nome curto', 30, false],
+    LEMA_IGREJA:     ['Lema', 160, false],
+    COR_PRIMARIA:    ['Cor da marca', 7, false],
+    PASTOR:          ['Pastor', 80, false],
+    CARGO_PASTOR:    ['Cargo do pastor', 60, false],
+    ENDERECO_IGREJA: ['Endereço', 160, false],
+    CNPJ_IGREJA:     ['CNPJ', 30, false],
+    PASTA_FOTOS:     ['Pasta das fotos', 60, true]
+  };
+
+  // Valida e grava só as chaves permitidas. Devolve { ok, erro }; nada é gravado se algum campo for inválido.
+  function salvar(dados) {
+    dados = dados || {};
+    var limpos = {}, chaves = Object.keys(dados);
+    for (var i = 0; i < chaves.length; i++) {
+      var k = chaves[i], def = EDITAVEIS[k];
+      if (!def) return { ok: false, erro: 'Campo não editável: ' + k };
+      var v = String(dados[k] === null || dados[k] === undefined ? '' : dados[k]).replace(/[\u0000-\u001F\u007F]/g, ' ').trim();
+      if (def[2] && !v) return { ok: false, erro: def[0] + ' é obrigatório.' };
+      if (v.length > def[1]) return { ok: false, erro: def[0] + ' aceita no máximo ' + def[1] + ' caracteres.' };
+      if (k === 'COR_PRIMARIA' && v && !/^#[0-9a-fA-F]{6}$/.test(v)) return { ok: false, erro: 'Cor inválida. Use o formato #RRGGBB.' };
+      limpos[k] = v;
+    }
+    var rows = _linhas();
+    Object.keys(limpos).forEach(function (k) {
+      var ultima = null;
+      rows.forEach(function (r) { if (String(r.Chave).trim() === k) ultima = r; });   // a última linha da chave vale
+      if (ultima) {
+        Util.updateRow('Config', ultima._rowIndex, { Chave: ultima.Chave, Valor: limpos[k], Descricao: ultima.Descricao, AtualizadoEm: Util.now() });
+      } else {
+        Util.insertRow('Config', { Chave: k, Valor: limpos[k], Descricao: '', AtualizadoEm: Util.now() });
+      }
+    });
+    return { ok: true };
+  }
+
   // Página de login é pública: a assinatura do pastor só vai depois do login (idt_obter)
-  function identidadeCompleta() { return identidade(); }
+  function identidadeCompleta() {
+    var id = identidade();
+    id.pastaFotos = get('PASTA_FOTOS', PASTA_FOTOS_PADRAO);
+    return id;
+  }
   function identidadeJson() {
     var id = identidade();
     id.assinatura = '';
@@ -141,7 +184,7 @@ var Config = (function () {
   }
 
   return {
-    get: get, identidade: identidade, iniciais: iniciais, iconeUrl: iconeUrl, identidadeJson: identidadeJson, identidadeCompleta: identidadeCompleta,
+    get: get, identidade: identidade, iniciais: iniciais, iconeUrl: iconeUrl, identidadeJson: identidadeJson, identidadeCompleta: identidadeCompleta, salvar: salvar,
     garantirChaves: garantirChaves, chaves: CHAVES, pastaFotos: function () { return get('PASTA_FOTOS', PASTA_FOTOS_PADRAO); }
   };
 })();

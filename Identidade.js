@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════
-//  Imagens.gs · Logo, marca d'água e assinatura da igreja
+//  Identidade.gs · Imagens (logo, marca d'água, assinatura) e ajustes da igreja
 //
 //  Enviadas pela tela Identidade (só admin) e guardadas na aba "Imagens"
 //  da própria planilha, em base64 dividido em partes (limite de 50.000
@@ -91,6 +91,15 @@ function idt_enviarImagem(token, tipo, base64) {
 function idt_removerImagem(token, tipo) {
   return _idtAdmin(token, function () {
     try { Imagens.remover(tipo); } catch (e) { return Util.err(e.message); }
+    return Util.ok(Config.identidadeCompleta());
+  });
+}
+
+// Textos e cor da igreja (antes só editáveis direto na aba Config)
+function idt_salvarAjustes(token, dados) {
+  return _idtAdmin(token, function () {
+    var r = Config.salvar(dados);
+    if (!r.ok) return Util.err(r.erro);
     return Util.ok(Config.identidadeCompleta());
   });
 }

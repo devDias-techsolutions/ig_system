@@ -449,6 +449,54 @@ test('identidade: arquivo que não é imagem mostra aviso e nada é salvo', asyn
   assert.equal(await page.locator('#idt-previa-logo img').count(), 0);
 });
 
+test('identidade: admin edita nome, cor e dados da carteirinha e salva num só lugar', async () => {
+  const backend = criarBackend();
+  const { page } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  await page.evaluate(() => navigateTo('identidade'));
+  await page.waitForSelector('#idt-nome');
+  const antesCor = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--teal').trim().toLowerCase());
+  assert.equal(await page.isDisabled('#idt-salvar'), true, 'sem alterações o botão fica desabilitado');
+  await page.fill('#idt-nome', 'Igreja Teste Nova');
+  await page.fill('#idt-pastor', 'Pr. Fulano');
+  await page.click('.idt-cor[data-cor="#7C3AED"]');
+  const previa = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--teal').trim().toLowerCase());
+  assert.notEqual(previa, antesCor, 'prévia da cor na hora');
+  assert.equal(await page.isDisabled('#idt-salvar'), false);
+  await page.click('#idt-salvar');
+  await page.waitForFunction(() => IDENTIDADE.nome === 'Igreja Teste Nova');
+  assert.equal(await page.evaluate(() => IDENTIDADE.pastor), 'Pr. Fulano');
+  assert.equal(JSON.parse(backend.env.run('Config.identidadeJson()')).corPrimaria, '#7c3aed');
+  assert.equal(await page.isDisabled('#idt-salvar'), true);
+});
+
+test('identidade: cor sem salvar volta ao sair da tela; descartar restaura os campos', async () => {
+  const backend = criarBackend();
+  const { page } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  const antes = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--teal').trim());
+  await page.evaluate(() => navigateTo('identidade'));
+  await page.waitForSelector('#idt-nome');
+  const nomeOrig = await page.inputValue('#idt-nome');
+  await page.fill('#idt-nome', 'Outro');
+  await page.click('.idt-cor[data-cor="#BE185D"]');
+  await page.click('#idt-descartar');
+  await page.waitForSelector('#idt-nome');
+  assert.equal(await page.inputValue('#idt-nome'), nomeOrig);
+  await page.click('.idt-cor[data-cor="#BE185D"]');
+  await page.evaluate(() => navigateTo('home'));
+  await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--teal').trim()), antes);
+});
+
+test('identidade: cor inválida vinda do servidor mostra erro e nada muda', async () => {
+  const backend = criarBackend();
+  const { page } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  const r = await page.evaluate(() => new Promise((ok) => google.script.run.withSuccessHandler(ok).idt_salvarAjustes(App.session.token, { COR_PRIMARIA: 'azul' })));
+  assert.equal(r.success, false);
+});
+
 test('identidade: secretaria não vê o item no menu e não abre a tela nem envia pela API', async () => {
   const backend = criarBackend();
   const { page } = await abrir(browser, backend);
