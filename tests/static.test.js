@@ -132,7 +132,7 @@ test('tema: shell e login sem o teal original solto (só nas variáveis --teal*)
   assert.deepEqual(hits, [], 'Cores soltas no shell/login:\n' + hits.join('\n'));
 });
 
-const TELAS_BASE = ['_home.html', '_usuarios.html', '_login.html', '_primeiro-acesso.html', '_recuperar-senha.html', '_identidade.html'];
+const TELAS_BASE = ['_home.html', '_membros.html', '_usuarios.html', '_login.html', '_primeiro-acesso.html', '_recuperar-senha.html', '_identidade.html'];
 test('tema: Home, Usuários, login e telas de acesso sem teal solto nem :root próprio', () => {
   const raw = /rgba\(\s*0\s*,\s*(?:217|196|169|137)\s*,\s*(?:198|181|156|123)|#00D9C6|#00A99C|#00C4B5|#00FFF0|#00897E|#00BFA5|#00b8ad|#007d78|#009A93|#005248|#007064/i;
   const hits = findings(raw, TELAS_BASE);

@@ -545,3 +545,14 @@ test('carteirinha: logo enviado fica dentro do cabeçalho, em caixa pequena e se
   assert.ok(r.w <= 56 && r.h <= 56, 'logo no máximo 56px: ' + JSON.stringify(r));
   assert.ok(r.dentro, 'logo dentro do cabeçalho: ' + JSON.stringify(r));
 });
+
+test('tema: card destaque de Membros acompanha a cor da marca', async () => {
+  const backend = criarBackend();
+  await definirConfig(backend, 'COR_PRIMARIA', '#7c3aed');
+  const { page } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  await page.evaluate(() => navigateTo('membros'));
+  await page.waitForSelector('.mb-kpi-card-hero');
+  const bg = await page.evaluate(() => getComputedStyle(document.querySelector('.mb-kpi-card-hero')).backgroundImage);
+  assert.ok(!/10, ?61, ?98|14, ?107, ?138|26, ?122, ?104/.test(bg), 'sem o azul/verde fixo: ' + bg);
+});
