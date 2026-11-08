@@ -23,12 +23,20 @@
 .idt-campos .field.largo { grid-column: 1 / -1; }
 .idt-ajuda { font-size: 11px; color: var(--text-dim); line-height: 1.4; }
 
-.idt-cores { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; }
-.idt-cor { width: 36px; height: 36px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; box-shadow: 0 0 0 1px var(--border); }
-.idt-cor.sel { border-color: var(--text); }
-.idt-cor-livre { display: flex; align-items: center; gap: 8px; margin-left: 4px; }
-.idt-cor-livre input[type="color"] { width: 44px; height: 36px; padding: 0; border: 1px solid var(--border); border-radius: 8px; background: none; cursor: pointer; }
-.idt-cor-livre input[type="text"] { width: 110px; height: 36px; font-size: 14px !important; padding: 0 10px; text-transform: uppercase; }
+.idt-cor-bloco { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+.idt-cor-botao {
+  position: relative; display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 14px 8px 8px;
+  background: var(--bg3); border: 1.5px solid var(--border-strong); border-radius: var(--radius-md, 14px); cursor: pointer;
+}
+.idt-cor-botao input[type="color"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: 0; padding: 0; }
+.idt-cor-amostra { width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; background: var(--teal); box-shadow: 0 0 0 1px var(--border) inset; }
+.idt-cor-texto { flex: 1; font-size: 15px; font-weight: 700; color: var(--text); }
+.idt-cor-botao svg { flex-shrink: 0; color: var(--text-muted); }
+.idt-cor-hex { text-transform: uppercase; }
+.idt-recentes-rotulo { font-size: 12px; font-weight: 700; color: var(--text-muted); margin: 0 0 8px; }
+.idt-recentes { display: flex; flex-wrap: wrap; gap: 10px; }
+.idt-recente { width: 40px; height: 40px; border-radius: 50%; border: 2px solid transparent; padding: 0; cursor: pointer; box-shadow: 0 0 0 1px var(--border); }
+.idt-recente.sel { border-color: var(--text); }
 
 .idt-grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 16px; }
 .idt-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
@@ -79,7 +87,7 @@ var IDT_CAMPOS = {
   cnpj:        ['CNPJ_IGREJA',     'CNPJ',             'text', 'Rodapé da carteirinha. Opcional.'],
   pastaFotos:  ['PASTA_FOTOS',     'Pasta das fotos no Drive', 'text', 'As novas fotos de membros vão para esta pasta (criada sozinha). Fotos já salvas continuam onde estão.']
 };
-var IDT_CORES = ['#0F766E', '#0E7490', '#1D4ED8', '#7C3AED', '#BE185D', '#C2410C', '#15803D', '#475569'];
+var IDT_RECENTES_MAX = 6;
 var IDT = { orig: {}, draft: {} };
 
 function _idtValoresSalvos() {
@@ -104,11 +112,15 @@ function renderIdentidade() {
       _idtSecao('Dados da igreja', 'Aparecem no login, no menu, no topo e nos e-mails do sistema.', _idtCampo('nome', true) + _idtCampo('nomeCurto') + _idtCampo('lema', true)) +
 
       _idtSecao('Cor da marca', 'Muda botões, destaques e menus em todo o sistema. Veja o resultado na hora e salve quando gostar.',
-        '<div class="idt-cores" id="idt-cores">' +
-          IDT_CORES.map(function (c) { return '<button type="button" class="idt-cor" data-cor="' + c + '" style="background:' + c + '" aria-label="Cor ' + c + '" onclick="idtCor(\'' + c + '\')"></button>'; }).join('') +
-          '<span class="idt-cor-livre"><input type="color" id="idt-cor-picker" oninput="idtCor(this.value)" aria-label="Escolher outra cor">' +
-          '<input type="text" id="idt-cor-hex" maxlength="7" placeholder="#RRGGBB" oninput="idtCorTexto(this.value)" aria-label="Cor em hexadecimal"></span>' +
-          '<button type="button" class="btn btn-ghost btn-sm" onclick="idtCor(\'\')">Cor padrão</button>' +
+        '<div class="idt-cor-bloco">' +
+          '<label class="idt-cor-botao" id="idt-cor-botao"><span class="idt-cor-amostra" id="idt-cor-amostra"></span>' +
+            '<span class="idt-cor-texto">Escolher cor</span>' +
+            '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>' +
+            '<input type="color" id="idt-cor-picker" oninput="idtCor(this.value)" aria-label="Escolher cor da marca"></label>' +
+          '<div class="field" style="margin:0"><label for="idt-cor-hex">Ou digite o código da cor</label>' +
+            '<input type="text" class="idt-cor-hex" id="idt-cor-hex" maxlength="7" placeholder="#RRGGBB" autocomplete="off" oninput="idtCorTexto(this.value)"></div>' +
+          '<div><button type="button" class="btn btn-ghost btn-sm" id="idt-cor-padrao" onclick="idtCor(\'\')">Usar cor padrão</button></div>' +
+          _idtRecentesHtml() +
         '</div>') +
 
       _idtSecao('Imagens', 'Envie direto do seu aparelho. Ficam guardadas na própria planilha e são reduzidas automaticamente (até 100 KB).',
@@ -132,7 +144,7 @@ function renderIdentidade() {
 }
 
 function _idtSecao(titulo, texto, corpo) {
-  return '<section class="idt-sec"><h2>' + titulo + '</h2><p>' + texto + '</p>' + (corpo.indexOf('idt-campos') === -1 && corpo.indexOf('idt-grade') === -1 && corpo.indexOf('idt-cores') === -1 ? '<div class="idt-campos">' + corpo + '</div>' : corpo) + '</section>';
+  return '<section class="idt-sec"><h2>' + titulo + '</h2><p>' + texto + '</p>' + (corpo.indexOf('idt-campos') === -1 && corpo.indexOf('idt-grade') === -1 && corpo.indexOf('idt-cor-bloco') === -1 ? '<div class="idt-campos">' + corpo + '</div>' : corpo) + '</section>';
 }
 
 function _idtCampo(k, largo) {
@@ -156,6 +168,24 @@ function _idtCartaoImagem(t) {
     '</div></div>';
 }
 
+// Cores recentes: só as que a igreja já salvou, guardadas neste aparelho
+function _idtRecentes() {
+  try { var r = JSON.parse(localStorage.getItem('idt_cores_recentes') || '[]'); return Array.isArray(r) ? r.filter(function (c) { return /^#[0-9A-F]{6}$/.test(c); }) : []; } catch (e) { return []; }
+}
+function _idtLembrarCor(hex) {
+  if (!hex) return;
+  hex = hex.toUpperCase();
+  var r = [hex].concat(_idtRecentes().filter(function (c) { return c !== hex; })).slice(0, IDT_RECENTES_MAX);
+  try { localStorage.setItem('idt_cores_recentes', JSON.stringify(r)); } catch (e) {}
+}
+function _idtRecentesHtml() {
+  var r = _idtRecentes();
+  if (!r.length) return '';
+  return '<div><p class="idt-recentes-rotulo">Cores recentes</p><div class="idt-recentes">' +
+    r.map(function (c) { return '<button type="button" class="idt-recente" data-cor="' + c + '" style="background:' + c + '" aria-label="Cor ' + c + '" onclick="idtCor(\'' + c + '\')"></button>'; }).join('') +
+    '</div></div>';
+}
+
 // ── Edição de textos e cor ─────────────────────────────────
 function idtDigitou(k, valor) { IDT.draft[k] = valor; _idtAtualizarTela(); }
 
@@ -166,6 +196,7 @@ function idtCor(hex) {
 }
 function idtCorTexto(v) {
   v = v.trim();
+  if (/^[0-9a-fA-F]{6}$/.test(v)) v = '#' + v;
   if (/^#[0-9a-fA-F]{6}$/.test(v)) idtCor(v.toUpperCase());
 }
 function _idtPreviaCor() {
@@ -186,7 +217,8 @@ function _idtAtualizarTela() {
   if (el) el.innerHTML = '<span>' + escHtml(iniciaisIgreja((d.nomeCurto || '').trim() || nome)) + '</span>' +
     (IDENTIDADE.logoUrl ? '<img src="' + escHtml(IDENTIDADE.logoUrl) + '" alt="" onload="this.previousElementSibling.style.visibility=\'hidden\'" onerror="this.style.display=\'none\'">' : '');
   var cor = (d.corPrimaria || '').toUpperCase();
-  document.querySelectorAll('.idt-cor').forEach(function (b) { b.classList.toggle('sel', b.getAttribute('data-cor').toUpperCase() === cor); });
+  document.querySelectorAll('.idt-recente').forEach(function (b) { b.classList.toggle('sel', b.getAttribute('data-cor') === cor); });
+  var amostra = document.getElementById('idt-cor-amostra'); if (amostra) amostra.style.background = cor || 'var(--teal)';
   var picker = document.getElementById('idt-cor-picker'); if (picker && cor) picker.value = cor.toLowerCase();
   var hex = document.getElementById('idt-cor-hex'); if (hex && document.activeElement !== hex) hex.value = cor;
   el = document.getElementById('idt-estado');
@@ -217,7 +249,7 @@ function idtSalvar() {
   google.script.run
     .withFailureHandler(function () { _idtSalvarFim(); showToast('Falha de conexão. Tente novamente.', 'error'); })
     .withSuccessHandler(function (res) {
-      if (res && res.success) { _idtAtualizar(res.data); showToast('Alterações salvas.', 'success'); }
+      if (res && res.success) { if (envio.COR_PRIMARIA) _idtLembrarCor(envio.COR_PRIMARIA); _idtAtualizar(res.data); showToast('Alterações salvas.', 'success'); }
       else { _idtSalvarFim(); showToast((res && res.error) || 'Não foi possível salvar.', 'error'); }
     })
     .idt_salvarAjustes(App.session.token, envio);
