@@ -470,3 +470,26 @@ test('carteirinha: assinatura enviada pela tela Identidade aparece no verso mesm
   assert.ok(c.html.includes('data:image/png;base64,' + PNG), 'imagem da assinatura no verso');
   assert.equal(c.html.includes('sign-name'), false, 'sem pastor, sem nome impresso');
 });
+
+test('carteirinha: logo enviado fica dentro do cabeçalho, em caixa pequena e sem posição absoluta', async () => {
+  const backend = criarBackend();
+  // logo largo e grande de propósito (2:1)
+  const larg = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64').toString('base64');
+  backend.env.ctx.__p = larg; backend.env.run("Imagens.salvar('logo', __p)");
+  const { page } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  await page.evaluate(() => navigateTo('membros'));
+  await page.waitForSelector('.mb-tab, [data-tab]');
+  await page.evaluate(() => {
+    const w = document.createElement('div'); w.id = 'cartao-teste'; w.style.cssText = 'position:fixed;top:0;left:0;z-index:99999';
+    w.innerHTML = mbCard_htmlFrente({ nome: 'Maria Silva', rol: '1', funcao: 'Membro' }, false); document.body.appendChild(w);
+  });
+  const r = await page.evaluate(() => {
+    const img = document.querySelector('#cartao-teste .card-logo img'); const hd = document.querySelector('#cartao-teste .card-header');
+    const a = img.getBoundingClientRect(), h = hd.getBoundingClientRect();
+    return { pos: getComputedStyle(img).position, w: a.width, h: a.height, dentro: a.top >= h.top - 1 && a.bottom <= h.bottom + 1 && a.left >= h.left - 1 && a.right <= h.right + 1 };
+  });
+  assert.notEqual(r.pos, 'absolute');
+  assert.ok(r.w <= 56 && r.h <= 56, 'logo no máximo 56px: ' + JSON.stringify(r));
+  assert.ok(r.dentro, 'logo dentro do cabeçalho: ' + JSON.stringify(r));
+});
