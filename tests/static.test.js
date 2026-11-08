@@ -222,3 +222,23 @@ test('recorte: núcleo sem perfil professor e sem funcionalidades "Em breve"', (
   ].filter((h) => !/data:image/.test(h));
   assert.deepEqual(hits, [], 'Itens fora do MVP encontrados:\n' + hits.join('\n'));
 });
+
+// ═══ 5. LAYOUT SYSTEM (Etapa 15) ════════════════════════════
+test('layout: o shell define os blocos .page, .page-head, .panel, .form-grid e .action-bar', () => {
+  const idx = read('index.html');
+  ['\\.page', '\\.page-head', '\\.page-title', '\\.panel', '\\.panel-title', '\\.form-grid', '\\.action-bar', '\\.action-bar-btns'].forEach((c) =>
+    assert.match(idx, new RegExp('^' + c + '\\s*\\{', 'm'), 'faltando ' + c.replace('\\', '') + ' no Layout System'));
+});
+
+test('layout: módulos só preenchem os blocos, nunca os redefinem', () => {
+  const redefine = /^\s*\.(?:page|page-head|page-title|page-sub|panel|panel-title|panel-text|form-grid|action-bar|action-bar-btns|action-bar-status)\s*[,{]/;
+  const hits = findings(redefine, HTML.filter((f) => f !== 'index.html'));
+  assert.deepEqual(hits, [], 'Telas redefinindo o Layout System:\n' + hits.join('\n'));
+});
+
+test('layout: telas migradas usam .page como raiz e barra de ações padrão', () => {
+  ['_home.html', '_membros.html', '_identidade.html'].forEach((f) => assert.match(read(f), /class="page[ "]/, f + ' sem raiz .page'));
+  const idt = read('_identidade.html');
+  assert.match(idt, /class="action-bar"/);
+  assert.ok(/Descartar[\s\S]{0,400}Salvar alterações/.test(idt), 'ordem fixa: secundário (Descartar) antes do primário (Salvar)');
+});

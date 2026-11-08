@@ -5,8 +5,6 @@
    a paleta da igreja (aba Config) chega pelas variáveis --teal*.
 ══════════════════════════════════════════════════ */
 
-.hm { max-width: 1120px; margin: 0 auto; padding: var(--sp-5) var(--gutter) var(--sp-7); }
-
 /* ── Entrada suave, escalonada ── */
 .hm-rise { opacity: 0; transform: translateY(12px); animation: hmRise .55s var(--ease-spring) forwards; animation-delay: calc(var(--i, 0) * 70ms); }
 @keyframes hmRise { to { opacity: 1; transform: translateY(0); } }
@@ -167,7 +165,7 @@ function renderHome() {
 
   /* ══ Cabeçalho de identidade (nome, logo, lema e cor vêm da aba Config) ══ */
   var html =
-    '<div class="hm">' +
+    '<div class="page hm">' +
     '<header class="hm-head hm-rise" style="--i:' + (i++) + '">' +
       '<div class="hm-id">' +
         '<div class="hm-logo"><span class="brand-mark">' + brandMarkInner() + '</span></div>' +

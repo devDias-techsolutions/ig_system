@@ -1,12 +1,5 @@
 <style>
-/* ═════════════════════════════════════════════
-   IDENTIDADE — personalização da igreja num só lugar (somente admin)
-   Estrutura fixa: prévia · seções (título + campos) · barra de salvar sempre no mesmo lugar
-═════════════════════════════════════════════ */
-.idt-wrap { max-width: 960px; margin: 0 auto; padding: 24px 16px 24px; }
-.idt-titulo { font-size: 22px; font-weight: 800; letter-spacing: -.02em; color: var(--text); margin: 0 0 4px; }
-.idt-sub { font-size: 13px; color: var(--text-muted); margin: 0 0 20px; line-height: 1.5; }
-
+/* IDENTIDADE — só o que é específico da tela; a estrutura vem do Layout System (.page, .panel, .form-grid, .action-bar) */
 .idt-marca {
   display: flex; align-items: center; gap: 14px; padding: 16px;
   background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 14px;
@@ -15,12 +8,6 @@
 .idt-marca-nome { font-size: 17px; font-weight: 800; color: var(--text); line-height: 1.2; }
 .idt-marca-lema { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
-.idt-sec { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 16px 6px; margin-bottom: 14px; }
-.idt-sec h2 { font-size: 14px; font-weight: 800; color: var(--text); margin: 0 0 2px; }
-.idt-sec > p { font-size: 12px; color: var(--text-muted); margin: 0 0 14px; line-height: 1.45; }
-.idt-campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0 14px; }
-.idt-campos .field { margin-bottom: 16px; }
-.idt-campos .field.largo { grid-column: 1 / -1; }
 .idt-ajuda { font-size: 11px; color: var(--text-dim); line-height: 1.4; }
 
 .idt-cor-bloco { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
@@ -52,19 +39,6 @@
 .idt-acoes { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; }
 .idt-acoes .btn { flex: 1 1 auto; }
 .idt-dica { margin: 0 0 16px; font-size: 12px; color: var(--text-muted); line-height: 1.55; }
-
-/* Barra de salvar: sempre na base da tela, mesmos botões, mesma ordem */
-.idt-barra {
-  position: sticky; bottom: 12px; z-index: 20;
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  background: var(--bg-glass-strong); border: 1px solid var(--border); border-radius: var(--radius-lg);
-  padding: 10px 12px 10px 16px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  box-shadow: var(--shadow-lg);
-}
-.idt-estado { font-size: 12px; color: var(--text-muted); }
-.idt-estado.sujo { color: var(--warning, #f59e0b); font-weight: 700; }
-.idt-botoes { display: flex; gap: 8px; }
-@media (max-width: 1023px) { .idt-barra { bottom: calc(84px + env(safe-area-inset-bottom)); } .idt-wrap { padding-bottom: 8px; } }
 </style>
 
 <script>
@@ -104,9 +78,9 @@ function renderIdentidade() {
   IDT.draft = JSON.parse(JSON.stringify(IDT.rascunho || IDT.orig));
   IDT.rascunho = null;
   renderView(
-    '<div class="idt-wrap">' +
-      '<h1 class="idt-titulo">Identidade da igreja</h1>' +
-      '<p class="idt-sub">Tudo o que personaliza o sistema fica aqui: nome, cor, imagens e dados da carteirinha.</p>' +
+    '<div class="page page-narrow">' +
+      '<div class="page-head"><h1 class="page-title">Identidade da igreja</h1>' +
+      '<p class="page-sub">Tudo o que personaliza o sistema fica aqui: nome, cor, imagens e dados da carteirinha.</p></div>' +
       '<div class="idt-marca"><span class="brand-mark" id="idt-marca-logo"></span><div><div class="idt-marca-nome" id="idt-marca-nome"></div><div class="idt-marca-lema" id="idt-marca-lema"></div></div></div>' +
 
       _idtSecao('Dados da igreja', 'Aparecem no login, no menu, no topo e nos e-mails do sistema.', _idtCampo('nome', true) + _idtCampo('nomeCurto') + _idtCampo('lema', true)) +
@@ -131,9 +105,9 @@ function renderIdentidade() {
 
       _idtSecao('Fotos dos membros', 'Onde as fotos novas são guardadas no Google Drive.', _idtCampo('pastaFotos', true)) +
 
-      '<div class="idt-barra">' +
-        '<span class="idt-estado" id="idt-estado">Tudo salvo</span>' +
-        '<span class="idt-botoes">' +
+      '<div class="action-bar">' +
+        '<span class="action-bar-status" id="idt-estado">Tudo salvo</span>' +
+        '<span class="action-bar-btns">' +
           '<button class="btn btn-ghost btn-sm" id="idt-descartar" onclick="idtDescartar()" disabled>Descartar</button>' +
           '<button class="btn btn-primary btn-sm" id="idt-salvar" onclick="idtSalvar()" disabled>Salvar alterações</button>' +
         '</span>' +
@@ -144,12 +118,12 @@ function renderIdentidade() {
 }
 
 function _idtSecao(titulo, texto, corpo) {
-  return '<section class="idt-sec"><h2>' + titulo + '</h2><p>' + texto + '</p>' + (corpo.indexOf('idt-campos') === -1 && corpo.indexOf('idt-grade') === -1 && corpo.indexOf('idt-cor-bloco') === -1 ? '<div class="idt-campos">' + corpo + '</div>' : corpo) + '</section>';
+  return '<section class="panel"><h2 class="panel-title">' + titulo + '</h2><p class="panel-text">' + texto + '</p>' + (corpo.indexOf('idt-grade') === -1 && corpo.indexOf('idt-cor-bloco') === -1 ? '<div class="form-grid">' + corpo + '</div>' : corpo) + '</section>';
 }
 
 function _idtCampo(k, largo) {
   var d = IDT_CAMPOS[k];
-  return '<div class="field' + (largo ? ' largo' : '') + '"><label for="idt-' + k + '">' + d[1] + '</label>' +
+  return '<div class="field' + (largo ? ' span-all' : '') + '"><label for="idt-' + k + '">' + d[1] + '</label>' +
     '<input type="text" id="idt-' + k + '" value="' + escHtml(IDT.draft[k] || '') + '" autocomplete="off" oninput="idtDigitou(\'' + k + '\', this.value)">' +
     (d[3] ? '<span class="idt-ajuda">' + d[3] + '</span>' : '') + '</div>';
 }
@@ -222,7 +196,7 @@ function _idtAtualizarTela() {
   var picker = document.getElementById('idt-cor-picker'); if (picker && cor) picker.value = cor.toLowerCase();
   var hex = document.getElementById('idt-cor-hex'); if (hex && document.activeElement !== hex) hex.value = cor;
   el = document.getElementById('idt-estado');
-  if (el) { el.textContent = sujo ? 'Alterações não salvas' : 'Tudo salvo'; el.classList.toggle('sujo', sujo); }
+  if (el) { el.textContent = sujo ? 'Alterações não salvas' : 'Tudo salvo'; el.classList.toggle('pendente', sujo); }
   ['idt-salvar', 'idt-descartar'].forEach(function (id) { var b = document.getElementById(id); if (b) b.disabled = !sujo; });
 }
 
