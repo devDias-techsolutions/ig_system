@@ -2418,6 +2418,7 @@ function mbImportarJSON(e) {
 .mb-card-back .back-sign .sign-line {
   width: 70%; border-bottom: 1px solid #fff; margin-bottom: 14px;
 }
+.mb-card-back .back-sign .sign-line:last-child { margin-bottom: 4px; }
 .mb-card-back .back-sign .sign-name {
   margin-top: -12px; font-size: 8px; font-weight: 700;
   text-transform: uppercase; white-space: nowrap;
@@ -2738,13 +2739,13 @@ function mbCard_htmlVerso(m, forPrint) {
           '<div class="back-grid">'+grid+'</div>'+
         '</div>'+
 
-        /* Assinatura (só se o pastor foi informado na Config) */
-        (d.pastor ?
+        /* Assinatura: aparece se houver imagem da assinatura OU nome do pastor na Config */
+        ((d.assinatura || d.pastor) ?
         '<div class="back-sign">'+
           '<div class="sign-img-wrap">'+_mbCardImg(d.assinatura)+'</div>'+
           '<div class="sign-line"></div>'+
-          '<div class="sign-name">'+_mbEsc(d.pastor)+'</div>'+
-          (d.cargo ? '<div class="sign-cargo">'+_mbEsc(d.cargo)+'</div>' : '')+
+          (d.pastor ? '<div class="sign-name">'+_mbEsc(d.pastor)+'</div>' : '')+
+          (d.pastor && d.cargo ? '<div class="sign-cargo">'+_mbEsc(d.cargo)+'</div>' : '')+
         '</div>' : '')+
 
         /* Endereço rodapé */
