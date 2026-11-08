@@ -459,7 +459,7 @@ test('identidade: admin edita nome, cor e dados da carteirinha e salva num só l
   assert.equal(await page.isDisabled('#idt-salvar'), true, 'sem alterações o botão fica desabilitado');
   await page.fill('#idt-nome', 'Igreja Teste Nova');
   await page.fill('#idt-pastor', 'Pr. Fulano');
-  await page.click('.idt-cor[data-cor="#7C3AED"]');
+  await page.fill('#idt-cor-hex', '#7C3AED');
   const previa = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--teal').trim().toLowerCase());
   assert.notEqual(previa, antesCor, 'prévia da cor na hora');
   assert.equal(await page.isDisabled('#idt-salvar'), false);
@@ -479,11 +479,11 @@ test('identidade: cor sem salvar volta ao sair da tela; descartar restaura os ca
   await page.waitForSelector('#idt-nome');
   const nomeOrig = await page.inputValue('#idt-nome');
   await page.fill('#idt-nome', 'Outro');
-  await page.click('.idt-cor[data-cor="#BE185D"]');
+  await page.fill('#idt-cor-hex', '#BE185D');
   await page.click('#idt-descartar');
   await page.waitForSelector('#idt-nome');
   assert.equal(await page.inputValue('#idt-nome'), nomeOrig);
-  await page.click('.idt-cor[data-cor="#BE185D"]');
+  await page.fill('#idt-cor-hex', '#BE185D');
   await page.evaluate(() => navigateTo('home'));
   await page.waitForTimeout(200);
   assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--teal').trim()), antes);
@@ -555,4 +555,22 @@ test('tema: card destaque de Membros acompanha a cor da marca', async () => {
   await page.waitForSelector('.mb-kpi-card-hero');
   const bg = await page.evaluate(() => getComputedStyle(document.querySelector('.mb-kpi-card-hero')).backgroundImage);
   assert.ok(!/10, ?61, ?98|14, ?107, ?138|26, ?122, ?104/.test(bg), 'sem o azul/verde fixo: ' + bg);
+});
+
+test('identidade: cor salva vira "cor recente" e pode ser reaplicada; sem recentes não mostra o bloco', async () => {
+  const backend = criarBackend();
+  const { page } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  await page.evaluate(() => { localStorage.removeItem('idt_cores_recentes'); navigateTo('identidade'); });
+  await page.waitForSelector('#idt-cor-hex');
+  assert.equal(await page.locator('.idt-recente').count(), 0);
+  assert.ok(await page.isVisible('#idt-cor-botao'), 'botão "Escolher cor" visível');
+  await page.fill('#idt-cor-hex', '7c3aed');
+  await page.click('#idt-salvar');
+  await page.waitForSelector('.idt-recente[data-cor="#7C3AED"]');
+  await page.fill('#idt-cor-hex', '#BE185D');
+  await page.click('#idt-salvar');
+  await page.waitForFunction(() => document.querySelectorAll('.idt-recente').length === 2);
+  await page.click('.idt-recente[data-cor="#7C3AED"]');
+  assert.equal(await page.inputValue('#idt-cor-hex'), '#7C3AED');
 });
