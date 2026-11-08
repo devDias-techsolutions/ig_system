@@ -456,3 +456,17 @@ test('identidade: secretaria não vê o item no menu e não abre a tela nem envi
   const r = await page.evaluate((png) => new Promise((ok) => google.script.run.withSuccessHandler(ok).idt_enviarImagem(App.session.token, 'logo', png)), PNG_1X1.toString('base64'));
   assert.equal(r.success, false);
 });
+
+test('carteirinha: assinatura enviada pela tela Identidade aparece no verso mesmo sem nome do pastor', async () => {
+  const backend = criarBackend();
+  const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+  backend.env.ctx.__p = PNG;
+  backend.env.run("Imagens.salvar('assinatura', __p)");
+  const { page } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  await page.waitForFunction(() => IDENTIDADE.assinatura); // chega depois do login (idt_obter)
+  const c = await cartao(page);
+  assert.ok(c.html.includes('back-sign'), 'bloco da assinatura');
+  assert.ok(c.html.includes('data:image/png;base64,' + PNG), 'imagem da assinatura no verso');
+  assert.equal(c.html.includes('sign-name'), false, 'sem pastor, sem nome impresso');
+});
