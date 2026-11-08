@@ -449,7 +449,7 @@ test('módulos: manifesto é serializável (sem funções) e o JSON do HTML é s
 test('módulos: o esquema da planilha inclui as abas do núcleo e as declaradas pelos módulos ativos', () => {
   const env = freshEnv();
   const esq = JSON.parse(env.run('JSON.stringify(SetupSheets.schema())'));
-  assert.deepEqual(Object.keys(esq).sort(), ['Config', 'Membros', 'Sessoes', 'Usuarios']);
+  assert.deepEqual(Object.keys(esq).sort(), ['Config', 'Imagens', 'Membros', 'Sessoes', 'Usuarios']);
   assert.equal(esq.Membros[0], 'id');
   assert.ok(esq.Membros.includes('ativo'));
 });
@@ -462,7 +462,7 @@ test('módulos: módulo desativado some do registro, das abas, dos KPIs e do HTM
   assert.equal(env.run('Modulos.kpis().length'), 0);
   assert.equal(env.run('incluirModulos()'), '');
   const esq = JSON.parse(env.run('JSON.stringify(SetupSheets.schema())'));
-  assert.deepEqual(Object.keys(esq).sort(), ['Config', 'Sessoes', 'Usuarios']);
+  assert.deepEqual(Object.keys(esq).sort(), ['Config', 'Imagens', 'Sessoes', 'Usuarios']);
 });
 
 test('módulos: núcleo sem nenhum módulo — KPIs mostram só usuários', () => {
@@ -540,4 +540,74 @@ test('membros: dados de cadastro nunca são guardados no cache entre execuções
   env.run("mb_listarMembros('tok')");
   assert.ok(!env.scriptCache.get('sheet_Membros'), 'Membros foi parar no CacheService');
   assert.ok(!env.scriptCache.get('sheet_Usuarios'), 'Usuarios foi parar no CacheService');
+});
+
+// ═══ Identidade: imagens enviadas pelo admin (logo, marca d'água, assinatura) ═══
+function envIdentidade(perfil = 'admin') {
+  const env = freshEnv();
+  env.run('setupSpreadsheet()');
+  env.scriptCache.put('sess_tok', JSON.stringify({
+    token: 'tok', id: 'u1', nome: 'Ana', email: 'ana@igreja.test', perfil,
+    expiraEm: new Date(Date.now() + 3600e3).toISOString(), primeiroAcesso: false,
+  }), 3600);
+  return env;
+}
+const pngB64 = (extra = 20) => Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.alloc(extra, 7)]).toString('base64');
+
+test('identidade: admin envia o logo e ele vira data URI no lugar do link da Config', () => {
+  const env = envIdentidade();
+  definirConfigUnit(env, 'LOGO_URL', 'https://exemplo.test/antigo.png');
+  env.ctx.__b = pngB64();
+  const r = env.run("idt_enviarImagem('tok', 'logo', __b)");
+  assert.equal(r.success, true, JSON.stringify(r));
+  assert.equal(r.data.logoUrl, 'data:image/png;base64,' + pngB64());
+  assert.equal(JSON.parse(env.run('Config.identidadeJson()')).logoUrl, 'data:image/png;base64,' + pngB64());
+});
+
+test('identidade: imagem de 90 KB é dividida em partes de célula e volta idêntica', () => {
+  const env = envIdentidade();
+  env.ctx.__b = pngB64(90000);
+  assert.equal(env.run("idt_enviarImagem('tok', 'marcaDagua', __b)").success, true);
+  const linha = env.activeSS.getSheetByName('Imagens')._rows[1];
+  assert.ok(linha.slice(2, 5).every((c) => String(c).length <= 50000 && c !== ''), 'cada célula tem até 50.000 caracteres');
+  assert.equal(env.run('Config.identidade().marcaDagua'), 'data:image/png;base64,' + pngB64(90000));
+});
+
+test('identidade: só admin altera; secretaria recebe erro e nada é gravado', () => {
+  const env = envIdentidade('secretaria');
+  env.ctx.__b = pngB64();
+  const r = env.run("idt_enviarImagem('tok', 'logo', __b)");
+  assert.equal(r.success, false);
+  assert.match(r.error || r.message, /administrador/i);
+  assert.equal(env.run("Imagens.dataUri('logo')"), '');
+  assert.equal(env.run("idt_removerImagem('tok', 'logo')").success, false);
+});
+
+test('identidade: rejeita SVG, arquivo que não é imagem, tipo inválido e imagem grande demais', () => {
+  const env = envIdentidade();
+  const tenta = (b64, tipo = 'logo') => { env.ctx.__b = b64; return env.run(`idt_enviarImagem('tok', '${tipo}', __b)`); };
+  assert.equal(tenta(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>').toString('base64')).success, false);
+  assert.equal(tenta(Buffer.from('MZ executavel qualquer').toString('base64')).success, false);
+  assert.equal(tenta('%%%não é base64%%%').success, false);
+  assert.equal(tenta(pngB64(), 'outra').success, false);
+  assert.match(tenta(pngB64(120000)).error, /muito grande/i);
+  assert.equal(env.run("Imagens.dataUri('logo')"), '');
+});
+
+test('identidade: remover volta ao link da Config; a página pública nunca leva a assinatura', () => {
+  const env = envIdentidade();
+  definirConfigUnit(env, 'LOGO_URL', 'https://exemplo.test/logo.png');
+  env.ctx.__b = pngB64();
+  env.run("idt_enviarImagem('tok', 'logo', __b)");
+  env.run("idt_enviarImagem('tok', 'assinatura', __b)");
+  assert.equal(JSON.parse(env.run('Config.identidadeJson()')).assinatura, '', 'login é público');
+  assert.equal(env.run("idt_obter('tok')").data.assinatura, 'data:image/png;base64,' + pngB64(), 'logado recebe a assinatura');
+  assert.equal(env.run("idt_removerImagem('tok', 'logo')").data.logoUrl, 'https://exemplo.test/logo.png');
+});
+
+test('identidade: ícone do app não embute o logo enviado (grande demais para o <head>)', () => {
+  const env = envIdentidade();
+  env.ctx.__b = pngB64(5000);
+  env.run("idt_enviarImagem('tok', 'logo', __b)");
+  assert.match(env.run('Config.iconeUrl()'), /^data:image\/svg\+xml/);
 });

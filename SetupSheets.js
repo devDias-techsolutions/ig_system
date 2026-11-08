@@ -20,6 +20,11 @@ var SetupSheets = (function () {
       'CriadoEm', 'ExpiraEm', 'Ativo'
     ],
 
+    // Imagens da igreja enviadas pela tela Identidade (logo, marca d'água, assinatura): ficam na própria
+    // planilha, então copiar a planilha leva as imagens junto. Cada imagem é dividida em partes
+    // porque uma célula aceita no máximo 50.000 caracteres.
+    Imagens: ['Tipo', 'Mime', 'Dados1', 'Dados2', 'Dados3', 'AtualizadoEm'],
+
     Config: [
       'Chave', 'Valor', 'Descricao', 'AtualizadoEm'
     ]
@@ -29,6 +34,7 @@ var SetupSheets = (function () {
   var CORE_COLORS = {
     Usuarios:      '#1C353A',
     Sessoes:       '#0f2a2f',
+    Imagens:       '#3a3a3a',
     Config:        '#2a2a2a'
   };
 

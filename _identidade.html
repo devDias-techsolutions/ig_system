@@ -1,0 +1,135 @@
+<style>
+/* ═════════════════════════════════════════════
+   IDENTIDADE — logo, marca d'água e assinatura (somente admin)
+═════════════════════════════════════════════ */
+.idt-wrap { max-width: 880px; margin: 0 auto; padding: 24px 16px 96px; }
+.idt-titulo { font-size: 22px; font-weight: 800; letter-spacing: -.02em; color: var(--text); margin: 0 0 4px; }
+.idt-sub { font-size: 13px; color: var(--text-muted); margin: 0 0 22px; line-height: 1.5; }
+.idt-grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.idt-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.idt-card h2 { font-size: 14px; font-weight: 700; color: var(--text); margin: 0; }
+.idt-card p { font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.45; }
+.idt-previa {
+  height: 140px; border-radius: var(--radius-md); border: 1px dashed var(--border-strong);
+  background: linear-gradient(135deg, var(--teal-dark), var(--teal));
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.idt-previa img { max-width: 100%; max-height: 100%; object-fit: contain; padding: 8px; box-sizing: border-box; }
+.idt-previa span { font-size: 12px; color: #fff; opacity: .8; }
+.idt-acoes { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; }
+.idt-acoes .btn { flex: 1 1 auto; }
+.idt-dica { margin-top: 18px; font-size: 12px; color: var(--text-muted); line-height: 1.55; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; }
+</style>
+
+<script>
+// ── Tela de Identidade ─────────────────────────────────────
+var IDT_TIPOS = [
+  { tipo: 'logo',       campo: 'logoUrl',    titulo: 'Logo da igreja',  dica: 'Aparece no login, na barra lateral, no topo e na carteirinha.', maxDim: 512 },
+  { tipo: 'marcaDagua', campo: 'marcaDagua', titulo: 'Marca d\'água',   dica: 'Imagem de fundo, bem suave, da carteirinha (opcional).',        maxDim: 800 },
+  { tipo: 'assinatura', campo: 'assinatura', titulo: 'Assinatura',      dica: 'Assinatura do pastor, no verso da carteirinha (opcional).',     maxDim: 500 }
+];
+var IDT_MAX_BYTES = 95000; // o servidor aceita até 100 KB
+
+function renderIdentidade() {
+  if (!App.session) { navigateTo('login'); return; }
+  renderView(
+    '<div class="idt-wrap">' +
+      '<h1 class="idt-titulo">Identidade da igreja</h1>' +
+      '<p class="idt-sub">Envie as imagens direto do seu aparelho. Elas ficam guardadas na própria planilha, sem precisar de link do Drive.</p>' +
+      '<div class="idt-grade">' + IDT_TIPOS.map(_idtCartao).join('') + '</div>' +
+      '<div class="idt-dica"><strong>Dica:</strong> use PNG com fundo transparente e, de preferência, uma versão <strong>clara (branca)</strong> do logo, ' +
+        'porque ele aparece sobre a cor da marca. As imagens são reduzidas automaticamente para até 100 KB.</div>' +
+    '</div>'
+  );
+}
+
+function _idtCartao(t) {
+  var src = IDENTIDADE[t.campo] || '';
+  return '<div class="idt-card" id="idt-' + t.tipo + '">' +
+    '<h2>' + t.titulo + '</h2><p>' + t.dica + '</p>' +
+    '<div class="idt-previa" id="idt-previa-' + t.tipo + '">' + _idtPrevia(src) + '</div>' +
+    '<div class="idt-acoes">' +
+      '<label class="btn btn-secondary btn-sm" id="idt-escolher-' + t.tipo + '" style="cursor:pointer">' +
+        '<span id="idt-rotulo-' + t.tipo + '">' + (src ? 'Trocar imagem' : 'Enviar imagem') + '</span>' +
+        '<input type="file" accept="image/png,image/jpeg,image/webp" style="display:none" id="idt-arq-' + t.tipo + '" ' +
+          'onchange="idtEscolher(\'' + t.tipo + '\', this)">' +
+      '</label>' +
+      (src ? '<button class="btn btn-ghost btn-sm" id="idt-remover-' + t.tipo + '" onclick="idtRemover(\'' + t.tipo + '\')">Remover</button>' : '') +
+    '</div></div>';
+}
+
+function _idtPrevia(src) {
+  return src ? '<img alt="" src="' + escHtml(src) + '">' : '<span>Sem imagem</span>';
+}
+
+// Reduz a imagem no navegador (PNG, mantém a transparência) até caber no limite
+function _idtReduzir(arquivo, maxDim) {
+  return new Promise(function (resolve, reject) {
+    var url = URL.createObjectURL(arquivo);
+    var img = new Image();
+    img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('Não foi possível ler essa imagem.')); };
+    img.onload = function () {
+      URL.revokeObjectURL(url);
+      var escala = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
+      var tentativa = 0;
+      (function gerar() {
+        var w = Math.max(1, Math.round(img.naturalWidth * escala)), h = Math.max(1, Math.round(img.naturalHeight * escala));
+        var c = document.createElement('canvas'); c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        c.toBlob(function (blob) {
+          if (!blob) { reject(new Error('Não foi possível processar essa imagem.')); return; }
+          if (blob.size > IDT_MAX_BYTES && tentativa < 8) { tentativa++; escala *= 0.8; gerar(); return; }
+          if (blob.size > IDT_MAX_BYTES) { reject(new Error('Imagem complexa demais. Tente uma versão mais simples.')); return; }
+          var fr = new FileReader();
+          fr.onload = function () { resolve(String(fr.result).split(',')[1]); };
+          fr.onerror = function () { reject(new Error('Não foi possível ler essa imagem.')); };
+          fr.readAsDataURL(blob);
+        }, 'image/png');
+      })();
+    };
+    img.src = url;
+  });
+}
+
+function _idtOcupado(tipo, ocupado) {
+  var rot = document.getElementById('idt-rotulo-' + tipo);
+  if (rot) rot.textContent = ocupado ? 'Enviando...' : (IDENTIDADE[_idtCampo(tipo)] ? 'Trocar imagem' : 'Enviar imagem');
+  var lbl = document.getElementById('idt-escolher-' + tipo);
+  if (lbl) lbl.style.pointerEvents = ocupado ? 'none' : '';
+}
+function _idtCampo(tipo) { return IDT_TIPOS.filter(function (t) { return t.tipo === tipo; })[0].campo; }
+
+// Depois de enviar/remover: atualiza a identidade em memória, o cabeçalho e os cartões desta tela
+function _idtAtualizar(dados) {
+  Object.keys(dados).forEach(function (k) { IDENTIDADE[k] = dados[k]; });
+  aplicarIdentidade();
+  if (App.currentView === 'identidade') renderIdentidade(); else renderNav(true);
+}
+
+function idtEscolher(tipo, input) {
+  var arquivo = input.files && input.files[0];
+  input.value = '';
+  if (!arquivo) return;
+  var t = IDT_TIPOS.filter(function (x) { return x.tipo === tipo; })[0];
+  _idtOcupado(tipo, true);
+  _idtReduzir(arquivo, t.maxDim).then(function (b64) {
+    google.script.run
+      .withFailureHandler(function () { _idtOcupado(tipo, false); showToast('Falha de conexão. Tente novamente.', 'error'); })
+      .withSuccessHandler(function (res) {
+        if (res && res.success) { _idtAtualizar(res.data); showToast('Imagem salva.', 'success'); }
+        else { _idtOcupado(tipo, false); showToast((res && res.error) || 'Não foi possível salvar a imagem.', 'error'); }
+      })
+      .idt_enviarImagem(App.session.token, tipo, b64);
+  }).catch(function (e) { _idtOcupado(tipo, false); showToast(e.message, 'error'); });
+}
+
+function idtRemover(tipo) {
+  google.script.run
+    .withFailureHandler(function () { showToast('Falha de conexão. Tente novamente.', 'error'); })
+    .withSuccessHandler(function (res) {
+      if (res && res.success) { _idtAtualizar(res.data); showToast('Imagem removida.', 'success'); }
+      else showToast((res && res.error) || 'Não foi possível remover a imagem.', 'error');
+    })
+    .idt_removerImagem(App.session.token, tipo);
+}
+</script>
