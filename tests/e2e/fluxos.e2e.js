@@ -392,6 +392,10 @@ test('tema: com COR_PRIMARIA roxa, login e Home não mostram nenhum teal origina
   await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   await page.waitForTimeout(300);
   assert.deepEqual(await coresTeal(page), [], 'shell/Home com teal solto');
+  await page.evaluate(() => navigateTo('usuarios'));
+  await esperarTela(page, 'usuarios');
+  await page.waitForTimeout(300);
+  assert.deepEqual(await coresTeal(page), [], 'Usuários com teal solto');
 });
 
 test('logo: PNG transparente não ganha fundo próprio e esconde as iniciais ao carregar', async () => {

@@ -276,7 +276,7 @@
 .login-card .input-wrap:focus-within .input-icon,
 .pa-card    .input-wrap:focus-within .input-icon {
   opacity: 1;
-  color: var(--teal, #009A93);
+  color: var(--teal);
 }
 [data-theme="light"] .login-card .input-icon,
 [data-theme="light"] .pa-card    .input-icon {
@@ -328,7 +328,7 @@ function renderLogin() {
           '<div class="field">' +
             '<label for="login-email">E-mail</label>' +
             '<div class="input-wrap">' +
-              '<span class="input-icon" style="color:var(--teal,#009A93)"><i data-lucide="mail" style="width:18px;height:18px"></i></span>' +
+              '<span class="input-icon" style="color:var(--teal)"><i data-lucide="mail" style="width:18px;height:18px"></i></span>' +
               '<input type="email" id="login-email" class="has-icon-left" ' +
                 'placeholder="seu@email.com" autocomplete="email" autofocus>' +
             '</div>' +
@@ -339,7 +339,7 @@ function renderLogin() {
           '<div class="field">' +
             '<label for="login-senha">Senha</label>' +
             '<div class="input-wrap" style="position:relative">' +
-              '<span class="input-icon" style="color:var(--teal,#009A93)"><i data-lucide="lock" style="width:18px;height:18px"></i></span>' +
+              '<span class="input-icon" style="color:var(--teal)"><i data-lucide="lock" style="width:18px;height:18px"></i></span>' +
               '<input type="password" id="login-senha" class="has-icon-left has-icon-right" ' +
                 'placeholder="••••••••" autocomplete="current-password">' +
               '<button type="button" class="pwd-toggle-btn" onclick="togglePwdVisibility(\'login-senha\', this)" tabindex="-1">' +
