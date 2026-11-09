@@ -167,6 +167,7 @@ var Auth = (function () {
       var link = ScriptApp.getService().getUrl() + '?view=recuperar-senha&token=' + token;
       var igreja = String(Config.identidade().nome).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       GmailApp.sendEmail(user.Email, '[' + igreja + '] Recuperação de senha', '', {
+        name: Config.remetente(),
         htmlBody:
           '<div style="font-family:sans-serif;max-width:480px;margin:auto">' +
           '<h2 style="color:#1C353A">Recuperação de Senha</h2>' +

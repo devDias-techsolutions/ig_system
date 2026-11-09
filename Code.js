@@ -124,6 +124,28 @@ function criarPrimeiroAdmin() {
   return SetupSheets.criarAdministrador(NOME, EMAIL);
 }
 
+// Entrega a uma igreja nova: 1ª execução cria a aba "Implantacao" para você preencher;
+// com ela preenchida, execute de novo e o sistema fica pronto (abas, identidade e administrador).
+function implantarIgreja() {
+  var dados = Implantacao.lerDados();
+  if (!dados) {
+    Implantacao.criarModelo();
+    Logger.log('📝 Criei a aba "Implantacao". Preencha a coluna Valor e execute implantarIgreja() de novo.');
+    return { passo: 'preencher' };
+  }
+  var r = Implantacao.implantar(dados);
+  Logger.log('Administrador: ' + r.admin.status + ' (' + r.admin.email + ')');
+  Logger.log(Implantacao.texto(r.verificacao));
+  return r;
+}
+
+// Relatório do que está pronto e do que falta. Pode rodar a qualquer momento.
+function verificarImplantacao() {
+  var ver = Implantacao.verificar();
+  Logger.log(Implantacao.texto(ver));
+  return ver;
+}
+
 function runMigrate() {
   SetupSheets.migrateColumns();
 }

@@ -647,3 +647,102 @@ test('identidade: texto digitado é guardado como texto (sem caracteres de contr
   env.ctx.__d = { NOME_IGREJA: 'Igreja\u0000 <b>Boa</b>\n' };
   assert.equal(env.run("idt_salvarAjustes('tok', __d)").data.nome, 'Igreja  <b>Boa</b>');
 });
+
+// ═══ Implantação (Etapa 16) ═════════════════════════════════
+function preencherImplantacao(env, valores) {
+  const rows = env.activeSS.getSheetByName('Implantacao')._rows;
+  rows.forEach((r) => { if (valores[r[0]] !== undefined) r[1] = valores[r[0]]; });
+}
+const DADOS_OK = { ADMIN_NOME: 'Maria Admin', ADMIN_EMAIL: 'Maria@Igreja.org', NOME_IGREJA: 'Igreja Vida Nova', NOME_CURTO: 'Vida Nova', COR_PRIMARIA: '#7C3AED', PASTOR: 'Pr. João' };
+
+test('implantação: primeira execução só cria a aba para preencher, sem criar usuários', () => {
+  const env = freshEnv();
+  const r = env.run('implantarIgreja()');
+  assert.equal(r.passo, 'preencher');
+  assert.ok(env.activeSS.getSheetByName('Implantacao'));
+  assert.equal(env.activeSS.getSheetByName('Usuarios'), null);
+});
+
+test('implantação: aba preenchida cria abas, identidade, administrador e envia a senha com o nome da igreja', () => {
+  const env = freshEnv();
+  env.run('implantarIgreja()');
+  preencherImplantacao(env, DADOS_OK);
+  const r = env.run('implantarIgreja()');
+  assert.equal(r.admin.status, 'criado');
+  assert.equal(r.admin.email, 'maria@igreja.org');
+  const id = env.run('Config.identidade()');
+  assert.equal(id.nome, 'Igreja Vida Nova');
+  assert.equal(id.nomeCurto, 'Vida Nova');
+  assert.equal(id.corPrimaria, '#7c3aed');
+  assert.equal(id.pastor, 'Pr. João');
+  assert.equal(id.cargoPastor, 'Pastor Presidente', 'campo vazio mantém o padrão');
+  const email = env.calls.emails[0];
+  assert.equal(email[0], 'maria@igreja.org');
+  assert.match(email[1], /Igreja Vida Nova/);
+  assert.equal(email[3].name, 'Igreja Vida Nova', 'remetente com o nome da igreja, não o da conta Google');
+  assert.equal(r.verificacao.pronto, true);
+});
+
+test('implantação: rodar duas vezes não duplica administrador, e-mail nem chaves da Config', () => {
+  const env = freshEnv();
+  env.run('implantarIgreja()');
+  preencherImplantacao(env, DADOS_OK);
+  env.run('implantarIgreja()');
+  const r2 = env.run('implantarIgreja()');
+  assert.equal(r2.admin.status, 'ja_existia');
+  assert.equal(env.activeSS.getSheetByName('Usuarios')._rows.length, 2);
+  assert.equal(env.calls.emails.length, 1);
+  const chaves = env.activeSS.getSheetByName('Config')._rows.slice(1).map((r) => r[0]);
+  assert.equal(new Set(chaves).size, chaves.length, 'chaves duplicadas na Config');
+});
+
+test('implantação: já existindo outro administrador, não cria um segundo', () => {
+  const env = freshEnv();
+  env.run('implantarIgreja()');
+  preencherImplantacao(env, DADOS_OK);
+  env.run('implantarIgreja()');
+  env.run(`(function () { var r = Util.sheetToObjects('Implantacao').filter(function (x) { return x.Chave === 'ADMIN_EMAIL'; })[0]; Util.updateRow('Implantacao', r._rowIndex, { Chave: 'ADMIN_EMAIL', Valor: 'outra@igreja.org', Descricao: r.Descricao }); })()`);
+  const r = env.run('implantarIgreja()');
+  assert.equal(r.admin.status, 'outro_admin');
+  assert.equal(env.activeSS.getSheetByName('Usuarios')._rows.length, 2);
+});
+
+test('implantação: dados inválidos são recusados antes de gravar qualquer coisa', () => {
+  for (const ruim of [
+    { ...DADOS_OK, ADMIN_EMAIL: 'sem-arroba' },
+    { ...DADOS_OK, ADMIN_NOME: '' },
+    { ...DADOS_OK, NOME_IGREJA: '' },
+    { ...DADOS_OK, NOME_IGREJA: 'Minha Igreja' },
+    { ...DADOS_OK, COR_PRIMARIA: 'roxo' },
+    { ...DADOS_OK, PASTOR: 'x'.repeat(200) },
+  ]) {
+    const env = freshEnv();
+    env.run('implantarIgreja()');
+    preencherImplantacao(env, ruim);
+    assert.throws(() => env.run('implantarIgreja()'), undefined, JSON.stringify(ruim));
+    assert.equal(env.activeSS.getSheetByName('Usuarios'), null, 'nada deve ser criado: ' + JSON.stringify(ruim));
+    assert.equal(env.calls.emails.length, 0);
+  }
+});
+
+test('implantação: verificarImplantacao mostra o que falta antes e o que está pronto depois', () => {
+  const env = freshEnv();
+  const antes = env.run('verificarImplantacao()');
+  assert.equal(antes.pronto, false);
+  assert.ok(antes.itens.some((i) => i.nivel === 'erro' && /Abas/.test(i.item)));
+  env.run('implantarIgreja()');
+  preencherImplantacao(env, DADOS_OK);
+  env.run('implantarIgreja()');
+  const depois = env.run('verificarImplantacao()');
+  assert.equal(depois.pronto, true);
+  assert.ok(depois.itens.some((i) => i.nivel === 'aviso' && /Logo/.test(i.item)), 'sem logo vira aviso, não erro');
+  assert.match(env.run('Implantacao.texto(verificarImplantacao())'), /Pronto para entregar/);
+});
+
+test('e-mails do sistema saem com o nome da igreja como remetente', () => {
+  const env = freshEnv();
+  env.run('setupSpreadsheet()');
+  definirConfigUnit(env, 'NOME_IGREJA', 'Igreja Teste');
+  env.run("SetupSheets.criarAdministrador('A', 'a@igreja.org')");
+  assert.equal(env.calls.emails[0][3].name, 'Igreja Teste');
+});
