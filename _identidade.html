@@ -1,8 +1,7 @@
 <style>
 /* IDENTIDADE — só o que é específico da tela; a estrutura vem do Layout System (.page, .panel, .form-grid, .action-bar) */
 .idt-marca {
-  display: flex; align-items: center; gap: 14px; padding: 16px;
-  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 14px;
 }
 .idt-marca .brand-mark { width: 56px; height: 56px; font-size: 20px; flex-shrink: 0; }
 .idt-marca-nome { font-size: 17px; font-weight: 800; color: var(--text); line-height: 1.2; }
@@ -82,7 +81,7 @@ function renderIdentidade() {
     '<div class="page page-narrow">' +
       '<div class="page-head"><h1 class="page-title">Identidade da igreja</h1>' +
       '<p class="page-sub">Tudo o que personaliza o sistema fica aqui: nome, cor, imagens e dados da carteirinha.</p></div>' +
-      '<div class="idt-marca"><span class="brand-mark" id="idt-marca-logo"></span><div><div class="idt-marca-nome" id="idt-marca-nome"></div><div class="idt-marca-lema" id="idt-marca-lema"></div></div></div>' +
+      '<section class="panel idt-marca"><span class="brand-mark" id="idt-marca-logo"></span><div><div class="idt-marca-nome" id="idt-marca-nome"></div><div class="idt-marca-lema" id="idt-marca-lema"></div></div></section>' +
 
       _idtSecao('Dados da igreja', 'Aparecem no login, no menu, no topo e nos e-mails do sistema.', _idtCampo('nome', true) + _idtCampo('nomeCurto') + _idtCampo('lema', true)) +
 
@@ -119,7 +118,7 @@ function renderIdentidade() {
 }
 
 function _idtSecao(titulo, texto, corpo) {
-  return '<section class="panel"><h2 class="panel-title">' + titulo + '</h2><p class="panel-text">' + texto + '</p>' + (corpo.indexOf('idt-grade') === -1 && corpo.indexOf('idt-cor-bloco') === -1 ? '<div class="form-grid">' + corpo + '</div>' : corpo) + '</section>';
+  return '<section class="panel"><div class="panel-head"><h2 class="panel-title">' + titulo + '</h2></div><p class="panel-text">' + texto + '</p>' + (corpo.indexOf('idt-grade') === -1 && corpo.indexOf('idt-cor-bloco') === -1 ? '<div class="form-grid">' + corpo + '</div>' : corpo) + '</section>';
 }
 
 function _idtCampo(k, largo) {

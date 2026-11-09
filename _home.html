@@ -11,6 +11,7 @@
 
 /* ── Cabeçalho de identidade ── */
 .hm-head {
+  margin-bottom: var(--sp-5);
   position: relative; overflow: hidden; padding: var(--sp-5);
   border: 1px solid var(--border); border-radius: var(--radius-xl);
   background: linear-gradient(135deg, var(--teal-dim) 0%, transparent 58%), var(--bg-glass);
@@ -41,9 +42,6 @@
 .hm-sub b { color: var(--text); font-weight: 700; }
 
 /* ── Títulos de seção ── */
-.hm-sec { margin: var(--sp-6) 0 var(--sp-3); display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
-.hm-sec-title { font-size: var(--fs-xs); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); }
-.hm-sec-hint { font-size: var(--fs-xs); color: var(--text-dim); }
 
 /* ── Indicadores ── */
 .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-3); }
@@ -67,7 +65,7 @@
 .kpi-label { font-size: var(--fs-sm); font-weight: 600; color: var(--text-muted); line-height: 1.3; }
 
 /* ── Colunas: módulos | atividade ── */
-.hm-cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 var(--sp-6); }
+.hm-cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 var(--sp-5); margin-top: var(--sp-5); }
 @media (min-width: 1100px) { .hm-cols.com-atividade { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); } }
 
 /* ── Módulos ── */
@@ -184,17 +182,17 @@ function renderHome() {
   /* ══ Indicadores ══ */
   if (_homeTem(cfg, 'kpis')) {
     html +=
-      '<div class="hm-rise" style="--i:' + (i++) + '">' +
-        '<div class="hm-sec"><span class="hm-sec-title">Indicadores</span></div>' +
+      '<section class="panel hm-rise" style="--i:' + (i++) + '">' +
+        '<div class="panel-head"><h2 class="panel-title">Indicadores</h2></div>' +
         '<div class="kpi-grid" id="kpi-grid">' + _kpiSkeleton() + _kpiSkeleton() + _kpiSkeleton() + _kpiSkeleton() + '</div>' +
-      '</div>';
+      '</section>';
   }
 
   /* ══ Módulos (+ Administração) | Atividade ══ */
   html += '<div class="hm-cols' + (comAtividade ? ' com-atividade' : '') + '">';
 
-  html += '<section class="hm-rise" style="--i:' + (i++) + '">' +
-    '<div class="hm-sec"><span class="hm-sec-title">Módulos</span></div>' +
+  html += '<section class="panel hm-rise" style="--i:' + (i++) + '">' +
+    '<div class="panel-head"><h2 class="panel-title">Módulos</h2></div>' +
     '<div class="hm-mods">' +
       (mods.length
         ? mods.map(function (m) { return _moduleBtn(m.icone, m.nome, m.descricao, m.rota); }).join('')
@@ -204,14 +202,14 @@ function renderHome() {
               : 'Peça ao administrador para liberar módulos para o seu perfil.')) +
     '</div>' +
     (podeUsuarios
-      ? '<div class="hm-sec"><span class="hm-sec-title">Administração</span></div>' +
+      ? '<div class="panel-head"><h2 class="panel-title">Administração</h2></div>' +
         '<div class="hm-mods">' + _moduleBtn('shield-check', 'Usuários', 'Acessos, perfis e permissões', 'usuarios') + '</div>'
       : '') +
   '</section>';
 
   if (comAtividade) {
-    html += '<section class="hm-rise" style="--i:' + (i++) + '">' +
-      '<div class="hm-sec"><span class="hm-sec-title">Atividade recente</span></div>' +
+    html += '<section class="panel hm-rise" style="--i:' + (i++) + '">' +
+      '<div class="panel-head"><h2 class="panel-title">Atividade recente</h2></div>' +
       '<div class="activity-list" id="activity-list">' + _activitySkeleton() + _activitySkeleton() + _activitySkeleton() + '</div>' +
     '</section>';
   }

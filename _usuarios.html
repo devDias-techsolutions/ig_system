@@ -31,8 +31,6 @@
 .usr-hero-sub { font-size:11px; color:rgba(255,255,255,.5); margin-top:3px; font-family:'DM Mono',monospace; text-transform:uppercase; letter-spacing:.5px; }
 
 /* ── CONTENT ── */
-.usr-content { max-width:860px; margin:0 auto; padding:24px 16px 96px; }
-
 /* ── SECTION HEADER ── */
 .usr-section-header {
   display:flex; align-items:center; justify-content:space-between;
@@ -209,7 +207,7 @@ function renderUsuarios() {
     tabsHtml([['usuarios', 'users', 'Usuários']].concat(isAdmin ? [['permissoes', 'shield', 'Permissões']] : []), 'usuarios', 'usrSetTab', 'usr-tab-')+
 
     /* ── CONTENT ── */
-    '<div class="usr-content" id="usr-content">'+
+    '<div class="page page-narrow"><section class="panel" id="usr-content">'+
 
       /* Header */
       '<div class="usr-section-header">'+
@@ -240,7 +238,7 @@ function renderUsuarios() {
         _usrSkeletonItem()+_usrSkeletonItem()+_usrSkeletonItem()+
       '</div>'+
 
-    '</div>'+
+    '</section></div>'+
 
     /* ── MODAIS ── */
     _modalNovoUsuario()+
