@@ -20,7 +20,7 @@ async function abrirEdicaoComFoto() {
   const id = backend.env.run('mb_salvarMembro(__t, __m)').data.id;
   await s.page.evaluate(() => navigateTo('membros'));
   await esperarTela(s.page, 'membros');
-  await s.page.waitForSelector('.mb-tab');
+  await s.page.waitForSelector('.tab');
   await s.page.evaluate(([id, px]) => { MB._fotoCache['ARQUIVO_DRIVE_1'] = px; mbEditarMembro(id); }, [id, PIXEL]);
   await s.page.waitForSelector('#mbf-nome');
   return { ...s, backend, id };

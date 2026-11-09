@@ -13,34 +13,6 @@
 ════════════════════════════════════════════════════════════ -->
 
 <style>
-/* ── Topnav module (idêntico ao ED) ── */
-.mb-topnav-module {
-  display: flex; align-items: center; gap: 8px;
-  padding: 0 var(--gutter); height: 40px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-glass); backdrop-filter: blur(20px);
-  position: sticky; top: 64px; z-index: 100;
-}
-.mb-topnav-module-back {
-  width: 28px; height: 28px; border-radius: 8px;
-  background: none; border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: var(--text-muted);
-  transition: background .15s, color .15s;
-  flex-shrink: 0;
-}
-.mb-topnav-module-back:hover { background: var(--bg4); color: var(--text); }
-.mb-topnav-crumb-app  { font-size: 12px; font-weight: 700; color: var(--text-muted); cursor: pointer; }
-.mb-topnav-crumb-app:hover { color: var(--text); }
-.mb-topnav-crumb-sep  { font-size: 12px; color: var(--text-dim); }
-.mb-topnav-crumb-module { font-size: 12px; font-weight: 800; color: var(--teal); }
-.mb-topnav-crumb-tags { display: flex; gap: 6px; margin-left: auto; }
-.mb-topnav-crumb-tag  {
-  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 100px;
-  background: var(--teal-dim); color: var(--teal); border: 1px solid var(--teal-border);
-  font-family: 'DM Mono', monospace; letter-spacing: .3px;
-}
-@media (max-width: 480px) { .mb-topnav-crumb-tags { display: none; } }
 .topnav-right { overflow: visible !important; }
 
 /* ── Topnav desktop / mobile gear (idêntico ao ED) ── */
@@ -72,25 +44,6 @@
   font-size: 10px; font-weight: 800; color: var(--text-muted);
   text-transform: uppercase; letter-spacing: .07em; padding: 6px 13px 2px;
 }
-
-/* ── Tabs ── */
-.mb-tabs {
-  display: flex; gap: 4px; padding: 12px 16px 0; overflow-x: auto;
-  scrollbar-width: none;
-}
-.mb-tabs::-webkit-scrollbar { display: none; }
-.mb-tab {
-  display: flex; align-items: center; gap: 6px;
-  padding: 8px 14px; border-radius: 10px 10px 0 0;
-  border: none; background: none; cursor: pointer;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 12px; font-weight: 700;
-  color: var(--text-muted); white-space: nowrap;
-  transition: background .15s, color .15s;
-  border-bottom: 2px solid transparent;
-}
-.mb-tab:hover { background: var(--bg4); color: var(--text); }
-.mb-tab.active { color: var(--teal); border-bottom-color: var(--teal); }
 
 /* ── Panel ── */
 /* padding controlado via inline style no elemento (var(--gutter)) */
@@ -239,16 +192,16 @@
   margin-top: 8px; width: fit-content;
 }
 .kpi-hero-dot {
-  width: 5px; height: 5px; border-radius: 50%; background: #4ade80;
-  box-shadow: 0 0 6px #4ade80;
+  width: 5px; height: 5px; border-radius: 50%; background: var(--success);
+  box-shadow: 0 0 6px var(--success);
 }
 
 /* ── cores por tipo ── */
 .kpi-total    { --kc: var(--teal);    }
-.kpi-ativos   { --kc: #36d399;  }  
-.kpi-inativos { --kc: #ff5e7a;  }
-.kpi-aniv     { --kc: #d7b15b;  }
-.kpi-semfoto  { --kc: #9b7cff;  }
+.kpi-ativos   { --kc: var(--success); }  
+.kpi-inativos { --kc: var(--danger); }
+.kpi-aniv     { --kc: var(--gold); }
+.kpi-semfoto  { --kc: var(--purple); }
 
 .kpi-ativos   .mb-kpi-card-value { color: #1a7a50; }
 .kpi-inativos .mb-kpi-card-value { color: #b91c3a; }
@@ -270,39 +223,8 @@
 
 svg.kico { display: block; }
 
-/* Manter ed-stats/ed-stat-card para outros usos no código (ex: aula detail) */
-.ed-stats { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:12px; }
-@media(min-width:640px){ .ed-stats{ grid-template-columns:repeat(3,1fr); } }
-.ed-stat-card {
-  background: rgba(255,255,255,0.06); backdrop-filter:blur(12px);
-  border:1px solid rgba(255,255,255,0.10); border-radius:14px;
-  padding:14px 12px; display:flex; flex-direction:column;
-  position:relative; overflow:hidden; --kpi-color:var(--teal);
-}
-[data-theme="light"] .ed-stat-card { background:rgba(255,255,255,0.65); border-color:rgba(220,228,240,.9); }
-.ed-stat-card::after {
-  content:''; position:absolute; bottom:0; left:0; right:0; height:1.5px;
-  background:linear-gradient(90deg,transparent,var(--kpi-color),transparent);
-  animation:kpiPulse 2.6s ease-in-out infinite;
-}
-.ed-stat-card:hover { transform:translateY(-2px); }
-.ed-stat-value { font-size:34px; font-weight:900; font-family:'DM Mono',monospace; color:var(--text); line-height:.9; letter-spacing:-2.5px; }
-.ed-stat-label { font-size:9px; font-weight:700; color:var(--text-muted); margin-top:6px; text-transform:uppercase; letter-spacing:.12em; }
-.ed-stat-card.kpi-hero { grid-column:span 2; }
-@media(min-width:640px){ .ed-stat-card.kpi-hero{ grid-column:span 1; } }
-.ed-stat-icon-wrap { width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-bottom:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1); }
-.ed-stat-top { display:flex;align-items:center;gap:6px;margin-bottom:10px; }
-.ed-stat-dot { width:5px;height:5px;border-radius:50%;background:var(--kpi-color);flex-shrink:0; }
-.ed-stat-tag { font-size:8px;font-weight:800;letter-spacing:1.2px;font-family:'DM Mono',monospace;color:var(--kpi-color);opacity:.8;text-transform:uppercase; }
-.ed-stat-ghost { position:absolute;right:-10px;bottom:-10px;color:var(--kpi-color);opacity:.06;pointer-events:none;transform:rotate(-8deg); }
-.ed-stat-ghost i { width:70px;height:70px;display:block; }
 .ed-stat-sparkline { position:absolute;bottom:8px;right:6px;opacity:.15;pointer-events:none;color:var(--kpi-color); }
-.ed-stat-card:hover .ed-stat-sparkline { opacity:.32; }
 .ed-stat-sparkline svg { display:block; }
-.ed-stat-status { display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:99px;padding:3px 8px 3px 5px;font-size:9px;color:rgba(255,255,255,.6);font-weight:600;margin-top:8px; }
-.ed-stat-status-dot { width:5px;height:5px;border-radius:50%;background:#4ade80;box-shadow:0 0 6px #4ade80; }
-.ed-stat-blob { position:absolute;width:120px;height:120px;background:radial-gradient(circle,rgba(255,255,255,.09) 0%,transparent 70%);border-radius:50%;bottom:-36px;right:-24px;pointer-events:none;animation:kpiBlobDrift 8s ease-in-out infinite alternate; }
-.ed-stat-arc { position:absolute;width:70px;height:70px;border:1px solid rgba(255,255,255,.09);border-radius:50%;top:-16px;right:-12px;pointer-events:none; }
 
 /* ── Section header ── */
 .ed-section-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
@@ -399,7 +321,7 @@ svg.kico { display: block; }
 .mb-crop .mb-cam-stage { touch-action: none; cursor: grab; }
 .mb-crop-zoom { padding: 10px 24px 0; background: #000; }
 .mb-crop-zoom input { width: 100%; }
-.mb-crop-aviso { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; color: #fbbf24; font-size: 12px; font-weight: 600; padding: 0 16px; }
+.mb-crop-aviso { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; color: var(--warning); font-size: 12px; font-weight: 600; padding: 0 16px; }
 .mb-cam-hint { position: absolute; left: 0; right: 0; top: 10px; text-align: center; color: #fff; font-size: 13px; font-weight: 600; text-shadow: 0 1px 3px #000; padding: 0 16px; }
 .mb-cam-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px calc(14px + env(safe-area-inset-bottom)); background: #000; }
 .mb-cam-bar button { background: none; border: 0; color: #fff; font: 600 14px 'Plus Jakarta Sans', sans-serif; min-width: 84px; padding: 10px 0; cursor: pointer; }
@@ -425,39 +347,8 @@ svg.kico { display: block; }
 .mb-detail-label { font-size: 10px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 3px; }
 .mb-detail-value { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; }
 
-/* ── Modal confirm (reutiliza modal-overlay do design system) ── */
-#modal-mb-confirm .modal-box { max-width: 400px; }
-
-/* ── Modal Aniversariantes ── */
-/* Centralizado e com altura limitada à área visível (dvh): no celular não encosta embaixo nem some atrás da barra do navegador */
-#modal-mb-aniv { align-items: center; padding: 12px; }
-#modal-mb-aniv .modal-box {
-  max-width: 560px; width: 100%;
-  max-height: min(80vh, 80dvh); display: flex; flex-direction: column;
-  padding: 0; overflow: hidden;
-  border-radius: var(--radius-lg);
-}
-#modal-mb-aniv .modal-box::before { display: none; }
-.mb-aniv-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 20px 14px; border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.mb-aniv-header-left { display: flex; align-items: center; gap: 10px; }
-.mb-aniv-title { font-size: 15px; font-weight: 800; color: var(--text); }
-.mb-aniv-body {
-  flex: 1 1 auto; min-height: 0; /* sem isso o corpo não encolhe e a lista fica cortada, sem rolagem */
-  overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
-  padding: 14px 16px 18px;
-  display: flex; flex-direction: column; gap: 8px;
-}
-.mb-aniv-close {
-  width: 32px; height: 32px; border-radius: 50%; border: none;
-  background: var(--bg4); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--text-muted); transition: background .15s;
-}
-.mb-aniv-close:hover { background: var(--border); color: var(--text); }
+/* ── Aniversariantes: só a lista; o modal usa a estrutura padrão (header/body/footer) ── */
+.mb-aniv-body { display: flex; flex-direction: column; gap: 8px; }
 .mb-aniv-empty {
   text-align: center; padding: 32px 0;
   font-size: 13px; color: var(--text-muted);
@@ -471,7 +362,7 @@ svg.kico { display: block; }
 }
 .mb-aniv-badge {
   position: absolute; top: 2px; right: 2px;
-  background: var(--gold, #d7b15b); color: #000;
+  background: var(--gold); color: #000;
   font-size: 9px; font-weight: 800;
   min-width: 16px; height: 16px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
@@ -495,19 +386,6 @@ svg.kico { display: block; }
   .no-print { display: none !important; }
 }
 </style>
-
-<!-- Modal de confirmação (shared) -->
-<div class="modal-overlay" id="modal-mb-confirm">
-  <div class="modal-box">
-    <div style="text-align:center;margin-bottom:12px"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--danger,#ef4444)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-    <div id="mb-confirm-title" style="font-size:16px;font-weight:800;color:var(--text);text-align:center;margin-bottom:8px"></div>
-    <div id="mb-confirm-body"  style="font-size:13px;color:var(--text-muted);text-align:center;line-height:1.6;margin-bottom:20px"></div>
-    <div style="display:flex;gap:10px">
-      <button class="btn btn-secondary btn-full" id="mb-confirm-cancel">Cancelar</button>
-      <button class="btn btn-danger btn-full"    id="mb-confirm-ok">Excluir</button>
-    </div>
-  </div>
-</div>
 
 <script>
 // ============================================================
@@ -732,40 +610,16 @@ function _mbLoadProximoRol(cb) {
 function _mbTopnavActions() {
   return (
     '<button class="btn btn-ghost btn-sm mb-aniv-topnav-btn" onclick="mbAbrirModalAniv()" title="Aniversariantes do mês" id="mb-aniv-topnav-btn">'+
-      '<i data-lucide="cake" style="width:16px;height:16px"></i>'+
+      '<i data-lucide="cake" class="ic-16"></i>'+
       '<span class="mb-aniv-badge" id="mb-aniv-badge" style="display:none"></span>'+
     '</button>'
   );
 }
 
-// ── Breadcrumb do módulo (abaixo da topnav persistente) ─────
-function _mbBuildTopnav() {
-  return (
-    '<div class="mb-topnav-module no-print">'+
-      '<button class="mb-topnav-module-back" onclick="navigateTo(\'home\')" title="Voltar">'+
-        '<i data-lucide="arrow-left" style="width:14px;height:14px"></i>'+
-      '</button>'+
-      '<span class="mb-topnav-crumb-app" onclick="navigateTo(\'home\')">Gestão Ministerial</span>'+
-      '<span class="mb-topnav-crumb-sep">/</span>'+
-      '<span class="mb-topnav-crumb-module">Membros</span>'+
-      '<div class="mb-topnav-crumb-tags">'+
-        '<span class="mb-topnav-crumb-tag">CRUD</span>'+
-        '<span class="mb-topnav-crumb-tag">ROL Auto</span>'+
-        '<span class="mb-topnav-crumb-tag">Carteirinha</span>'+
-      '</div>'+
-    '</div>'
-  );
-}
-
-// ── Tabs bar ─────────────────────────────────────────────
+// ── Barra do módulo e abas: componentes padrão do shell ──
+function _mbBuildTopnav() { return moduleBarHtml('Membros', ['CRUD', 'ROL Auto', 'Carteirinha']); }
 function _mbBuildTabs() {
-  var tabs = [['lista','users','Membros'],['form','user-plus','Novo Membro'],['carteirinha','credit-card','Carteirinhas']];
-  return '<div class="mb-tabs no-print">'+
-    tabs.map(function(t){
-      return '<button class="mb-tab'+(MB.tab===t[0]?' active':'')+'" onclick="mbSetTab(\''+t[0]+'\')">'+
-        '<i data-lucide="'+t[1]+'" style="width:14px;height:14px"></i>'+t[2]+'</button>';
-    }).join('')+
-  '</div>';
+  return tabsHtml([['lista', 'users', 'Membros'], ['form', 'user-plus', 'Novo Membro'], ['carteirinha', 'credit-card', 'Carteirinhas']], MB.tab, 'mbSetTab');
 }
 
 // ── Render principal ─────────────────────────────────────
@@ -780,23 +634,15 @@ function renderMembros() {
     _mbBuildTopnav() +
     _mbBuildTabs()   +
     '<div id="mb-panel" class="page"></div>' +
-    _mbModalConfirmHtml() +
     _modalTrocarSenha() +
     '<div class="modal-overlay" id="modal-mb-aniv" onclick="if(event.target===this)mbFecharModalAniv()">'+
       '<div class="modal-box">'+
-        '<div class="mb-aniv-header">'+
-          '<div class="mb-aniv-header-left">'+
-            '<i data-lucide="cake" style="width:20px;height:20px;color:var(--color-accent,#d97706)"></i>'+
-            '<div>'+
-              '<div class="mb-aniv-title">Aniversariantes do Mês</div>'+
-              '<div id="mb-aniv-sub" style="font-size:11px;color:var(--text-muted);margin-top:2px"></div>'+
-            '</div>'+
-          '</div>'+
-          '<button class="mb-aniv-close" onclick="mbFecharModalAniv()">'+
-            '<i data-lucide="x" style="width:15px;height:15px"></i>'+
-          '</button>'+
+        '<div class="modal-header">'+
+          '<div><h3>Aniversariantes do Mês</h3><div class="modal-sub" id="mb-aniv-sub"></div></div>'+
+          '<button class="btn btn-ghost btn-sm" style="width:36px;padding:0" onclick="mbFecharModalAniv()" aria-label="Fechar"><i data-lucide="x" class="ic-16"></i></button>'+
         '</div>'+
-        '<div class="mb-aniv-body" id="mb-aniv-body"></div>'+
+        '<div class="modal-body mb-aniv-body" id="mb-aniv-body"></div>'+
+        '<div class="modal-footer"><button class="btn btn-secondary btn-full" onclick="mbFecharModalAniv()">Fechar</button></div>'+
       '</div>'+
     '</div>'
   );
@@ -821,7 +667,7 @@ function renderMembros() {
 // ── setTab ───────────────────────────────────────────────
 function mbSetTab(tab) {
   MB.tab = tab;
-  document.querySelectorAll('.mb-tab').forEach(function(b){
+  document.querySelectorAll('.tab').forEach(function(b){
     b.classList.toggle('active', b.getAttribute('onclick') === "mbSetTab('"+tab+"')");
   });
   if (tab !== 'form') _mbLimparRascunho();
@@ -898,20 +744,20 @@ function _mbBuildLista() {
       '</div>'+
       '<div style="display:flex;gap:8px;align-items:center">'+
         '<button class="btn btn-primary btn-sm" onclick="mbNovoMembro()">'+
-          '<i data-lucide="user-plus" style="width:15px;height:15px"></i>'+
+          '<i data-lucide="user-plus" class="ic-15"></i>'+
           '<span>Novo Membro</span>'+
         '</button>'+
         '<div class="mb-toolbar-more-wrap">'+
           '<button class="btn btn-ghost btn-sm" onclick="mbToggleToolbarMore(event)" title="Mais opções" style="width:34px;padding:0">'+
-            '<i data-lucide="more-horizontal" style="width:15px;height:15px"></i>'+
+            '<i data-lucide="more-horizontal" class="ic-15"></i>'+
           '</button>'+
           '<div class="mb-toolbar-more-dd" id="mb-toolbar-more-dd">'+
             '<div class="dd-label">Backup</div>'+
             '<button onclick="mbCloseToolbarMore();mbExportarJSON()">'+
-              '<i data-lucide="download" style="width:14px;height:14px"></i> Exportar JSON'+
+              '<i data-lucide="download" class="ic-14"></i> Exportar JSON'+
             '</button>'+
             '<label style="cursor:pointer">'+
-              '<i data-lucide="upload" style="width:14px;height:14px"></i> Importar JSON'+
+              '<i data-lucide="upload" class="ic-14"></i> Importar JSON'+
               '<input type="file" accept=".json" onchange="mbCloseToolbarMore();mbImportarJSON(event)" style="display:none">'+
             '</label>'+
           '</div>'+
@@ -923,7 +769,7 @@ function _mbBuildLista() {
   var busca =
     '<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">'+
       '<div class="ed-search-wrap" style="flex:1;min-width:180px">'+
-        '<span class="ed-search-icon"><i data-lucide="search" style="width:15px;height:15px"></i></span>'+
+        '<span class="ed-search-icon"><i data-lucide="search" class="ic-15"></i></span>'+
         '<input class="ed-search" id="mb-search-input" type="text" placeholder="Buscar nome, ROL, função..." value="'+_mbEsc(MB.search)+'" oninput="_mbOnSearchLista(event)">'+
       '</div>'+
       '<select class="ed-filter-select" id="mb-filtro-select" onchange="_mbOnFiltroChange(event)">'+
@@ -992,7 +838,7 @@ function _mbBuildListaItens(lista, total) {
         '<span class="badge '+(ativo?'badge-green':'badge-red')+'">'+(ativo?'Ativo':'Inativo')+'</span>'+
         '<div class="ed-aula-actions">'+
           '<button class="ed-item-btn" onclick="event.stopPropagation();mbEditarMembro(\''+_mbEsc(m.id)+'\')" title="Editar">'+
-            '<i data-lucide="pencil" style="width:13px;height:13px"></i>'+
+            '<i data-lucide="pencil" class="ic-13"></i>'+
           '</button>'+
         '</div>'+
       '</div>';
@@ -1037,7 +883,7 @@ function mbAtualizarCardLista() {
           '<div style="font-size:10px;color:var(--text-muted)">ROL '+m.rol+' · '+(m.funcao||'Membro')+'</div>'+
         '</div>'+
         '<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;flex-shrink:0" onclick="event.stopPropagation();mbCard_downloadPDF(\''+m.id+'\')" title="PDF Carteirinha">'+
-          '<i data-lucide="file-down" style="width:13px;height:13px"></i> PDF'+
+          '<i data-lucide="file-down" class="ic-13"></i> PDF'+
         '</button>'+
       '</div>';
   });
@@ -1137,7 +983,7 @@ function _mbBuildAniversariantes() {
   var html =
     '<div style="background:var(--glass-bg-premium);border:var(--glass-border-premium);border-radius:16px;padding:16px;backdrop-filter:blur(14px);margin-bottom:16px">'+
     '<div class="ed-section-header" style="margin-bottom:10px">'+
-      '<div><div class="ed-section-title" style="display:flex;align-items:center;gap:6px"><i data-lucide="cake" style="width:16px;height:16px"></i>Aniversariantes do Mês</div></div>'+
+      '<div><div class="ed-section-title" style="display:flex;align-items:center;gap:6px"><i data-lucide="cake" class="ic-16"></i>Aniversariantes do Mês</div></div>'+
       '<span class="badge badge-gold">'+lista.length+'</span>'+
     '</div>'+
     '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px">';
@@ -1165,7 +1011,7 @@ function _mbBuildAniversariantes() {
 function mbNovoMembro() {
   MB.tab = 'form'; MB.editId = null;
   MB.fotoData = ''; MB.fotoZoom = 1; MB.fotoX = 50; MB.fotoY = 50; MB.fotoNova = false; MB.fotoRemovida = false;
-  document.querySelectorAll('.mb-tab').forEach(function(b){
+  document.querySelectorAll('.tab').forEach(function(b){
     b.classList.toggle('active', b.getAttribute('onclick') === "mbSetTab('form')");
   });
   _mbLoadProximoRol(function(){ _mbRenderPanel(); });
@@ -1183,7 +1029,7 @@ function mbEditarMembro(id) {
   MB.fotoY    = parseFloat(m.fotoY)    || 50;
   MB.fotoNova = false; MB.fotoRemovida = false; // foto existente — não re-envia a menos que o usuário troque
   MB.tab = 'form';
-  document.querySelectorAll('.mb-tab').forEach(function(b){
+  document.querySelectorAll('.tab').forEach(function(b){
     b.classList.toggle('active', b.getAttribute('onclick') === "mbSetTab('form')");
   });
   _mbRenderPanel();
@@ -1216,10 +1062,10 @@ function _mbBuildForm() {
     /* Breadcrumb interno */
     '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'+
       '<button class="btn btn-ghost btn-sm" onclick="MB.tab=\'lista\';_mbLoad(function(){_mbRenderPanel();})">'+
-        '<i data-lucide="arrow-left" style="width:16px;height:16px"></i>'+
+        '<i data-lucide="arrow-left" class="ic-16"></i>'+
       '</button>'+
       '<div style="flex:1">'+
-        '<div class="ed-section-title" style="display:flex;align-items:center;gap:6px">'+(MB.editId?'<i data-lucide="pencil" style="width:16px;height:16px"></i>Editar Membro':'<i data-lucide="plus" style="width:16px;height:16px"></i>Novo Membro')+'</div>'+
+        '<div class="ed-section-title" style="display:flex;align-items:center;gap:6px">'+(MB.editId?'<i data-lucide="pencil" class="ic-16"></i>Editar Membro':'<i data-lucide="plus" class="ic-16"></i>Novo Membro')+'</div>'+
         '<div class="ed-section-sub">'+(MB.editId?'Atualize os dados':'Preencha o cadastro completo')+'</div>'+
       '</div>'+
     '</div>'+
@@ -1234,7 +1080,7 @@ function _mbBuildForm() {
         '<input type="text" id="mbf-rol" value="'+rol+'" placeholder="0001">'+
       '</div>'+
       '<div class="field mb-form-full">'+
-        '<label>Nome Completo <span style="color:var(--danger)">*</span></label>'+
+        '<label>Nome Completo <span class="req">*</span></label>'+
         '<input type="text" id="mbf-nome" value="'+v('nome')+'" placeholder="Nome completo">'+
         '<div class="field-error" id="mbfe-nome">Campo obrigatório</div>'+
       '</div>'+
@@ -1242,7 +1088,7 @@ function _mbBuildForm() {
       /* Dados pessoais */
       '<div class="mb-form-section">Dados Pessoais</div>'+
       '<div class="field">'+
-        '<label>Sexo <span style="color:var(--danger)">*</span></label>'+
+        '<label>Sexo <span class="req">*</span></label>'+
         '<select id="mbf-sexo">'+
           '<option value="">Selecione</option>'+
           '<option value="Masculino"'+selSexo('Masculino')+'>Masculino</option>'+
@@ -1251,22 +1097,22 @@ function _mbBuildForm() {
         '<div class="field-error" id="mbfe-sexo">Campo obrigatório</div>'+
       '</div>'+
       '<div class="field">'+
-        '<label>Nascimento <span style="color:var(--danger)">*</span></label>'+
+        '<label>Nascimento <span class="req">*</span></label>'+
         '<input type="text" id="mbf-nascimento" value="'+v('nascimento')+'" placeholder="DD/MM/AAAA" maxlength="10" oninput="this.value=_mbMaskDate(this.value)">'+
         '<div class="field-error" id="mbfe-nascimento">Campo obrigatório</div>'+
       '</div>'+
       '<div class="field">'+
-        '<label>Nome da Mãe <span style="color:var(--danger)">*</span></label>'+
+        '<label>Nome da Mãe <span class="req">*</span></label>'+
         '<input type="text" id="mbf-nomeMae" value="'+v('nomeMae')+'" placeholder="Nome da mãe">'+
         '<div class="field-error" id="mbfe-nomeMae">Campo obrigatório</div>'+
       '</div>'+
       '<div class="field">'+
-        '<label>Nome do Pai <span style="color:var(--danger)">*</span></label>'+
+        '<label>Nome do Pai <span class="req">*</span></label>'+
         '<input type="text" id="mbf-nomePai" value="'+v('nomePai')+'" placeholder="Nome do pai">'+
         '<div class="field-error" id="mbfe-nomePai">Campo obrigatório</div>'+
       '</div>'+
       '<div class="field">'+
-        '<label>Estado Civil <span style="color:var(--danger)">*</span></label>'+
+        '<label>Estado Civil <span class="req">*</span></label>'+
         '<select id="mbf-estadoCivil">'+
           '<option value="">Selecione</option>'+
           ['Solteiro(a)','Casado(a)','Divorciado(a)','Viúvo(a)','União Estável'].map(function(o){
@@ -1281,17 +1127,17 @@ function _mbBuildForm() {
       /* Eclesiástico */
       '<div class="mb-form-section">Dados Eclesiásticos</div>'+
       '<div class="field">'+
-        '<label>Mês/Ano de Batismo <span style="color:var(--danger)">*</span></label>'+
+        '<label>Mês/Ano de Batismo <span class="req">*</span></label>'+
         '<input type="text" id="mbf-batismo" value="'+v('batismo')+'" placeholder="MM/AAAA" maxlength="7" oninput="this.value=_mbMaskMesAno(this.value)">'+
         '<div class="field-error" id="mbfe-batismo">Campo obrigatório</div>'+
       '</div>'+
       '<div class="field">'+
-        '<label>Igreja de Batismo <span style="color:var(--danger)">*</span></label>'+
+        '<label>Igreja de Batismo <span class="req">*</span></label>'+
         '<input type="text" id="mbf-Igreja" value="'+v('Igreja')+'" placeholder="Nome da igreja">'+
         '<div class="field-error" id="mbfe-Igreja">Campo obrigatório</div>'+
       '</div>'+
       '<div class="field mb-form-full">'+
-        '<label>Função na Igreja <span style="color:var(--danger)">*</span></label>'+
+        '<label>Função na Igreja <span class="req">*</span></label>'+
         '<input type="text" id="mbf-funcao" value="'+v('funcao')+'" placeholder="Membro, Diácono, Pastor...">'+
         '<div class="field-error" id="mbfe-funcao">Campo obrigatório</div>'+
       '</div>'+
@@ -1299,27 +1145,27 @@ function _mbBuildForm() {
       /* Endereço */
       '<div class="mb-form-section">Endereço</div>'+
       '<div class="field">'+
-        '<label>Rua <span style="color:var(--danger)">*</span></label>'+
+        '<label>Rua <span class="req">*</span></label>'+
         '<input type="text" id="mbf-rua" value="'+v('rua')+'" placeholder="Nome da rua">'+
         '<div class="field-error" id="mbfe-rua">Campo obrigatório</div>'+
       '</div>'+
       '<div class="field">'+
-        '<label>Número <span style="color:var(--danger)">*</span></label>'+
+        '<label>Número <span class="req">*</span></label>'+
         '<input type="text" id="mbf-numero" value="'+v('numero')+'" placeholder="123">'+
         '<div class="field-error" id="mbfe-numero">Campo obrigatório</div>'+
       '</div>'+
       '<div class="field">'+
-        '<label>Bairro <span style="color:var(--danger)">*</span></label>'+
+        '<label>Bairro <span class="req">*</span></label>'+
         '<input type="text" id="mbf-bairro" value="'+v('bairro')+'" placeholder="Nome do bairro">'+
         '<div class="field-error" id="mbfe-bairro">Campo obrigatório</div>'+
       '</div>'+
       '<div class="field">'+
-        '<label>Cidade <span style="color:var(--danger)">*</span></label>'+
+        '<label>Cidade <span class="req">*</span></label>'+
         '<input type="text" id="mbf-cidade" value="'+v('cidade')+'" placeholder="Betim">'+
         '<div class="field-error" id="mbfe-cidade">Campo obrigatório</div>'+
       '</div>'+
       '<div class="field">'+
-        '<label>Estado <span style="color:var(--danger)">*</span></label>'+
+        '<label>Estado <span class="req">*</span></label>'+
         '<select id="mbf-estado">'+
           '<option value="">UF</option>'+
           MB_ESTADOS.map(function(uf){ return '<option value="'+uf+'"'+selUF(uf)+'>'+uf+'</option>'; }).join('')+
@@ -1327,7 +1173,7 @@ function _mbBuildForm() {
         '<div class="field-error" id="mbfe-estado">Campo obrigatório</div>'+
       '</div>'+
       '<div class="field">'+
-        '<label>CEP <span style="color:var(--danger)">*</span></label>'+
+        '<label>CEP <span class="req">*</span></label>'+
         '<input type="text" id="mbf-cep" value="'+v('cep')+'" placeholder="00000-000" maxlength="9" oninput="this.value=_mbMaskCEP(this.value)">'+
         '<div class="field-error" id="mbfe-cep">Campo obrigatório</div>'+
       '</div>'+
@@ -1335,7 +1181,7 @@ function _mbBuildForm() {
       /* Contato */
       '<div class="mb-form-section">Contato</div>'+
       '<div class="field">'+
-        '<label>Celular <span style="color:var(--danger)">*</span></label>'+
+        '<label>Celular <span class="req">*</span></label>'+
         '<input type="tel" id="mbf-celular" value="'+v('celular')+'" placeholder="(31) 99999-9999" maxlength="15" oninput="this.value=_mbMaskPhone(this.value)">'+
         '<div class="field-error" id="mbfe-celular">Campo obrigatório</div>'+
       '</div>'+
@@ -1350,10 +1196,10 @@ function _mbBuildForm() {
             '<input type="file" id="mb-foto-input-cam" accept="image/*" capture="user" style="display:none" onchange="mbFotoChange(event)">'+
             '<div class="mb-foto-btns">'+
               '<button type="button" class="mb-foto-btn" id="mb-btn-camera" onclick="mbAbrirCamera()">'+
-                '<i data-lucide="camera" style="width:16px;height:16px"></i> Tirar foto'+
+                '<i data-lucide="camera" class="ic-16"></i> Tirar foto'+
               '</button>'+
               '<button type="button" class="mb-foto-btn" onclick="mbEscolherFoto()">'+
-                '<i data-lucide="image" style="width:16px;height:16px"></i> Escolher foto'+
+                '<i data-lucide="image" class="ic-16"></i> Escolher foto'+
               '</button>'+
             '</div>'+
             '<div id="mb-zoom-wrap" style="margin-top:10px;display:'+(MB.fotoData?'block':'none')+'">'+
@@ -1391,7 +1237,7 @@ function _mbBuildForm() {
     /* Botões */
     '<div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">'+
       '<button class="btn btn-primary btn-lg" onclick="mbSalvarForm()" style="flex:1">'+
-        '<i data-lucide="save" style="width:17px;height:17px"></i>'+
+        '<i data-lucide="save" class="ic-17"></i>'+
         '<span class="btn-text">'+(MB.editId?'Salvar Alterações':'Cadastrar Membro')+'</span>'+
         '<div class="btn-spinner"></div>'+
       '</button>'+
@@ -1432,7 +1278,7 @@ function _mbRetomarRascunho(r) {
     _mbPreencherForm(r.v);
     showToast('Retomamos o cadastro de onde você parou. Se tinha escolhido uma foto, escolha de novo.', 'info', 6000);
   }
-  document.querySelectorAll('.mb-tab').forEach(function(b) {
+  document.querySelectorAll('.tab').forEach(function(b) {
     b.classList.toggle('active', b.getAttribute('onclick') === "mbSetTab('form')");
   });
   if (r.editId) {
@@ -1815,7 +1661,7 @@ function mbSalvarForm() {
         showToast(MB.editId ? 'Membro atualizado!' : 'Membro cadastrado!', 'success');
         MB.editId = null; MB.fotoData = ''; MB.fotoZoom = 1; MB.fotoX = 50; MB.fotoY = 50; MB.fotoNova = false; MB.fotoRemovida = false;
         MB.tab = 'lista';
-        document.querySelectorAll('.mb-tab').forEach(function(b){
+        document.querySelectorAll('.tab').forEach(function(b){
           b.classList.toggle('active', b.getAttribute('onclick') === "mbSetTab('lista')");
         });
         _mbLoad(function(){ _mbRenderPanel(); });
@@ -1889,7 +1735,7 @@ function _mbBuildDetalhe() {
   return (
     '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'+
       '<button class="btn btn-ghost btn-sm" onclick="MB.tab=\'lista\';_mbLoad(function(){_mbRenderPanel();})">'+
-        '<i data-lucide="arrow-left" style="width:16px;height:16px"></i>'+
+        '<i data-lucide="arrow-left" class="ic-16"></i>'+
       '</button>'+
       '<div>'+
         '<div class="ed-section-title">'+_mbEsc(m.nome)+'</div>'+
@@ -1911,13 +1757,13 @@ function _mbBuildDetalhe() {
           '<span class="badge '+(ativo?'badge-green':'badge-red')+'" style="display:inline-flex;margin-bottom:10px">'+(ativo?'Ativo':'Inativo')+'</span>'+
           '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
             '<button class="btn btn-secondary btn-sm" onclick="mbEditarMembro(\''+_mbEsc(m.id)+'\')">'+
-              '<i data-lucide="pencil" style="width:14px;height:14px"></i> Editar'+
+              '<i data-lucide="pencil" class="ic-14"></i> Editar'+
             '</button>'+
             '<button class="btn btn-ghost btn-sm" onclick="mbAbrirCarteirinhaDetalhe(\''+_mbEsc(m.id)+'\')" title="Gerar carteirinha">'+
-              '<i data-lucide="credit-card" style="width:14px;height:14px"></i> Carteirinha'+
+              '<i data-lucide="credit-card" class="ic-14"></i> Carteirinha'+
             '</button>'+
             '<button class="btn btn-danger btn-sm" onclick="mbConfirmarDeletar(\''+_mbEsc(m.id)+'\')" style="margin-left:auto">'+
-              '<i data-lucide="trash-2" style="width:14px;height:14px"></i> Excluir'+
+              '<i data-lucide="trash-2" class="ic-14"></i> Excluir'+
             '</button>'+
           '</div>'+
         '</div>'+
@@ -1939,35 +1785,11 @@ function _mbBuildDetalhe() {
 // ════════════════════════════════════════════
 //  DELETAR
 // ════════════════════════════════════════════
-function _mbModalConfirmHtml() {
-  return (
-    '<div class="modal-overlay" id="modal-mb-confirm">'+
-      '<div class="modal-box">'+
-        '<div style="text-align:center;margin-bottom:12px"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--danger,#ef4444)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>'+
-        '<div id="mb-confirm-title" style="font-size:16px;font-weight:800;color:var(--text);text-align:center;margin-bottom:8px"></div>'+
-        '<div id="mb-confirm-body"  style="font-size:13px;color:var(--text-muted);text-align:center;line-height:1.6;margin-bottom:20px"></div>'+
-        '<div style="display:flex;gap:10px">'+
-          '<button class="btn btn-secondary btn-full" id="mb-confirm-cancel">Cancelar</button>'+
-          '<button class="btn btn-danger btn-full"    id="mb-confirm-ok">Excluir</button>'+
-        '</div>'+
-      '</div>'+
-    '</div>'
-  );
-}
-
 function mbConfirmarDeletar(id) {
-  var m = MB.membros.filter(function(x){ return String(x.id)===String(id); })[0];
-  if (!m) return;
-  var overlay = document.getElementById('modal-mb-confirm');
-  document.getElementById('mb-confirm-title').textContent = 'Excluir membro';
-  document.getElementById('mb-confirm-body').textContent  = 'Excluir "'+m.nome+'"? Esta ação não pode ser desfeita.';
-  document.getElementById('mb-confirm-cancel').onclick = function(){ overlay.classList.remove('open'); };
-  document.getElementById('mb-confirm-ok').onclick = function(){
-    overlay.classList.remove('open');
-    _mbDeletar(id);
-  };
-  overlay.onclick = function(e){ if(e.target===overlay) overlay.classList.remove('open'); };
-  overlay.classList.add('open');
+  var mb = MB.membros.filter(function(x){ return String(x.id)===String(id); })[0];
+  if (!mb) return;
+  showConfirm('Excluir "' + _mbEsc(mb.nome) + '"? Esta ação não pode ser desfeita.', { title: 'Excluir membro', confirmLabel: 'Excluir' })
+    .then(function(ok){ if (ok) _mbDeletar(id); });
 }
 
 function _mbDeletar(id) {
@@ -2068,7 +1890,7 @@ function mbAbrirCarteirinhaDetalhe(id) {
   MB.cardSelected = id;
   MB.cardSelecionados = {};
   MB.cardSearch = '';
-  document.querySelectorAll('.mb-tab').forEach(function(b){
+  document.querySelectorAll('.tab').forEach(function(b){
     b.classList.toggle('active', b.getAttribute('onclick') === "mbSetTab('carteirinha')");
   });
   _mbRenderPanel();
@@ -2766,13 +2588,13 @@ function _mbBuildCarteirinha() {
       '</div>'+
       '<div class="mb-card-panel-actions">'+
         '<button class="btn btn-primary btn-sm" onclick="mbCard_downloadPDF(\''+selected.id+'\')">'+
-          '<i data-lucide="file-down" style="width:14px;height:14px"></i> PDF (frente + verso)'+
+          '<i data-lucide="file-down" class="ic-14"></i> PDF (frente + verso)'+
         '</button>'+
         '<button class="btn btn-secondary btn-sm" onclick="mbCard_downloadPNG(\''+selected.id+'\',false)">'+
-          '<i data-lucide="image" style="width:14px;height:14px"></i> PNG — Frente'+
+          '<i data-lucide="image" class="ic-14"></i> PNG — Frente'+
         '</button>'+
         '<button class="btn btn-secondary btn-sm" onclick="mbCard_downloadPNG(\''+selected.id+'\',true)">'+
-          '<i data-lucide="image" style="width:14px;height:14px"></i> PNG — Verso'+
+          '<i data-lucide="image" class="ic-14"></i> PNG — Verso'+
         '</button>'+
       '</div>'+
     '</div>';
@@ -2800,7 +2622,7 @@ function _mbBuildCarteirinha() {
           '<div style="font-size:10px;color:var(--text-muted)">ROL '+m.rol+' · '+(m.funcao||'Membro')+'</div>'+
         '</div>'+
         '<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;flex-shrink:0" onclick="event.stopPropagation();mbCard_downloadPDF(\''+m.id+'\')" title="PDF Carteirinha">'+
-          '<i data-lucide="file-down" style="width:13px;height:13px"></i> PDF'+
+          '<i data-lucide="file-down" class="ic-13"></i> PDF'+
         '</button>'+
       '</div>';
   });
@@ -2814,20 +2636,20 @@ function _mbBuildCarteirinha() {
         '</div>'+
         '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'+
           '<button class="btn btn-ghost btn-sm" onclick="mbCard_selecionarTodos()" title="Selecionar todos">'+
-            '<i data-lucide="check-square" style="width:14px;height:14px"></i>'+
+            '<i data-lucide="check-square" class="ic-14"></i>'+
           '</button>'+
           '<button class="btn btn-ghost btn-sm" onclick="mbCard_deselecionarTodos()" title="Limpar seleção">'+
-            '<i data-lucide="square" style="width:14px;height:14px"></i>'+
+            '<i data-lucide="square" class="ic-14"></i>'+
           '</button>'+
           '<button class="btn btn-primary btn-sm" id="btn-lote" onclick="mbCard_gerarLote()"'+loteDisabled+' style="'+(nSel===0?'opacity:0.5;cursor:not-allowed':'')+'">'+
-            '<i data-lucide="layers" style="width:14px;height:14px"></i>'+
+            '<i data-lucide="layers" class="ic-14"></i>'+
             '<span id="btn-lote-txt">'+loteLabel+'</span>'+
             '<div class="btn-spinner"></div>'+
           '</button>'+
         '</div>'+
       '</div>'+
       '<div class="ed-search-wrap" style="margin-bottom:10px">'+
-        '<span class="ed-search-icon"><i data-lucide="search" style="width:15px;height:15px"></i></span>'+
+        '<span class="ed-search-icon"><i data-lucide="search" class="ic-15"></i></span>'+
         '<input class="ed-search" id="mb-card-search-input" type="text" placeholder="Buscar membro..." value="'+_mbEsc(MB.cardSearch||'')+'" oninput="_mbOnSearchCard(event)">'+
       '</div>'+
       '<div class="mb-lote-grid" id="mb-lote-grid">'+itens+'</div>'+

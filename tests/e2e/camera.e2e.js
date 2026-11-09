@@ -18,7 +18,7 @@ async function abrirFormulario(opts) {
   await entrar(s.page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   await s.page.evaluate(() => navigateTo('membros'));
   await esperarTela(s.page, 'membros');
-  await s.page.waitForSelector('.mb-tab');
+  await s.page.waitForSelector('.tab');
   await s.page.evaluate(() => mbNovoMembro());
   await s.page.waitForSelector('#mb-btn-camera');
   return s;

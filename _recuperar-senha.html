@@ -24,10 +24,10 @@ function _renderSolicitarEmail() {
         '<div class="pa-card">' +
 
           '<button class="btn btn-ghost btn-sm" onclick="navigateTo(\'login\')" style="margin-bottom:20px;padding:0;gap:6px">' +
-            '<i data-lucide="arrow-left" style="width:16px;height:16px"></i> Voltar ao login' +
+            '<i data-lucide="arrow-left" class="ic-16"></i> Voltar ao login' +
           '</button>' +
 
-          '<div class="pa-badge" style="background:rgba(138,180,248,0.1);border-color:rgba(138,180,248,0.25);color:#8ab4f8" style="display:inline-flex;align-items:center;gap:5px"><i data-lucide="key" style="width:13px;height:13px"></i>Recuperação de Senha</div>' +
+          '<div class="pa-badge" style="background:rgba(138,180,248,0.1);border-color:rgba(138,180,248,0.25);color:#8ab4f8" style="display:inline-flex;align-items:center;gap:5px"><i data-lucide="key" class="ic-13"></i>Recuperação de Senha</div>' +
           '<h2 class="pa-title">Esqueceu sua senha?</h2>' +
           '<p class="pa-sub">Informe seu e-mail cadastrado. Enviaremos um link para redefinição de senha.</p>' +
 
@@ -55,7 +55,7 @@ function _renderSolicitarEmail() {
             '<div class="field">' +
               '<label for="rec-email">E-mail cadastrado</label>' +
               '<div class="input-wrap">' +
-                '<span class="input-icon"><i data-lucide="mail" style="width:18px;height:18px"></i></span>' +
+                '<span class="input-icon"><i data-lucide="mail" class="ic-18"></i></span>' +
                 '<input type="email" id="rec-email" class="has-icon-left" ' +
                   'placeholder="seu@email.com" autocomplete="email" autofocus>' +
               '</div>' +
@@ -158,7 +158,7 @@ function _renderRedefinirSenha(token) {
 function _buildRedefForm(token, nome) {
   var card = document.getElementById('redef-card');
   card.innerHTML =
-    '<div class="pa-badge" style="background:var(--teal-dim);border-color:color-mix(in srgb, var(--teal-dark) 25%, transparent);color:var(--teal)" style="display:inline-flex;align-items:center;gap:5px"><i data-lucide="key" style="width:13px;height:13px"></i>Nova Senha</div>' +
+    '<div class="pa-badge" style="background:var(--teal-dim);border-color:color-mix(in srgb, var(--teal-dark) 25%, transparent);color:var(--teal)" style="display:inline-flex;align-items:center;gap:5px"><i data-lucide="key" class="ic-13"></i>Nova Senha</div>' +
     '<h2 class="pa-title">Redefinir senha</h2>' +
     '<p class="pa-sub">Olá, <strong>' + nome + '</strong>! Defina sua nova senha abaixo.</p>' +
 
@@ -169,11 +169,11 @@ function _buildRedefForm(token, nome) {
     '<div class="field">' +
       '<label for="redef-nova">Nova Senha</label>' +
       '<div class="input-wrap">' +
-        '<span class="input-icon"><i data-lucide="lock" style="width:18px;height:18px"></i></span>' +
+        '<span class="input-icon"><i data-lucide="lock" class="ic-18"></i></span>' +
         '<input type="password" id="redef-nova" class="has-icon-left has-icon-right" ' +
           'placeholder="Mínimo 8 caracteres" autocomplete="new-password" oninput="paCheckStrengthRedef()">' +
         '<button type="button" class="pwd-toggle-btn" onclick="togglePwdVisibility(\'redef-nova\', this)" tabindex="-1">' +
-          '<i data-lucide="eye" style="width:18px;height:18px"></i>' +
+          '<i data-lucide="eye" class="ic-18"></i>' +
         '</button>' +
       '</div>' +
       '<div class="pwd-strength visible" id="redef-strength">' +
@@ -191,11 +191,11 @@ function _buildRedefForm(token, nome) {
     '<div class="field">' +
       '<label for="redef-confirma">Confirmar Nova Senha</label>' +
       '<div class="input-wrap">' +
-        '<span class="input-icon"><i data-lucide="lock-keyhole" style="width:18px;height:18px"></i></span>' +
+        '<span class="input-icon"><i data-lucide="lock-keyhole" class="ic-18"></i></span>' +
         '<input type="password" id="redef-confirma" class="has-icon-left has-icon-right" ' +
           'placeholder="Repita a senha" autocomplete="new-password">' +
         '<button type="button" class="pwd-toggle-btn" onclick="togglePwdVisibility(\'redef-confirma\', this)" tabindex="-1">' +
-          '<i data-lucide="eye" style="width:18px;height:18px"></i>' +
+          '<i data-lucide="eye" class="ic-18"></i>' +
         '</button>' +
       '</div>' +
       '<span class="field-error">As senhas não conferem.</span>' +

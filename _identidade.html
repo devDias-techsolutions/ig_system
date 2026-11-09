@@ -78,6 +78,7 @@ function renderIdentidade() {
   IDT.draft = JSON.parse(JSON.stringify(IDT.rascunho || IDT.orig));
   IDT.rascunho = null;
   renderView(
+    moduleBarHtml('Identidade', ['Marca']) +
     '<div class="page page-narrow">' +
       '<div class="page-head"><h1 class="page-title">Identidade da igreja</h1>' +
       '<p class="page-sub">Tudo o que personaliza o sistema fica aqui: nome, cor, imagens e dados da carteirinha.</p></div>' +
