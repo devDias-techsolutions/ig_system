@@ -86,6 +86,7 @@
 .usr-item.inativo { opacity:.55; }
 
 .usr-avatar {
+  --usr-admin-fg:#FF7D93; --usr-sec-fg:#B7A0FF;
   width:46px; height:46px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
   font-weight:800; font-size:15px; flex-shrink:0;
@@ -151,6 +152,7 @@
 }
 .perm-table tr:last-child td { border-bottom: none; }
 .perm-table tr:hover td { background: rgba(255,255,255,.015); }
+[data-theme="light"] .usr-avatar { --usr-admin-fg:#B4233F; --usr-sec-fg:#5B3FD0; }
 [data-theme="light"] .perm-table tr:hover td { background: rgba(0,0,0,.018); }
 
 .perm-check {
@@ -325,8 +327,8 @@ function _usrRenderLista() {
   }
 
   var colors = {
-    admin:      { bg:'rgba(255,94,122,.14)',    fg:'#FF5E7A' },
-    secretaria: { bg:'rgba(155,124,255,.14)',   fg:'#9B7CFF' }
+    admin:      { bg:'rgba(255,94,122,.16)',    fg:'var(--usr-admin-fg)' },
+    secretaria: { bg:'rgba(155,124,255,.16)',   fg:'var(--usr-sec-fg)' }
   };
 
   var html = '';

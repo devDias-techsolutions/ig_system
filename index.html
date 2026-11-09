@@ -67,7 +67,7 @@
   --text:             #F4FBFF;
   --text-soft:        #D8E5EA;
   --text-muted:       #88A2AE;
-  --text-dim:         #55717D;
+  --text-dim:         #7F9AA6;
 
   --border:           rgba(255, 255, 255, 0.08);
   --border2:          rgba(255, 255, 255, 0.12);
@@ -175,7 +175,7 @@
   --text:             #0F172A; /* Slate 900 */
   --text-soft:        #334155; /* Slate 700 */
   --text-muted:       #475569; /* Slate 600 */
-  --text-dim:         #64748B; /* Slate 500 */
+  --text-dim:         #566579; /* Slate 600 — AA sobre branco */
 
   /* Bordas Cirúrgicas Estilo Stripe */
   --border:           #E2E8F0; 
@@ -624,11 +624,11 @@ body::after {
 }
 .btn:hover:not(:disabled) { transform: translateY(-2px); }
 .btn:active:not(:disabled) { transform: scale(.97); }
-.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn:disabled, .btn-primary:disabled { opacity: 1; background: var(--bg4); color: var(--text-muted); border-color: var(--border); box-shadow: none; cursor: not-allowed; }
 
 .btn-primary {
   background: linear-gradient(135deg, var(--teal-light) 0%, var(--teal-dark) 100%);
-  color: #fff;
+  color: var(--on-teal, #fff);
   box-shadow: 0 8px 24px var(--teal-glow-soft), inset 0 1px 0 rgba(255,255,255,.2);
 }
 .btn-primary:hover:not(:disabled) {
@@ -748,7 +748,8 @@ textarea { height: auto; min-height: 110px; padding: 16px 18px; resize: vertical
   font-size: 11px; font-weight: 800;
   font-family: 'DM Mono', monospace; letter-spacing: .4px;
 }
-.badge-teal   { background: var(--teal-dim);   color: var(--teal);   border: 1px solid var(--teal-border); }
+.badge-teal   { background: var(--teal-dim);   color: var(--teal-light);   border: 1px solid var(--teal-border); }
+[data-theme="light"] .badge-teal { color: var(--teal-dark); }
 .badge-gold   { background: var(--gold-dim);   color: var(--gold);   border: 1px solid rgba(215, 177, 91, 0.25); }
 .badge-green  { background: var(--success-dim);  color: var(--success);  border: 1px solid rgba(54, 211, 153, 0.25); }
 .badge-red    { background: var(--danger-dim);    color: var(--danger);    border: 1px solid rgba(255, 94, 122, 0.25); }
@@ -1400,7 +1401,7 @@ function _lum(c) {
 function _corLegivel(c, tema) {
   for (var i = 0; i < 10; i++) {
     var l = _lum(c);
-    if (tema === 'light' ? l <= 0.17 : l >= 0.19) break;
+    if (tema === 'light' ? l <= 0.12 : l >= 0.26) break;
     c = _mix(c, tema === 'light' ? [0, 0, 0] : [255, 255, 255], 0.12);
   }
   return c;
@@ -1420,8 +1421,12 @@ function aplicarIdentidade() {
     root.setProperty('--teal-border',    rgba(0.25));
     root.setProperty('--teal-glow',      rgba(0.30));
     root.setProperty('--teal-glow-soft', rgba(0.08));
+    var _lo = _lum(_mix(c, [0, 0, 0], 0.25)), _hi = _lum(_mix(c, [255, 255, 255], 0.35)), _dk = _lum([11, 22, 32]);
+    var _cw = (1.05) / (_hi + 0.05);                 // pior caso do texto branco (ponta clara do gradiente)
+    var _cd = (_lo + 0.05) / (_dk + 0.05);          // pior caso do texto escuro (ponta escura)
+    root.setProperty('--on-teal', _cd > _cw ? '#0B1620' : '#fff');
   } else {
-    ['--teal','--teal-light','--teal-dark','--teal-dim','--teal-border','--teal-glow','--teal-glow-soft'].forEach(function (v) { root.removeProperty(v); });
+    ['--on-teal','--teal','--teal-light','--teal-dark','--teal-dim','--teal-border','--teal-glow','--teal-glow-soft'].forEach(function (v) { root.removeProperty(v); });
   }
   document.title = IDENTIDADE.nome + ' — Gestão Ministerial';
   if (IDENTIDADE.logoUrl) {

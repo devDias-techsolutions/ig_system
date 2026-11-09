@@ -282,3 +282,11 @@ test('setor: Home, Membros, Usuários e Identidade agrupam o conteúdo em .panel
   const proprio = findings(/^\s*\.(?:kpi-group|kpi-groups|kpi-group-label|hm-sec|hm-sec-title|usr-content|idt-sec)\s*[,{]/, HTML);
   assert.deepEqual(proprio, [], 'containers/títulos de setor próprios:\n' + proprio.join('\n'));
 });
+
+test('contraste: KPI de Membros não é branco opaco no tema escuro; marca do Identidade tem fundo', () => {
+  const m = read('_membros.html');
+  assert.doesNotMatch(m, /^\.mb-kpi-card\s*\{[^}]*background:\s*rgba\(255,255,255\);/m);
+  assert.match(read('_identidade.html'), /\.idt-marca \.brand-mark\s*\{[^}]*background:/);
+  assert.match(m, /\[data-theme="light"\] \.mb-kpi-card\.mb-kpi-card-hero/);
+  assert.match(read('index.html'), /color:\s*var\(--on-teal/);
+});
