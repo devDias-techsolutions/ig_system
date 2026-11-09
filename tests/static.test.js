@@ -275,3 +275,10 @@ test('padrão: Membros não tem CSS morto herdado (.ed-stat*) nem cores de statu
   assert.ok(!/\.ed-stats|\.ed-stat-card/.test(t), 'sobrou CSS morto .ed-stats/.ed-stat-card');
   assert.ok(!/#(?:4ade80|36d399|ff5e7a|d7b15b|9b7cff|fbbf24)/i.test(t), 'cores de status devem vir das variáveis do shell');
 });
+
+// ═══ 7. SETORIZAÇÃO (Etapa 15c) ══════════════════════════════
+test('setor: Home, Membros, Usuários e Identidade agrupam o conteúdo em .panel (sem container de vidro próprio)', () => {
+  ['_home.html', '_membros.html', '_usuarios.html', '_identidade.html'].forEach((f) => assert.match(read(f), /class="panel[ "]/, f + ' sem .panel'));
+  const proprio = findings(/^\s*\.(?:kpi-group|kpi-groups|kpi-group-label|hm-sec|hm-sec-title|usr-content|idt-sec)\s*[,{]/, HTML);
+  assert.deepEqual(proprio, [], 'containers/títulos de setor próprios:\n' + proprio.join('\n'));
+});

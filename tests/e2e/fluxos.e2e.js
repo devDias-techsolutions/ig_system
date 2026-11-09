@@ -604,3 +604,14 @@ test('layout: botões da barra de ações não mudam de lugar entre "tudo salvo"
     await page.context().close();
   }
 });
+
+test('topo no celular mostra o nome curto da igreja ao lado do logo', async () => {
+  const backend = criarBackend();
+  await definirConfig(backend, 'NOME_CURTO', 'Vida Nova');
+  const { page } = await abrir(browser, backend, { viewport: { width: 360, height: 740 } });
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  const r = await page.evaluate(() => { const n = document.querySelector('.topnav-name'); const b = n.getBoundingClientRect(); return { txt: n.textContent, visivel: b.width > 0 && getComputedStyle(n).display !== 'none', dentro: b.right <= innerWidth - 60 }; });
+  assert.equal(r.txt, 'Vida Nova');
+  assert.ok(r.visivel, 'nome curto visível no topo');
+  assert.ok(r.dentro, 'não invade os botões da direita');
+});

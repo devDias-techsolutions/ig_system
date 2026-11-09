@@ -52,40 +52,6 @@
 /* ── KPI — grupos temáticos ── */
 
 /* container de grupos */
-.kpi-groups { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
-
-/* grupo: label + grid interno */
-.kpi-group {
-  background: rgba(255,255,255,0.06);
-  backdrop-filter: blur(14px) saturate(1.4);
-  -webkit-backdrop-filter: blur(14px) saturate(1.4);
-  border: 1px solid rgba(255,255,255,0.11);
-  box-shadow: 0 2px 12px rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,0.08);
-  border-radius: 20px;
-  padding: 14px 14px 14px;
-  overflow: hidden;
-  position: relative;
-}
-[data-theme="light"] .kpi-group {
-  background: rgba(255,255,255,0.55);
-  border: 1px solid rgba(255,255,255,0.80);
-  box-shadow: 0 2px 10px rgba(80,100,160,0.07), inset 0 1px 0 rgba(255,255,255,0.95);
-}
-/* brilho de topo */
-.kpi-group::before {
-  content: ''; position: absolute;
-  top: 0; left: 14%; right: 14%; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.20), transparent);
-  pointer-events: none;
-}
-
-.kpi-group-label {
-  font-size: 9px; font-weight: 800; letter-spacing: 0.18em;
-  text-transform: uppercase; color: rgba(255,255,255,0.28);
-  margin-bottom: 12px; padding-left: 2px;
-}
-[data-theme="light"] .kpi-group-label { color: rgba(30,50,80,0.35); }
-
 /* grid interno dos cards — sempre em linha */
 .kpi-group-grid {
   display: grid;
@@ -779,7 +745,7 @@ function _mbBuildLista() {
       '</select>'+
     '</div>';
 
-  return kpis + toolbar + busca + '<div id="mb-lista-container">'+_mbBuildListaItens(filtrado, total)+'</div>';
+  return kpis + '<section class="panel">' + toolbar + busca + '<div id="mb-lista-container">'+_mbBuildListaItens(filtrado, total)+'</div></section>';
 }
 
 // ── Filtra membros conforme MB.search e MB.filtroAtivo ───
@@ -919,26 +885,26 @@ function _mbKpiGroups(total, ativos, inativos, aniv, semFoto) {
   }
 
   return (
-    '<div class="kpi-groups">' +
+    '<div>' +
 
       // Grupo A — Cadastro (Total hero + Ativos + Inativos)
-      '<div class="kpi-group kpi-group-a">' +
-        '<div class="kpi-group-label">Cadastro</div>' +
+      '<section class="panel kpi-group-a">' +
+        '<div class="panel-head"><h2 class="panel-title">Cadastro</h2></div>' +
         '<div class="kpi-group-grid">' +
           card('kpi-total',    'users',  total,    'Total',    true) +
           card('kpi-ativos',   'check',  ativos,   'Ativos',   false) +
           card('kpi-inativos', 'xcirc',  inativos, 'Inativos', false) +
         '</div>' +
-      '</div>' +
+      '</section>' +
 
       // Grupo B — Atenção (Aniversariantes + Sem foto)
-      '<div class="kpi-group kpi-group-b">' +
-        '<div class="kpi-group-label">Atenção</div>' +
+      '<section class="panel kpi-group-b">' +
+        '<div class="panel-head"><h2 class="panel-title">Atenção</h2></div>' +
         '<div class="kpi-group-grid">' +
           card('kpi-aniv',    'cake',   aniv,    'Aniv. mês', false) +
           card('kpi-semfoto', 'imgoff', semFoto, 'Sem foto',  false) +
         '</div>' +
-      '</div>' +
+      '</section>' +
 
     '</div>'
   );
