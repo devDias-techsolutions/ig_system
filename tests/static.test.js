@@ -242,3 +242,36 @@ test('layout: telas migradas usam .page como raiz e barra de ações padrão', (
   assert.match(idt, /class="action-bar"/);
   assert.ok(/Descartar[\s\S]{0,400}Salvar alterações/.test(idt), 'ordem fixa: secundário (Descartar) antes do primário (Salvar)');
 });
+
+// ═══ 6. PADRONIZAÇÃO DOS MÓDULOS (Etapa 15b) ═════════════════
+test('padrão: Membros, Usuários e Identidade usam a barra de módulo do shell (sem versão própria)', () => {
+  ['_membros.html', '_usuarios.html', '_identidade.html'].forEach((f) => assert.match(read(f), /moduleBarHtml\(/, f + ' sem moduleBarHtml'));
+  ['_membros.html', '_usuarios.html'].forEach((f) => assert.match(read(f), /tabsHtml\(/, f + ' sem tabsHtml'));
+  const proprio = findings(/\.(?:mb-topnav-(?:module|crumb)|mb-tabs?|usr-tabs?)\b/, ['_membros.html', '_usuarios.html']);
+  assert.deepEqual(proprio, [], 'cabeçalho/abas próprios:\n' + proprio.join('\n'));
+});
+
+test('padrão: todo modal de módulo tem cabeçalho, corpo e rodapé padrão', () => {
+  ['_membros.html', '_usuarios.html'].forEach((f) => {
+    const t = read(f);
+    const n = (re) => (t.match(re) || []).length;
+    const caixas = n(/class="modal-box"/g);
+    assert.ok(caixas > 0, f + ' deveria ter modais');
+    assert.equal(n(/class="modal-header"/g), caixas, f + ': modal sem modal-header');
+    assert.equal(n(/class="modal-body/g), caixas, f + ': modal sem modal-body');
+    assert.equal(n(/class="modal-footer"/g), caixas, f + ': modal sem modal-footer');
+  });
+});
+
+test('padrão: tamanho de ícone e asterisco de obrigatório usam classes do shell, não style inline', () => {
+  const ic = findings(/<i data-lucide="[a-z0-9-]+" style="width:(?:13|14|15|16|17|18|20)px;height:\d+px">/, HTML);
+  assert.deepEqual(ic, [], 'use class="ic-N":\n' + ic.join('\n'));
+  const req = findings(/<span style="color:var\(--danger\)">\*<\/span>/, HTML);
+  assert.deepEqual(req, [], 'use class="req":\n' + req.join('\n'));
+});
+
+test('padrão: Membros não tem CSS morto herdado (.ed-stat*) nem cores de status soltas fora da carteirinha', () => {
+  const t = read('_membros.html');
+  assert.ok(!/\.ed-stats|\.ed-stat-card/.test(t), 'sobrou CSS morto .ed-stats/.ed-stat-card');
+  assert.ok(!/#(?:4ade80|36d399|ff5e7a|d7b15b|9b7cff|fbbf24)/i.test(t), 'cores de status devem vir das variáveis do shell');
+});

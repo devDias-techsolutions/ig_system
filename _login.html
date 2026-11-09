@@ -328,7 +328,7 @@ function renderLogin() {
           '<div class="field">' +
             '<label for="login-email">E-mail</label>' +
             '<div class="input-wrap">' +
-              '<span class="input-icon" style="color:var(--teal)"><i data-lucide="mail" style="width:18px;height:18px"></i></span>' +
+              '<span class="input-icon" style="color:var(--teal)"><i data-lucide="mail" class="ic-18"></i></span>' +
               '<input type="email" id="login-email" class="has-icon-left" ' +
                 'placeholder="seu@email.com" autocomplete="email" autofocus>' +
             '</div>' +
@@ -339,11 +339,11 @@ function renderLogin() {
           '<div class="field">' +
             '<label for="login-senha">Senha</label>' +
             '<div class="input-wrap" style="position:relative">' +
-              '<span class="input-icon" style="color:var(--teal)"><i data-lucide="lock" style="width:18px;height:18px"></i></span>' +
+              '<span class="input-icon" style="color:var(--teal)"><i data-lucide="lock" class="ic-18"></i></span>' +
               '<input type="password" id="login-senha" class="has-icon-left has-icon-right" ' +
                 'placeholder="••••••••" autocomplete="current-password">' +
               '<button type="button" class="pwd-toggle-btn" onclick="togglePwdVisibility(\'login-senha\', this)" tabindex="-1">' +
-                '<i data-lucide="eye" style="width:18px;height:18px"></i>' +
+                '<i data-lucide="eye" class="ic-18"></i>' +
               '</button>' +
             '</div>' +
           '</div>' +
@@ -366,7 +366,7 @@ function renderLogin() {
         '<div class="login-footer" style="display:flex;align-items:center;justify-content:center;gap:12px">' +
           '<span>' + escHtml(IDENTIDADE.nome) + ' · Gestão Ministerial</span>' +
           '<button class="theme-toggle-btn btn btn-ghost btn-sm" onclick="toggleTheme()" style="width:32px;height:32px;padding:0;border-radius:8px" title="Alternar tema">' +
-            '<i data-lucide="moon" style="width:16px;height:16px"></i>' +
+            '<i data-lucide="moon" class="ic-16"></i>' +
           '</button>' +
         '</div>' +
 
@@ -448,8 +448,8 @@ function togglePwdVisibility(inputId, btn) {
   var isHidden = input.type === 'password';
   input.type = isHidden ? 'text' : 'password';
   btn.innerHTML = isHidden
-    ? '<i data-lucide="eye-off" style="width:18px;height:18px"></i>'
-    : '<i data-lucide="eye" style="width:18px;height:18px"></i>';
+    ? '<i data-lucide="eye-off" class="ic-18"></i>'
+    : '<i data-lucide="eye" class="ic-18"></i>';
   if (window.lucide) lucide.createIcons();
 }
 </script>

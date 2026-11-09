@@ -24,7 +24,7 @@ const kpis = (page) => page.evaluate(() => {
 const textoKpis = (page) => page.evaluate(() => document.getElementById('kpi-grid').innerText.replace(/\s+/g, ' '));
 
 async function irParaHome(page) { await page.evaluate(() => navigateTo('home')); await esperarTela(page, 'home'); await page.waitForTimeout(250); }
-async function irParaMembros(page) { await page.evaluate(() => navigateTo('membros')); await esperarTela(page, 'membros'); await page.waitForSelector('#mb-lista-container, .mb-tab', { timeout: 6000 }); }
+async function irParaMembros(page) { await page.evaluate(() => navigateTo('membros')); await esperarTela(page, 'membros'); await page.waitForSelector('#mb-lista-container, .tab', { timeout: 6000 }); }
 
 async function cadastrarMembro(page, nome) {
   await page.evaluate(() => mbNovoMembro());
@@ -312,10 +312,12 @@ test('celular: modal de aniversariantes fica inteiro na tela e a lista rola dent
     const box = document.querySelector('#modal-mb-aniv .modal-box').getBoundingClientRect();
     const body = document.getElementById('mb-aniv-body');
     const antes = body.scrollTop; body.scrollTop = 400;
-    return { top: box.top, bottom: box.bottom, vh: innerHeight, rolavel: body.scrollHeight > body.clientHeight, rolou: body.scrollTop > antes };
+    const fr = document.querySelector('#modal-mb-aniv .modal-footer .btn').getBoundingClientRect();
+    return { top: box.top, bottom: box.bottom, vh: innerHeight, rodapeVisivel: fr.top >= box.top && fr.bottom <= innerHeight, semMenuPorCima: (document.elementFromPoint(fr.x + fr.width / 2, fr.y + fr.height / 2) || document.body).closest('.modal-footer') !== null, rolavel: body.scrollHeight > body.clientHeight, rolou: body.scrollTop > antes };
   });
   assert.ok(m.top >= 0 && m.bottom <= m.vh, 'modal cabe na tela: ' + JSON.stringify(m));
-  assert.ok(m.top > 20 && m.vh - m.bottom > 20, 'modal não encosta nas bordas: ' + JSON.stringify(m));
+  assert.ok(m.rodapeVisivel, 'botão Fechar visível sem rolar a página: ' + JSON.stringify(m));
+  assert.ok(m.semMenuPorCima, 'o menu inferior não cobre o botão Fechar: ' + JSON.stringify(m));
   assert.ok(m.rolavel && m.rolou, 'a lista rola dentro do modal: ' + JSON.stringify(m));
   assert.deepEqual(s.erros, []);
 });
@@ -531,7 +533,7 @@ test('carteirinha: logo enviado fica dentro do cabeçalho, em caixa pequena e se
   const { page } = await abrir(browser, backend);
   await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   await page.evaluate(() => navigateTo('membros'));
-  await page.waitForSelector('.mb-tab, [data-tab]');
+  await page.waitForSelector('.tab, [data-tab]');
   await page.evaluate(() => {
     const w = document.createElement('div'); w.id = 'cartao-teste'; w.style.cssText = 'position:fixed;top:0;left:0;z-index:99999';
     w.innerHTML = mbCard_htmlFrente({ nome: 'Maria Silva', rol: '1', funcao: 'Membro' }, false); document.body.appendChild(w);
