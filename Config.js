@@ -129,8 +129,8 @@ var Config = (function () {
     PASTA_FOTOS:     ['Pasta das fotos', 60, true]
   };
 
-  // Valida e grava só as chaves permitidas. Devolve { ok, erro }; nada é gravado se algum campo for inválido.
-  function salvar(dados) {
+  // Valida os campos sem gravar nada. Devolve { ok, erro } ou { ok, limpos } (valores já limpos).
+  function validar(dados) {
     dados = dados || {};
     var limpos = {}, chaves = Object.keys(dados);
     for (var i = 0; i < chaves.length; i++) {
@@ -142,6 +142,14 @@ var Config = (function () {
       if (k === 'COR_PRIMARIA' && v && !/^#[0-9a-fA-F]{6}$/.test(v)) return { ok: false, erro: 'Cor inválida. Use o formato #RRGGBB.' };
       limpos[k] = v;
     }
+    return { ok: true, limpos: limpos };
+  }
+
+  // Valida e grava só as chaves permitidas. Devolve { ok, erro }; nada é gravado se algum campo for inválido.
+  function salvar(dados) {
+    var val = validar(dados);
+    if (!val.ok) return val;
+    var limpos = val.limpos;
     var rows = _linhas();
     Object.keys(limpos).forEach(function (k) {
       var ultima = null;
@@ -154,6 +162,9 @@ var Config = (function () {
     });
     return { ok: true };
   }
+
+  // Nome que aparece como remetente dos e-mails do sistema (no lugar do nome da conta Google dona da planilha)
+  function remetente() { return String(identidade().nome); }
 
   // Página de login é pública: a assinatura do pastor só vai depois do login (idt_obter)
   function identidadeCompleta() {
@@ -184,7 +195,7 @@ var Config = (function () {
   }
 
   return {
-    get: get, identidade: identidade, iniciais: iniciais, iconeUrl: iconeUrl, identidadeJson: identidadeJson, identidadeCompleta: identidadeCompleta, salvar: salvar,
+    get: get, identidade: identidade, iniciais: iniciais, iconeUrl: iconeUrl, identidadeJson: identidadeJson, identidadeCompleta: identidadeCompleta, salvar: salvar, validar: validar, remetente: remetente,
     garantirChaves: garantirChaves, chaves: CHAVES, pastaFotos: function () { return get('PASTA_FOTOS', PASTA_FOTOS_PADRAO); }
   };
 })();

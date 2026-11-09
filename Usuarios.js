@@ -287,6 +287,7 @@ var Usuarios = (function () {
 
       var igreja = String(Config.identidade().nome).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       GmailApp.sendEmail(email, '[' + igreja + '] Bem-vindo ao sistema!', '', {
+        name: Config.remetente(),
         htmlBody:
           '<div style="font-family:sans-serif;max-width:480px;margin:auto">' +
           '<h2 style="color:#1C353A">Bem-vindo(a), ' + nome + '!</h2>' +

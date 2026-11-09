@@ -1,7 +1,8 @@
 // ═══════════════════════════════════════════════════════════
 //  SetupSheets.gs · Criação das abas do Google Sheets
-//  Execute setupSpreadsheet() UMA VEZ para inicializar o banco
-//  e depois criarPrimeiroAdmin() para criar o administrador
+//  Para entregar uma igreja nova use implantarIgreja() (Code.js / Implantacao.js),
+//  que chama createAllSheets() e cria o administrador. setupSpreadsheet() continua
+//  disponível para recriar abas/chaves que faltarem (pode rodar quantas vezes quiser).
 // ═══════════════════════════════════════════════════════════
 
 var SetupSheets = (function () {
@@ -193,7 +194,8 @@ var SetupSheets = (function () {
     var enviado = false;
     try {
       var appUrl = ScriptApp.getService().getUrl();
-      GmailApp.sendEmail(email, 'Seu acesso de administrador', '', {
+      GmailApp.sendEmail(email, '[' + Config.remetente() + '] Seu acesso de administrador', '', {
+        name: Config.remetente(),
         htmlBody: '<p>Olá, ' + nome + '!</p>' +
                   '<p>Seu acesso de administrador foi criado.</p>' +
                   '<p>E-mail: <b>' + email + '</b><br>Senha temporária: <b>' + senha + '</b></p>' +
