@@ -8,6 +8,7 @@
     "test:static": "node --test tests/static.test.js",
     "test:runtime": "node --test tests/runtime.test.js",
     "preview": "node tests/preview/preview.js",
+    "empacotar": "node scripts/empacotar-cliente.js",
     "e2e": "node --test \"tests/e2e/*.e2e.js\""
   },
   "engines": {

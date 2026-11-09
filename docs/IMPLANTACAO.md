@@ -2,6 +2,15 @@
 
 Para quem entrega o sistema (DevDias). O cliente não vê nada disto: recebe o sistema pronto.
 
+## Caminho rápido: empacotar o cliente
+
+Em vez de preencher à mão, guarde os dados da igreja num arquivo e gere o pacote:
+
+1. Copie `clientes/exemplo/cliente.json` para `clientes/<slug>/cliente.json` e preencha (a pasta `clientes/` não vai para o GitHub, só o modelo).
+2. `npm run empacotar -- <slug>` (ou `node scripts/empacotar-cliente.js <slug>`). Dados inválidos são recusados e nada é gerado.
+3. Em `dist-clientes/<slug>/` saem: `codigo/` (o que vai para o Apps Script, com `.clasp.json` se você preencheu `scriptId`), `Implantacao.csv` (valores para colar na aba), `ENTREGA.md` (roteiro com os dados desta igreja) e `VERSAO.txt`.
+4. Siga o `ENTREGA.md`. É o mesmo passo a passo abaixo, já personalizado.
+
 ## Passo a passo
 
 1. **Copie a planilha modelo** (Arquivo → Fazer uma cópia). O script vai junto.
