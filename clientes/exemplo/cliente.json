@@ -1,0 +1,15 @@
+{
+  "slug": "exemplo",
+  "adminNome": "Maria da Silva",
+  "adminEmail": "maria@igrejaexemplo.org",
+  "nome": "Igreja Exemplo Vida Nova",
+  "nomeCurto": "Vida Nova",
+  "lema": "Tudo posso naquele que me fortalece",
+  "cor": "#7C3AED",
+  "pastor": "Pr. João da Silva",
+  "cargoPastor": "Pastor Presidente",
+  "endereco": "Rua das Flores, 100 — Centro",
+  "cnpj": "00.000.000/0001-00",
+  "pastaFotos": "Fotos de Membros",
+  "scriptId": ""
+}

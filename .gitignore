@@ -2,3 +2,6 @@ dist/
 .clasp.json
 .clasprc.json
 node_modules/
+dist-clientes/
+clientes/*
+!clientes/exemplo/
