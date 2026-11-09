@@ -72,7 +72,7 @@
   padding: 13px 12px 11px;
   display: flex; flex-direction: column; justify-content: space-between;
   position: relative; overflow: hidden;
-  background: rgba(255,255,255);
+  background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.09);
   transition: transform .18s, box-shadow .18s;
   animation: kpiCardUp .35s cubic-bezier(.22,.68,0,1.2) both;
@@ -126,13 +126,18 @@
 
 /* ── card DESTAQUE (total/membros) — primeiro do grupo-a; acompanha a cor da marca ── */
 .mb-kpi-card-hero {
-  background: linear-gradient(148deg, color-mix(in srgb, var(--teal-dark) 55%, #000) 0%, var(--teal-dark) 55%, color-mix(in srgb, var(--teal) 70%, var(--teal-dark)) 100%);
+  background: linear-gradient(148deg, color-mix(in srgb, var(--teal-dark) 40%, #000) 0%, color-mix(in srgb, var(--teal-dark) 70%, #000) 60%, color-mix(in srgb, var(--teal-dark) 85%, #000) 100%);
   border: 1px solid rgba(255,255,255,0.14);
   box-shadow: 0 4px 20px var(--teal-glow), inset 0 1px 0 rgba(255,255,255,0.13);
 }
-[data-theme="light"] .mb-kpi-card-hero { border-color: rgba(255,255,255,0.18); }
+/* mesmo peso do tema claro do card comum, para o destaque não perder o fundo escuro */
+[data-theme="light"] .mb-kpi-card.mb-kpi-card-hero {
+  background: linear-gradient(148deg, color-mix(in srgb, var(--teal-dark) 40%, #000) 0%, color-mix(in srgb, var(--teal-dark) 70%, #000) 60%, color-mix(in srgb, var(--teal-dark) 85%, #000) 100%);
+  border-color: rgba(255,255,255,0.18);
+  box-shadow: 0 6px 20px var(--teal-glow), inset 0 1px 0 rgba(255,255,255,0.13);
+}
 .mb-kpi-card-hero .mb-kpi-card-value { font-size: 38px; color: #fff; letter-spacing: -3px; }
-.mb-kpi-card-hero .mb-kpi-card-label { color: rgba(255,255,255,0.42); }
+.mb-kpi-card-hero .mb-kpi-card-label { color: rgba(255,255,255,0.92); }
 .mb-kpi-card-hero .mb-kpi-card-icon  { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.16); }
 /* blob orgânico interno */
 .mb-kpi-card-hero::before {
@@ -154,7 +159,7 @@
   display: inline-flex; align-items: center; gap: 5px;
   background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.15);
   border-radius: 99px; padding: 4px 9px 4px 5px;
-  font-size: 9px; color: rgba(255,255,255,0.6); font-weight: 600;
+  font-size: 9px; color: #fff; font-weight: 600;
   margin-top: 8px; width: fit-content;
 }
 .kpi-hero-dot {
@@ -169,10 +174,10 @@
 .kpi-aniv     { --kc: var(--gold); }
 .kpi-semfoto  { --kc: var(--purple); }
 
-.kpi-ativos   .mb-kpi-card-value { color: #1a7a50; }
-.kpi-inativos .mb-kpi-card-value { color: #b91c3a; }
-.kpi-aniv     .mb-kpi-card-value { color: #92530a; }
-.kpi-semfoto  .mb-kpi-card-value { color: #5b21b6; }
+.kpi-ativos   .mb-kpi-card-value { color: #4ADE9F; }
+.kpi-inativos .mb-kpi-card-value { color: #FF7D93; }
+.kpi-aniv     .mb-kpi-card-value { color: #E8C36F; }
+.kpi-semfoto  .mb-kpi-card-value { color: #B7A0FF; }
 [data-theme="light"] .kpi-ativos   .mb-kpi-card-value { color: #0a6640; }
 [data-theme="light"] .kpi-inativos .mb-kpi-card-value { color: #9b1c1c; }
 [data-theme="light"] .kpi-aniv     .mb-kpi-card-value { color: #92400e; }
