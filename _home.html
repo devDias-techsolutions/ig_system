@@ -51,13 +51,13 @@
 /* ── Módulos ── */
 .hm-mods { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--sp-3); }
 .hm-mod {
-  position: relative; display: flex; align-items: center; gap: var(--sp-3); width: 100%; text-align: left;
+  position: relative; overflow: hidden; isolation: isolate; display: flex; align-items: center; gap: var(--sp-3); width: 100%; text-align: left;
   padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-glass);
   color: inherit; font-family: inherit; cursor: pointer;
   transition: transform .28s var(--ease-spring), border-color .2s var(--ease), box-shadow .28s var(--ease), background .2s var(--ease);
 }
 [data-theme="light"] .hm-mod { background: #FFFFFF; box-shadow: 0 1px 2px rgba(15, 23, 42, .04); }
-.hm-mod:hover { transform: translateY(-3px); border-color: var(--teal-border); box-shadow: 0 16px 32px -18px var(--teal-glow); }
+.hm-mod:hover { transform: translateY(-4px); border-color: var(--teal-border); box-shadow: 0 22px 40px -20px var(--teal-glow); }
 .hm-mod:active { transform: translateY(-1px) scale(.99); }
 .hm-mod:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
 .hm-mod-icon { width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0; display: grid; place-items: center; background: var(--teal-dim); color: var(--teal); }

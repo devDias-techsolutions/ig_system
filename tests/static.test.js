@@ -292,3 +292,9 @@ test('padrão: KPI de Membros usa o mesmo card do Início (sem estilo próprio, 
   assert.match(read('_identidade.html'), /\.idt-marca \.brand-mark\s*\{[^}]*background:/);
   assert.match(read('index.html'), /color:\s*var\(--on-teal/);
 });
+
+test('UI premium: camada compartilhada (painel, KPI, botão, aba) com movimento e respeito a reduced-motion', () => {
+  const h = read('index.html');
+  for (const re of [/\.panel::before/, /\.panel::after/, /\.kpi-icon::after/, /@keyframes kpiHalo/, /@keyframes btnBreathe/, /\.tab::after/, /\.btn::after/, /pointermove/, /prefers-reduced-motion: reduce\)\s*\{[^}]*\n[^}]*animation: none/])
+    assert.match(h, re);
+});
