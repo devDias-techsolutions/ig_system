@@ -283,10 +283,12 @@ test('setor: Home, Membros, Usuários e Identidade agrupam o conteúdo em .panel
   assert.deepEqual(proprio, [], 'containers/títulos de setor próprios:\n' + proprio.join('\n'));
 });
 
-test('contraste: KPI de Membros não é branco opaco no tema escuro; marca do Identidade tem fundo', () => {
+test('padrão: KPI de Membros usa o mesmo card do Início (sem estilo próprio, sem hero, sem pulso)', () => {
   const m = read('_membros.html');
-  assert.doesNotMatch(m, /^\.mb-kpi-card\s*\{[^}]*background:\s*rgba\(255,255,255\);/m);
+  assert.match(m, /_kpiCard\(/);
+  assert.doesNotMatch(m, /mb-kpi|kpi-hero|kpiPulse|kpi-group/);
+  assert.doesNotMatch(read('_home.html'), /^\.kpi-card\s*\{/m);
+  assert.match(read('index.html'), /^\.kpi-card\s*\{/m);
   assert.match(read('_identidade.html'), /\.idt-marca \.brand-mark\s*\{[^}]*background:/);
-  assert.match(m, /\[data-theme="light"\] \.mb-kpi-card\.mb-kpi-card-hero/);
   assert.match(read('index.html'), /color:\s*var\(--on-teal/);
 });
