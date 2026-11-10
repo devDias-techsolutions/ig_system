@@ -515,6 +515,14 @@ body::after {
   background: radial-gradient(200px circle at var(--mx, 50%) var(--my, 0%), color-mix(in srgb, var(--kpi-color, var(--teal)) 24%, transparent), transparent 70%);
 }
 .kpi-card:hover::after, .hm-mod:hover::after { opacity: 1; }
+/* ícone fantasma: marca d'água do cartão, na cor do indicador */
+.card-ghost {
+  position: absolute; right: -12px; bottom: -20px; width: 104px; height: 104px; z-index: -1; pointer-events: none;
+  color: var(--kpi-color, var(--teal)); opacity: .08; stroke-width: 1.2; transform: rotate(-12deg);
+  transition: transform .6s var(--ease-spring), opacity .4s var(--ease);
+}
+.kpi-card:hover .card-ghost, .hm-mod:hover .card-ghost { transform: rotate(-4deg) scale(1.12); opacity: .16; }
+.kpi-card.is-loading .card-ghost { display: none; }
 .kpi-card.kc-blue  { --kpi-color: var(--cyan);    --kpi-dim: rgba(77, 163, 255, .12);  --kpi-border: rgba(77, 163, 255, .35);  --kpi-shadow: rgba(77, 163, 255, .45); }
 .kpi-card.kc-gold  { --kpi-color: var(--gold);    --kpi-dim: rgba(215, 177, 91, .14);  --kpi-border: rgba(215, 177, 91, .38);  --kpi-shadow: rgba(215, 177, 91, .45); }
 .kpi-card.kc-red   { --kpi-color: var(--danger);  --kpi-dim: rgba(255, 94, 122, .12);  --kpi-border: rgba(255, 94, 122, .35);  --kpi-shadow: rgba(255, 94, 122, .40); }
@@ -1183,7 +1191,7 @@ body.nav-on #topnav-usuarios-btn { display: none !important; }
 @media (prefers-reduced-motion: reduce) {
   .sb-item, .bn-item { transition: none; }
   .kpi-card, .kpi-value, .kpi-icon::after, .panel, .panel::after, .page > .panel, .btn-primary, .module-bar-name::before { animation: none !important; }
-  .kpi-card::after, .hm-mod::after, .btn::after, .tab::after, .tab i { transition: none; }
+  .kpi-card::after, .hm-mod::after, .btn::after, .tab::after, .tab i, .card-ghost { transition: none; }
 }
 </style>
 </head>
@@ -1437,6 +1445,7 @@ function _kpiCard(icon, colorClass, value, label, tag, valueId) {
       '<div class="kpi-icon"><i data-lucide="' + escHtml(icon || 'activity') + '"></i></div>' +
       '<span class="kpi-tag">' + escHtml(tagText) + '</span>' +
     '</div>' +
+    '<i data-lucide="' + escHtml(icon || 'activity') + '" class="card-ghost" aria-hidden="true"></i>' +
     '<div class="kpi-value"' + (valueId ? ' id="' + escHtml(valueId) + '"' : '') + '>' + escHtml(value) + '</div>' +
     '<div class="kpi-label">' + escHtml(label) + '</div>' +
   '</div>';

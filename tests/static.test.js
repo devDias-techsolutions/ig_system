@@ -298,3 +298,9 @@ test('UI premium: camada compartilhada (painel, KPI, botão, aba) com movimento 
   for (const re of [/\.panel::before/, /\.panel::after/, /\.kpi-icon::after/, /@keyframes kpiHalo/, /@keyframes btnBreathe/, /\.tab::after/, /\.btn::after/, /pointermove/, /\.kpi-icon::after, \.panel, [^\n]*animation: none !important/])
     assert.match(h, re);
 });
+
+test('ícone fantasma: KPI e módulo do Início têm marca d\'água no mesmo componente', () => {
+  assert.match(read('index.html'), /_kpiCard[\s\S]{0,900}class="card-ghost"/);
+  assert.match(read('_home.html'), /_moduleBtn[\s\S]{0,700}class="card-ghost"/);
+  assert.match(read('index.html'), /\.card-ghost\s*\{/);
+});
