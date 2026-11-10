@@ -548,15 +548,21 @@ test('carteirinha: logo enviado fica dentro do cabeçalho, em caixa pequena e se
   assert.ok(r.dentro, 'logo dentro do cabeçalho: ' + JSON.stringify(r));
 });
 
-test('tema: card destaque de Membros acompanha a cor da marca', async () => {
+test('padrão: KPIs de Membros são os mesmos cards do Início e seguem a cor da marca', async () => {
   const backend = criarBackend();
   await definirConfig(backend, 'COR_PRIMARIA', '#7c3aed');
   const { page } = await abrir(browser, backend);
   await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   await page.evaluate(() => navigateTo('membros'));
-  await page.waitForSelector('.mb-kpi-card-hero');
-  const bg = await page.evaluate(() => getComputedStyle(document.querySelector('.mb-kpi-card-hero')).backgroundImage);
-  assert.ok(!/10, ?61, ?98|14, ?107, ?138|26, ?122, ?104/.test(bg), 'sem o azul/verde fixo: ' + bg);
+  await page.waitForSelector('.kpi-card');
+  const r = await page.evaluate(() => ({
+    n: document.querySelectorAll('.kpi-card').length,
+    antigo: document.querySelectorAll('.mb-kpi-card, .kpi-hero-status').length,
+    cor: getComputedStyle(document.querySelector('.kpi-card .kpi-icon')).color
+  }));
+  assert.equal(r.n, 5);
+  assert.equal(r.antigo, 0);
+  assert.notEqual(r.cor, 'rgb(10, 61, 98)');
 });
 
 test('identidade: cor salva vira "cor recente" e pode ser reaplicada; sem recentes não mostra o bloco', async () => {
