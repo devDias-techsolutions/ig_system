@@ -18,7 +18,10 @@ async function comoAdmin() {
 
 const kpis = (page) => page.evaluate(() => {
   const o = {};
-  document.querySelectorAll('#kpi-grid > *').forEach((c) => { o[c.textContent.replace(/[0-9]+/g, '').trim()] = Number((c.textContent.match(/[0-9]+/) || [0])[0]); });
+  document.querySelectorAll('#kpi-grid .kg-stat, #kpi-grid .kg-alert').forEach((c) => {
+    const rot = c.querySelector('.kg-lab') ? c.querySelector('.kg-lab').textContent : c.textContent.replace(/[0-9]+|Ver lista ›/g, '');
+    o[rot.trim()] = Number((c.textContent.match(/[0-9]+/) || [0])[0]);
+  });
   return o;
 });
 const textoKpis = (page) => page.evaluate(() => document.getElementById('kpi-grid').innerText.replace(/\s+/g, ' '));
@@ -63,9 +66,9 @@ test('perfil secretaria entra na Home do seu perfil (sem administração) e abre
   const texto = await page.evaluate(() => document.querySelector('.hm').innerText.replace(/\s+/g, ' '));
   assert.match(texto, /Seu espaço de trabalho/);
   assert.ok(!/Administração/.test(texto), 'secretaria não vê o bloco de administração na Home');
-  assert.ok(!/Usuários do sistema/.test(texto), 'secretaria não vê o indicador de usuários');
+  assert.ok(!/Acesso ao sistema/.test(texto), 'secretaria não vê o grupo de usuários');
   assert.ok(!/Atividade recente/.test(texto), 'secretaria não vê atividade de administração');
-  assert.match(texto, /Membros ativos/);
+  assert.match(texto, /Cadastro da igreja Ativos/);
   await page.evaluate(() => navigateTo('membros'));
   await esperarTela(page, 'membros');
   assert.deepEqual(erros, []);
@@ -209,13 +212,13 @@ test('Home: falha ao carregar indicadores mostra erro com "Tentar de novo" que f
   await page.waitForSelector('#kpi-grid .hm-empty.erro', { timeout: 6000 });
   falhar = false;
   await page.click('#kpi-grid .hm-empty.erro .btn');
-  await page.waitForSelector('#kpi-grid .kpi-card:not(.is-loading)', { timeout: 6000 });
+  await page.waitForSelector('#kpi-grid .kpi-group:not(.is-loading)', { timeout: 6000 });
 });
 
 // ── Membros × Home (o defeito do cache apareceu aqui) ───────
 test('membros: cadastrar, inativar e excluir refletem na lista e nos números da Home', async () => {
   const { page, erros } = await comoAdmin();
-  assert.match(await textoKpis(page), /0\s*Membros ativos|Membros ativos\s*0/i);
+  assert.match(await textoKpis(page), /Ativos\s*0/i);
 
   await irParaMembros(page);
   await cadastrarMembro(page, 'Fulano de Tal');
@@ -234,8 +237,8 @@ test('membros: cadastrar, inativar e excluir refletem na lista e nos números da
 
   await irParaHome(page);
   const t = await textoKpis(page);
-  assert.match(t, /Membros inativos/i, t);
-  assert.equal(await page.evaluate(() => [...document.querySelectorAll('#kpi-grid > *')].map((c) => c.innerText.replace(/\s+/g, ' ')).find((x) => /inativos/i.test(x)).match(/[0-9]+/)[0]), '1', t);
+  assert.match(t, /Inativos/i, t);
+  assert.equal(await page.evaluate(() => [...document.querySelectorAll('#kpi-grid .kg-stat')].map((c) => c.innerText.replace(/\s+/g, ' ')).find((x) => /inativos/i.test(x)).match(/[0-9]+/)[0]), '1', t);
 
   // excluir
   await irParaMembros(page);
@@ -554,13 +557,15 @@ test('padrão: KPIs de Membros são os mesmos cards do Início e seguem a cor da
   const { page } = await abrir(browser, backend);
   await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   await page.evaluate(() => navigateTo('membros'));
-  await page.waitForSelector('.kpi-card');
+  await page.waitForSelector('.kpi-group');
   const r = await page.evaluate(() => ({
-    n: document.querySelectorAll('.kpi-card').length,
+    n: document.querySelectorAll('.kpi-group').length,
+    soltos: document.querySelectorAll('.kpi-card').length,
     antigo: document.querySelectorAll('.mb-kpi-card, .kpi-hero-status').length,
-    cor: getComputedStyle(document.querySelector('.kpi-card .kpi-icon')).color
+    cor: getComputedStyle(document.querySelector('.kpi-group .kg-dot:not(.ok):not(.bad):not(.warn)')).backgroundColor
   }));
-  assert.equal(r.n, 5);
+  assert.equal(r.n, 2);
+  assert.equal(r.soltos, 0);
   assert.equal(r.antigo, 0);
   assert.notEqual(r.cor, 'rgb(10, 61, 98)');
 });
