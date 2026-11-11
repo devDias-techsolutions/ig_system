@@ -317,3 +317,10 @@ test('grupo de indicadores: Início e Membros usam _kpiGroup (uma seta só, dest
   assert.match(read('index.html'), /function _kpiGroup[\s\S]{0,1800}kpi-go/);
   assert.match(read('Membros.js'), /alerta: true/);
 });
+
+test('cartas: aba no módulo Membros, arquivo próprio incluído pelo manifesto e registro no servidor', () => {
+  assert.match(read('_membros.html'), /\['cartas', 'file-text', 'Cartas'\]/);
+  assert.match(read('Membros.js'), /html: \['_membros', '_membros-cartas'\]/);
+  assert.match(read('_membros-cartas.html'), /mb_registrarCarta/);
+  assert.doesNotMatch(read('_membros-cartas.html'), /mb-kpi|kpi-hero/);
+});

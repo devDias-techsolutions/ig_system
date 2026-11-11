@@ -440,9 +440,9 @@ function _mbTopnavActions() {
 }
 
 // ── Barra do módulo e abas: componentes padrão do shell ──
-function _mbBuildTopnav() { return moduleBarHtml('Membros', ['CRUD', 'ROL Auto', 'Carteirinha']); }
+function _mbBuildTopnav() { return moduleBarHtml('Membros', ['CRUD', 'ROL Auto', 'Carteirinha', 'Cartas']); }
 function _mbBuildTabs() {
-  return tabsHtml([['lista', 'users', 'Membros'], ['form', 'user-plus', 'Novo Membro'], ['carteirinha', 'credit-card', 'Carteirinhas']], MB.tab, 'mbSetTab');
+  return tabsHtml([['lista', 'users', 'Membros'], ['form', 'user-plus', 'Novo Membro'], ['carteirinha', 'credit-card', 'Carteirinhas'], ['cartas', 'file-text', 'Cartas']], MB.tab, 'mbSetTab');
 }
 
 // ── Render principal ─────────────────────────────────────
@@ -499,6 +499,8 @@ function mbSetTab(tab) {
   } else if (tab === 'form') {
     MB.editId = null; MB.fotoData = ''; MB.fotoZoom = 1; MB.fotoX = 50; MB.fotoY = 50; MB.fotoNova = false; MB.fotoRemovida = false;
     _mbLoadProximoRol(function(){ _mbRenderPanel(); });
+  } else if (tab === 'cartas') {
+    _mbLoad(function(){ _mbRenderPanel(); });
   } else if (tab === 'carteirinha') {
     MB.cardSelected = null; MB.cardSelecionados = {}; MB.cardSearch = '';
     _mbLoad(function(){ _mbRenderPanel(); });
@@ -513,8 +515,10 @@ function _mbRenderPanel() {
   if (MB.tab === 'form')        panel.innerHTML = _mbBuildForm();
   if (MB.tab === 'detalhe')     panel.innerHTML = _mbBuildDetalhe();
   if (MB.tab === 'carteirinha') panel.innerHTML = _mbBuildCarteirinha();
+  if (MB.tab === 'cartas')      panel.innerHTML = mbCarta_build();
   if (window.lucide) lucide.createIcons();
   if (MB.tab === 'lista') _mbAnimKpis();
+  if (MB.tab === 'cartas') mbCarta_depois();
   _mbBindSearchListeners();
 }
 

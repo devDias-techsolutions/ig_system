@@ -358,6 +358,51 @@ var Membros = (function () {
     });
   }
 
+  // ══ CARTAS (mudança / recomendação) ═════════════════════
+  // Cada carta emitida fica registrada: quem emitiu, para quem e quando (controle contra uso indevido).
+  var CARTAS = 'Cartas';
+  var CARTAS_HEADERS = ['Id', 'Data', 'Tipo', 'MembroId', 'MembroNome', 'Destino', 'EmitidoPor'];
+  var CARTAS_TIPOS = ['mudanca', 'recomendacao'];
+
+  function _sheetCartas() {
+    var ss = getSSInstance();
+    var sh = ss.getSheetByName(CARTAS);
+    if (!sh) {   // instalações antigas ainda não têm a aba: cria sozinha na primeira emissão
+      sh = ss.insertSheet(CARTAS);
+      sh.appendRow(CARTAS_HEADERS);
+      sh.getRange(1, 1, 1, CARTAS_HEADERS.length).setFontWeight('bold');
+      sh.setFrozenRows(1);
+    }
+    return sh;
+  }
+
+  function registrarCarta(token, d) {
+    return withAuth(token, function (sess) {
+      d = d || {};
+      if (CARTAS_TIPOS.indexOf(d.tipo) === -1) return Util.err('Tipo de carta inválido.');
+      if (!d.membroId || !d.membroNome) return Util.err('Selecione o membro.');
+      var id = Util.uuid();
+      _sheetCartas().appendRow([id, Util.now(), d.tipo, String(d.membroId), String(d.membroNome),
+        String(d.destino || '').slice(0, 120), sess.nome || sess.email || '']);
+      Util.invalidarCache(CARTAS);
+      return Util.ok({ id: id });
+    });
+  }
+
+  // Últimas cartas emitidas (mais recentes primeiro); com membroId, só as dele
+  function listarCartas(token, membroId) {
+    return withAuth(token, function () {
+      var sh = _sheetCartas();
+      var v = sh.getDataRange().getValues();
+      var out = [];
+      for (var i = v.length - 1; i >= 1 && out.length < 100; i--) {
+        if (membroId && String(v[i][3]) !== String(membroId)) continue;
+        out.push({ id: v[i][0], data: v[i][1], tipo: v[i][2], membroId: v[i][3], membroNome: v[i][4], destino: v[i][5], emitidoPor: v[i][6] });
+      }
+      return Util.ok(out);
+    });
+  }
+
   return {
     listarMembros:        listarMembros,
     getProximoRol:        getProximoRol,
@@ -367,6 +412,8 @@ var Membros = (function () {
     getFotoMembro:        getFotoMembro,
     corrigirIdsDuplicados: corrigirIdsDuplicados,
     setupMembros:         setupMembros,
+    registrarCarta:       registrarCarta,
+    listarCartas:         listarCartas,
     HEADERS:              HEADERS
   };
 
@@ -381,7 +428,7 @@ __MANIFESTOS__.push({
   icone: 'contact',
   rota: 'membros',
   render: 'renderMembros',
-  html: '_membros',
+  html: ['_membros', '_membros-cartas'],
   perfis: ['admin', 'secretaria'],
   ordem: 10,
   permissoes: {
@@ -394,7 +441,7 @@ __MANIFESTOS__.push({
       { id:'mb_backup',  label: 'Exportar / importar backup', admin: true, secretaria: true }
     ]
   },
-  abas: [{ nome: 'Membros', colunas: Membros.HEADERS, cor: '#00695C' }],
+  abas: [{ nome: 'Membros', colunas: Membros.HEADERS, cor: '#00695C' }, { nome: 'Cartas', colunas: ['Id', 'Data', 'Tipo', 'MembroId', 'MembroNome', 'Destino', 'EmitidoPor'], cor: '#37474F' }],
   kpis: function () {
     function ativo(v) { return v === true || v === 1 || String(v).trim().toUpperCase() === 'TRUE'; }
     var todos = Util.sheetToObjects('Membros');
@@ -427,6 +474,8 @@ function _safe_mb(fn) {
 
 function mb_listarMembros(token)        { return _safe_mb(function(){ return Membros.listarMembros(token); }); }
 function mb_getProximoRol(token)        { return _safe_mb(function(){ return Membros.getProximoRol(token); }); }
+function mb_registrarCarta(token, d)    { return _safe_mb(function(){ return Membros.registrarCarta(token, d); }); }
+function mb_listarCartas(token, membroId) { return _safe_mb(function(){ return Membros.listarCartas(token, membroId); }); }
 function mb_salvarMembro(token, membro) { return _safe_mb(function(){ return Membros.salvarMembro(token, membro); }); }
 function mb_deletarMembro(token, id)    { return _safe_mb(function(){ return Membros.deletarMembro(token, id); }); }
 function mb_setupMembros(token)         { return _safe_mb(function(){ return Membros.setupMembros(token); }); }
