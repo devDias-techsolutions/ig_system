@@ -648,7 +648,7 @@ test('cartas: aba preenche membro, cargo, igreja e data; mudança troca o texto;
   assert.match(t, /recomendamos que o\(a\) recebais/);
 
   await page.fill('#cr-destino', 'AD Centro');
-  await page.check('input[name="cr-tipo"][value="mudanca"]');
+  await page.click('.cr-tipo label:has(input[value="mudanca"])');
   t = await carta();
   assert.match(t, /\( X \) MUDANÇA/);
   assert.match(t, /Apresentamos à igreja AD Centro/);
