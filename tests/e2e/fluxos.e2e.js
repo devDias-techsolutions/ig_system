@@ -634,7 +634,9 @@ test('cartas: aba preenche membro, cargo, igreja e data; mudança troca o texto;
   const { page, erros } = await abrir(browser, backend);
   await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   await irParaMembros(page);
-  await cadastrarMembro(page, 'Maria Souza');
+  // membro criado direto no servidor (o fluxo de cadastro pela tela já é testado em outro lugar)
+  const salvo = await page.evaluate(() => new Promise((ok) => google.script.run.withSuccessHandler(ok).mb_salvarMembro(App.session.token, { nome: 'Maria Souza', ativo: true, funcao: 'Membro' })));
+  assert.equal(salvo.success, true);
   await page.evaluate(() => mbSetTab('cartas'));
   await page.waitForSelector('#cr-pre .cr-page', { timeout: 6000 });
 
