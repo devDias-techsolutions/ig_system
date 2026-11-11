@@ -717,18 +717,18 @@ function mbAtualizarCardLista() {
 function _mbKpiGroups(total, ativos, inativos, aniv, semFoto) {
   return (
     '<section class="panel">' +
-      '<div class="panel-head"><h2 class="panel-title">Cadastro</h2></div>' +
-      '<div class="kpi-grid">' +
-        _kpiCard('users',      'kc-teal',  total,    'Total de membros', 'Total',    'mbkv-total') +
-        _kpiCard('user-check', 'kc-green', ativos,   'Membros ativos',    'Ativos',   'mbkv-ativos') +
-        _kpiCard('user-x',     'kc-red',   inativos, 'Membros inativos',  'Inativos', 'mbkv-inativos') +
-      '</div>' +
-    '</section>' +
-    '<section class="panel">' +
-      '<div class="panel-head"><h2 class="panel-title">Atenção</h2></div>' +
-      '<div class="kpi-grid">' +
-        _kpiCard('cake',      'kc-gold',   aniv,    'Aniversariantes do mês', 'Mês',  'mbkv-aniv') +
-        _kpiCard('image-off', 'kc-purple', semFoto, 'Membros sem foto',        'Foto', 'mbkv-semfoto') +
+      '<div class="panel-head"><h2 class="panel-title">Indicadores</h2></div>' +
+      '<div class="kpi-groups">' +
+        _kpiGroup({ cor: 'kc-teal', icone: 'users', titulo: 'Cadastro', sub: 'Membros da igreja', stats: [
+          { label: 'Total',    valor: total,    id: 'mbkv-total' },
+          { label: 'Ativos',   valor: ativos,   id: 'mbkv-ativos',   dot: 'ok' },
+          { label: 'Inativos', valor: inativos, id: 'mbkv-inativos', dot: 'bad' }
+        ] }) +
+        _kpiGroup({ cor: 'kc-gold', icone: 'bell-ring', titulo: 'Atenção', sub: 'O que precisa de cuidado', stats: [
+          { label: 'Aniversariantes do mês', valor: aniv, id: 'mbkv-aniv', dot: 'warn' }
+        ], alertas: [
+          { icone: 'image-off', valor: semFoto, id: 'mbkv-semfoto', texto: 'sem foto' }
+        ] }) +
       '</div>' +
     '</section>'
   );

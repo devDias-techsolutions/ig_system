@@ -511,11 +511,11 @@ body::after {
   background: linear-gradient(90deg, transparent, var(--kpi-color), transparent); opacity: .75;
 }
 /* holofote que segue o cursor (cartões clicáveis também: .hm-mod) */
-.kpi-card::after, .hm-mod::after {
-  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity .3s var(--ease);
+.kpi-card::after, .hm-mod::after, .kpi-group::after {
+  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .3s var(--ease);
   background: radial-gradient(200px circle at var(--mx, 50%) var(--my, 0%), color-mix(in srgb, var(--kpi-color, var(--teal)) 24%, transparent), transparent 70%);
 }
-.kpi-card:hover::after, .hm-mod:hover::after { opacity: 1; }
+.kpi-card:hover::after, .hm-mod:hover::after, .kpi-group.is-link:hover::after { opacity: 1; }
 /* ícone fantasma: marca d'água do cartão, na cor do indicador */
 .card-ghost {
   position: absolute; right: -12px; bottom: -20px; width: 104px; height: 104px; z-index: -1; pointer-events: none;
@@ -524,11 +524,11 @@ body::after {
 }
 .kpi-card:hover .card-ghost, .hm-mod:hover .card-ghost { transform: rotate(-4deg) scale(1.12); opacity: .16; }
 .kpi-card.is-loading .card-ghost { display: none; }
-.kpi-card.kc-blue  { --kpi-color: var(--cyan);    --kpi-dim: rgba(77, 163, 255, .12);  --kpi-border: rgba(77, 163, 255, .35);  --kpi-shadow: rgba(77, 163, 255, .45); }
-.kpi-card.kc-gold  { --kpi-color: var(--gold);    --kpi-dim: rgba(215, 177, 91, .14);  --kpi-border: rgba(215, 177, 91, .38);  --kpi-shadow: rgba(215, 177, 91, .45); }
-.kpi-card.kc-red   { --kpi-color: var(--danger);  --kpi-dim: rgba(255, 94, 122, .12);  --kpi-border: rgba(255, 94, 122, .35);  --kpi-shadow: rgba(255, 94, 122, .40); }
-.kpi-card.kc-purple{ --kpi-color: var(--purple);  --kpi-dim: rgba(155, 124, 255, .14); --kpi-border: rgba(155, 124, 255, .38); --kpi-shadow: rgba(155, 124, 255, .40); }
-.kpi-card.kc-green { --kpi-color: var(--success); --kpi-dim: rgba(54, 211, 153, .12);  --kpi-border: rgba(54, 211, 153, .35);  --kpi-shadow: rgba(54, 211, 153, .40); }
+.kpi-card.kc-blue, .kpi-group.kc-blue  { --kpi-color: var(--cyan);    --kpi-dim: rgba(77, 163, 255, .12);  --kpi-border: rgba(77, 163, 255, .35);  --kpi-shadow: rgba(77, 163, 255, .45); }
+.kpi-card.kc-gold, .kpi-group.kc-gold  { --kpi-color: var(--gold);    --kpi-dim: rgba(215, 177, 91, .14);  --kpi-border: rgba(215, 177, 91, .38);  --kpi-shadow: rgba(215, 177, 91, .45); }
+.kpi-card.kc-red, .kpi-group.kc-red   { --kpi-color: var(--danger);  --kpi-dim: rgba(255, 94, 122, .12);  --kpi-border: rgba(255, 94, 122, .35);  --kpi-shadow: rgba(255, 94, 122, .40); }
+.kpi-card.kc-purple, .kpi-group.kc-purple{ --kpi-color: var(--purple);  --kpi-dim: rgba(155, 124, 255, .14); --kpi-border: rgba(155, 124, 255, .38); --kpi-shadow: rgba(155, 124, 255, .40); }
+.kpi-card.kc-green, .kpi-group.kc-green { --kpi-color: var(--success); --kpi-dim: rgba(54, 211, 153, .12);  --kpi-border: rgba(54, 211, 153, .35);  --kpi-shadow: rgba(54, 211, 153, .40); }
 .kpi-top { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
 .kpi-icon { position: relative; width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; background: var(--kpi-dim); color: var(--kpi-color); box-shadow: inset 0 0 0 1px var(--kpi-border), 0 6px 16px -8px var(--kpi-shadow); }
 /* anel que pulsa: indica indicador "vivo" */
@@ -562,6 +562,62 @@ body::after {
   }
   .kpi-grid > .kpi-card:last-child:nth-child(odd) .kpi-go::before { content: 'Ver lista'; }
 }
+
+/* ══ GRUPO DE INDICADORES — cartão mestre (Início, Membros, módulos) ══
+   Um assunto por cartão: título + descrição, métricas dentro, faixa de atenção e UMA seta.
+   O ícone é uma "joia" de vidro que vaza pela borda superior. */
+.kpi-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 40px var(--sp-4); padding-top: 28px; }
+.kpi-group {
+  --kpi-color: var(--teal); --kpi-dim: var(--teal-dim); --kpi-border: var(--teal-border); --kpi-shadow: var(--teal-glow);
+  --kg-dark: color-mix(in srgb, var(--kpi-color) 52%, #000);
+  position: relative; isolation: isolate; padding: var(--sp-5) var(--sp-4) var(--sp-4); border-radius: 22px;
+  border: 1px solid var(--border); background: linear-gradient(155deg, rgba(255,255,255,.08), rgba(255,255,255,.012) 62%), var(--bg-glass);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 20px 36px -24px rgba(0,0,0,.8);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  transition: transform .28s var(--ease-spring), border-color .2s var(--ease), box-shadow .28s var(--ease);
+  animation: cardIn .55s var(--ease-spring) both;
+}
+[data-theme="light"] .kpi-group { background: rgba(255,255,255,.9); border: 1px solid rgba(255,255,255,.7); box-shadow: 0 10px 30px -5px rgba(0,32,96,.10); }
+.kpi-groups > :nth-child(2) { animation-delay: .08s; } .kpi-groups > :nth-child(3) { animation-delay: .16s; }
+.kpi-group::before {   /* aura de luz atrás da joia */
+  content: ''; position: absolute; left: -10px; top: -22px; width: 190px; height: 150px; z-index: -1; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--kpi-color) 28%, transparent), transparent);
+}
+.kpi-group.is-link { cursor: pointer; }
+.kpi-group.is-link:hover { transform: translateY(-4px); border-color: var(--kpi-border); box-shadow: 0 26px 44px -22px var(--kpi-shadow); }
+.kpi-group.is-link:focus-visible { outline: 2px solid var(--kpi-color); outline-offset: 3px; }
+.kg-gem {
+  position: absolute; left: 14px; top: -26px; width: 66px; height: 66px; border-radius: 22px; display: grid; place-items: center; color: #fff;
+  transform: rotate(-8deg); transition: transform .5s var(--ease-spring);
+  background: radial-gradient(120% 120% at 25% 15%, color-mix(in srgb, var(--kpi-color) 68%, #fff) 0%, var(--kpi-color) 40%, var(--kg-dark) 100%);
+  box-shadow: 0 20px 28px -12px var(--kg-dark), 0 0 0 1px color-mix(in srgb, var(--kpi-color) 60%, #fff), 0 0 0 6px color-mix(in srgb, var(--kpi-color) 14%, transparent), inset 0 2px 1px rgba(255,255,255,.7), inset 0 -8px 14px rgba(0,0,0,.22);
+}
+.kg-gem::before { content: ''; position: absolute; inset: -9px; border-radius: 28px; border: 1.5px solid color-mix(in srgb, var(--kpi-color) 45%, transparent); opacity: .55; animation: gemRing 3.2s ease-out infinite; }
+.kg-gem::after { content: ''; position: absolute; left: 8px; top: 6px; width: 30px; height: 14px; border-radius: 50%; background: linear-gradient(180deg, rgba(255,255,255,.7), transparent); transform: rotate(-20deg); }
+.kg-gem i, .kg-gem svg { position: relative; z-index: 1; width: 30px; height: 30px; stroke-width: 2; filter: drop-shadow(0 3px 3px rgba(0,0,0,.4)); }
+@keyframes gemRing { 0% { transform: scale(.96); opacity: .6; } 70%, 100% { transform: scale(1.14); opacity: 0; } }
+.kpi-group.is-link:hover .kg-gem { transform: rotate(-3deg) translateY(-3px) scale(1.05); }
+.kg-name { padding: 0 40px 0 78px; min-height: 22px; font-size: 21px; font-weight: 800; letter-spacing: -.025em; line-height: 1.15; color: var(--text); }
+.kg-sub { margin-top: 3px; padding: 0 40px 0 78px; font-size: var(--fs-xs); color: var(--text-muted); }
+.kg-stats { display: grid; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); margin-top: var(--sp-4); border-radius: 16px; border: 1px solid var(--border); background: rgba(255,255,255,.04); }
+[data-theme="light"] .kg-stats { background: #F1F6FB; }
+.kg-stat { padding: 12px 14px; min-width: 0; }
+.kg-stat + .kg-stat { border-left: 1px solid var(--border); }
+.kg-lab { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700; letter-spacing: .02em; color: var(--text-muted); }
+.kg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; background: var(--kpi-color); }
+.kg-dot.ok { background: var(--success); } .kg-dot.bad { background: var(--danger); } .kg-dot.info { background: var(--cyan); } .kg-dot.warn { background: var(--gold); }
+.kg-num { margin-top: 6px; font-size: clamp(30px, 8vw, 38px); font-weight: 800; letter-spacing: -.04em; line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--text);
+  background: linear-gradient(135deg, var(--text) 10%, color-mix(in srgb, var(--kpi-color) 62%, var(--text))); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  animation: kpiValue .8s var(--ease-spring) .1s both; }
+.kg-alert { display: flex; align-items: center; gap: 10px; margin-top: var(--sp-3); padding: 10px 14px; border-radius: 14px; font-size: var(--fs-sm); font-weight: 600; color: var(--text);
+  background: color-mix(in srgb, var(--cyan) 12%, transparent); border: 1px solid color-mix(in srgb, var(--cyan) 30%, transparent); }
+.kg-alert i, .kg-alert svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--cyan); }
+.kg-alert b { font-size: 15px; font-weight: 800; }
+.kg-alert .kg-more { margin-left: auto; font-size: 11px; font-weight: 800; color: var(--cyan); }
+[data-theme="light"] .kg-alert i, [data-theme="light"] .kg-alert svg, [data-theme="light"] .kg-alert .kg-more { color: #2457c9; }
+.kpi-group .kpi-go { top: 14px; right: 14px; }
+.kpi-group.is-loading { pointer-events: none; }
+.kpi-group.is-loading::before, .kpi-group.is-loading .kg-gem::before { display: none; }
 
 /* ══════════════════════════════════════════════════
    LAYOUT SYSTEM — estrutura mínima de toda tela (ver docs/LAYOUT.md)
@@ -1212,7 +1268,7 @@ body:has(.modal-overlay.open) .app-bnav { transform: translateY(110%); pointer-e
 body.nav-on #topnav-usuarios-btn { display: none !important; }
 @media (prefers-reduced-motion: reduce) {
   .sb-item, .bn-item { transition: none; }
-  .kpi-card, .kpi-value, .kpi-icon::after, .panel, .panel::after, .page > .panel, .btn-primary, .module-bar-name::before { animation: none !important; }
+  .kpi-card, .kpi-group, .kpi-value, .kpi-icon::after, .panel, .panel::after, .page > .panel, .btn-primary, .module-bar-name::before { animation: none !important; }
   .kpi-card::after, .hm-mod::after, .btn::after, .tab::after, .tab i, .card-ghost { transition: none; }
 }
 </style>
@@ -1475,6 +1531,29 @@ function _kpiCard(icon, colorClass, value, label, tag, valueId, destino) {
   '</div>';
 }
 
+/* Grupo de indicadores: { cor, icone, titulo, sub, destino?, stats:[{label,valor,dot?,id?}], alertas:[{icone,valor,texto,id?,mais?}] }
+   Com destino, o grupo inteiro abre a tela (uma seta só); sem destino, é só leitura. */
+function _kpiGroup(o) {
+  var nav = o.destino ? 'navigateTo(\'' + escHtml(o.destino) + '\')' : '';
+  var link = o.destino ? ' is-link" role="button" tabindex="0" aria-label="' + escHtml(o.titulo) + ': abrir" onclick="' + nav + '" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();' + nav + '}' : '';
+  var stats = (o.stats || []).map(function (st) {
+    return '<div class="kg-stat"><div class="kg-lab"><i class="kg-dot ' + escHtml(st.dot || '') + '"></i>' + escHtml(st.label) + '</div>' +
+      '<div class="kg-num"' + (st.id ? ' id="' + escHtml(st.id) + '"' : '') + '>' + escHtml(st.valor) + '</div></div>';
+  }).join('');
+  var alertas = (o.alertas || []).map(function (a) {
+    return '<div class="kg-alert"><i data-lucide="' + escHtml(a.icone || 'image-off') + '"></i><b' + (a.id ? ' id="' + escHtml(a.id) + '"' : '') + '>' + escHtml(a.valor) + '</b> ' + escHtml(a.texto) +
+      (o.destino ? '<span class="kg-more">Ver lista ›</span>' : '') + '</div>';
+  }).join('');
+  return '<section class="kpi-group ' + escHtml(o.cor || 'kc-teal') + link + '">' +
+    '<div class="kg-gem"><i data-lucide="' + escHtml(o.icone || 'activity') + '"></i></div>' +
+    '<div class="kg-name">' + escHtml(o.titulo) + '</div>' +
+    (o.sub ? '<div class="kg-sub">' + escHtml(o.sub) + '</div>' : '') +
+    (o.destino ? '<span class="kpi-go" aria-hidden="true"><i data-lucide="chevron-right"></i></span>' : '') +
+    (stats ? '<div class="kg-stats" style="--n:' + (o.stats || []).length + '">' + stats + '</div>' : '') +
+    alertas +
+  '</section>';
+}
+
 function moduleBarHtml(nome, tags, voltarView) {
   var v = voltarView || 'home';
   return '<div class="module-bar no-print">' +
@@ -1544,7 +1623,7 @@ function _corLegivel(c, tema) {
 // Aplica a cor primária da Config nas variáveis de tema (reaplicada ao trocar claro/escuro)
 // Holofote dos cartões: posição do cursor vira --mx/--my (o brilho está no CSS)
 document.addEventListener('pointermove', function (e) {
-  var t = e.target && e.target.closest ? e.target.closest('.kpi-card, .hm-mod') : null;
+  var t = e.target && e.target.closest ? e.target.closest('.kpi-card, .hm-mod, .kpi-group') : null;
   if (!t) return;
   var r = t.getBoundingClientRect();
   t.style.setProperty('--mx', (e.clientX - r.left) + 'px');

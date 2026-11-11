@@ -402,7 +402,7 @@ __MANIFESTOS__.push({
     return [
       { icone: 'users',  cor: 'kc-teal', valor: ativos.length, rotulo: 'Membros ativos',   curto: 'Ativos', destino: 'membros' },
       { icone: 'user-x', cor: 'kc-gold', valor: todos.length - ativos.length, rotulo: 'Membros inativos', curto: 'Inativos', destino: 'membros' },
-      { icone: 'camera', cor: 'kc-blue', valor: ativos.filter(function (r) { return !String(r.foto || '').trim(); }).length, rotulo: 'Membros sem foto', curto: 'Sem foto', destino: 'membros' }
+      { icone: 'camera', cor: 'kc-blue', valor: ativos.filter(function (r) { return !String(r.foto || '').trim(); }).length, rotulo: 'Membros sem foto', curto: 'Sem foto', destino: 'membros', alerta: true }
     ];
   }
 });

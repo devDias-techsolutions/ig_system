@@ -279,14 +279,14 @@ test('padrão: Membros não tem CSS morto herdado (.ed-stat*) nem cores de statu
 // ═══ 7. SETORIZAÇÃO (Etapa 15c) ══════════════════════════════
 test('setor: Home, Membros, Usuários e Identidade agrupam o conteúdo em .panel (sem container de vidro próprio)', () => {
   ['_home.html', '_membros.html', '_usuarios.html', '_identidade.html'].forEach((f) => assert.match(read(f), /class="panel[ "]/, f + ' sem .panel'));
-  const proprio = findings(/^\s*\.(?:kpi-group|kpi-groups|kpi-group-label|hm-sec|hm-sec-title|usr-content|idt-sec)\s*[,{]/, HTML);
+  const proprio = findings(/^\s*\.(?:kpi-group|kpi-groups|kpi-group-label|hm-sec|hm-sec-title|usr-content|idt-sec)\s*[,{]/, HTML.filter((f) => f !== 'index.html'));
   assert.deepEqual(proprio, [], 'containers/títulos de setor próprios:\n' + proprio.join('\n'));
 });
 
-test('padrão: KPI de Membros usa o mesmo card do Início (sem estilo próprio, sem hero, sem pulso)', () => {
+test('padrão: KPI de Membros usa o mesmo grupo de indicadores do Início (sem estilo próprio, sem hero, sem pulso)', () => {
   const m = read('_membros.html');
-  assert.match(m, /_kpiCard\(/);
-  assert.doesNotMatch(m, /mb-kpi|kpi-hero|kpiPulse|kpi-group/);
+  assert.match(m, /_kpiGroup\(/);
+  assert.doesNotMatch(m, /mb-kpi|kpi-hero|kpiPulse|\.kpi-group/);
   assert.doesNotMatch(read('_home.html'), /^\.kpi-card\s*\{/m);
   assert.match(read('index.html'), /^\.kpi-card\s*\{/m);
   assert.match(read('_identidade.html'), /\.idt-marca \.brand-mark\s*\{[^}]*background:/);
@@ -310,4 +310,10 @@ test('Início: sem logo duplicado no cabeçalho; KPI que navega tem seta, e o se
   assert.match(read('index.html'), /kpi-go/);
   assert.match(read('Membros.js'), /destino: 'membros'/);
   assert.match(read('Dashboard.js'), /destino: 'usuarios'/);
+});
+
+test('grupo de indicadores: Início e Membros usam _kpiGroup (uma seta só, destino no grupo) e o servidor marca o alerta', () => {
+  assert.match(read('_home.html'), /_kpiGroup\(/);
+  assert.match(read('index.html'), /function _kpiGroup[\s\S]{0,1800}kpi-go/);
+  assert.match(read('Membros.js'), /alerta: true/);
 });

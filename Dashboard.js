@@ -18,7 +18,7 @@ var Dashboard = (function () {
       // Indicador de administração: só para quem administra o sistema
       if (sess.perfil === PERFIS.ADMIN) {
         var usuarios = Util.sheetToObjects('Usuarios').filter(function(r) { return _ativo(r.Ativo); });
-        kpis.push({ icone: 'shield-check', cor: 'kc-green', valor: usuarios.length, rotulo: 'Usuários do sistema', curto: 'Usuários', destino: 'usuarios' });
+        kpis.push({ icone: 'shield-check', cor: 'kc-green', valor: usuarios.length, rotulo: 'Usuários do sistema', curto: 'Usuários', dentro: 'com acesso', destino: 'usuarios' });
       }
       return Util.ok(kpis);
     });

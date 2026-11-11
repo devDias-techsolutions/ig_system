@@ -164,7 +164,7 @@ function renderHome() {
     html +=
       '<section class="panel hm-rise" style="--i:' + (i++) + '">' +
         '<div class="panel-head"><h2 class="panel-title">Indicadores</h2></div>' +
-        '<div class="kpi-grid" id="kpi-grid">' + _kpiSkeleton() + _kpiSkeleton() + _kpiSkeleton() + _kpiSkeleton() + '</div>' +
+        '<div class="kpi-groups" id="kpi-grid">' + _kpiSkeleton() + _kpiSkeleton() + '</div>' +
       '</section>';
   }
 
@@ -214,12 +214,41 @@ function renderHome() {
 
 /* ── HELPERS ── */
 function _kpiSkeleton() {
-  return '<div class="kpi-card is-loading">' +
-    '<div class="kpi-top"><div class="skeleton" style="width:36px;height:36px;border-radius:11px"></div>' +
-    '<div class="skeleton" style="width:48px;height:10px;border-radius:4px"></div></div>' +
-    '<div class="skeleton" style="width:55%;height:32px;border-radius:8px"></div>' +
-    '<div class="skeleton" style="width:80%;height:12px;border-radius:4px"></div>' +
+  return '<div class="kpi-group is-loading">' +
+    '<div class="skeleton" style="width:50%;height:22px;border-radius:6px"></div>' +
+    '<div class="skeleton" style="width:35%;height:12px;border-radius:4px;margin-top:8px"></div>' +
+    '<div class="skeleton" style="width:100%;height:84px;border-radius:16px;margin-top:16px"></div>' +
   '</div>';
+}
+
+/* Agrupa os indicadores do servidor por tela de destino (um cartão mestre por assunto).
+   Os que não têm destino ficam como cartões soltos. */
+var HOME_GRUPOS = {
+  membros:  { titulo: 'Membros',  sub: 'Cadastro da igreja', icone: 'users',        cor: 'kc-teal' },
+  usuarios: { titulo: 'Usuários', sub: 'Acesso ao sistema',  icone: 'shield-check', cor: 'kc-green' }
+};
+var HOME_DOT = { Ativos: 'ok', Inativos: 'bad' };
+function _kpiHtml(d) {
+  var ordem = [], porDestino = {}, soltos = '';
+  d.forEach(function (k) {
+    if (!k.destino) { soltos += _kpiCard(k.icone, k.cor, k.valor || 0, k.rotulo, k.curto); return; }
+    if (!porDestino[k.destino]) { porDestino[k.destino] = []; ordem.push(k.destino); }
+    porDestino[k.destino].push(k);
+  });
+  var html = ordem.map(function (dest) {
+    var itens = porDestino[dest];
+    var meta = HOME_GRUPOS[dest] || { titulo: itens[0].curto, sub: '', icone: itens[0].icone, cor: itens[0].cor };
+    return _kpiGroup({
+      cor: meta.cor, icone: meta.icone, titulo: meta.titulo, sub: meta.sub, destino: dest,
+      stats: itens.filter(function (k) { return !k.alerta; }).map(function (k) {
+        return { label: k.dentro || k.curto, valor: k.valor || 0, dot: HOME_DOT[k.curto] || '' };
+      }),
+      alertas: itens.filter(function (k) { return k.alerta; }).map(function (k) {
+        return { icone: k.icone === 'camera' ? 'image-off' : k.icone, valor: k.valor || 0, texto: String(k.curto).toLowerCase() };
+      })
+    });
+  }).join('');
+  return html + (soltos ? '<div class="kpi-grid" style="grid-column:1/-1">' + soltos + '</div>' : '');
 }
 
 function _activitySkeleton() {
@@ -269,7 +298,7 @@ function _loadKpis() {
           'Quando houver módulos com dados para o seu perfil, os números aparecem aqui.'));
         return;
       }
-      mostrar(d.map(function (k) { return _kpiCard(k.icone, k.cor, k.valor || 0, k.rotulo, k.curto, null, k.destino); }).join(''));
+      mostrar(_kpiHtml(d));
     })
     .withFailureHandler(function () {
       mostrar(_homeEstado('wifi-off', 'Sem conexão com o servidor',
@@ -279,7 +308,7 @@ function _loadKpis() {
 }
 function _homeRecarregarKpis() {
   var grid = document.getElementById('kpi-grid');
-  if (grid) grid.innerHTML = _kpiSkeleton() + _kpiSkeleton() + _kpiSkeleton() + _kpiSkeleton();
+  if (grid) grid.innerHTML = _kpiSkeleton() + _kpiSkeleton();
   _loadKpis();
 }
 
