@@ -634,14 +634,16 @@ test('cartas: aba preenche membro, cargo, igreja e data; mudança troca o texto;
   const { page, erros } = await abrir(browser, backend);
   await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   await irParaMembros(page);
-  await cadastrarMembro(page, 'Maria das Graças');
+  // membro criado direto no servidor (o fluxo de cadastro pela tela já é testado em outro lugar)
+  const salvo = await page.evaluate(() => new Promise((ok) => google.script.run.withSuccessHandler(ok).mb_salvarMembro(App.session.token, { nome: 'Maria Souza', ativo: true, funcao: 'Membro' })));
+  assert.equal(salvo.success, true);
   await page.evaluate(() => mbSetTab('cartas'));
   await page.waitForSelector('#cr-pre .cr-page', { timeout: 6000 });
 
   const carta = () => page.evaluate(() => document.querySelector('[data-cr="2"]').innerText.replace(/\s+/g, ' '));
   let t = await carta();
   assert.match(t, /\( X \) RECOMENDAÇÃO/);
-  assert.match(t, /o membro Maria das Graças/);
+  assert.match(t, /o membro Maria Souza/);
   assert.match(t, /Igreja de origem: Igreja Vida Nova/);
   assert.match(t, /Cargo exercido: Membro/);
   assert.match(t, /Local: Betim-MG/);
@@ -663,9 +665,9 @@ test('cartas: aba preenche membro, cargo, igreja e data; mudança troca o texto;
   assert.ok(capa.rodapeReto, 'endereço no rodapé fica reto');
 
   // registro (o PDF em si depende das bibliotecas da CDN; aqui só o registro)
-  const r = await page.evaluate(() => new Promise((ok) => google.script.run.withSuccessHandler(ok).mb_registrarCarta(App.session.token, { tipo: CR.tipo, membroId: CR.membroId, membroNome: 'Maria das Graças', destino: CR.destino })));
+  const r = await page.evaluate(() => new Promise((ok) => google.script.run.withSuccessHandler(ok).mb_registrarCarta(App.session.token, { tipo: CR.tipo, membroId: CR.membroId, membroNome: 'Maria Souza', destino: CR.destino })));
   assert.equal(r.success, true);
   await page.evaluate(() => mbCarta_carregarHist());
-  await page.waitForFunction(() => document.getElementById('cr-hist').innerText.includes('Maria das Graças'), null, { timeout: 6000 });
+  await page.waitForFunction(() => document.getElementById('cr-hist').innerText.includes('Maria Souza'), null, { timeout: 6000 });
   assert.deepEqual(erros, []);
 });

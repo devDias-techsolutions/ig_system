@@ -324,3 +324,10 @@ test('cartas: aba no módulo Membros, arquivo próprio incluído pelo manifesto 
   assert.match(read('_membros-cartas.html'), /mb_registrarCarta/);
   assert.doesNotMatch(read('_membros-cartas.html'), /mb-kpi|kpi-hero/);
 });
+
+test('cartas: papel do PDF não depende do tema — fundo e cor de tinta inline, textura em PNG de canvas, com conferência da captura', () => {
+  const c = read('_membros-cartas.html');
+  assert.match(c, /background-color:#e9ecee;color:#14233a/);
+  assert.doesNotMatch(c, /image\/svg\+xml/, 'textura em SVG falhava na captura');
+  assert.match(c, /function _crCapturarOk/);
+});
