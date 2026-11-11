@@ -1,0 +1,301 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+     MEMBROS · CARTAS — emissão de carta de mudança e de recomendação
+     Folha A4 impressa frente e verso e dobrada ao meio:
+       • página 1 (capa) é montada de cabeça para baixo, para ficar certa depois da dobra;
+       • página 2 é a carta, com os dados do membro e da igreja já preenchidos.
+     Cada emissão fica registrada na aba "Cartas" da planilha.
+     Depende de _membros.html (MB, _mbEsc, _mbLoad, _mbHandleResponse) e do shell (IDENTIDADE, showToast).
+     ═══════════════════════════════════════════════════════════════════ -->
+<style>
+/* ── Papel (A4 a 96 dpi = 794×1123 px; a mesma página é capturada para o PDF) ── */
+.cr-page {
+  --cr-ink: #14233a; --cr-band-a: #0b2447; --cr-band-b: #0a4a8a;
+  position: relative; width: 794px; height: 1123px; overflow: hidden; flex: none; color: var(--cr-ink);
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; font-weight: 700;
+  background-color: #e9ecee;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' seed='4'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .5  0 0 0 0 .55  0 0 0 .22 0'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>");
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.cr-band { position: absolute; left: 0; top: 0; bottom: 0; width: 162px; background: linear-gradient(180deg, var(--cr-band-a), var(--cr-band-b)); }
+.cr-logo { position: absolute; left: 31px; width: 100px; height: 100px; object-fit: contain; }
+.cr-logo-ini { position: absolute; left: 31px; width: 100px; height: 100px; display: grid; place-items: center; font-size: 34px; color: #fff; border: 3px solid rgba(255,255,255,.7); border-radius: 24px; }
+.cr-corpo { position: absolute; left: 162px; right: 0; top: 0; bottom: 0; }
+
+/* Página 2 — a carta */
+.cr-titulo { position: absolute; left: 0; right: 0; top: 96px; text-align: center; font-size: 21px; line-height: 1.5; letter-spacing: .01em; }
+.cr-bloco { position: absolute; left: 46px; right: 46px; font-size: 19px; line-height: 1.7; }
+.cr-linha { display: flex; align-items: flex-end; gap: 12px; white-space: nowrap; }
+.cr-campo { flex: 1; min-width: 0; border-bottom: 1.5px solid var(--cr-ink); padding: 0 6px 1px; font-weight: 600; font-size: 17px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; min-height: 25px; }
+.cr-texto { margin-top: 8px; }
+.cr-orn { position: absolute; left: 90px; right: 90px; height: 14px; }
+.cr-pequeno { font-size: 14.5px; line-height: 2.1; }
+.cr-pequeno .cr-campo { font-size: 14px; min-height: 20px; }
+.cr-data { display: inline-flex; gap: 4px; align-items: flex-end; }
+.cr-assin { position: relative; }
+.cr-assin img { position: absolute; left: 150px; bottom: 6px; height: 52px; max-width: 220px; object-fit: contain; }
+
+/* Página 1 — a capa: cada bloco é girado 180° (a folha é dobrada ao meio depois de impressa) */
+.cr-capa { position: absolute; left: 0; right: 0; text-align: center; transform: rotate(180deg); }
+.cr-capa-tit { top: 372px; font-size: 21px; line-height: 1.8; }
+.cr-capa-igreja { top: 212px; font-size: 21px; }
+.cr-capa-para { top: 160px; left: 60px; right: 60px; text-align: left; font-size: 20px; }
+.cr-capa-cit { top: 66px; font-size: 16.5px; }
+.cr-capa-ref { top: 28px; font-size: 15px; }
+.cr-rodape { position: absolute; left: 0; right: 0; bottom: 52px; text-align: center; font-size: 16.5px; line-height: 1.4; }
+
+/* ── Tela ── */
+.cr-pre { display: grid; gap: var(--sp-4); }
+.cr-pre-pag { position: relative; width: 100%; border-radius: var(--radius-md); overflow: hidden; box-shadow: 0 18px 36px -20px rgba(0,0,0,.55); border: 1px solid var(--border); background: #e9ecee; }
+.cr-pre-pag > .cr-page { position: absolute; left: 0; top: 0; transform-origin: top left; }
+.cr-pre .cr-pre-rot { margin: var(--sp-2) 0; font-size: var(--fs-xs); font-weight: 700; color: var(--text-dim); }
+.cr-tipo { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-2); }
+.cr-tipo label { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 10px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--bg-glass); font-size: var(--fs-sm); font-weight: 700; color: var(--text-muted); cursor: pointer; transition: all .2s var(--ease); }
+.cr-tipo input { position: absolute; opacity: 0; pointer-events: none; }
+.cr-tipo label:has(input:checked) { color: var(--teal); border-color: var(--teal-border); background: var(--teal-dim); box-shadow: 0 8px 20px -12px var(--teal-glow); }
+.cr-tipo label:has(input:focus-visible) { outline: 2px solid var(--teal); outline-offset: 2px; }
+.cr-hist { display: grid; gap: var(--sp-2); }
+.cr-hist-it { display: flex; align-items: center; gap: var(--sp-3); padding: 10px 12px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--bg-glass); font-size: var(--fs-sm); }
+.cr-hist-it b { font-weight: 700; color: var(--text); }
+.cr-hist-it span { color: var(--text-muted); font-size: var(--fs-xs); }
+.cr-hist-it .badge { margin-left: auto; flex-shrink: 0; }
+@media (min-width: 900px) { .cr-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-5); align-items: start; } .cr-layout > .panel { margin: 0; } }
+</style>
+
+<script>
+// ═══ CARTAS ═══════════════════════════════════════════════════
+var CR_TEXTOS = {
+  recomendacao: { nome: 'Recomendação', corpo: 'e, por achar-se em plena comunhão com a igreja, com alegria recomendamos que o(a) recebais no Senhor, como usam fazer os santos. (Romanos 16:2)' },
+  mudanca:      { nome: 'Mudança',      corpo: 'e, por achar-se em plena comunhão com a igreja e havendo mudado de localidade, com alegria o(a) transferimos a essa igreja, rogando que o(a) recebais no Senhor, como usam fazer os santos. (Romanos 16:2)' }
+};
+var CR = { membroId: '', tipo: 'recomendacao', destino: '', cargo: '', local: '', data: '', assinar: false, historico: [], gerando: false };
+
+function _crHoje() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function _crDataBR(iso) { var p = String(iso || '').split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : ''; }
+// "… | Betim-MG" ou "… Betim - MG" → "Betim-MG" (a secretaria pode ajustar no campo)
+function _crLocalPadrao() {
+  var m = String(IDENTIDADE.endereco || '').match(/([A-Za-zÀ-ÿ' ]+?)\s*[-\/]\s*([A-Z]{2})\s*$/);
+  return m ? m[1].trim() + '-' + m[2] : '';
+}
+function _crMix(hex, k) {   // k<0 escurece, k>0 clareia
+  var m = /^#?([0-9a-f]{6})$/i.exec(String(hex || '').trim());
+  if (!m) return null;
+  var n = parseInt(m[1], 16), c = [n >> 16 & 255, n >> 8 & 255, n & 255].map(function (v) {
+    return Math.max(0, Math.min(255, Math.round(k < 0 ? v * (1 + k) : v + (255 - v) * k)));
+  });
+  return 'rgb(' + c.join(',') + ')';
+}
+function _crMembro() {
+  return (MB.membros || []).filter(function (m) { return String(m.id) === String(CR.membroId); })[0] || null;
+}
+
+// ── Papel: duas páginas A4 (794×1123) ─────────────────────────
+function _crOrnamento(top) {
+  return '<svg class="cr-orn" style="top:' + top + 'px" viewBox="0 0 400 14" preserveAspectRatio="none" aria-hidden="true">' +
+    '<line x1="0" y1="7" x2="170" y2="7" stroke="#14233a" stroke-width="1.2"/><line x1="230" y1="7" x2="400" y2="7" stroke="#14233a" stroke-width="1.2"/>' +
+    '<path d="M200 0 L206 7 L200 14 L194 7Z" fill="#14233a"/><path d="M181 7 L185 4 L189 7 L185 10Z M211 7 L215 4 L219 7 L215 10Z" fill="#14233a"/></svg>';
+}
+function _crCss(d) {
+  var a = _crMix(d.cor, -0.55) || '#0b2447', b = _crMix(d.cor, -0.1) || '#0a4a8a';
+  return '--cr-band-a:' + a + ';--cr-band-b:' + b;
+}
+function _crMarca(d, top, girar) {
+  var rot = girar ? 'transform:rotate(180deg);' : '';
+  return d.logo
+    ? '<img class="cr-logo" style="top:' + top + 'px;' + rot + '" src="' + _mbEsc(d.logo) + '" crossorigin="anonymous" alt="">'
+    : '<div class="cr-logo-ini" style="top:' + top + 'px;' + rot + '">' + _mbEsc(d.igreja.split(/\s+/).map(function (p) { return p[0]; }).join('').slice(0, 3).toUpperCase()) + '</div>';
+}
+function _crTitulo(d, cls) {
+  return '<div class="' + (cls.indexOf('cr-capa') === -1 ? cls : cls) + '">CARTA<br>(' + (d.tipo === 'mudanca' ? ' X ' : ' &nbsp; ') + ') MUDANÇA<br>(' + (d.tipo === 'recomendacao' ? ' X ' : ' &nbsp; ') + ') RECOMENDAÇÃO</div>';
+}
+
+function mbCarta_htmlCapa(d) {
+  return '<div class="cr-page" style="' + _crCss(d) + '"><div class="cr-band"></div>' + _crMarca(d, 382, true) +
+    '<div class="cr-corpo">' +
+      _crTitulo(d, 'cr-capa cr-capa-tit') +
+      '<div class="cr-capa cr-capa-igreja">' + _mbEsc(d.igreja) + '</div>' +
+      '<div class="cr-capa cr-capa-para"><div class="cr-linha"><span>Á Igreja:</span><span class="cr-campo">' + _mbEsc(d.destino) + '</span></div></div>' +
+      '<div class="cr-capa cr-capa-cit">"para que o(a) recebais no Senhor, como usam fazer os santos."</div>' +
+      '<div class="cr-capa cr-capa-ref">Romanos 16:2</div>' +
+      '<div class="cr-rodape">' + _mbEsc(d.igreja) + (d.endereco ? '<br>' + _mbEsc(d.endereco) : '') + '</div>' +
+    '</div></div>';
+}
+function mbCarta_htmlCarta(d) {
+  var T = CR_TEXTOS[d.tipo] || CR_TEXTOS.recomendacao;
+  return '<div class="cr-page" style="' + _crCss(d) + '"><div class="cr-band"></div>' + _crMarca(d, 96, false) +
+    '<div class="cr-corpo">' +
+      _crTitulo(d, 'cr-titulo') +
+      '<div class="cr-bloco" style="top:274px">' +
+        '<div class="cr-linha"><span>Apresentamos à igreja</span><span class="cr-campo">' + _mbEsc(d.destino) + '</span></div>' +
+        '<div class="cr-linha"><span>o membro</span><span class="cr-campo">' + _mbEsc(d.membro) + '</span></div>' +
+        '<div class="cr-texto">' + _mbEsc(T.corpo) + '</div>' +
+      '</div>' +
+      _crOrnamento(500) +
+      '<div class="cr-bloco" style="top:552px">' +
+        '<div class="cr-linha"><span>Igreja de origem:</span><span class="cr-campo">' + _mbEsc(d.igreja) + '</span></div>' +
+        '<div class="cr-linha"><span>Cargo exercido:</span><span class="cr-campo">' + _mbEsc(d.cargo) + '</span></div>' +
+      '</div>' +
+      _crOrnamento(668) +
+      '<div class="cr-bloco cr-pequeno" style="top:690px">Carimbo da igreja</div>' +
+      _crOrnamento(838) +
+      '<div class="cr-bloco cr-pequeno" style="top:870px;right:130px">' +
+        '<div class="cr-linha"><span>Local:</span><span class="cr-campo">' + _mbEsc(d.local) + '</span></div>' +
+        '<div class="cr-linha"><span>Data:</span><span class="cr-campo" style="flex:none;width:130px">' + _mbEsc(d.data) + '</span></div>' +
+        '<div class="cr-linha cr-assin"><span>Assinatura do Pastor:</span><span class="cr-campo"></span>' +
+          (d.assinatura ? '<img src="' + _mbEsc(d.assinatura) + '" crossorigin="anonymous" alt="">' : '') + '</div>' +
+      '</div>' +
+    '</div></div>';
+}
+function mbCarta_dados() {
+  var m = _crMembro(), i = IDENTIDADE;
+  return {
+    tipo: CR.tipo, membro: m ? m.nome : '', destino: CR.destino, cargo: CR.cargo, local: CR.local, data: _crDataBR(CR.data),
+    igreja: i.nome || '', endereco: i.endereco || '', logo: i.logoUrl || '', cor: i.corPrimaria || '',
+    assinatura: CR.assinar && i.assinatura ? i.assinatura : ''
+  };
+}
+
+// ── Tela da aba ───────────────────────────────────────────────
+function mbCarta_build() {
+  var ativos = (MB.membros || []).filter(function (m) { return m.ativo !== false; })
+    .sort(function (a, b) { return String(a.nome).localeCompare(String(b.nome), 'pt-BR'); });
+  if (!ativos.length) {
+    return '<section class="panel"><div class="mb-empty"><div class="mb-empty-title">Nenhum membro ativo</div><div class="mb-empty-sub">Cadastre membros para emitir cartas.</div></div></section>';
+  }
+  if (!CR.data) CR.data = _crHoje();
+  if (!CR.local) CR.local = _crLocalPadrao();
+  if (!_crMembro()) { CR.membroId = ativos[0].id; CR.cargo = ativos[0].funcao || ''; }
+
+  var opcoes = ativos.map(function (m) {
+    return '<option value="' + _mbEsc(m.id) + '"' + (String(m.id) === String(CR.membroId) ? ' selected' : '') + '>' + _mbEsc(m.nome) + (m.rol ? ' · ROL ' + _mbEsc(m.rol) : '') + '</option>';
+  }).join('');
+  var temAss = !!IDENTIDADE.assinatura;
+  return '<div class="cr-layout">' +
+    '<section class="panel">' +
+      '<div class="panel-head"><h2 class="panel-title">Emitir carta</h2></div>' +
+      '<div class="form-grid">' +
+        '<div class="field span-all"><label for="cr-membro">Membro</label><select id="cr-membro" onchange="mbCarta_escolher(this.value)">' + opcoes + '</select></div>' +
+        '<div class="field span-all"><label>Tipo de carta</label><div class="cr-tipo" role="radiogroup" aria-label="Tipo de carta">' +
+          '<label><input type="radio" name="cr-tipo" value="recomendacao"' + (CR.tipo === 'recomendacao' ? ' checked' : '') + ' onchange="mbCarta_set(\'tipo\',this.value)"><i data-lucide="award" class="ic-16"></i>Recomendação</label>' +
+          '<label><input type="radio" name="cr-tipo" value="mudanca"' + (CR.tipo === 'mudanca' ? ' checked' : '') + ' onchange="mbCarta_set(\'tipo\',this.value)"><i data-lucide="arrow-right-left" class="ic-16"></i>Mudança</label>' +
+        '</div></div>' +
+        '<div class="field span-all"><label for="cr-destino">Igreja que vai receber</label><input type="text" id="cr-destino" maxlength="120" placeholder="Em branco, a linha fica para escrever à mão" value="' + _mbEsc(CR.destino) + '" oninput="mbCarta_set(\'destino\',this.value)"></div>' +
+        '<div class="field"><label for="cr-cargo">Cargo exercido</label><input type="text" id="cr-cargo" maxlength="80" value="' + _mbEsc(CR.cargo) + '" oninput="mbCarta_set(\'cargo\',this.value)"></div>' +
+        '<div class="field"><label for="cr-local">Local</label><input type="text" id="cr-local" maxlength="60" value="' + _mbEsc(CR.local) + '" oninput="mbCarta_set(\'local\',this.value)"></div>' +
+        '<div class="field"><label for="cr-data">Data</label><input type="date" id="cr-data" value="' + _mbEsc(CR.data) + '" oninput="mbCarta_set(\'data\',this.value)"></div>' +
+        (temAss ? '<div class="field"><label for="cr-assinar">Assinatura do pastor</label><select id="cr-assinar" onchange="mbCarta_set(\'assinar\',this.value===\'1\')"><option value="0"' + (CR.assinar ? '' : ' selected') + '>Assinar à mão</option><option value="1"' + (CR.assinar ? ' selected' : '') + '>Usar a assinatura cadastrada</option></select></div>' : '') +
+      '</div>' +
+    '</section>' +
+    '<div>' +
+      '<section class="panel"><div class="panel-head"><h2 class="panel-title">Prévia</h2></div>' +
+        '<div class="cr-pre" id="cr-pre"></div>' +
+        '<p class="panel-text" style="margin-top:var(--sp-3)">Imprima frente e verso (virar pela borda curta) e dobre ao meio: a capa fica certa depois da dobra.</p>' +
+      '</section>' +
+      '<section class="panel"><div class="panel-head"><h2 class="panel-title">Cartas emitidas</h2></div><div class="cr-hist" id="cr-hist"></div></section>' +
+    '</div>' +
+  '</div>' +
+  '<div class="action-bar"><button class="btn btn-primary" id="cr-gerar" onclick="mbCarta_gerar()"><i data-lucide="file-down" class="ic-16"></i>Gerar PDF</button></div>';
+}
+function mbCarta_depois() {
+  mbCarta_prever();
+  if (window.ResizeObserver && document.getElementById('cr-pre')) new ResizeObserver(mbCarta_ajustar).observe(document.getElementById('cr-pre'));
+  mbCarta_histRender();
+  mbCarta_carregarHist();
+}
+function mbCarta_escolher(id) {
+  CR.membroId = id;
+  var m = _crMembro();
+  CR.cargo = m ? (m.funcao || '') : '';
+  var el = document.getElementById('cr-cargo'); if (el) el.value = CR.cargo;
+  mbCarta_prever();
+}
+function mbCarta_set(k, v) { CR[k] = v; mbCarta_prever(); }
+
+function mbCarta_prever() {
+  var box = document.getElementById('cr-pre');
+  if (!box) return;
+  var d = mbCarta_dados();
+  box.innerHTML =
+    '<div><div class="cr-pre-rot">Capa (verso da folha)</div><div class="cr-pre-pag" data-cr="1">' + mbCarta_htmlCapa(d) + '</div></div>' +
+    '<div><div class="cr-pre-rot">Carta (frente da folha)</div><div class="cr-pre-pag" data-cr="2">' + mbCarta_htmlCarta(d) + '</div></div>';
+  mbCarta_ajustar();
+}
+// Encolhe a folha de 794 px à largura disponível
+function mbCarta_ajustar() {
+  document.querySelectorAll('.cr-pre-pag').forEach(function (w) {
+    var k = w.clientWidth / 794;
+    w.style.height = Math.round(1123 * k) + 'px';
+    var p = w.firstElementChild; if (p) p.style.transform = 'scale(' + k + ')';
+  });
+}
+window.addEventListener('resize', function () { if (MB && MB.tab === 'cartas') mbCarta_ajustar(); });
+
+// ── Histórico ──
+function mbCarta_carregarHist() {
+  var token = App.session && App.session.token;
+  if (!token) return;
+  google.script.run
+    .withFailureHandler(function () {})
+    .withSuccessHandler(function (r) { if (r && r.success) { CR.historico = r.data || []; mbCarta_histRender(); } })
+    .mb_listarCartas(token);
+}
+function mbCarta_histRender() {
+  var el = document.getElementById('cr-hist');
+  if (!el) return;
+  el.innerHTML = CR.historico.length ? CR.historico.slice(0, 8).map(function (c) {
+    return '<div class="cr-hist-it"><div><b>' + _mbEsc(c.membroNome) + '</b><br><span>' + _mbEsc(String(c.data).slice(0, 10)) + (c.destino ? ' · ' + _mbEsc(c.destino) : '') + ' · ' + _mbEsc(c.emitidoPor) + '</span></div>' +
+      '<span class="badge ' + (c.tipo === 'mudanca' ? 'badge-gold' : 'badge-teal') + '">' + _mbEsc((CR_TEXTOS[c.tipo] || {}).nome || c.tipo) + '</span></div>';
+  }).join('') : '<p class="panel-text">Nenhuma carta emitida ainda.</p>';
+}
+
+// ── PDF: registra a emissão e só então gera (sem registro não há carta) ──
+function mbCarta_gerar() {
+  if (CR.gerando) return;
+  var m = _crMembro(), token = App.session && App.session.token;
+  if (!m || !token) return;
+  if (!window.jspdf || !window.domtoimage) { showToast('Bibliotecas de PDF ainda não carregaram. Aguarde um instante.', 'warning'); return; }
+  var btn = document.getElementById('cr-gerar');
+  CR.gerando = true; if (btn) btn.classList.add('loading');
+  var d = mbCarta_dados();
+  google.script.run
+    .withFailureHandler(function (e) { _crFim(); showToast((e && e.message) || 'Erro ao registrar a carta.', 'error'); })
+    .withSuccessHandler(function (r) {
+      if (!r || !r.success) { _crFim(); showToast((r && r.error) || 'Erro ao registrar a carta.', 'error'); return; }
+      _crCapturar(mbCarta_htmlCapa(d)).then(function (capa) {
+        return _crCapturar(mbCarta_htmlCarta(d)).then(function (carta) {
+          var pdf = new window.jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+          pdf.addImage(capa, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+          pdf.addPage('a4', 'portrait');
+          pdf.addImage(carta, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+          pdf.save('Carta_' + (CR_TEXTOS[d.tipo].nome) + '_' + String(m.nome).split(' ')[0] + '.pdf');
+          showToast('Carta gerada e registrada.', 'success');
+          mbCarta_carregarHist();
+        });
+      }).catch(function (e) { console.error(e); showToast('Erro ao gerar o PDF.', 'error'); }).then(_crFim);
+    })
+    .mb_registrarCarta(token, { tipo: CR.tipo, membroId: m.id, membroNome: m.nome, destino: CR.destino });
+}
+function _crFim() { CR.gerando = false; var b = document.getElementById('cr-gerar'); if (b) b.classList.remove('loading'); }
+function _crCapturar(html) {
+  return new Promise(function (resolve, reject) {
+    var cont = document.getElementById('mb-pdf-render-container');
+    var SCALE = 2.5;
+    var outer = document.createElement('div');
+    outer.style.cssText = 'position:absolute;top:0;left:0;width:' + (794 * SCALE) + 'px;height:' + (1123 * SCALE) + 'px;overflow:hidden;pointer-events:none';
+    var inner = document.createElement('div');
+    inner.style.cssText = 'width:794px;height:1123px;transform:scale(' + SCALE + ');transform-origin:top left';
+    inner.innerHTML = html;
+    outer.appendChild(inner); cont.appendChild(outer);
+    var fontes = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+    var imgs = [].slice.call(inner.querySelectorAll('img')).map(function (im) {
+      return im.complete ? Promise.resolve() : new Promise(function (ok) { im.onload = im.onerror = ok; });
+    });
+    Promise.all([fontes].concat(imgs)).then(function () {
+      setTimeout(function () {
+        domtoimage.toJpeg(outer, { width: 794 * SCALE, height: 1123 * SCALE, quality: 0.93, bgcolor: '#e9ecee' })
+          .then(function (u) { cont.removeChild(outer); resolve(u); })
+          .catch(function (e) { cont.removeChild(outer); reject(e); });
+      }, 120);
+    });
+  });
+}
+</script>

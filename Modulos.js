@@ -68,7 +68,9 @@ var Modulos = (function () {
 
   // Concatena o HTML de cada módulo ativo (usado por <?!= incluirModulos() ?> no index.html)
   function incluirHtml() {
-    return ativos().map(function (m) { return m.html ? include(m.html) : ''; }).join('\n');
+    return ativos().map(function (m) {
+      return [].concat(m.html || []).map(function (f) { return include(f); }).join('\n');
+    }).join('\n');
   }
 
   // KPIs dos módulos ativos (cada módulo calcula os seus; falha de um não derruba a home)

@@ -626,3 +626,46 @@ test('topo no celular mostra o nome curto da igreja ao lado do logo', async () =
   assert.ok(r.visivel, 'nome curto visível no topo');
   assert.ok(r.dentro, 'não invade os botões da direita');
 });
+
+test('cartas: aba preenche membro, cargo, igreja e data; mudança troca o texto; capa sai de cabeça para baixo; emissão é registrada', async () => {
+  const backend = criarBackend();
+  definirConfig(backend, 'NOME_IGREJA', 'Igreja Vida Nova');
+  definirConfig(backend, 'ENDERECO_IGREJA', 'Rua A, 10, Centro | Betim-MG');
+  const { page, erros } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  await irParaMembros(page);
+  await cadastrarMembro(page, 'Maria das Graças');
+  await page.evaluate(() => mbSetTab('cartas'));
+  await page.waitForSelector('#cr-pre .cr-page', { timeout: 6000 });
+
+  const carta = () => page.evaluate(() => document.querySelector('[data-cr="2"]').innerText.replace(/\s+/g, ' '));
+  let t = await carta();
+  assert.match(t, /\( X \) RECOMENDAÇÃO/);
+  assert.match(t, /o membro Maria das Graças/);
+  assert.match(t, /Igreja de origem: Igreja Vida Nova/);
+  assert.match(t, /Cargo exercido: Membro/);
+  assert.match(t, /Local: Betim-MG/);
+  assert.match(t, /recomendamos que o\(a\) recebais/);
+
+  await page.fill('#cr-destino', 'AD Centro');
+  await page.click('.cr-tipo label:has(input[value="mudanca"])');
+  t = await carta();
+  assert.match(t, /\( X \) MUDANÇA/);
+  assert.match(t, /Apresentamos à igreja AD Centro/);
+  assert.match(t, /havendo mudado de localidade/);
+
+  const capa = await page.evaluate(() => {
+    const c = document.querySelector('[data-cr="1"]');
+    return { txt: c.innerText.replace(/\s+/g, ' '), giradas: [...c.querySelectorAll('.cr-capa')].every((e) => getComputedStyle(e).transform !== 'none'), rodapeReto: getComputedStyle(c.querySelector('.cr-rodape')).transform === 'none' };
+  });
+  assert.match(capa.txt, /Á Igreja: AD Centro/);
+  assert.ok(capa.giradas, 'blocos da capa de cabeça para baixo');
+  assert.ok(capa.rodapeReto, 'endereço no rodapé fica reto');
+
+  // registro (o PDF em si depende das bibliotecas da CDN; aqui só o registro)
+  const r = await page.evaluate(() => new Promise((ok) => google.script.run.withSuccessHandler(ok).mb_registrarCarta(App.session.token, { tipo: CR.tipo, membroId: CR.membroId, membroNome: 'Maria das Graças', destino: CR.destino })));
+  assert.equal(r.success, true);
+  await page.evaluate(() => mbCarta_carregarHist());
+  await page.waitForFunction(() => document.getElementById('cr-hist').innerText.includes('Maria das Graças'), null, { timeout: 6000 });
+  assert.deepEqual(erros, []);
+});

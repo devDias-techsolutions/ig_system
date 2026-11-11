@@ -449,7 +449,7 @@ test('módulos: manifesto é serializável (sem funções) e o JSON do HTML é s
 test('módulos: o esquema da planilha inclui as abas do núcleo e as declaradas pelos módulos ativos', () => {
   const env = freshEnv();
   const esq = JSON.parse(env.run('JSON.stringify(SetupSheets.schema())'));
-  assert.deepEqual(Object.keys(esq).sort(), ['Config', 'Imagens', 'Membros', 'Sessoes', 'Usuarios']);
+  assert.deepEqual(Object.keys(esq).sort(), ['Cartas', 'Config', 'Imagens', 'Membros', 'Sessoes', 'Usuarios']);
   assert.equal(esq.Membros[0], 'id');
   assert.ok(esq.Membros.includes('ativo'));
 });
@@ -745,4 +745,32 @@ test('e-mails do sistema saem com o nome da igreja como remetente', () => {
   definirConfigUnit(env, 'NOME_IGREJA', 'Igreja Teste');
   env.run("SetupSheets.criarAdministrador('A', 'a@igreja.org')");
   assert.equal(env.calls.emails[0][3].name, 'Igreja Teste');
+});
+
+test('cartas: emissão fica registrada (quem, para quem, quando); tipo inválido e membro vazio são recusados', () => {
+  const { env, ss } = envMembros();
+  env.ctx.__c = { tipo: 'mudanca', membroId: 'm1', membroNome: 'Fulano', destino: 'AD Centro' };
+  assert.equal(env.run("mb_registrarCarta('tok', __c)").success, true);
+  env.ctx.__c = { tipo: 'recomendacao', membroId: 'm2', membroNome: 'Beltrano' };
+  assert.equal(env.run("mb_registrarCarta('tok', __c)").success, true);
+  env.ctx.__c = { tipo: 'outra', membroId: 'm1', membroNome: 'X' };
+  assert.equal(env.run("mb_registrarCarta('tok', __c)").success, false);
+  env.ctx.__c = { tipo: 'mudanca', membroId: '', membroNome: '' };
+  assert.equal(env.run("mb_registrarCarta('tok', __c)").success, false);
+  const todas = env.run("mb_listarCartas('tok')").data;
+  assert.equal(todas.length, 2);
+  assert.equal(todas[0].membroNome, 'Beltrano', 'mais recente primeiro');
+  assert.equal(todas[1].emitidoPor, 'Ana');
+  assert.equal(todas[1].destino, 'AD Centro');
+  assert.equal(env.run("mb_listarCartas('tok', 'm1')").data.length, 1);
+  assert.equal(env.run("mb_registrarCarta('invalido', { tipo: 'mudanca', membroId: 'm1', membroNome: 'F' })").success, false);
+});
+
+test('cartas: instalação antiga sem a aba "Cartas" cria a aba sozinha na primeira emissão', () => {
+  const { env, ss } = envMembros();
+  const sh = ss.getSheetByName('Cartas');
+  if (sh) ss.deleteSheet(sh);
+  env.ctx.__c = { tipo: 'recomendacao', membroId: 'm1', membroNome: 'Fulano' };
+  assert.equal(env.run("mb_registrarCarta('tok', __c)").success, true);
+  assert.ok(ss.getSheetByName('Cartas'));
 });
