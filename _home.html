@@ -24,20 +24,23 @@
   content: ''; position: absolute; right: -90px; top: -90px; width: 280px; height: 280px; border-radius: 50%;
   background: radial-gradient(circle, var(--teal-glow-soft), transparent 66%); pointer-events: none;
 }
-.hm-id { position: relative; z-index: 1; display: flex; align-items: center; gap: var(--sp-4); }
-.hm-logo {
-  width: 64px; height: 64px; border-radius: 20px; flex-shrink: 0; overflow: hidden;
-  background: linear-gradient(135deg, var(--teal-dark), var(--teal)); box-shadow: 0 10px 26px var(--teal-glow);
-}
-.hm-logo .brand-mark { font-size: 22px; }
+.hm-id { position: relative; z-index: 1; display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-4); }
 .hm-id-txt { min-width: 0; }
-.hm-greet { font-size: var(--fs-sm); font-weight: 600; color: var(--text-muted); }
-.hm-title { margin-top: 2px; font-size: clamp(20px, 3.2vw, var(--fs-2xl)); font-weight: 800; letter-spacing: -.03em; line-height: 1.15; color: var(--text); overflow-wrap: anywhere; }
+.hm-greet { font-size: clamp(24px, 4.4vw, 34px); font-weight: 800; letter-spacing: -.035em; line-height: 1.1; color: var(--text); overflow-wrap: anywhere; }
+.hm-title { margin-top: var(--sp-2); font-size: var(--fs-md); font-weight: 600; letter-spacing: -.01em; line-height: 1.3; color: var(--text-muted); overflow-wrap: anywhere; }
+/* perfil: pílula com ponto vivo, no canto do cabeçalho */
+.hm-role {
+  flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 100px;
+  font-size: var(--fs-xs); font-weight: 800; letter-spacing: .02em; color: var(--teal-dark);
+  background: var(--teal-dim); border: 1px solid var(--teal-border); box-shadow: 0 6px 18px -8px var(--teal-glow);
+}
+[data-theme="dark"] .hm-role, :root:not([data-theme="light"]) .hm-role { color: var(--teal-light); }
+.hm-role-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); animation: livePing 2.4s ease-out infinite; }
+@media (max-width: 480px) { .hm-id { flex-direction: column-reverse; align-items: flex-start; gap: var(--sp-3); } }
 .hm-lema { margin-top: var(--sp-2); padding-left: var(--sp-3); border-left: 2px solid var(--teal); font-size: var(--fs-sm); font-style: italic; line-height: 1.5; color: var(--text-muted); }
 .hm-sub {
-  position: relative; z-index: 1; display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap;
-  margin-top: var(--sp-4); padding-top: var(--sp-4); border-top: 1px solid var(--border);
-  font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.5;
+  position: relative; z-index: 1; margin-top: var(--sp-4); padding-top: var(--sp-4); border-top: 1px solid var(--border);
+  font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.6;
 }
 .hm-sub b { color: var(--text); font-weight: 700; }
 
@@ -146,17 +149,14 @@ function renderHome() {
     '<div class="page hm">' +
     '<header class="hm-head hm-rise" style="--i:' + (i++) + '">' +
       '<div class="hm-id">' +
-        '<div class="hm-logo"><span class="brand-mark">' + brandMarkInner() + '</span></div>' +
         '<div class="hm-id-txt">' +
           '<div class="hm-greet">' + sauda + (nome ? ', ' + escHtml(nome) : '') + '</div>' +
           '<h1 class="hm-title">' + escHtml(IDENTIDADE.nome) + '</h1>' +
           (IDENTIDADE.lema ? '<p class="hm-lema">' + escHtml(IDENTIDADE.lema) + '</p>' : '') +
         '</div>' +
+        '<span class="hm-role"><span class="hm-role-dot"></span>' + escHtml(PERFIL_LABEL[perfil] || perfil) + '</span>' +
       '</div>' +
-      '<div class="hm-sub">' +
-        '<span class="badge badge-teal">' + escHtml(PERFIL_LABEL[perfil] || perfil) + '</span>' +
-        '<span><b>' + cfg.visao + '</b> · ' + cfg.sub + '</span>' +
-      '</div>' +
+      '<p class="hm-sub"><b>' + cfg.visao + '</b> · ' + cfg.sub + '</p>' +
     '</header>';
 
   /* ══ Indicadores ══ */
@@ -269,7 +269,7 @@ function _loadKpis() {
           'Quando houver módulos com dados para o seu perfil, os números aparecem aqui.'));
         return;
       }
-      mostrar(d.map(function (k) { return _kpiCard(k.icone, k.cor, k.valor || 0, k.rotulo, k.curto); }).join(''));
+      mostrar(d.map(function (k) { return _kpiCard(k.icone, k.cor, k.valor || 0, k.rotulo, k.curto, null, k.destino); }).join(''));
     })
     .withFailureHandler(function () {
       mostrar(_homeEstado('wifi-off', 'Sem conexão com o servidor',

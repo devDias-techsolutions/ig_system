@@ -493,13 +493,14 @@ body::after {
 .kpi-card {
   --kpi-color: var(--teal); --kpi-dim: var(--teal-dim); --kpi-border: var(--teal-border); --kpi-shadow: var(--teal-glow);
   position: relative; overflow: hidden; display: flex; flex-direction: column; gap: var(--sp-3);
-  isolation: isolate; padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  isolation: isolate; padding: var(--sp-4); border: 1px solid var(--border); border-radius: 20px;
   background: linear-gradient(160deg, rgba(255,255,255,.07), rgba(255,255,255,.012)), var(--bg-glass);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 12px 28px -20px rgba(0,0,0,.7);
   transition: transform .28s var(--ease-spring), border-color .2s var(--ease), box-shadow .28s var(--ease);
   animation: cardIn .55s var(--ease-spring) both;
 }
-[data-theme="light"] .kpi-card { background: linear-gradient(160deg, #FFFFFF, #F4F8FC); box-shadow: 0 1px 2px rgba(15,23,42,.05), 0 14px 30px -20px color-mix(in srgb, var(--kpi-color) 55%, transparent); }
+[data-theme="light"] .kpi-card { background: rgba(255,255,255,.85); border: 1px solid rgba(255,255,255,.6); box-shadow: 0 10px 30px -5px rgba(0,32,96,.07); }
 .kpi-card:hover { transform: translateY(-4px); border-color: var(--kpi-border); box-shadow: 0 22px 40px -20px var(--kpi-shadow), inset 0 1px 0 rgba(255,255,255,.12); }
 .kpi-grid > :nth-child(2) { animation-delay: .06s; } .kpi-grid > :nth-child(3) { animation-delay: .12s; }
 .kpi-grid > :nth-child(4) { animation-delay: .18s; } .kpi-grid > :nth-child(5) { animation-delay: .24s; }
@@ -534,12 +535,33 @@ body::after {
 .kpi-icon::after { content: ''; position: absolute; inset: 0; border-radius: inherit; border: 1.5px solid var(--kpi-color); opacity: 0; animation: kpiHalo 3s ease-out infinite; pointer-events: none; }
 @keyframes kpiHalo { 0% { transform: scale(1); opacity: .5; } 70%, 100% { transform: scale(1.6); opacity: 0; } }
 .kpi-card.is-loading::before, .kpi-card.is-loading .kpi-icon::after { display: none; }
+/* cartão que abre outra tela: seta no canto, cursor e foco */
+.kpi-card.is-link { cursor: pointer; }
+.kpi-card.is-link:focus-visible { outline: 2px solid var(--kpi-color); outline-offset: 3px; }
+.kpi-go { position: absolute; top: 12px; right: 12px; z-index: 1; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; color: var(--kpi-color); background: var(--kpi-dim); transition: transform .3s var(--ease-spring); }
+.kpi-go i { width: 15px; height: 15px; }
+.kpi-card.is-link:hover .kpi-go { transform: translateX(3px); }
+.kpi-card.is-link .kpi-tag { margin-right: 28px; }
 .kpi-icon i { width: 18px; height: 18px; }
 .kpi-tag { font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); }
-.kpi-value { font-size: clamp(28px, 4vw, 36px); font-weight: 800; letter-spacing: -.04em; line-height: 1; color: var(--text); font-variant-numeric: tabular-nums; animation: kpiValue .8s var(--ease-spring) .1s both; }
+.kpi-value { font-size: clamp(32px, 4.4vw, 40px); font-weight: 800; letter-spacing: -.04em; line-height: 1; color: var(--text);
+  background: linear-gradient(135deg, var(--text) 10%, color-mix(in srgb, var(--kpi-color) 62%, var(--text))); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-variant-numeric: tabular-nums; animation: kpiValue .8s var(--ease-spring) .1s both; }
 @keyframes kpiValue { from { opacity: 0; transform: translateY(10px) scale(.92); filter: blur(5px); } to { opacity: 1; transform: none; filter: none; } }
 .kpi-label { font-size: var(--fs-sm); font-weight: 600; color: var(--text-muted); line-height: 1.3; }
-@media (max-width: 719px) { .kpi-grid > .kpi-card:last-child:nth-child(odd) { grid-column: 1 / -1; } }
+/* cartão sozinho na última linha (celular): ocupa a largura toda, em linha — [ícone nº] [rótulo] [Ver lista ›] */
+@media (max-width: 719px) {
+  .kpi-grid > .kpi-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1; display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; column-gap: var(--sp-3);
+  }
+  .kpi-grid > .kpi-card:last-child:nth-child(odd) .kpi-top { display: contents; }
+  .kpi-grid > .kpi-card:last-child:nth-child(odd) .kpi-tag { display: none; }
+  .kpi-grid > .kpi-card:last-child:nth-child(odd) .kpi-value { margin-right: var(--sp-2); }
+  .kpi-grid > .kpi-card:last-child:nth-child(odd) .kpi-go {
+    position: static; width: auto; height: 30px; padding: 0 8px 0 12px; border-radius: 100px; gap: 2px; display: inline-flex; align-items: center;
+    font-size: 11px; font-weight: 800; border: 1px solid var(--kpi-border);
+  }
+  .kpi-grid > .kpi-card:last-child:nth-child(odd) .kpi-go::before { content: 'Ver lista'; }
+}
 
 /* ══════════════════════════════════════════════════
    LAYOUT SYSTEM — estrutura mínima de toda tela (ver docs/LAYOUT.md)
@@ -1438,9 +1460,10 @@ function navigateTo(view, params) {
 // ── RENDER HELPER ────────────────────────────────────────
 // Barra do módulo padrão: [voltar] Gestão Ministerial / Módulo   [tags]
 // Card de indicador padrão do sistema (ver .kpi-card). valueId opcional p/ animar/atualizar o número
-function _kpiCard(icon, colorClass, value, label, tag, valueId) {
+function _kpiCard(icon, colorClass, value, label, tag, valueId, destino) {
   var tagText = tag || String(label).split(' ')[0];
-  return '<div class="kpi-card ' + escHtml(colorClass || 'kc-teal') + '">' +
+  var link = destino ? ' is-link" role="button" tabindex="0" aria-label="' + escHtml(label) + ': abrir" onclick="navigateTo(\'' + escHtml(destino) + '\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();navigateTo(\'' + escHtml(destino) + '\')}' : '';
+  return '<div class="kpi-card ' + escHtml(colorClass || 'kc-teal') + link + '">' +
     '<div class="kpi-top">' +
       '<div class="kpi-icon"><i data-lucide="' + escHtml(icon || 'activity') + '"></i></div>' +
       '<span class="kpi-tag">' + escHtml(tagText) + '</span>' +
@@ -1448,6 +1471,7 @@ function _kpiCard(icon, colorClass, value, label, tag, valueId) {
     '<i data-lucide="' + escHtml(icon || 'activity') + '" class="card-ghost" aria-hidden="true"></i>' +
     '<div class="kpi-value"' + (valueId ? ' id="' + escHtml(valueId) + '"' : '') + '>' + escHtml(value) + '</div>' +
     '<div class="kpi-label">' + escHtml(label) + '</div>' +
+    (destino ? '<span class="kpi-go" aria-hidden="true"><i data-lucide="chevron-right"></i></span>' : '') +
   '</div>';
 }
 

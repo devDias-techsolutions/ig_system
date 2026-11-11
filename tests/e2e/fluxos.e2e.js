@@ -82,8 +82,8 @@ test('Home: nome, lema e cor da igreja vêm da aba Config; sem logo aparecem as 
   assert.equal(await page.textContent('.hm-title'), 'Igreja Vida Nova');
   assert.equal(await page.textContent('.hm-lema'), 'O Senhor é o meu pastor');
   assert.match(await page.title(), /^Igreja Vida Nova/);
-  assert.equal(await page.textContent('.hm-logo .brand-mark span'), 'VN');
-  assert.equal(await page.locator('.hm-logo img').count(), 0);
+  assert.equal(await page.locator('.hm-logo').count(), 0, 'logo só na barra superior');
+  assert.equal(await page.textContent('#topnav-mark span'), 'VN');
   const cor = await page.evaluate(() => document.documentElement.style.getPropertyValue('--teal').trim());
   assert.ok(cor.length === 7 && cor[0] === '#', 'cor da marca aplicada: ' + cor);
   assert.deepEqual(erros, []);

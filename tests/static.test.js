@@ -304,3 +304,10 @@ test('ícone fantasma: KPI e módulo do Início têm marca d\'água no mesmo com
   assert.match(read('_home.html'), /_moduleBtn[\s\S]{0,700}class="card-ghost"/);
   assert.match(read('index.html'), /\.card-ghost\s*\{/);
 });
+
+test('Início: sem logo duplicado no cabeçalho; KPI que navega tem seta, e o servidor informa o destino', () => {
+  assert.doesNotMatch(read('_home.html'), /hm-logo/);
+  assert.match(read('index.html'), /kpi-go/);
+  assert.match(read('Membros.js'), /destino: 'membros'/);
+  assert.match(read('Dashboard.js'), /destino: 'usuarios'/);
+});
