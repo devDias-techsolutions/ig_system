@@ -324,3 +324,10 @@ test('cartas: aba no módulo Membros, arquivo próprio incluído pelo manifesto 
   assert.match(read('_membros-cartas.html'), /mb_registrarCarta/);
   assert.doesNotMatch(read('_membros-cartas.html'), /mb-kpi|kpi-hero/);
 });
+
+test('cartas: o fundo do papel não usa SVG dentro de url() (o dom-to-image perde o fundo e o PDF sai preto)', () => {
+  const t = read('_membros-cartas.html');
+  assert.doesNotMatch(t, /url\(["']?data:image\/svg/);
+  assert.match(t, /function _crTextura/);
+  assert.match(t, /background:#e9ecee/);
+});
