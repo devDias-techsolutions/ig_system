@@ -66,9 +66,9 @@ test('perfil secretaria entra na Home do seu perfil (sem administração) e abre
   const texto = await page.evaluate(() => document.querySelector('.hm').innerText.replace(/\s+/g, ' '));
   assert.match(texto, /Seu espaço de trabalho/);
   assert.ok(!/Administração/.test(texto), 'secretaria não vê o bloco de administração na Home');
-  assert.ok(!/Usuários do sistema/.test(texto), 'secretaria não vê o indicador de usuários');
+  assert.ok(!/Acesso ao sistema/.test(texto), 'secretaria não vê o grupo de usuários');
   assert.ok(!/Atividade recente/.test(texto), 'secretaria não vê atividade de administração');
-  assert.match(texto, /Membros ativos/);
+  assert.match(texto, /Cadastro da igreja Ativos/);
   await page.evaluate(() => navigateTo('membros'));
   await esperarTela(page, 'membros');
   assert.deepEqual(erros, []);

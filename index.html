@@ -565,7 +565,7 @@ body::after {
 
 /* ══ GRUPO DE INDICADORES — cartão mestre (Início, Membros, módulos) ══
    Um assunto por cartão: título + descrição, métricas dentro, faixa de atenção e UMA seta.
-   O ícone é uma "joia" de vidro que vaza pela borda superior. */
+   O ícone é um bloco 3D reto (face + espessura) que vaza pela borda superior. */
 .kpi-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 40px var(--sp-4); padding-top: 28px; }
 .kpi-group {
   --kpi-color: var(--teal); --kpi-dim: var(--teal-dim); --kpi-border: var(--teal-border); --kpi-shadow: var(--teal-glow);
@@ -581,24 +581,21 @@ body::after {
 .kpi-groups > :nth-child(2) { animation-delay: .08s; } .kpi-groups > :nth-child(3) { animation-delay: .16s; }
 .kpi-group::before {   /* aura de luz atrás da joia */
   content: ''; position: absolute; left: -10px; top: -22px; width: 190px; height: 150px; z-index: -1; border-radius: 50%; pointer-events: none;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--kpi-color) 28%, transparent), transparent);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--kpi-color) 14%, transparent), transparent);
 }
 .kpi-group.is-link { cursor: pointer; }
 .kpi-group.is-link:hover { transform: translateY(-4px); border-color: var(--kpi-border); box-shadow: 0 26px 44px -22px var(--kpi-shadow); }
 .kpi-group.is-link:focus-visible { outline: 2px solid var(--kpi-color); outline-offset: 3px; }
 .kg-gem {
-  position: absolute; left: 14px; top: -26px; width: 66px; height: 66px; border-radius: 22px; display: grid; place-items: center; color: #fff;
-  transform: rotate(-8deg); transition: transform .5s var(--ease-spring);
-  background: radial-gradient(120% 120% at 25% 15%, color-mix(in srgb, var(--kpi-color) 68%, #fff) 0%, var(--kpi-color) 40%, var(--kg-dark) 100%);
-  box-shadow: 0 20px 28px -12px var(--kg-dark), 0 0 0 1px color-mix(in srgb, var(--kpi-color) 60%, #fff), 0 0 0 6px color-mix(in srgb, var(--kpi-color) 14%, transparent), inset 0 2px 1px rgba(255,255,255,.7), inset 0 -8px 14px rgba(0,0,0,.22);
+  position: absolute; left: 16px; top: -24px; width: 58px; height: 58px; border-radius: 16px; display: grid; place-items: center; color: #fff;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--kpi-color) 88%, #fff), var(--kpi-color) 55%, color-mix(in srgb, var(--kpi-color) 80%, #000));
+  box-shadow: 0 5px 0 var(--kg-dark), 0 16px 20px -10px var(--kg-dark), inset 0 1px 0 rgba(255,255,255,.4);
+  transition: transform .3s var(--ease-spring), box-shadow .3s var(--ease-spring);
 }
-.kg-gem::before { content: ''; position: absolute; inset: -9px; border-radius: 28px; border: 1.5px solid color-mix(in srgb, var(--kpi-color) 45%, transparent); opacity: .55; animation: gemRing 3.2s ease-out infinite; }
-.kg-gem::after { content: ''; position: absolute; left: 8px; top: 6px; width: 30px; height: 14px; border-radius: 50%; background: linear-gradient(180deg, rgba(255,255,255,.7), transparent); transform: rotate(-20deg); }
-.kg-gem i, .kg-gem svg { position: relative; z-index: 1; width: 30px; height: 30px; stroke-width: 2; filter: drop-shadow(0 3px 3px rgba(0,0,0,.4)); }
-@keyframes gemRing { 0% { transform: scale(.96); opacity: .6; } 70%, 100% { transform: scale(1.14); opacity: 0; } }
-.kpi-group.is-link:hover .kg-gem { transform: rotate(-3deg) translateY(-3px) scale(1.05); }
-.kg-name { padding: 0 40px 0 78px; min-height: 22px; font-size: 21px; font-weight: 800; letter-spacing: -.025em; line-height: 1.15; color: var(--text); }
-.kg-sub { margin-top: 3px; padding: 0 40px 0 78px; font-size: var(--fs-xs); color: var(--text-muted); }
+.kg-gem i, .kg-gem svg { width: 28px; height: 28px; stroke-width: 2; }
+.kpi-group.is-link:hover .kg-gem { transform: translateY(-3px); box-shadow: 0 8px 0 var(--kg-dark), 0 20px 22px -10px var(--kg-dark), inset 0 1px 0 rgba(255,255,255,.4); }
+.kg-name { padding: 0 40px 0 74px; min-height: 22px; font-size: 21px; font-weight: 800; letter-spacing: -.025em; line-height: 1.15; color: var(--text); }
+.kg-sub { margin-top: 3px; padding: 0 40px 0 74px; font-size: var(--fs-xs); color: var(--text-muted); }
 .kg-stats { display: grid; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); margin-top: var(--sp-4); border-radius: 16px; border: 1px solid var(--border); background: rgba(255,255,255,.04); }
 [data-theme="light"] .kg-stats { background: #F1F6FB; }
 .kg-stat { padding: 12px 14px; min-width: 0; }
@@ -617,7 +614,7 @@ body::after {
 [data-theme="light"] .kg-alert i, [data-theme="light"] .kg-alert svg, [data-theme="light"] .kg-alert .kg-more { color: #2457c9; }
 .kpi-group .kpi-go { top: 14px; right: 14px; }
 .kpi-group.is-loading { pointer-events: none; }
-.kpi-group.is-loading::before, .kpi-group.is-loading .kg-gem::before { display: none; }
+.kpi-group.is-loading::before { display: none; }
 
 /* ══════════════════════════════════════════════════
    LAYOUT SYSTEM — estrutura mínima de toda tela (ver docs/LAYOUT.md)
