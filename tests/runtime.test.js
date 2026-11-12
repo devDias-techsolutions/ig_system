@@ -853,3 +853,9 @@ test('qr: página pública não precisa de login, é noindex e não contém dado
   assert.ok(out, 'doGet devolveu algo');
   assert.ok(!JSON.stringify(out).includes('123.456'));
 });
+
+test('qr: URL do QR sempre aponta para a implantação pública (/exec), nunca /dev', () => {
+  const { env, id } = envQr();
+  env.ctx.ScriptApp.getService = () => ({ getUrl: () => 'https://script.google.com/macros/s/ABC/dev' });
+  assert.equal(emitir(env, id).data.url.indexOf('https://script.google.com/macros/s/ABC/exec?page=validar&c='), 0);
+});

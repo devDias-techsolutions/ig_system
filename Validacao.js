@@ -48,7 +48,9 @@ var Validacao = (function () {
       }
       var codigo = _codigoNovo();
       sh.appendRow([codigo, String(membroId), Util.now(), sess.nome || sess.email || '', 'ativa']);
-      var url = ScriptApp.getService().getUrl() + '?page=validar&c=' + codigo;
+      // /dev só abre para o dono do script; o QR precisa apontar para a implantação pública (/exec)
+      var base = String(ScriptApp.getService().getUrl() || '').replace(/\/dev$/, '/exec');
+      var url = base + '?page=validar&c=' + codigo;
       return Util.ok({ codigo: codigo, url: url });
     });
   }
