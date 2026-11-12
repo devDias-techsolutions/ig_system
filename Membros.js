@@ -441,7 +441,7 @@ __MANIFESTOS__.push({
       { id:'mb_backup',  label: 'Exportar / importar backup', admin: true, secretaria: true }
     ]
   },
-  abas: [{ nome: 'Membros', colunas: Membros.HEADERS, cor: '#00695C' }, { nome: 'Cartas', colunas: ['Id', 'Data', 'Tipo', 'MembroId', 'MembroNome', 'Destino', 'EmitidoPor'], cor: '#37474F' }],
+  abas: [{ nome: 'Membros', colunas: Membros.HEADERS, cor: '#00695C' }, { nome: 'Cartas', colunas: ['Id', 'Data', 'Tipo', 'MembroId', 'MembroNome', 'Destino', 'EmitidoPor'], cor: '#37474F' }, { nome: 'Credenciais', colunas: ['Codigo', 'MembroId', 'Emitida', 'EmitidoPor', 'Status'], cor: '#4527A0' }],
   kpis: function () {
     function ativo(v) { return v === true || v === 1 || String(v).trim().toUpperCase() === 'TRUE'; }
     var todos = Util.sheetToObjects('Membros');

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+  :root { --cor: <?= d.cor ?>; --fundo:#0b1620; --card:#12212e; --tx:#eaf2f6; --dim:#8fa7b4; --ok:#2ecc8f; --warn:#f2b441; --bad:#ef5b5b; }
+  @media (prefers-color-scheme: light) { :root { --fundo:#eef3f6; --card:#fff; --tx:#14233a; --dim:#566579; --ok:#0f9d6a; --warn:#b97a0a; --bad:#cf3b3b; } }
+  * { box-sizing:border-box; margin:0; }
+  body { min-height:100vh; display:grid; place-items:center; padding:20px 16px; font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; color:var(--tx);
+    background: radial-gradient(900px 500px at 50% -10%, color-mix(in srgb,var(--cor) 35%,transparent), transparent 70%), var(--fundo); }
+  .card { width:100%; max-width:400px; background:var(--card); border-radius:24px; padding:62px 24px 22px; position:relative; text-align:center;
+    box-shadow:0 30px 60px -30px rgba(0,0,0,.55), 0 0 0 1px color-mix(in srgb,var(--tx) 8%,transparent); animation:in .6s cubic-bezier(.2,.8,.2,1) both; }
+  .card::before { content:''; position:absolute; inset:0 0 auto 0; height:4px; border-radius:24px 24px 0 0; background:linear-gradient(90deg,transparent,var(--cor),transparent); }
+  @keyframes in { from { opacity:0; transform:translateY(14px) scale(.98); } }
+  .logo { position:absolute; left:50%; top:-34px; transform:translateX(-50%); width:68px; height:68px; border-radius:20px; display:grid; place-items:center; overflow:hidden;
+    background:linear-gradient(145deg,color-mix(in srgb,var(--cor) 85%,#fff),var(--cor)); color:#fff; font-weight:800; font-size:22px; letter-spacing:.5px;
+    box-shadow:0 5px 0 color-mix(in srgb,var(--cor) 55%,#000), 0 16px 22px -10px rgba(0,0,0,.5); }
+  .logo img { width:100%; height:100%; object-fit:contain; background:#fff; }
+  h1 { font-size:17px; font-weight:700; }
+  .lema { color:var(--dim); font-size:13px; margin-top:2px; }
+  .selo { margin:22px auto 6px; width:92px; height:92px; border-radius:50%; display:grid; place-items:center; color:#fff; background:var(--st);
+    box-shadow:0 0 0 8px color-mix(in srgb,var(--st) 18%,transparent), 0 0 0 16px color-mix(in srgb,var(--st) 8%,transparent); }
+  .selo svg { width:46px; height:46px; }
+  .ativo .selo { animation:pulso 2.4s ease-out infinite; }
+  @keyframes pulso { 0% { box-shadow:0 0 0 0 color-mix(in srgb,var(--st) 45%,transparent), 0 0 0 8px color-mix(in srgb,var(--st) 18%,transparent); } 100% { box-shadow:0 0 0 22px transparent, 0 0 0 8px color-mix(in srgb,var(--st) 18%,transparent); } }
+  .status { margin-top:14px; font-size:22px; font-weight:800; color:var(--st); }
+  .msg { color:var(--dim); font-size:13.5px; line-height:1.5; margin:6px 4px 0; }
+  .dados { margin-top:20px; padding:14px 16px; border-radius:16px; text-align:left; background:color-mix(in srgb,var(--tx) 5%,transparent); }
+  .dados small { display:block; color:var(--dim); font-size:11.5px; margin-bottom:2px; }
+  .dados b { display:block; font-size:16px; margin-bottom:10px; overflow-wrap:anywhere; }
+  .dados b:last-child { margin-bottom:0; }
+  .rodape { margin-top:18px; color:var(--dim); font-size:11.5px; line-height:1.5; }
+  .ativo { --st:var(--ok); } .inativo, .cancelado, .limite { --st:var(--warn); } .nao_encontrado { --st:var(--bad); }
+  @media (prefers-reduced-motion: reduce) { * { animation:none !important; } }
+</style>
+<title>Validação do cartão</title>
+</head>
+<body>
+<main class="card <?= d.estado ?>" role="main">
+  <div class="logo"><? if (d.logo) { ?><img src="<?= d.logo ?>" alt=""><? } else { ?><?= d.iniciais ?><? } ?></div>
+  <h1><?= d.igreja ?></h1>
+  <? if (d.lema) { ?><p class="lema"><?= d.lema ?></p><? } ?>
+
+  <div class="selo" aria-hidden="true">
+    <? if (d.estado === 'ativo') { ?>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+    <? } else if (d.estado === 'nao_encontrado') { ?>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    <? } else { ?>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 6v7M12 17.5v.5"/></svg>
+    <? } ?>
+  </div>
+  <p class="status"><?= d.titulo ?></p>
+  <p class="msg"><?= d.msg ?></p>
+
+  <? if (d.nome && d.estado !== 'cancelado') { ?>
+  <div class="dados">
+    <small>Nome</small><b><?= d.nome ?></b>
+    <? if (d.funcao) { ?><small>Função</small><b><?= d.funcao ?></b><? } ?>
+    <small>Situação</small><b><?= d.titulo ?></b>
+  </div>
+  <? } ?>
+
+  <p class="rodape">Consulta feita em <?= d.agora ?>.<br>Mostramos só nome, função e situação. Nenhum outro dado do membro é exibido.</p>
+</main>
+</body>
+</html>

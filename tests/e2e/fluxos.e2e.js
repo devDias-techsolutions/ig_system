@@ -672,3 +672,41 @@ test('cartas: aba preenche membro, cargo, igreja e data; mudança troca o texto;
   await page.waitForFunction(() => document.getElementById('cr-hist').innerText.includes('Maria Souza'), null, { timeout: 6000 });
   assert.deepEqual(erros, []);
 });
+
+test('carteirinha: QR de validação é opcional, aparece no verso sem cobrir a assinatura e emite código no servidor', async () => {
+  const backend = criarBackend();
+  const { page, erros } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  await irParaMembros(page);
+  await page.addScriptTag({ path: require.resolve('qrcode-generator/qrcode.js') });   // na produção vem da CDN
+  const salvo = await page.evaluate(() => new Promise((ok) => google.script.run.withSuccessHandler(ok).mb_salvarMembro(App.session.token, { nome: 'Maria Souza', ativo: true, funcao: 'Diaconisa' })));
+  assert.equal(salvo.success, true);
+  await page.evaluate(() => { mbSetTab('carteirinha'); });
+  await page.waitForSelector('#mb-qr-opt', { timeout: 6000 });
+
+  assert.equal(await page.isChecked('#mb-qr-opt'), false, 'QR começa desligado');
+  assert.equal(await page.locator('.mb-card-back .back-qr').count(), 0, 'sem QR no verso por padrão');
+
+  await page.check('#mb-qr-opt');
+  await page.waitForSelector('.mb-card-back .back-qr .qr-box.prev');
+  assert.equal(await page.isChecked('#mb-qr-opt'), true, 'escolha mantida após redesenhar');
+
+  const qr = await page.evaluate(() => mbCard_emitirQr(MB.membros[0]));
+  assert.match(qr, /^data:image\/gif;base64,/);
+  const geo = await page.evaluate((src) => {
+    const host = document.createElement('div');
+    host.innerHTML = mbCard_htmlVerso(MB.membros[0], false, src);
+    document.body.appendChild(host);
+    const card = host.querySelector('.mb-card-back').getBoundingClientRect();
+    const q = host.querySelector('.back-qr .qr-box').getBoundingClientRect();
+    const r = { dentro: q.left >= card.left && q.right <= card.right && q.bottom <= card.bottom, img: !!host.querySelector('.qr-box img') };
+    host.remove();
+    return r;
+  }, qr);
+  assert.ok(geo.img && geo.dentro, 'QR dentro do cartão');
+
+  const cred = await page.evaluate(() => new Promise((ok) => google.script.run.withSuccessHandler(ok).mb_emitirCredencial(App.session.token, MB.membros[0].id)));
+  assert.equal(cred.success, true);
+  assert.match(cred.data.url, /\?page=validar&c=[0-9a-f]{32}$/);
+  assert.deepEqual(erros.filter((e) => !/qrcode|cdnjs/i.test(e)), []);
+});

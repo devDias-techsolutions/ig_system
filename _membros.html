@@ -1,6 +1,7 @@
 <!-- Bibliotecas de geração de PDF/PNG (carregadas de forma assíncrona) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 
 <!-- ══════════════════════════════════════════════════════════
      _membros.html · Módulo Membros
@@ -1997,6 +1998,17 @@ function mbImportarJSON(e) {
   text-transform: uppercase; white-space: nowrap;
 }
 .mb-card-back .back-sign .sign-cargo { margin-bottom: 1px; font-size: 7px; font-weight: 500; opacity: 0.8; }
+.mb-card-back .back-row { display:flex; align-items:flex-end; justify-content:space-between; gap:8px; }
+.mb-card-back .back-row .back-sign { flex:1; min-width:0; }
+.mb-card-back .back-qr { flex:0 0 auto; width:74px; text-align:center; }
+.mb-card-back .back-qr .qr-box { width:74px; height:74px; background:#fff; border-radius:6px; padding:2px; display:grid; place-items:center; }
+.mb-card-back .back-qr .qr-box img { width:100%; height:100%; image-rendering:pixelated; display:block; }
+.mb-card-back .back-qr .qr-box.prev { background:rgba(255,255,255,.12); border:1px dashed rgba(255,255,255,.55); color:#fff; font-size:11px; font-weight:800; }
+.mb-card-back .back-qr .qr-cap { font-size:5.5px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; margin-top:2px; opacity:.85; }
+.mb-qr-opt { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:12px; cursor:pointer; text-align:left;
+  border:1px solid var(--border); background:var(--bg-card2, transparent); font-size:12px; line-height:1.4; }
+.mb-qr-opt input { margin-top:2px; accent-color: var(--teal); }
+.mb-qr-opt small { display:block; color:var(--text-dim); font-size:11px; }
 .mb-card-back .back-address {
   padding-top: 3px;
   border-top: 1px solid rgba(217,224,240,0.2);
@@ -2279,7 +2291,7 @@ function mbCard_htmlFrente(m, forPrint, fotoPreProcessada, logoProcessado) {
 }
 
 // ── Monta HTML do VERSO do cartão ───────────────────────
-function mbCard_htmlVerso(m, forPrint) {
+function mbCard_htmlVerso(m, forPrint, qrSrc) {
   var d = mbCard_dados();
   var campos = [
     ['Nascimento', m.nascimento],
@@ -2312,14 +2324,8 @@ function mbCard_htmlVerso(m, forPrint) {
           '<div class="back-grid">'+grid+'</div>'+
         '</div>'+
 
-        /* Assinatura: aparece se houver imagem da assinatura OU nome do pastor na Config */
-        ((d.assinatura || d.pastor) ?
-        '<div class="back-sign">'+
-          '<div class="sign-img-wrap">'+_mbCardImg(d.assinatura)+'</div>'+
-          '<div class="sign-line"></div>'+
-          (d.pastor ? '<div class="sign-name">'+_mbEsc(d.pastor)+'</div>' : '')+
-          (d.pastor && d.cargo ? '<div class="sign-cargo">'+_mbEsc(d.cargo)+'</div>' : '')+
-        '</div>' : '')+
+        /* Assinatura (+ QR opcional ao lado): aparece se houver imagem da assinatura OU nome do pastor */
+        _mbCardAssinatura(d, qrSrc)+
 
         /* Endereço rodapé */
         '<div class="back-address">'+
@@ -2330,6 +2336,44 @@ function mbCard_htmlVerso(m, forPrint) {
     '</div>'+
     '</div>'
   );
+}
+
+function _mbCardAssinatura(d, qrSrc) {
+  var sign = (d.assinatura || d.pastor) ?
+    '<div class="back-sign">'+
+      '<div class="sign-img-wrap">'+_mbCardImg(d.assinatura)+'</div>'+
+      '<div class="sign-line"></div>'+
+      (d.pastor ? '<div class="sign-name">'+_mbEsc(d.pastor)+'</div>' : '')+
+      (d.pastor && d.cargo ? '<div class="sign-cargo">'+_mbEsc(d.cargo)+'</div>' : '')+
+    '</div>' : '';
+  if (!qrSrc) return sign;
+  var box = qrSrc === 'preview'
+    ? '<div class="qr-box prev">QR</div>'
+    : '<div class="qr-box"><img src="'+qrSrc+'" alt=""></div>';
+  return '<div class="back-row">'+(sign || '<div style="flex:1"></div>')+
+    '<div class="back-qr">'+box+'<div class="qr-cap">Validar cartão</div></div></div>';
+}
+
+// ── QR Code de validação (opcional na emissão) ──────────
+// Cada emissão cria um código novo no servidor e cancela os anteriores do mesmo membro.
+function mbCard_toggleQr(on) { MB.qrOn = !!on; }
+function mbCard_qrDataUrl(url) {
+  var q = window.qrcode(0, 'L');
+  q.addData(url); q.make();
+  return q.createDataURL(8, 2);
+}
+function mbCard_emitirQr(m) {
+  if (!MB.qrOn) return Promise.resolve(null);
+  if (!window.qrcode) return Promise.reject(new Error('Biblioteca de QR Code não carregada.'));
+  return new Promise(function(resolve, reject) {
+    google.script.run
+      .withFailureHandler(function(e){ reject(new Error((e && e.message) || 'Erro ao emitir o QR Code.')); })
+      .withSuccessHandler(function(r){
+        if (!r || !r.success) return reject(new Error((r && r.error) || 'Erro ao emitir o QR Code.'));
+        try { resolve(mbCard_qrDataUrl(r.data.url)); } catch (e) { reject(e); }
+      })
+      .mb_emitirCredencial(App.session && App.session.token, m.id);
+  });
 }
 
 // ── Tab: CARTEIRINHA — painel preview + painel lista ────
@@ -2363,9 +2407,11 @@ function _mbBuildCarteirinha() {
         '<div class="mb-card-preview-label">Frente</div>'+
         mbCard_htmlFrente(selected, false)+
         '<div class="mb-card-preview-label" style="margin-top:14px">Verso</div>'+
-        mbCard_htmlVerso(selected, false)+
+        mbCard_htmlVerso(selected, false, MB.qrOn ? 'preview' : null)+
       '</div>'+
       '<div class="mb-card-panel-actions">'+
+        '<label class="mb-qr-opt"><input type="checkbox" id="mb-qr-opt"'+(MB.qrOn?' checked':'')+' onchange="mbCard_toggleQr(this.checked);_mbRenderPanel()">'+
+          '<span><b>Incluir QR Code de validação</b><small>Quem ler o QR vê nome, função e situação. Gera um código novo e cancela o QR de cartões anteriores deste membro.</small></span></label>'+
         '<button class="btn btn-primary btn-sm" onclick="mbCard_downloadPDF(\''+selected.id+'\')">'+
           '<i data-lucide="file-down" class="ic-14"></i> PDF (frente + verso)'+
         '</button>'+
@@ -2477,7 +2523,7 @@ function mbCard_toast(label, pct, sub) {
 
 // ── Renderiza cartão num div temporário e captura JPEG alta resolução ────
 // SCALE 6 → 2040×1284 px ≈ 600 dpi no formato 85,6×53,98 mm (impressão profissional)
-function mbCard_capturar(m, showBack) {
+function mbCard_capturar(m, showBack, qrSrc) {
   return new Promise(function(resolve, reject) {
     var SCALE  = 6;   // ← era 4; 6 = ~600 dpi para carteirinha 85,6×53,98mm
     var W      = 340;
@@ -2502,7 +2548,7 @@ function mbCard_capturar(m, showBack) {
 
       // Frente recebe foto e logo pré-processados (canvas); verso não tem nenhum dos dois
       inner.innerHTML = showBack
-        ? mbCard_htmlVerso(m, false)
+        ? mbCard_htmlVerso(m, false, qrSrc || null)
         : mbCard_htmlFrente(m, false, fotoProcessada || null, logoProcessado || null);
 
       outer.appendChild(inner);
@@ -2581,9 +2627,10 @@ function mbCard_downloadPDF(id) {
 
   mbCard_toast('Gerando PDF...', 10, 'Capturando frente...');
 
-  mbCard_capturar(m, false).then(function(frontImg) {
+  mbCard_emitirQr(m).then(function(qr) {
+   return mbCard_capturar(m, false).then(function(frontImg) {
     mbCard_toast('Gerando PDF...', 50, 'Capturando verso...');
-    return mbCard_capturar(m, true).then(function(backImg) {
+    return mbCard_capturar(m, true, qr).then(function(backImg) {
       mbCard_toast('Gerando PDF...', 85, 'Salvando arquivo...');
       var pdf = new window.jspdf.jsPDF({
         orientation: 'landscape',
@@ -2597,10 +2644,11 @@ function mbCard_downloadPDF(id) {
       mbCard_toast(null);
       showToast('PDF gerado com sucesso!', 'success');
     });
+   });
   }).catch(function(e) {
     mbCard_toast(null);
     console.error(e);
-    showToast('Erro ao gerar PDF. Verifique o console.', 'error');
+    showToast((MB.qrOn && e && e.message) || 'Erro ao gerar PDF. Verifique o console.', 'error');
   });
 }
 
@@ -2616,7 +2664,9 @@ function mbCard_downloadPNG(id, showBack) {
 
   mbCard_toast('Gerando PNG...', 30, showBack ? 'Verso' : 'Frente');
 
-  mbCard_capturar(m, showBack).then(function(dataUrl) {
+  (showBack ? mbCard_emitirQr(m) : Promise.resolve(null)).then(function(qr) {
+    return mbCard_capturar(m, showBack, qr);
+  }).then(function(dataUrl) {
     var a = document.createElement('a');
     a.href     = dataUrl;
     a.download = 'Cartao_' + (showBack?'Verso':'Frente') + '_ROL' + (m.rol||'0000') + '.png';
@@ -2626,7 +2676,7 @@ function mbCard_downloadPNG(id, showBack) {
   }).catch(function(e) {
     mbCard_toast(null);
     console.error(e);
-    showToast('Erro ao gerar PNG.', 'error');
+    showToast((MB.qrOn && e && e.message) || 'Erro ao gerar PNG.', 'error');
   });
 }
 
@@ -2716,7 +2766,7 @@ function mbCard_gerarLote() {
     mbCard_capturar(m, false).then(function(frontImg) {
       // Arte estendida BLEED mm para fora em cada lado — cobre além da linha de corte
       pdf.addImage(frontImg, 'JPEG', MARGIN - BLEED, yPos - BLEED, CW + 2*BLEED, CH + 2*BLEED, undefined, 'FAST');
-      return mbCard_capturar(m, true);
+      return mbCard_emitirQr(m).then(function(qr) { return mbCard_capturar(m, true, qr); });
     }).then(function(backImg) {
       pdf.addImage(backImg, 'JPEG', xBack - BLEED, yPos - BLEED, CW + 2*BLEED, CH + 2*BLEED, undefined, 'FAST');
       // Linha de corte no limite exato do CR80, com sangria cobrindo além dela
