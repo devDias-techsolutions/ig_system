@@ -642,7 +642,7 @@ test('cartas: aba preenche membro, cargo, igreja e data; mudança troca o texto;
 
   const carta = () => page.evaluate(() => document.querySelector('[data-cr="2"]').innerText.replace(/\s+/g, ' '));
   let t = await carta();
-  assert.match(t, /\( X \) RECOMENDAÇÃO/);
+  assert.equal(await page.textContent('[data-cr="2"] .cr-opt.on'), 'RECOMENDAÇÃO');
   assert.match(t, /o membro Maria Souza/);
   assert.match(t, /Igreja de origem: Igreja Vida Nova/);
   assert.match(t, /Cargo exercido: Membro/);
@@ -652,7 +652,8 @@ test('cartas: aba preenche membro, cargo, igreja e data; mudança troca o texto;
   await page.fill('#cr-destino', 'AD Centro');
   await page.click('.cr-tipo label:has(input[value="mudanca"])');
   t = await carta();
-  assert.match(t, /\( X \) MUDANÇA/);
+  assert.equal(await page.textContent('[data-cr="2"] .cr-opt.on'), 'MUDANÇA');
+  assert.equal(await page.locator('[data-cr="2"] .cr-opt.on').count(), 1, 'só um selo marcado');
   assert.match(t, /Apresentamos à igreja AD Centro/);
   assert.match(t, /havendo mudado de localidade/);
 

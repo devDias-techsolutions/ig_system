@@ -21,7 +21,10 @@
 .cr-corpo { position: absolute; left: 162px; right: 0; top: 0; bottom: 0; }
 
 /* Página 2 — a carta */
-.cr-titulo { position: absolute; left: 0; right: 0; top: 96px; text-align: center; font-size: 21px; line-height: 1.5; letter-spacing: .01em; }
+.cr-titulo { position: absolute; left: 0; right: 0; top: 92px; text-align: center; }
+.cr-tit { font-size: 30px; font-weight: 800; letter-spacing: .32em; text-indent: .32em; line-height: 1.1; }
+.cr-opts { display: flex; justify-content: center; gap: 14px; margin-top: 14px; }
+.cr-opt { display: inline-flex; align-items: center; gap: 7px; padding: 8px 18px; border-radius: 100px; font-size: 14.5px; font-weight: 800; letter-spacing: .08em; white-space: nowrap; }
 .cr-bloco { position: absolute; left: 46px; right: 46px; font-size: 19px; line-height: 1.7; }
 .cr-linha { display: flex; align-items: flex-end; gap: 12px; white-space: nowrap; }
 .cr-campo { flex: 1; min-width: 0; border-bottom: 1.5px solid var(--cr-ink); padding: 0 6px 1px; font-weight: 600; font-size: 17px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; min-height: 25px; }
@@ -30,12 +33,10 @@
 .cr-pequeno { font-size: 14.5px; line-height: 2.1; }
 .cr-pequeno .cr-campo { font-size: 14px; min-height: 20px; }
 .cr-data { display: inline-flex; gap: 4px; align-items: flex-end; }
-.cr-assin { position: relative; }
-.cr-assin img { position: absolute; left: 150px; bottom: 6px; height: 52px; max-width: 220px; object-fit: contain; }
 
 /* Página 1 — a capa: cada bloco é girado 180° (a folha é dobrada ao meio depois de impressa) */
 .cr-capa { position: absolute; left: 0; right: 0; text-align: center; transform: rotate(180deg); }
-.cr-capa-tit { top: 372px; font-size: 21px; line-height: 1.8; }
+.cr-capa-tit { top: 388px; }
 .cr-capa-igreja { top: 212px; font-size: 21px; }
 .cr-capa-para { top: 160px; left: 60px; right: 60px; text-align: left; font-size: 20px; }
 .cr-capa-cit { top: 66px; font-size: 16.5px; }
@@ -66,7 +67,7 @@ var CR_TEXTOS = {
   recomendacao: { nome: 'Recomendação', corpo: 'e, por achar-se em plena comunhão com a igreja, com alegria recomendamos que o(a) recebais no Senhor, como usam fazer os santos. (Romanos 16:2)' },
   mudanca:      { nome: 'Mudança',      corpo: 'e, por achar-se em plena comunhão com a igreja e havendo mudado de localidade, com alegria o(a) transferimos a essa igreja, rogando que o(a) recebais no Senhor, como usam fazer os santos. (Romanos 16:2)' }
 };
-var CR = { membroId: '', tipo: 'recomendacao', destino: '', cargo: '', local: '', data: '', assinar: false, historico: [], gerando: false };
+var CR = { membroId: '', tipo: 'recomendacao', destino: '', cargo: '', local: '', data: '', historico: [], gerando: false };
 
 function _crHoje() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
 function _crDataBR(iso) { var p = String(iso || '').split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : ''; }
@@ -121,8 +122,18 @@ function _crMarca(d, top, girar) {
     ? '<img class="cr-logo" style="top:' + top + 'px;' + rot + '" src="' + _mbEsc(d.logo) + '" crossorigin="anonymous" alt="">'
     : '<div class="cr-logo-ini" style="top:' + top + 'px;' + rot + '">' + _mbEsc(d.igreja.split(/\s+/).map(function (p) { return p[0]; }).join('').slice(0, 3).toUpperCase()) + '</div>';
 }
+// "CARTA" + dois selos: o tipo escolhido fica preenchido na cor da igreja, com um visto; o outro fica apagado
+function _crSelo(d, tipo, nome) {
+  var on = d.tipo === tipo;
+  var a = _crMix(d.cor, -0.55) || '#0b2447', b = _crMix(d.cor, -0.1) || '#0a4a8a';
+  var visto = '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  return '<span class="cr-opt' + (on ? ' on' : '') + '" style="' + (on
+    ? 'background:linear-gradient(135deg,' + a + ',' + b + ');color:#fff;border:1.5px solid ' + b + ';box-shadow:0 5px 12px -4px ' + b
+    : 'background:transparent;color:#14233a;border:1.5px solid #14233a55;opacity:.55') + '">' + (on ? visto : '') + nome + '</span>';
+}
 function _crTitulo(d, cls) {
-  return '<div class="' + (cls.indexOf('cr-capa') === -1 ? cls : cls) + '">CARTA<br>(' + (d.tipo === 'mudanca' ? ' X ' : ' &nbsp; ') + ') MUDANÇA<br>(' + (d.tipo === 'recomendacao' ? ' X ' : ' &nbsp; ') + ') RECOMENDAÇÃO</div>';
+  return '<div class="' + cls + '"><div class="cr-tit">CARTA</div><div class="cr-opts">' +
+    _crSelo(d, 'recomendacao', 'RECOMENDAÇÃO') + _crSelo(d, 'mudanca', 'MUDANÇA') + '</div></div>';
 }
 
 function mbCarta_htmlCapa(d, semTextura) {
@@ -157,8 +168,7 @@ function mbCarta_htmlCarta(d, semTextura) {
       '<div class="cr-bloco cr-pequeno" style="top:870px;right:130px">' +
         '<div class="cr-linha"><span>Local:</span><span class="cr-campo">' + _mbEsc(d.local) + '</span></div>' +
         '<div class="cr-linha"><span>Data:</span><span class="cr-campo" style="flex:none;width:130px">' + _mbEsc(d.data) + '</span></div>' +
-        '<div class="cr-linha cr-assin"><span>Assinatura do Pastor:</span><span class="cr-campo"></span>' +
-          (d.assinatura ? '<img src="' + _mbEsc(d.assinatura) + '" crossorigin="anonymous" alt="">' : '') + '</div>' +
+        '<div class="cr-linha"><span>Assinatura do Pastor:</span><span class="cr-campo"></span></div>' +
       '</div>' +
     '</div></div>';
 }
@@ -166,8 +176,7 @@ function mbCarta_dados() {
   var m = _crMembro(), i = IDENTIDADE;
   return {
     tipo: CR.tipo, membro: m ? m.nome : '', destino: CR.destino, cargo: CR.cargo, local: CR.local, data: _crDataBR(CR.data),
-    igreja: i.nome || '', endereco: i.endereco || '', logo: i.logoUrl || '', cor: i.corPrimaria || '',
-    assinatura: CR.assinar && i.assinatura ? i.assinatura : ''
+    igreja: i.nome || '', endereco: i.endereco || '', logo: i.logoUrl || '', cor: i.corPrimaria || ''
   };
 }
 
@@ -185,7 +194,6 @@ function mbCarta_build() {
   var opcoes = ativos.map(function (m) {
     return '<option value="' + _mbEsc(m.id) + '"' + (String(m.id) === String(CR.membroId) ? ' selected' : '') + '>' + _mbEsc(m.nome) + (m.rol ? ' · ROL ' + _mbEsc(m.rol) : '') + '</option>';
   }).join('');
-  var temAss = !!IDENTIDADE.assinatura;
   return '<div class="cr-layout">' +
     '<section class="panel">' +
       '<div class="panel-head"><h2 class="panel-title">Emitir carta</h2></div>' +
@@ -199,7 +207,6 @@ function mbCarta_build() {
         '<div class="field"><label for="cr-cargo">Cargo exercido</label><input type="text" id="cr-cargo" maxlength="80" value="' + _mbEsc(CR.cargo) + '" oninput="mbCarta_set(\'cargo\',this.value)"></div>' +
         '<div class="field"><label for="cr-local">Local</label><input type="text" id="cr-local" maxlength="60" value="' + _mbEsc(CR.local) + '" oninput="mbCarta_set(\'local\',this.value)"></div>' +
         '<div class="field"><label for="cr-data">Data</label><input type="date" id="cr-data" value="' + _mbEsc(CR.data) + '" oninput="mbCarta_set(\'data\',this.value)"></div>' +
-        (temAss ? '<div class="field"><label for="cr-assinar">Assinatura do pastor</label><select id="cr-assinar" onchange="mbCarta_set(\'assinar\',this.value===\'1\')"><option value="0"' + (CR.assinar ? '' : ' selected') + '>Assinar à mão</option><option value="1"' + (CR.assinar ? ' selected' : '') + '>Usar a assinatura cadastrada</option></select></div>' : '') +
       '</div>' +
     '</section>' +
     '<div>' +
