@@ -449,7 +449,7 @@ test('módulos: manifesto é serializável (sem funções) e o JSON do HTML é s
 test('módulos: o esquema da planilha inclui as abas do núcleo e as declaradas pelos módulos ativos', () => {
   const env = freshEnv();
   const esq = JSON.parse(env.run('JSON.stringify(SetupSheets.schema())'));
-  assert.deepEqual(Object.keys(esq).sort(), ['Cartas', 'Config', 'Imagens', 'Membros', 'Sessoes', 'Usuarios']);
+  assert.deepEqual(Object.keys(esq).sort(), ['Cartas', 'Config', 'Credenciais', 'Imagens', 'Membros', 'Sessoes', 'Usuarios']);
   assert.equal(esq.Membros[0], 'id');
   assert.ok(esq.Membros.includes('ativo'));
 });
@@ -773,4 +773,83 @@ test('cartas: instalação antiga sem a aba "Cartas" cria a aba sozinha na prime
   env.ctx.__c = { tipo: 'recomendacao', membroId: 'm1', membroNome: 'Fulano' };
   assert.equal(env.run("mb_registrarCarta('tok', __c)").success, true);
   assert.ok(ss.getSheetByName('Cartas'));
+});
+
+// ═══ QR Code de validação do cartão ═════════════════════════
+function envQr() {
+  const r = envMembros();
+  r.env.ctx.__m = { nome: 'Maria Silva', funcao: 'Diaconisa', cpf: '123.456.789-00', telefone: '1199999', ativo: true };
+  r.id = r.env.run("mb_salvarMembro('tok', __m)").data.id;
+  return r;
+}
+const emitir = (env, id) => { env.ctx.__id = id; return env.run("mb_emitirCredencial('tok', __id)"); };
+const consultar = (env, c) => { env.ctx.__c = c; return env.run('Validacao.consultar(__c)'); };
+
+test('qr: emissão devolve código aleatório de 32 hex e URL da página pública; exige login e membro ativo', () => {
+  const { env, id } = envQr();
+  const r = emitir(env, id);
+  assert.equal(r.success, true);
+  assert.match(r.data.codigo, /^[0-9a-f]{32}$/);
+  assert.ok(r.data.url.endsWith('?page=validar&c=' + r.data.codigo));
+  assert.ok(!r.data.codigo.includes(id), 'código não pode derivar do id');
+  assert.notEqual(emitir(env, id).data.codigo, r.data.codigo);
+  env.ctx.__id = id;
+  assert.equal(env.run("mb_emitirCredencial('invalido', __id)").success, false);
+  assert.equal(emitir(env, 'nao-existe').success, false);
+  env.ctx.__m = { id, nome: 'Maria Silva', ativo: false };
+  env.run("mb_salvarMembro('tok', __m)");
+  assert.equal(emitir(env, id).success, false, 'inativo não recebe QR');
+});
+
+test('qr: consulta devolve só nome, função e situação; inativar o membro invalida na hora', () => {
+  const { env, id } = envQr();
+  const cod = emitir(env, id).data.codigo;
+  const r = consultar(env, cod);
+  assert.deepEqual(Object.keys(r).sort(), ['emitida', 'estado', 'funcao', 'nome']);
+  assert.equal(r.estado, 'ativo');
+  assert.equal(r.nome, 'Maria Silva');
+  assert.equal(r.funcao, 'Diaconisa');
+  assert.ok(!JSON.stringify(r).includes('123.456'), 'CPF vazou');
+  env.ctx.__m = { id, nome: 'Maria Silva', funcao: 'Diaconisa', ativo: false };
+  env.run("mb_salvarMembro('tok', __m)");
+  assert.equal(consultar(env, cod).estado, 'inativo');
+});
+
+test('qr: nova emissão revoga o QR anterior do mesmo membro', () => {
+  const { env, id } = envQr();
+  const velho = emitir(env, id).data.codigo;
+  const novo = emitir(env, id).data.codigo;
+  assert.equal(consultar(env, velho).estado, 'cancelado');
+  assert.equal(consultar(env, novo).estado, 'ativo');
+});
+
+test('qr: código malformado e inexistente respondem igual (sem pista para quem tenta adivinhar)', () => {
+  const { env } = envQr();
+  const a = consultar(env, 'abc');
+  const b = consultar(env, 'a'.repeat(32));
+  const c = consultar(env, '<script>');
+  const j = JSON.stringify;
+  assert.equal(j(a), j({ estado: 'nao_encontrado' }));
+  assert.equal(j(b), j(a));
+  assert.equal(j(c), j(a));
+});
+
+test('qr: limites de uso — códigos inválidos por minuto e consultas por código por hora', () => {
+  const { env, id } = envQr();
+  const cod = emitir(env, id).data.codigo;
+  for (let i = 0; i < 15; i++) assert.equal(consultar(env, 'f'.repeat(31) + i.toString(16)).estado, 'nao_encontrado');
+  assert.equal(consultar(env, 'e'.repeat(32)).estado, 'limite', 'tentativas inválidas deveriam travar');
+  assert.equal(consultar(env, cod).estado, 'ativo', 'o cartão válido continua funcionando');
+  const e2 = envQr();
+  const c2 = emitir(e2.env, e2.id).data.codigo;
+  for (let i = 0; i < 30; i++) assert.equal(consultar(e2.env, c2).estado, 'ativo');
+  assert.equal(consultar(e2.env, c2).estado, 'limite');
+});
+
+test('qr: página pública não precisa de login, é noindex e não contém dados além de nome/função/situação', () => {
+  const { env, id } = envQr();
+  const cod = emitir(env, id).data.codigo;
+  const out = env.run("doGet({ parameter: { page: 'validar', c: '" + cod + "' } })");
+  assert.ok(out, 'doGet devolveu algo');
+  assert.ok(!JSON.stringify(out).includes('123.456'));
 });

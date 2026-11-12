@@ -88,6 +88,9 @@ function doGet(e) {
   }
   // ───────────────────────────────────────────────────────────
 
+  // ── Rota pública: validação do cartão de membro (QR Code) ──
+  if (params.page === 'validar') return Validacao.pagina(params.c);
+
   var tmpl = HtmlService.createTemplateFromFile('index');
 
   // Injeta no template — o JS do index.html lê com <?= recovToken ?> e <?= view ?>
