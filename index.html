@@ -1273,6 +1273,9 @@ body.nav-on #topnav-usuarios-btn { display: none !important; }
 .sw input:checked + .sw-track::after { transform:translateX(18px); }
 .sw input:focus-visible + .sw-track { outline:2px solid var(--teal); outline-offset:3px; }
 .sw-txt { font-size:14px; font-weight:700; color:var(--text); text-transform:none; letter-spacing:0; }
+.sw-row { padding:12px 16px; justify-content:space-between; }
+.sw-row .sw-info { order:-1; flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.sw-sub { font-size:12px; font-weight:500; line-height:1.35; color:var(--text-muted); text-transform:none; letter-spacing:0; }
 .icon-btn { flex:0 0 auto; width:44px; height:44px; display:grid; place-items:center; border-radius:var(--radius-sm); cursor:pointer;
   background:var(--bg-glass); border:1px solid var(--border); color:var(--text-muted); transition:border-color .2s, color .2s, transform .15s; }
 .icon-btn:hover { border-color:var(--teal-border); color:var(--teal); }
