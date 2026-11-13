@@ -2000,11 +2000,10 @@ function mbImportarJSON(e) {
 .mb-card-back .back-sign .sign-cargo { margin-bottom: 1px; font-size: 7px; font-weight: 500; opacity: 0.8; }
 .mb-card-back .back-row { display:flex; align-items:flex-end; justify-content:space-between; gap:8px; }
 .mb-card-back .back-row .back-sign { flex:1; min-width:0; }
-.mb-card-back .back-qr { flex:0 0 auto; width:74px; text-align:center; }
-.mb-card-back .back-qr .qr-box { width:74px; height:74px; background:#fff; border-radius:6px; padding:2px; display:grid; place-items:center; }
+.mb-card-back .back-qr { flex:0 0 auto; width:62px; text-align:center; }
+.mb-card-back .back-qr .qr-box { width:62px; height:62px; background:#fff; border-radius:6px; padding:2px; display:grid; place-items:center; }
 .mb-card-back .back-qr .qr-box img { width:100%; height:100%; image-rendering:pixelated; display:block; }
 .mb-card-back .back-qr .qr-box.prev { background:rgba(255,255,255,.12); border:1px dashed rgba(255,255,255,.55); color:#fff; font-size:11px; font-weight:800; }
-.mb-card-back .back-qr .qr-cap { font-size:5.5px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; margin-top:2px; opacity:.85; }
 .mb-qr-opt { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:12px; cursor:pointer; text-align:left;
   border:1px solid var(--border); background:var(--bg-card2, transparent); font-size:12px; line-height:1.4; }
 .mb-qr-opt input { margin-top:2px; accent-color: var(--teal); }
@@ -2351,7 +2350,7 @@ function _mbCardAssinatura(d, qrSrc) {
     ? '<div class="qr-box prev">QR</div>'
     : '<div class="qr-box"><img src="'+qrSrc+'" alt=""></div>';
   return '<div class="back-row">'+(sign || '<div style="flex:1"></div>')+
-    '<div class="back-qr">'+box+'<div class="qr-cap">Validar cartão</div></div></div>';
+    '<div class="back-qr">'+box+'</div></div>';
 }
 
 // ── QR Code de validação (opcional na emissão) ──────────
