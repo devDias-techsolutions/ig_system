@@ -42,13 +42,21 @@ var Validacao = (function () {
       if (!m) return Util.err('Membro não encontrado.');
       if (!_ativo(m.ativo)) return Util.err('Só membros ativos recebem cartão com QR Code.');
 
+      // O QR precisa apontar para o link público (/exec). Sem ele, o código nem é gerado:
+      // um QR com o link de teste (/dev) só abriria para o dono e mostraria "Não foi possível abrir o arquivo".
+      var base = Config.urlApp();
+      if (!base) {
+        return Util.err('Não foi possível descobrir o link público do sistema (o endereço atual não termina em /exec). ' +
+          'Abra o sistema pelo link da implantação ou preencha a chave URL_APP na aba Config com a "URL do app da Web".');
+      }
+
       var sh = _sheet(), v = sh.getDataRange().getValues();
       for (var i = 1; i < v.length; i++) {            // revoga os anteriores deste membro
         if (String(v[i][1]) === String(membroId) && v[i][4] === 'ativa') sh.getRange(i + 1, 5).setValue('revogada');
       }
       var codigo = _codigoNovo();
       sh.appendRow([codigo, String(membroId), Util.now(), sess.nome || sess.email || '', 'ativa']);
-      var url = ScriptApp.getService().getUrl() + '?page=validar&c=' + codigo;
+      var url = base + '?page=validar&c=' + codigo;
       return Util.ok({ codigo: codigo, url: url });
     });
   }
