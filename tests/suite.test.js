@@ -2,6 +2,7 @@
 // Ponto de entrada do `npm test`: carrega tudo no mesmo processo e valida o roadmap.
 
 require('./static.test.js');
+require('./ui.test.js');
 require('./runtime.test.js');
 require('./deploy.test.js');
 require('./empacotador.test.js');
