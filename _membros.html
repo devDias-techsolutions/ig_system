@@ -1022,7 +1022,7 @@ function _mbBuildForm() {
         '<label class="sw sw-row"><input type="checkbox" id="mbf-ativo"'+(ativo?' checked':'')+' onchange="document.getElementById(\'mbf-ativo-txt\').textContent=this.checked?\'Membro ativo\':\'Membro inativo\'">'+
           '<span class="sw-track"></span>'+
           '<span class="sw-info"><span class="sw-txt" id="mbf-ativo-txt">'+(ativo?'Membro ativo':'Membro inativo')+'</span>'+
-          '<span class="sw-sub">Inativos saem da contagem de ativos e o QR do cartão deixa de valer.</span></span></label>'+
+          '<span class="sw-sub">Inativos saem da contagem de ativos. Leitura do QR informará “Cartão inativo”.</span></span></label>'+
       '</div>';
     })() : '')+
 
