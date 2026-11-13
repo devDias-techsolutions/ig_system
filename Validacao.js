@@ -111,12 +111,17 @@ var Validacao = (function () {
   function _logoEmbutido(url) {
     url = String(url || '');
     if (!url) return '';
-    if (url.indexOf('data:image/') === 0) return url;
+    // O Apps Script bloqueia 'data:' em <?= ?> dentro de src; por isso a página imprime com <?!= ?>
+    // e aqui só passa o que é comprovadamente imagem em base64 ou https simples.
+    if (url.indexOf('data:image/') === 0) {
+      return /^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+\/]+={0,2}$/.test(url) ? url : '';
+    }
     var m = /drive\.google\.com\/uc\?export=view&id=([\w-]{10,})/.exec(url);
-    if (!m) return url;                       // https direto (ex.: GitHub raw): o navegador carrega
+    if (!m) return /^https:\/\/[^\s"'<>]+$/.test(url) ? url : '';   // https direto (ex.: GitHub raw)
     try {
       var blob = DriveApp.getFileById(m[1]).getBlob();
       if (blob.getBytes().length > 1500000) return '';   // grande demais para embutir
+      if (!/^image\/(png|jpeg|webp|gif)$/.test(blob.getContentType())) return '';
       return 'data:' + blob.getContentType() + ';base64,' + Utilities.base64Encode(blob.getBytes());
     } catch (e) { return ''; }
   }
