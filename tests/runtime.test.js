@@ -785,6 +785,28 @@ function envQr() {
 const emitir = (env, id) => { env.ctx.__id = id; return env.run("mb_emitirCredencial('tok', __id)"); };
 const consultar = (env, c) => { env.ctx.__c = c; return env.run('Validacao.consultar(__c)'); };
 
+test('qr: o link do QR é sempre o público (/exec); endereço de teste (/dev) bloqueia a emissão', () => {
+  const { env, id } = envQr();
+  env.run("ScriptApp.getService = function () { return { getUrl: function () { return 'https://script.google.com/macros/s/HEAD123/dev'; } }; }");
+  const r = emitir(env, id);
+  assert.equal(r.success, false);
+  assert.match(r.error, /URL_APP/);
+  const linhas = () => env.activeSS.getSheetByName('Credenciais') ? env.activeSS.getSheetByName('Credenciais')._rows.length : 1;
+  assert.equal(linhas(), 1, 'não pode gravar credencial quando o link não serve');
+});
+
+test('qr: a chave URL_APP da Config tem prioridade e só aceita link /exec do Apps Script', () => {
+  const { env, id } = envQr();
+  const exec = 'https://script.google.com/macros/s/AKfycbwTESTE-123/exec';
+  env.run("Util.insertRow('Config', {Chave:'URL_APP', Valor:'" + exec + "', Descricao:'', AtualizadoEm:''})");
+  env.run("ScriptApp.getService = function () { return { getUrl: function () { return 'https://script.google.com/macros/s/HEAD123/dev'; } }; }");
+  const r = emitir(env, id);
+  assert.equal(r.success, true, JSON.stringify(r));
+  assert.ok(r.data.url.startsWith(exec + '?page=validar&c='), r.data.url);
+  env.run("Util.insertRow('Config', {Chave:'URL_APP', Valor:'https://site-malicioso.com/exec', Descricao:'', AtualizadoEm:''})");
+  assert.equal(emitir(env, id).success, false, 'URL_APP fora do Apps Script não vale');
+});
+
 test('qr: emissão devolve código aleatório de 32 hex e URL da página pública; exige login e membro ativo', () => {
   const { env, id } = envQr();
   const r = emitir(env, id);

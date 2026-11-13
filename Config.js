@@ -30,6 +30,7 @@ var Config = (function () {
     { Chave: 'MARCA_DAGUA_URL', Valor: '',         Descricao: 'Avançado: link da marca d\'água da carteirinha (https://). A imagem enviada pela tela Identidade tem prioridade' },
     { Chave: 'ASSINATURA_URL', Valor: '',          Descricao: 'Avançado: link da assinatura do pastor (https://). A imagem enviada pela tela Identidade tem prioridade' },
     { Chave: 'PASTA_FOTOS',    Valor: PASTA_FOTOS_PADRAO, Descricao: 'Nome da pasta do Google Drive onde as fotos dos membros são guardadas (criada automaticamente)' },
+    { Chave: 'URL_APP',        Valor: '',          Descricao: 'Link oficial do sistema (Implantar > Gerenciar implantações > URL do app da Web, termina em /exec). Usado no QR Code do cartão. Vazio = o sistema descobre sozinho' },
     { Chave: 'MODULOS_ATIVOS', Valor: '',          Descricao: 'Módulos liberados, separados por vírgula, ex.: membros. Vazio = todos os módulos instalados' }
   ];
 
@@ -101,6 +102,17 @@ var Config = (function () {
     if (/^[A-Z\u00C0-\u00DD]{2,3}$/.test(w[0])) return w[0];
     if (w.length > 2 && /^igreja$/i.test(w[0])) w.shift();
     return (w[0].charAt(0) + (w[1] ? w[1].charAt(0) : '')).toUpperCase();
+  }
+
+  // Link público do sistema, para quem NÃO está logado no Google (QR do cartão).
+  // Vale a chave URL_APP da Config; sem ela, o endereço da implantação em uso.
+  // Só serve se terminar em /exec: o endereço de teste (/dev) só abre para o dono do projeto.
+  function urlApp() {
+    var cfg = get('URL_APP', '');
+    if (/^https:\/\/script\.google\.com\/[\w\/.\-]+\/exec$/.test(cfg)) return cfg;
+    var auto = '';
+    try { auto = String(ScriptApp.getService().getUrl() || ''); } catch (e) {}
+    return /\/exec$/.test(auto) ? auto : '';
   }
 
   // Ícone do app (aba do navegador, tela inicial do celular, PWA): o logo da Config
@@ -195,7 +207,7 @@ var Config = (function () {
   }
 
   return {
-    get: get, identidade: identidade, iniciais: iniciais, iconeUrl: iconeUrl, identidadeJson: identidadeJson, identidadeCompleta: identidadeCompleta, salvar: salvar, validar: validar, remetente: remetente,
+    get: get, identidade: identidade, iniciais: iniciais, iconeUrl: iconeUrl, identidadeJson: identidadeJson, identidadeCompleta: identidadeCompleta, salvar: salvar, validar: validar, remetente: remetente, urlApp: urlApp,
     garantirChaves: garantirChaves, chaves: CHAVES, pastaFotos: function () { return get('PASTA_FOTOS', PASTA_FOTOS_PADRAO); }
   };
 })();
