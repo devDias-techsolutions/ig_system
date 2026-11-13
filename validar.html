@@ -40,7 +40,7 @@
 </head>
 <body>
 <main class="card <?= d.estado ?>" role="main">
-  <div class="logo"><?= d.iniciais ?><? if (d.logo) { ?><img src="<?= d.logo ?>" alt="" onerror="this.remove()"><? } ?></div>
+  <div class="logo"><?= d.iniciais ?><? if (d.logo) { ?><img src="<?!= d.logo ?>" alt="" onerror="this.remove()"><? } ?></div>
   <h1><?= d.igreja ?></h1>
   <? if (d.lema) { ?><p class="lema"><?= d.lema ?></p><? } ?>
 
