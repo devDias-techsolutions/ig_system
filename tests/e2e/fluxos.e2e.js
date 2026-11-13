@@ -700,7 +700,9 @@ test('carteirinha: QR de validação é opcional, aparece no verso sem cobrir a 
     const card = host.querySelector('.mb-card-back').getBoundingClientRect();
     const q = host.querySelector('.back-qr .qr-box').getBoundingClientRect();
     const ad = host.querySelector('.back-address').getBoundingClientRect();
-    const r = { dentro: q.left >= card.left && q.right <= card.right && q.bottom <= card.bottom && ad.bottom <= card.bottom - 2 && q.top >= card.top, img: !!host.querySelector('.qr-box img') };
+    const cap = host.querySelector('.back-qr .qr-cap').getBoundingClientRect();
+    const sg = host.querySelector('.sign-name');
+    const r = { dentro: q.left >= card.left && q.right <= card.right && q.bottom <= card.bottom && ad.bottom <= card.bottom - 2 && q.top >= card.top && cap.bottom <= ad.top && cap.right <= card.right && getComputedStyle(host.querySelector('.back-qr .qr-cap')).display !== 'none', img: !!host.querySelector('.qr-box img') };
     host.remove();
     return r;
   }, qr);
