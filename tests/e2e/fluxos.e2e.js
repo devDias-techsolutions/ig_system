@@ -699,11 +699,12 @@ test('carteirinha: QR de validação é opcional, aparece no verso sem cobrir a 
     document.body.appendChild(host);
     const card = host.querySelector('.mb-card-back').getBoundingClientRect();
     const q = host.querySelector('.back-qr .qr-box').getBoundingClientRect();
-    const r = { dentro: q.left >= card.left && q.right <= card.right && q.bottom <= card.bottom, img: !!host.querySelector('.qr-box img') };
+    const ad = host.querySelector('.back-address').getBoundingClientRect();
+    const r = { dentro: q.left >= card.left && q.right <= card.right && q.bottom <= card.bottom && ad.bottom <= card.bottom - 2 && q.top >= card.top, img: !!host.querySelector('.qr-box img') };
     host.remove();
     return r;
   }, qr);
-  assert.ok(geo.img && geo.dentro, 'QR dentro do cartão');
+  assert.ok(geo.img && geo.dentro, 'QR e rodapé (endereço) inteiros dentro do cartão');
 
   const cred = await page.evaluate(() => new Promise((ok) => google.script.run.withSuccessHandler(ok).mb_emitirCredencial(App.session.token, MB.membros[0].id)));
   assert.equal(cred.success, true);
