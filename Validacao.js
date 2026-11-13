@@ -100,7 +100,7 @@ var Validacao = (function () {
   // ── Página pública ────────────────────────────────────────
   var TEXTOS = {
     ativo:          { titulo: 'Membro ativo',        msg: 'Cartão válido. A pessoa consta como membro desta igreja.' },
-    inativo:        { titulo: 'Membro inativo',      msg: 'Este cartão não está mais em vigor. A pessoa não consta como membro ativo.' },
+    inativo:        { titulo: 'Cartão inativo',       msg: 'Este cartão não está mais em vigor. A pessoa não consta como membro ativo.' },
     cancelado:      { titulo: 'Cartão cancelado',    msg: 'Este cartão foi cancelado ou substituído por outro mais recente.' },
     nao_encontrado: { titulo: 'Cartão não reconhecido', msg: 'Não encontramos este cartão. Pode ser falso ou ter sido digitado errado.' },
     limite:         { titulo: 'Muitas consultas',    msg: 'Tente novamente em alguns minutos.' }
