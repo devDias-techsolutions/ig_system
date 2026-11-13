@@ -106,6 +106,21 @@ var Validacao = (function () {
     limite:         { titulo: 'Muitas consultas',    msg: 'Tente novamente em alguns minutos.' }
   };
 
+  // Logo na página pública: link do Drive não carrega de forma confiável para quem não está logado,
+  // então o servidor lê o arquivo e embute a imagem (data:). Se não der, devolve '' e a página usa as iniciais.
+  function _logoEmbutido(url) {
+    url = String(url || '');
+    if (!url) return '';
+    if (url.indexOf('data:image/') === 0) return url;
+    var m = /drive\.google\.com\/uc\?export=view&id=([\w-]{10,})/.exec(url);
+    if (!m) return url;                       // https direto (ex.: GitHub raw): o navegador carrega
+    try {
+      var blob = DriveApp.getFileById(m[1]).getBlob();
+      if (blob.getBytes().length > 1500000) return '';   // grande demais para embutir
+      return 'data:' + blob.getContentType() + ';base64,' + Utilities.base64Encode(blob.getBytes());
+    } catch (e) { return ''; }
+  }
+
   // Qualquer falha vira uma página simples com o motivo (em vez da tela "Não foi possível abrir o arquivo" do Google).
   function pagina(codigo) {
     try { return _renderizar(codigo); }
@@ -125,7 +140,7 @@ var Validacao = (function () {
     tmpl.d = {
       estado: r.estado, titulo: t.titulo, msg: t.msg,
       nome: r.nome || '', funcao: r.funcao || '', emitida: r.emitida || '',
-      igreja: idt.nome, lema: idt.lema || '', logo: idt.logoUrl || '',
+      igreja: idt.nome, lema: idt.lema || '', logo: _logoEmbutido(idt.logoUrl),
       cor: idt.corPrimaria || '#0a4a8a',
       iniciais: String(idt.nome || '?').split(/\s+/).map(function (p) { return p.charAt(0); }).join('').slice(0, 3).toUpperCase(),
       agora: Utilities.formatDate(new Date(), 'America/Sao_Paulo', "dd/MM/yyyy 'às' HH:mm")
