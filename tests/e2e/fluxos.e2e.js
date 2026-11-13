@@ -707,6 +707,6 @@ test('carteirinha: QR de validação é opcional, aparece no verso sem cobrir a 
 
   const cred = await page.evaluate(() => new Promise((ok) => google.script.run.withSuccessHandler(ok).mb_emitirCredencial(App.session.token, MB.membros[0].id)));
   assert.equal(cred.success, true);
-  assert.match(cred.data.url, /\?page=validar&c=[0-9a-f]{32}$/);
+  assert.match(cred.data.url, /\?page=validar&codigo=[0-9a-f]{32}$/);
   assert.deepEqual(erros.filter((e) => !/qrcode|cdnjs/i.test(e)), []);
 });

@@ -3,7 +3,7 @@
 //
 //  • A secretaria emite o cartão com QR (opcional): cada emissão cria um CÓDIGO aleatório
 //    na aba "Credenciais" e revoga os códigos anteriores do mesmo membro (cartão perdido = cartão novo).
-//  • O QR abre uma página PÚBLICA (?page=validar&c=CÓDIGO) que mostra só: igreja, nome, função e situação.
+//  • O QR abre uma página PÚBLICA (?page=validar&codigo=CÓDIGO) que mostra só: igreja, nome, função e situação.
 //    A situação é lida na planilha NA HORA — inativar o membro invalida o cartão no mesmo instante.
 //
 //  Segurança:
@@ -56,7 +56,7 @@ var Validacao = (function () {
       }
       var codigo = _codigoNovo();
       sh.appendRow([codigo, String(membroId), Util.now(), sess.nome || sess.email || '', 'ativa']);
-      var url = base + '?page=validar&c=' + codigo;
+      var url = base + '?page=validar&codigo=' + codigo;
       return Util.ok({ codigo: codigo, url: url });
     });
   }
