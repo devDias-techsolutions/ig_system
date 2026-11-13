@@ -5,7 +5,7 @@
 
 <!-- ══════════════════════════════════════════════════════════
      _membros.html · Módulo Membros
-     Incluído via <?!= include('_membros'); ?> no index.html
+     Incluído pelo index.html (função include)
      Arquitetura do módulo:
        · Prefixo mb_ / MB nas funções e estado
        · _handleResponse  ·  _safe_mb  ·  google.script.run
@@ -119,16 +119,19 @@
 
 /* ── Foto upload/preview ── */
 .mb-foto-btn {
-  width: 100%; height: 48px; border-radius: 12px;
+  width: 100%; min-height: 52px; padding: 0 18px; border-radius: 14px;
   background: var(--bg-glass); border: 1.5px dashed var(--border);
-  color: var(--text-muted); font-family: 'Plus Jakarta Sans',sans-serif;
-  font-size: 13px; font-weight: 600; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: border-color .2s, background .2s;
+  color: var(--text); font-family: 'Plus Jakarta Sans',sans-serif;
+  font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  transition: border-color .2s, background .2s, transform .15s;
 }
-.mb-foto-btn:hover { border-color: var(--teal); background: var(--teal-dim); color: var(--teal); }
-.mb-foto-btns { display: flex; gap: 8px; }
-.mb-foto-btns .mb-foto-btn { flex: 1; }
+.mb-foto-btn svg { flex: 0 0 auto; color: var(--teal); }
+.mb-foto-btn:hover { border-color: var(--teal); background: var(--teal-dim); }
+.mb-foto-btn:active { transform: scale(.98); }
+.mb-foto-btns { display: flex; flex-direction: column; gap: 10px; }
+.mb-foto-row { display: flex; gap: 16px; align-items: stretch; }
+.mb-foto-row .mb-foto-btns { flex: 1; min-width: 0; justify-content: center; }
 
 /* ── Câmera com moldura 3×4 ── */
 .mb-cam { position: fixed; inset: 0; z-index: 10000; background: #000; display: flex; flex-direction: column; }
@@ -151,7 +154,7 @@
 .mb-cam-bar button { background: none; border: 0; color: #fff; font: 600 14px 'Plus Jakarta Sans', sans-serif; min-width: 84px; padding: 10px 0; cursor: pointer; }
 .mb-cam-bar .mb-cam-shot { width: 68px; height: 68px; min-width: 68px; border-radius: 50%; border: 4px solid #fff; background: #fff; padding: 0; box-shadow: inset 0 0 0 4px #000; }
 .mb-foto-preview {
-  width: 64px; height: 84px; border-radius: 8px; overflow: hidden;
+  width: 96px; height: 128px; border-radius: 14px; overflow: hidden;
   border: 2px solid var(--border); flex-shrink: 0; background: var(--bg4);
   position: relative;
 }
@@ -160,14 +163,23 @@
 .mb-foto-remove {
   position: absolute; top: 2px; right: 2px;
   background: var(--danger); color: #fff; border: none; cursor: pointer;
-  width: 16px; height: 16px; border-radius: 50%;
-  font-size: 10px; display: flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 50%;
+  font-size: 12px; display: flex; align-items: center; justify-content: center;
 }
 
 /* ── Detalhe ── */
-.mb-detail-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-@media (min-width: 480px) { .mb-detail-grid { grid-template-columns: 1fr 1fr; } }
+.mb-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 14px; }
+.mb-detail-grid .full { grid-column: 1 / -1; }
 @media (min-width: 768px) { .mb-detail-grid { grid-template-columns: 1fr 1fr 1fr; } }
+.mb-detail-sec { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--teal); margin: 22px 0 12px; display: flex; align-items: center; gap: 10px; }
+.mb-detail-sec::after { content: ''; flex: 1; height: 1px; background: var(--teal-border); }
+.mb-detail-head { display: flex; gap: 16px; align-items: center; }
+.mb-detail-photo { width: 84px; height: 112px; border-radius: 16px; overflow: hidden; border: 2px solid var(--border); flex-shrink: 0; background: var(--bg4); box-shadow: 0 10px 24px -12px rgba(0,0,0,.4); }
+.mb-detail-id { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.mb-detail-name { font-size: 20px; font-weight: 800; line-height: 1.15; color: var(--text); overflow-wrap: anywhere; }
+.mb-detail-meta { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+.mb-detail-actions { display: flex; gap: 10px; margin-top: 18px; position: relative; }
+.mb-detail-actions .btn { flex: 1; height: 44px; justify-content: center; }
 .mb-detail-label { font-size: 10px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 3px; }
 .mb-detail-value { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; }
 
@@ -970,32 +982,27 @@ function _mbBuildForm() {
       /* Foto */
       '<div class="mb-form-section mb-form-full">Foto 3×4</div>'+
       '<div class="mb-form-full">'+
-        '<div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">'+
-          '<div style="flex:1;min-width:180px">'+
+        '<div class="mb-foto-row">'+
+          '<div class="mb-foto-preview" id="mb-foto-preview" onmousedown="mbFotoMouseDown(event)" style="cursor:'+(MB.fotoData?'grab':'default')+'">'+
+            (MB.fotoData
+              ? '<img id="mb-foto-img" src="'+MB.fotoData+'" style="transform:scale('+MB.fotoZoom+');object-position:'+MB.fotoX+'% '+MB.fotoY+'%">'+
+                '<button class="mb-foto-remove" onclick="event.stopPropagation();mbRemoverFoto()" title="Remover" aria-label="Remover foto">✕</button>'
+              : '<div class="mb-foto-placeholder"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>')+
+          '</div>'+
+          '<div class="mb-foto-btns">'+
             '<input type="file" id="mb-foto-input" accept="image/*" style="display:none" onchange="mbFotoChange(event)">'+
             '<input type="file" id="mb-foto-input-cam" accept="image/*" capture="user" style="display:none" onchange="mbFotoChange(event)">'+
-            '<div class="mb-foto-btns">'+
-              '<button type="button" class="mb-foto-btn" id="mb-btn-camera" onclick="mbAbrirCamera()">'+
-                '<i data-lucide="camera" class="ic-16"></i> Tirar foto'+
-              '</button>'+
-              '<button type="button" class="mb-foto-btn" onclick="mbEscolherFoto()">'+
-                '<i data-lucide="image" class="ic-16"></i> Escolher foto'+
-              '</button>'+
-            '</div>'+
-            '<div id="mb-zoom-wrap" style="margin-top:10px;display:'+(MB.fotoData?'block':'none')+'">'+
-              '<div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:4px">Zoom</div>'+
-              '<input type="range" min="1" max="3" step="0.1" value="'+MB.fotoZoom+'" oninput="MB.fotoZoom=parseFloat(this.value);mbAtualizarFotoPreview()" style="width:100%">'+
-            '</div>'+
+            '<button type="button" class="mb-foto-btn" id="mb-btn-camera" onclick="mbAbrirCamera()">'+
+              '<i data-lucide="camera" class="ic-18"></i> Tirar foto'+
+            '</button>'+
+            '<button type="button" class="mb-foto-btn" onclick="mbEscolherFoto()">'+
+              '<i data-lucide="image" class="ic-18"></i> Escolher foto'+
+            '</button>'+
           '</div>'+
-          '<div>'+
-            '<div style="font-size:10px;font-weight:600;color:var(--text-muted);margin-bottom:4px">Preview</div>'+
-            '<div class="mb-foto-preview" id="mb-foto-preview" onmousedown="mbFotoMouseDown(event)" style="cursor:'+(MB.fotoData?'grab':'default')+'">'+
-              (MB.fotoData
-                ? '<img id="mb-foto-img" src="'+MB.fotoData+'" style="transform:scale('+MB.fotoZoom+');object-position:'+MB.fotoX+'% '+MB.fotoY+'%">'+
-                  '<button class="mb-foto-remove" onclick="event.stopPropagation();mbRemoverFoto()" title="Remover">✕</button>'
-                : '<div class="mb-foto-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>')+
-            '</div>'+
-          '</div>'+
+        '</div>'+
+        '<div id="mb-zoom-wrap" style="margin-top:14px;display:'+(MB.fotoData?'block':'none')+'">'+
+          '<div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:4px">Zoom</div>'+
+          '<input type="range" min="1" max="3" step="0.1" value="'+MB.fotoZoom+'" oninput="MB.fotoZoom=parseFloat(this.value);mbAtualizarFotoPreview()" style="width:100%">'+
         '</div>'+
       '</div>'+
 
@@ -1006,11 +1013,10 @@ function _mbBuildForm() {
       var mAtual = MB.membros.filter(function(x){ return String(x.id)===String(MB.editId); })[0] || {};
       var ativo  = mAtual.ativo !== false;
       return '<div class="field" style="margin-top:16px">'+
-        '<label>Status</label>'+
-        '<select id="mbf-ativo">'+
-          '<option value="true"'  +(ativo?' selected':'')+'>Ativo</option>'+
-          '<option value="false"' +(!ativo?' selected':'')+'>Inativo</option>'+
-        '</select>'+
+        '<label>Status do membro</label>'+
+        '<label class="sw"><input type="checkbox" id="mbf-ativo"'+(ativo?' checked':'')+' onchange="document.getElementById(\'mbf-ativo-txt\').textContent=this.checked?\'Ativo\':\'Inativo\'">'+
+          '<span class="sw-track"></span><span class="sw-txt" id="mbf-ativo-txt">'+(ativo?'Ativo':'Inativo')+'</span>'+
+          '</label>'+
       '</div>';
     })() : '')+
 
@@ -1392,7 +1398,7 @@ function mbSalvarForm() {
     : {};
 
   var ativoEl = document.getElementById('mbf-ativo');
-  var ativo   = MB.editId ? (ativoEl ? ativoEl.value !== 'false' : mAtual.ativo !== false) : true;
+  var ativo   = MB.editId ? (ativoEl ? ativoEl.checked : mAtual.ativo !== false) : true;
 
   // Foto: mantém fileId existente; substitui apenas se usuário escolheu nova foto
   var fotoAtual = MB.fotoNova ? null : (MB.fotoRemovida ? '' : (mAtual.foto || ''));
@@ -1493,73 +1499,69 @@ function _mbBuildDetalhe() {
   var m = MB.selected; if (!m) return '';
   var ativo = m.ativo !== false;
   var idade = _mbIdade(m.nascimento);
-  var campos = [
-    ['Sexo',           m.sexo],
-    ['Nascimento',     m.nascimento + (idade != null ? ' (' + idade + ' anos)' : '')],
-    ['Mãe',            m.nomeMae],
-    ['Pai',            m.nomePai],
-    ['Estado Civil',   m.estadoCivil],
-    ['Batismo',        m.batismo],
-    ['Igreja Batismo', m.Igreja],
-    ['Função',         m.funcao],
-    ['Celular',        m.celular],
-    ['E-mail',         m.email || '—'],
-    ['RG',             m.rg || '—'],
-    ['CPF',            m.cpf || '—'],
-    ['Endereço',       (m.rua||'') + ', ' + (m.numero||'')],
-    ['Bairro',         m.bairro],
-    ['Cidade/UF',      (m.cidade||'') + '/' + (m.estado||'')],
-    ['CEP',            m.cep]
+  var secoes = [
+    ['Pessoal', [
+      ['Sexo', m.sexo], ['Nascimento', m.nascimento + (idade != null ? ' ('+idade+' anos)' : '')],
+      ['Estado civil', m.estadoCivil], ['Função', m.funcao]]],
+    ['Família', [['Mãe', m.nomeMae, 1], ['Pai', m.nomePai, 1]]],
+    ['Igreja', [['Batismo', m.batismo], ['Igreja do batismo', m.Igreja]]],
+    ['Contato', [['Celular', m.celular], ['E-mail', m.email, 1]]],
+    ['Documentos', [['RG', m.rg], ['CPF', m.cpf]]],
+    ['Endereço', [['Endereço', (m.rua||'') + (m.numero ? ', '+m.numero : ''), 1], ['Bairro', m.bairro],
+                  ['Cidade/UF', (m.cidade||'') + '/' + (m.estado||'')], ['CEP', m.cep]]]
   ];
+  var id = _mbEsc(m.id);
 
   return (
     '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'+
-      '<button class="btn btn-ghost btn-sm" onclick="MB.tab=\'lista\';_mbLoad(function(){_mbRenderPanel();})">'+
+      '<button class="btn btn-ghost btn-sm" onclick="MB.tab=\'lista\';_mbLoad(function(){_mbRenderPanel();})" aria-label="Voltar">'+
         '<i data-lucide="arrow-left" class="ic-16"></i>'+
       '</button>'+
-      '<div>'+
-        '<div class="ed-section-title">'+_mbEsc(m.nome)+'</div>'+
-        '<div class="ed-section-sub">ROL Nº '+_mbEsc(m.rol||'—')+' · '+_mbEsc(m.funcao||'Membro')+'</div>'+
-      '</div>'+
+      '<div class="ed-section-title">Ficha do membro</div>'+
     '</div>'+
 
-    '<div style="background:var(--glass-bg-premium);border:var(--glass-border-premium);border-radius:18px;padding:20px;backdrop-filter:blur(20px)">'+
-
-      /* Header */
-      '<div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">'+
-        '<div style="width:68px;height:90px;border-radius:8px;overflow:hidden;border:2px solid var(--border);flex-shrink:0;background:var(--bg4)">'+
+    '<div class="panel" style="padding:20px">'+
+      '<div class="mb-detail-head">'+
+        '<div class="mb-detail-photo">'+
           (m.foto
             ? '<img src="'+(MB._fotoCache[m.foto]||'')+'" style="width:100%;height:100%;object-fit:cover;transform:scale('+(m.fotoZoom||1)+');object-position:'+(m.fotoX||50)+'% '+(m.fotoY||50)+'%">'
-            : '<div class="mb-foto-placeholder" style="height:100%"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>')+
+            : '<div class="mb-foto-placeholder" style="height:100%"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>')+
         '</div>'+
-        '<div style="flex:1">'+
-          '<div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px">'+_mbEsc(m.nome)+'</div>'+
-          '<span class="badge '+(ativo?'badge-green':'badge-red')+'" style="display:inline-flex;margin-bottom:10px">'+(ativo?'Ativo':'Inativo')+'</span>'+
-          '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
-            '<button class="btn btn-secondary btn-sm" onclick="mbEditarMembro(\''+_mbEsc(m.id)+'\')">'+
-              '<i data-lucide="pencil" class="ic-14"></i> Editar'+
-            '</button>'+
-            '<button class="btn btn-ghost btn-sm" onclick="mbAbrirCarteirinhaDetalhe(\''+_mbEsc(m.id)+'\')" title="Gerar carteirinha">'+
-              '<i data-lucide="credit-card" class="ic-14"></i> Carteirinha'+
-            '</button>'+
-            '<button class="btn btn-danger btn-sm" onclick="mbConfirmarDeletar(\''+_mbEsc(m.id)+'\')" style="margin-left:auto">'+
-              '<i data-lucide="trash-2" class="ic-14"></i> Excluir'+
-            '</button>'+
-          '</div>'+
+        '<div class="mb-detail-id">'+
+          '<div class="mb-detail-name">'+_mbEsc(m.nome)+'</div>'+
+          '<div class="mb-detail-meta">ROL Nº '+_mbEsc(m.rol||'—')+' · '+_mbEsc(m.funcao||'Membro')+'</div>'+
+          '<span class="badge '+(ativo?'badge-green':'badge-red')+'">'+(ativo?'Ativo':'Inativo')+'</span>'+
         '</div>'+
       '</div>'+
 
-      /* Campos */
-      '<div class="mb-detail-grid">'+
-        campos.map(function(c){
-          return '<div>'+
-            '<div class="mb-detail-label">'+_mbEsc(c[0])+'</div>'+
-            '<div class="mb-detail-value">'+_mbEsc(c[1]||'—')+'</div>'+
-          '</div>';
-        }).join('')+
+      '<div class="mb-detail-actions">'+
+        '<button class="btn btn-primary" onclick="mbEditarMembro(\''+id+'\')"><i data-lucide="pencil" class="ic-16"></i> Editar</button>'+
+        '<button class="btn btn-secondary" onclick="mbAbrirCarteirinhaDetalhe(\''+id+'\')"><i data-lucide="credit-card" class="ic-16"></i> Carteirinha</button>'+
+        '<button class="icon-btn" id="mb-menu-btn" onclick="mbToggleMenu(event)" aria-label="Mais ações" aria-haspopup="true"><i data-lucide="more-vertical" class="ic-18"></i></button>'+
+        '<div class="menu-pop" id="mb-menu" style="display:none" role="menu">'+
+          '<button class="danger" role="menuitem" onclick="mbConfirmarDeletar(\''+id+'\')"><i data-lucide="trash-2" class="ic-16"></i> Excluir membro</button>'+
+        '</div>'+
       '</div>'+
+
+      secoes.map(function(sec){
+        return '<div class="mb-detail-sec">'+sec[0]+'</div>'+
+          '<div class="mb-detail-grid">'+sec[1].map(function(c){
+            return '<div'+(c[2]?' class="full"':'')+'>'+
+              '<div class="mb-detail-label">'+_mbEsc(c[0])+'</div>'+
+              '<div class="mb-detail-value">'+_mbEsc(c[1]||'—')+'</div>'+
+            '</div>';
+          }).join('')+'</div>';
+      }).join('')+
     '</div>'
   );
+}
+
+function mbToggleMenu(ev) {
+  if (ev) ev.stopPropagation();
+  var el = document.getElementById('mb-menu'); if (!el) return;
+  var abrir = el.style.display === 'none';
+  el.style.display = abrir ? 'block' : 'none';
+  if (abrir) setTimeout(function(){ document.addEventListener('click', function f(){ el.style.display = 'none'; document.removeEventListener('click', f); }); }, 0);
 }
 
 // ════════════════════════════════════════════
