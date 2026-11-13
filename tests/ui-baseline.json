@@ -1,0 +1,62 @@
+{
+  "_home.html": {
+    "fonte": 0,
+    "raio": 3,
+    "duracao": 2,
+    "infinitas": 1
+  },
+  "_identidade.html": {
+    "fonte": 4,
+    "raio": 2,
+    "duracao": 0,
+    "infinitas": 0
+  },
+  "_login.html": {
+    "fonte": 10,
+    "raio": 0,
+    "duracao": 2,
+    "infinitas": 4
+  },
+  "_membros-cartas.html": {
+    "fonte": 10,
+    "raio": 0,
+    "duracao": 0,
+    "infinitas": 0
+  },
+  "_membros.html": {
+    "fonte": 45,
+    "raio": 25,
+    "duracao": 4,
+    "infinitas": 0
+  },
+  "_primeiro-acesso.html": {
+    "fonte": 3,
+    "raio": 0,
+    "duracao": 0,
+    "infinitas": 0
+  },
+  "_recuperar-senha.html": {
+    "fonte": 6,
+    "raio": 0,
+    "duracao": 0,
+    "infinitas": 0
+  },
+  "_usuarios.html": {
+    "fonte": 27,
+    "raio": 11,
+    "duracao": 4,
+    "infinitas": 1
+  },
+  "index.html": {
+    "fonte": 32,
+    "raio": 20,
+    "duracao": 34,
+    "infinitas": 9
+  },
+  "validar.html": {
+    "fonte": 7,
+    "raio": 1,
+    "duracao": 0,
+    "infinitas": 1
+  }
+}

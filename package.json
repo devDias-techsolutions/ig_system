@@ -6,6 +6,8 @@
   "scripts": {
     "test": "node --test tests/suite.test.js",
     "test:static": "node --test tests/static.test.js",
+    "test:ui": "node --test tests/ui.test.js",
+    "ui:baseline": "node tests/helpers/ui-escalas.js --gravar",
     "test:runtime": "node --test tests/runtime.test.js",
     "preview": "node tests/preview/preview.js",
     "empacotar": "node scripts/empacotar-cliente.js",
