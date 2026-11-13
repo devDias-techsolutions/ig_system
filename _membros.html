@@ -118,15 +118,18 @@
 }
 
 /* ── Foto upload/preview ── */
+.mb-foto-card { padding: 16px; border-radius: 18px; background: var(--bg-glass); border: 1px solid var(--border); }
+.mb-foto-hint { font-size: 12px; line-height: 1.4; color: var(--text-muted); margin-top: 2px; }
 .mb-foto-btn {
   width: 100%; min-height: 52px; padding: 0 18px; border-radius: 14px;
-  background: var(--bg-glass); border: 1.5px dashed var(--border);
+  background: transparent; border: 1px solid var(--border);
   color: var(--text); font-family: 'Plus Jakarta Sans',sans-serif;
   font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap;
   display: flex; align-items: center; justify-content: center; gap: 12px;
   transition: border-color .2s, background .2s, transform .15s;
 }
 .mb-foto-btn svg { flex: 0 0 auto; color: var(--teal); }
+.mb-foto-btn.main { background: var(--teal-dim); border-color: var(--teal-border); color: var(--teal); }
 .mb-foto-btn:hover { border-color: var(--teal); background: var(--teal-dim); }
 .mb-foto-btn:active { transform: scale(.98); }
 .mb-foto-btns { display: flex; flex-direction: column; gap: 10px; }
@@ -168,11 +171,10 @@
 }
 
 /* ── Detalhe ── */
-.mb-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 14px; }
+.mb-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 14px; padding: 16px; border-radius: 16px; background: var(--bg-glass); border: 1px solid var(--border); }
 .mb-detail-grid .full { grid-column: 1 / -1; }
 @media (min-width: 768px) { .mb-detail-grid { grid-template-columns: 1fr 1fr 1fr; } }
-.mb-detail-sec { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--teal); margin: 22px 0 12px; display: flex; align-items: center; gap: 10px; }
-.mb-detail-sec::after { content: ''; flex: 1; height: 1px; background: var(--teal-border); }
+.mb-detail-sec { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin: 22px 0 8px 4px; }
 .mb-detail-head { display: flex; gap: 16px; align-items: center; }
 .mb-detail-photo { width: 84px; height: 112px; border-radius: 16px; overflow: hidden; border: 2px solid var(--border); flex-shrink: 0; background: var(--bg4); box-shadow: 0 10px 24px -12px rgba(0,0,0,.4); }
 .mb-detail-id { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
@@ -180,8 +182,8 @@
 .mb-detail-meta { font-size: 12px; color: var(--text-muted); font-weight: 600; }
 .mb-detail-actions { display: flex; gap: 10px; margin-top: 18px; position: relative; }
 .mb-detail-actions .btn { flex: 1; height: 44px; justify-content: center; }
-.mb-detail-label { font-size: 10px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 3px; }
-.mb-detail-value { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; }
+.mb-detail-label { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 2px; }
+.mb-detail-value { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.4; }
 
 /* ── Aniversariantes: só a lista; o modal usa a estrutura padrão (header/body/footer) ── */
 .mb-aniv-body { display: flex; flex-direction: column; gap: 8px; }
@@ -862,7 +864,7 @@ function _mbBuildForm() {
       '</div>'+
     '</div>'+
 
-    '<div style="background:var(--glass-bg-premium);border:var(--glass-border-premium);border-radius:18px;padding:20px;backdrop-filter:blur(20px)">'+
+    '<div style="background:var(--glass-bg-premium);border:var(--glass-border-premium);border-radius:18px;padding:20px;margin-bottom:96px;backdrop-filter:blur(20px)">'+
     '<div class="mb-form-grid" id="mb-form">'+
 
       /* Identificação */
@@ -982,6 +984,7 @@ function _mbBuildForm() {
       /* Foto */
       '<div class="mb-form-section mb-form-full">Foto 3×4</div>'+
       '<div class="mb-form-full">'+
+        '<div class="mb-foto-card">'+
         '<div class="mb-foto-row">'+
           '<div class="mb-foto-preview" id="mb-foto-preview" onmousedown="mbFotoMouseDown(event)" style="cursor:'+(MB.fotoData?'grab':'default')+'">'+
             (MB.fotoData
@@ -992,17 +995,19 @@ function _mbBuildForm() {
           '<div class="mb-foto-btns">'+
             '<input type="file" id="mb-foto-input" accept="image/*" style="display:none" onchange="mbFotoChange(event)">'+
             '<input type="file" id="mb-foto-input-cam" accept="image/*" capture="user" style="display:none" onchange="mbFotoChange(event)">'+
-            '<button type="button" class="mb-foto-btn" id="mb-btn-camera" onclick="mbAbrirCamera()">'+
+            '<button type="button" class="mb-foto-btn main" id="mb-btn-camera" onclick="mbAbrirCamera()">'+
               '<i data-lucide="camera" class="ic-18"></i> Tirar foto'+
             '</button>'+
             '<button type="button" class="mb-foto-btn" onclick="mbEscolherFoto()">'+
               '<i data-lucide="image" class="ic-18"></i> Escolher foto'+
             '</button>'+
+            '<div class="mb-foto-hint">JPG ou PNG. Use o zoom para enquadrar.</div>'+
           '</div>'+
         '</div>'+
         '<div id="mb-zoom-wrap" style="margin-top:14px;display:'+(MB.fotoData?'block':'none')+'">'+
           '<div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:4px">Zoom</div>'+
           '<input type="range" min="1" max="3" step="0.1" value="'+MB.fotoZoom+'" oninput="MB.fotoZoom=parseFloat(this.value);mbAtualizarFotoPreview()" style="width:100%">'+
+        '</div>'+
         '</div>'+
       '</div>'+
 
@@ -1013,22 +1018,26 @@ function _mbBuildForm() {
       var mAtual = MB.membros.filter(function(x){ return String(x.id)===String(MB.editId); })[0] || {};
       var ativo  = mAtual.ativo !== false;
       return '<div class="field" style="margin-top:16px">'+
-        '<label>Status do membro</label>'+
-        '<label class="sw"><input type="checkbox" id="mbf-ativo"'+(ativo?' checked':'')+' onchange="document.getElementById(\'mbf-ativo-txt\').textContent=this.checked?\'Ativo\':\'Inativo\'">'+
-          '<span class="sw-track"></span><span class="sw-txt" id="mbf-ativo-txt">'+(ativo?'Ativo':'Inativo')+'</span>'+
-          '</label>'+
+        '<label>Situação</label>'+
+        '<label class="sw sw-row"><input type="checkbox" id="mbf-ativo"'+(ativo?' checked':'')+' onchange="document.getElementById(\'mbf-ativo-txt\').textContent=this.checked?\'Membro ativo\':\'Membro inativo\'">'+
+          '<span class="sw-track"></span>'+
+          '<span class="sw-info"><span class="sw-txt" id="mbf-ativo-txt">'+(ativo?'Membro ativo':'Membro inativo')+'</span>'+
+          '<span class="sw-sub">Inativos saem da contagem de ativos e o QR do cartão deixa de valer.</span></span></label>'+
       '</div>';
     })() : '')+
 
-    /* Botões */
-    '<div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">'+
-      '<button class="btn btn-primary btn-lg" onclick="mbSalvarForm()" style="flex:1">'+
-        '<i data-lucide="save" class="ic-17"></i>'+
-        '<span class="btn-text">'+(MB.editId?'Salvar Alterações':'Cadastrar Membro')+'</span>'+
-        '<div class="btn-spinner"></div>'+
-      '</button>'+
-      '<button class="btn btn-secondary" onclick="MB.tab=\'lista\';_mbLoad(function(){_mbRenderPanel();})">Cancelar</button>'+
     '</div>'+
+
+    /* Barra de ações fixa (Layout System) */
+    '<div class="action-bar" style="justify-content:flex-end">'+
+      '<div class="action-bar-btns">'+
+        '<button class="btn btn-secondary" onclick="MB.tab=\'lista\';_mbLoad(function(){_mbRenderPanel();})">Cancelar</button>'+
+        '<button class="btn btn-primary" onclick="mbSalvarForm()">'+
+          '<i data-lucide="save" class="ic-16"></i>'+
+          '<span class="btn-text">'+(MB.editId?'Salvar':'Cadastrar')+'</span>'+
+          '<div class="btn-spinner"></div>'+
+        '</button>'+
+      '</div>'+
     '</div>'
   );
 }
@@ -1501,7 +1510,7 @@ function _mbBuildDetalhe() {
   var idade = _mbIdade(m.nascimento);
   var secoes = [
     ['Pessoal', [
-      ['Sexo', m.sexo], ['Nascimento', m.nascimento + (idade != null ? ' ('+idade+' anos)' : '')],
+      ['Sexo', m.sexo], ['Nascimento' + (idade != null ? ' · '+idade+' anos' : ''), m.nascimento],
       ['Estado civil', m.estadoCivil], ['Função', m.funcao]]],
     ['Família', [['Mãe', m.nomeMae, 1], ['Pai', m.nomePai, 1]]],
     ['Igreja', [['Batismo', m.batismo], ['Igreja do batismo', m.Igreja]]],
@@ -1570,7 +1579,7 @@ function mbToggleMenu(ev) {
 function mbConfirmarDeletar(id) {
   var mb = MB.membros.filter(function(x){ return String(x.id)===String(id); })[0];
   if (!mb) return;
-  showConfirm('Excluir "' + _mbEsc(mb.nome) + '"? Esta ação não pode ser desfeita.', { title: 'Excluir membro', confirmLabel: 'Excluir' })
+  showConfirm('Excluir "' + _mbEsc(mb.nome) + '"? Esta ação remove a ficha e não pode ser desfeita. Para apenas tirar das listas, use Inativar na edição.', { title: 'Excluir membro', confirmLabel: 'Excluir' })
     .then(function(ok){ if (ok) _mbDeletar(id); });
 }
 
