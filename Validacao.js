@@ -106,7 +106,20 @@ var Validacao = (function () {
     limite:         { titulo: 'Muitas consultas',    msg: 'Tente novamente em alguns minutos.' }
   };
 
+  // Qualquer falha vira uma página simples com o motivo (em vez da tela "Não foi possível abrir o arquivo" do Google).
   function pagina(codigo) {
+    try { return _renderizar(codigo); }
+    catch (e) {
+      return HtmlService.createHtmlOutput(
+        '<meta name="viewport" content="width=device-width, initial-scale=1">' +
+        '<body style="font-family:sans-serif;padding:24px"><h3>Não foi possível validar o cartão agora</h3>' +
+        '<p>Tente novamente em instantes. Se persistir, avise a secretaria.</p>' +
+        '<p style="color:#888;font-size:12px">Detalhe técnico: ' + String(e && e.message || e).replace(/[<>&]/g, '') + '</p></body>'
+      ).setTitle('Validação do cartão');
+    }
+  }
+
+  function _renderizar(codigo) {
     var r = consultar(codigo), idt = Config.identidade(), t = TEXTOS[r.estado] || TEXTOS.nao_encontrado;
     var tmpl = HtmlService.createTemplateFromFile('validar');
     tmpl.d = {
@@ -119,9 +132,7 @@ var Validacao = (function () {
     };
     return tmpl.evaluate()
       .setTitle('Validação do cartão · ' + idt.nome)
-      .addMetaTag('viewport', 'width=device-width, initial-scale=1')
-      .addMetaTag('robots', 'noindex, nofollow')
-      .addMetaTag('referrer', 'no-referrer');
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1');
   }
 
   return { emitir: emitir, consultar: consultar, pagina: pagina, HEADERS: HEADERS, ABA: ABA, LIMITES: LIMITES };

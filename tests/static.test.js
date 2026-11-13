@@ -335,7 +335,7 @@ test('cartas: papel do PDF não depende do tema — fundo e cor de tinta inline,
 // ═══ QR Code de validação ═══════════════════════════════════
 test('qr: a página pública é noindex, sem login nem módulos, e o QR na carteirinha é opcional (desligado por padrão)', () => {
   const pag = read('validar.html'), val = read('Validacao.js'), mb = read('_membros.html');
-  assert.match(val, /noindex, nofollow/);
+  assert.match(read("validar.html"), /noindex, nofollow/);
   assert.match(read('Code.js'), /params\.page === 'validar'/);
   assert.ok(!/google\.script\.run/.test(pag), 'a página pública não chama o servidor');
   assert.ok(!/cpf|rg\b|telefone|endereco|foto/i.test(pag.replace(/<style[\s\S]*?<\/style>/, '')), 'página pública só mostra nome/função/situação');
