@@ -295,8 +295,10 @@ test('padrão: KPI de Membros usa o mesmo grupo de indicadores do Início (sem e
 
 test('UI premium: camada compartilhada (painel, KPI, botão, aba) com movimento e respeito a reduced-motion', () => {
   const h = read('index.html');
-  for (const re of [/\.panel::before/, /\.panel::after/, /\.kpi-icon::after/, /@keyframes kpiHalo/, /@keyframes btnBreathe/, /\.tab::after/, /\.btn::after/, /pointermove/, /\.kpi-icon::after, \.panel, [^\n]*animation: none !important/])
+  for (const re of [/\.panel::before/, /\.panel::after/, /@keyframes btnBreathe/, /\.tab::after/, /\.btn::after/, /pointermove/, /\.kpi-card, \.kpi-group, \.kpi-value, \.panel[^\n]*animation: none !important/])
     assert.match(h, re);
+  // orçamento de efeitos (docs/UI-GUIDELINES.md): KPI não tem halo pulsante contínuo
+  assert.doesNotMatch(h, /kpiHalo/);
 });
 
 test('ícone fantasma: KPI e módulo do Início têm marca d\'água no mesmo componente', () => {
