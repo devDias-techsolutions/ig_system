@@ -15,7 +15,7 @@ Regras em `docs/UI-GUIDELINES.md`; estrutura em `docs/LAYOUT.md`.
 | Etapa | O que é | Estado |
 | --- | --- | --- |
 | UI-1 | `UI-GUIDELINES.md`, tokens de escala no `index.html`, `tests/ui.test.js` + `ui-baseline.json` | Feita |
-| UI-2 | Normalizar peças repetidas: cabeçalho, abas (48 px), barra inferior discreta, **KPI compacto** (bloco 3D menor, número 32 px, estatísticas em linha) | Pendente |
+| UI-2 | Normalizar peças repetidas. **Feito:** abas (48 px, indicador sólido), barra inferior e menu lateral discretos (ativo = cor + linha fina, sem pílula/brilho), KPI compacto (`.kpi-group` e `.kpi-card`: bloco 40 px, número 32 px, sem aura/texto em degradê) e fim do halo pulsante em todo ícone de KPI. **Falta:** cabeçalho (topnav) em uma linha | Parcial |
 | UI-3 | Aplicar em Home → Membros → Usuários → Identidade (uma tela por PR) | Pendente |
 | UI-4 | Telas de acesso (login, primeiro acesso, recuperar senha) | Pendente |
 | UI-5 | Zerar o limite de valores fora da escala (`npm run ui:baseline` a cada ganho) | Contínuo |
@@ -29,7 +29,7 @@ Regras em `docs/UI-GUIDELINES.md`; estrutura em `docs/LAYOUT.md`.
 ## Estado medido (limite inicial em `tests/ui-baseline.json`)
 
 Valores fora da escala por tela (fonte / raio / transição / animações contínuas):
-`index.html` 32/20/34/9 · `_membros.html` 45/25/4/0 · `_usuarios.html` 27/11/4/1 · `_login.html` 10/0/2/4 · `_membros-cartas.html` 10/0/0/0 (cartão impresso: tamanhos próprios) · `_home.html` 0/3/2/1 · `_identidade.html` 4/2/0/0.
+`index.html` 25/16/21/8 (era 32/20/34/9 antes da UI-2) · `_membros.html` 45/25/4/0 · `_usuarios.html` 27/11/4/1 · `_login.html` 10/0/2/4 · `_membros-cartas.html` 10/0/0/0 (cartão impresso: tamanhos próprios) · `_home.html` 0/3/2/1 · `_identidade.html` 4/2/0/0.
 
 ## Como trabalhar
 
