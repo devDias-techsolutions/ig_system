@@ -32,8 +32,8 @@
 .mb-nav-cfg-dd.open { display: flex; }
 .mb-nav-cfg-dd button {
   display: flex; align-items: center; gap: 10px;
-  padding: 10px 13px; border-radius: 10px; border: none;
-  background: none; cursor: pointer; font-size: 13px; font-weight: 600;
+  padding: 10px 13px; border-radius:var(--r-2); border: none;
+  background: none; cursor: pointer; font-size:var(--fs-sm); font-weight: 600;
   color: var(--text); text-align: left; width: 100%;
   font-family: 'Plus Jakarta Sans', sans-serif; transition: background .15s;
 }
@@ -42,7 +42,7 @@
 .mb-nav-cfg-dd button.danger:hover { background: var(--danger-dim); }
 .mb-nav-cfg-dd .divider { height: 1px; background: var(--border); margin: 4px 0; }
 .mb-nav-cfg-dd .cfg-label {
-  font-size: 10px; font-weight: 800; color: var(--text-muted);
+  font-size:var(--fs-xs); font-weight: 800; color: var(--text-muted);
   text-transform: uppercase; letter-spacing: .07em; padding: 6px 13px 2px;
 }
 
@@ -59,16 +59,16 @@
 .ed-list { display: flex; flex-direction: column; gap: 6px; }
 .ed-list-item {
   display: flex; align-items: center; gap: 12px;
-  padding: 11px 14px; border-radius: 14px;
+  padding: 11px 14px; border-radius:var(--r-3);
   background: var(--glass-bg-premium); border: var(--glass-border-premium);
   box-shadow: var(--glass-shadow-premium); cursor: pointer;
-  transition: border-color .18s, transform .18s;
+  transition: border-color var(--dur), transform .18s;
   position: relative; overflow: hidden;
 }
 .ed-list-item::before {
   content: ''; position: absolute; left: 0; top: 15%; bottom: 15%;
-  width: 3px; border-radius: 0 2px 2px 0;
-  background: var(--teal); transform: scaleY(0); transition: transform .18s;
+  width: 3px; border-radius: 0;
+  background: var(--teal); transform: scaleY(0); transition: transform var(--dur);
 }
 .ed-list-item:hover { border-color: var(--border-strong); transform: translateX(2px); }
 .ed-list-item:hover::before { transform: scaleY(1); }
@@ -76,13 +76,13 @@
   width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
   background: var(--teal-dim); border: 1.5px solid var(--teal-border);
   display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 800; color: var(--teal);
+  font-size:var(--fs-sm); font-weight: 800; color: var(--teal);
   overflow: hidden;
 }
 .ed-list-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .ed-list-info { flex: 1; min-width: 0; }
-.ed-list-name { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ed-list-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ed-list-name { font-size:var(--fs-sm); font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ed-list-meta { font-size:var(--fs-xs); color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ed-aula-actions { display: flex; gap: 4px; align-items: center; }
 .ed-item-btn {
   width: 30px; height: 30px; border-radius: 8px;
@@ -96,15 +96,15 @@
 /* ── Search ── */
 .ed-search-wrap { position: relative; }
 .ed-search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--text-muted); display: flex; }
-.ed-search { width: 100%; height: 42px; padding: 0 14px 0 38px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg-glass); color: var(--text); font-family: 'Plus Jakarta Sans',sans-serif; font-size: 13px; }
+.ed-search { width: 100%; height: 42px; padding: 0 14px 0 38px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg-glass); color: var(--text); font-family: 'Plus Jakarta Sans',sans-serif; font-size:var(--fs-sm); }
 .ed-search:focus { outline: none; border-color: color-mix(in srgb, var(--teal) 45%, transparent); }
-.ed-filter-select { height: 42px; padding: 0 12px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg-glass); color: var(--text); font-family: 'Plus Jakarta Sans',sans-serif; font-size: 13px; }
+.ed-filter-select { height: 42px; padding: 0 12px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg-glass); color: var(--text); font-family: 'Plus Jakarta Sans',sans-serif; font-size:var(--fs-sm); }
 
 /* ── Empty state ── */
 .mb-empty { text-align: center; padding: 56px 24px; color: var(--text-muted); }
 .mb-empty-icon { margin-bottom: 12px; display: flex; align-items: center; justify-content: center; opacity: .4; color: var(--text-muted); }
 .mb-empty-title { font-size: 16px; font-weight: 800; color: var(--text); }
-.mb-empty-sub   { font-size: 13px; margin-top: 6px; line-height: 1.6; }
+.mb-empty-sub   { font-size:var(--fs-sm); margin-top: 6px; line-height: 1.6; }
 
 /* ── Formulário ── */
 .mb-form-grid { display: grid; grid-template-columns: 1fr; gap: 0; }
@@ -112,16 +112,16 @@
 .mb-form-full { grid-column: 1 / -1; }
 .mb-form-section {
   grid-column: 1 / -1;
-  font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+  font-size:var(--fs-xs); font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
   color: var(--teal); padding: 8px 0 6px;
   border-bottom: 1px solid var(--teal-border); margin: 8px 0 4px;
 }
 
 /* ── Foto upload/preview ── */
-.mb-foto-card { padding: 16px; border-radius: 18px; background: var(--bg-glass); border: 1px solid var(--border); }
+.mb-foto-card { padding: 16px; border-radius:var(--r-3); background: var(--bg-glass); border: 1px solid var(--border); }
 .mb-foto-hint { font-size: 12px; line-height: 1.4; color: var(--text-muted); margin-top: 2px; }
 .mb-foto-btn {
-  width: 100%; min-height: 52px; padding: 0 18px; border-radius: 14px;
+  width: 100%; min-height: 52px; padding: 0 18px; border-radius:var(--r-3);
   background: transparent; border: 1px solid var(--border);
   color: var(--text); font-family: 'Plus Jakarta Sans',sans-serif;
   font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap;
@@ -144,7 +144,7 @@
 .mb-cam-frame {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
   width: min(88%, 58vh); aspect-ratio: 3 / 4;
-  border: 3px solid #fff; border-radius: 10px;
+  border: 3px solid #fff; border-radius:var(--r-2);
   box-shadow: 0 0 0 100vmax rgba(0,0,0,.6); pointer-events: none;
 }
 .mb-crop-img { position: absolute; left: 0; top: 0; transform-origin: 0 0; max-width: none; user-select: none; -webkit-user-drag: none; }
@@ -152,12 +152,12 @@
 .mb-crop-zoom { padding: 10px 24px 0; background: #000; }
 .mb-crop-zoom input { width: 100%; }
 .mb-crop-aviso { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; color: var(--warning); font-size: 12px; font-weight: 600; padding: 0 16px; }
-.mb-cam-hint { position: absolute; left: 0; right: 0; top: 10px; text-align: center; color: #fff; font-size: 13px; font-weight: 600; text-shadow: 0 1px 3px #000; padding: 0 16px; }
+.mb-cam-hint { position: absolute; left: 0; right: 0; top: 10px; text-align: center; color: #fff; font-size:var(--fs-sm); font-weight: 600; text-shadow: 0 1px 3px #000; padding: 0 16px; }
 .mb-cam-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px calc(14px + env(safe-area-inset-bottom)); background: #000; }
 .mb-cam-bar button { background: none; border: 0; color: #fff; font: 600 14px 'Plus Jakarta Sans', sans-serif; min-width: 84px; padding: 10px 0; cursor: pointer; }
 .mb-cam-bar .mb-cam-shot { width: 68px; height: 68px; min-width: 68px; border-radius: 50%; border: 4px solid #fff; background: #fff; padding: 0; box-shadow: inset 0 0 0 4px #000; }
 .mb-foto-preview {
-  width: 96px; height: 128px; border-radius: 14px; overflow: hidden;
+  width: 96px; height: 128px; border-radius:var(--r-3); overflow: hidden;
   border: 2px solid var(--border); flex-shrink: 0; background: var(--bg4);
   position: relative;
 }
@@ -174,7 +174,7 @@
 .mb-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 14px; padding: 16px; border-radius: 16px; background: var(--bg-glass); border: 1px solid var(--border); }
 .mb-detail-grid .full { grid-column: 1 / -1; }
 @media (min-width: 768px) { .mb-detail-grid { grid-template-columns: 1fr 1fr 1fr; } }
-.mb-detail-sec { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin: 22px 0 8px 4px; }
+.mb-detail-sec { font-size:var(--fs-xs); font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin: 22px 0 8px 4px; }
 .mb-detail-head { display: flex; gap: 16px; align-items: center; }
 .mb-detail-photo { width: 84px; height: 112px; border-radius: 16px; overflow: hidden; border: 2px solid var(--border); flex-shrink: 0; background: var(--bg4); box-shadow: 0 10px 24px -12px rgba(0,0,0,.4); }
 .mb-detail-id { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
@@ -183,13 +183,13 @@
 .mb-detail-actions { display: flex; gap: 10px; margin-top: 18px; position: relative; }
 .mb-detail-actions .btn { flex: 1; height: 44px; justify-content: center; }
 .mb-detail-label { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 2px; }
-.mb-detail-value { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.4; }
+.mb-detail-value { font-size:var(--fs-md); font-weight: 700; color: var(--text); line-height: 1.4; }
 
 /* ── Aniversariantes: só a lista; o modal usa a estrutura padrão (header/body/footer) ── */
 .mb-aniv-body { display: flex; flex-direction: column; gap: 8px; }
 .mb-aniv-empty {
   text-align: center; padding: 32px 0;
-  font-size: 13px; color: var(--text-muted);
+  font-size:var(--fs-sm); color: var(--text-muted);
 }
 
 /* ── Badge topnav ── */
@@ -201,7 +201,7 @@
 .mb-aniv-badge {
   position: absolute; top: 2px; right: 2px;
   background: var(--gold); color: #000;
-  font-size: 9px; font-weight: 800;
+  font-size:var(--fs-xs); font-weight: 800;
   min-width: 16px; height: 16px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   padding: 0 4px; line-height: 1; pointer-events: none;
@@ -674,7 +674,7 @@ function _mbBuildListaItens(lista, total) {
           '<div class="ed-list-name">'+
             _mbEsc(m.nome||'—')+
             (bdHoje ? ' <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;flex-shrink:0;margin-left:2px"><rect x="2" y="11" width="20" height="10" rx="2" fill="#FF6B6B"/><rect x="2" y="11" width="20" height="4" rx="1" fill="#FF8E53"/><rect x="5" y="7" width="14" height="5" rx="1.5" fill="#FFD93D"/><rect x="5" y="7" width="14" height="2" rx="1" fill="#FFEC6E"/><line x1="8" y1="7" x2="8" y2="4" stroke="#FF6B6B" stroke-width="1.5" stroke-linecap="round"/><line x1="12" y1="7" x2="12" y2="3" stroke="#A78BFA" stroke-width="1.5" stroke-linecap="round"/><line x1="16" y1="7" x2="16" y2="4" stroke="#FF6B6B" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="8" cy="4" rx="1" ry="1.5" fill="#FF9500"/><ellipse cx="12" cy="3" rx="1" ry="1.5" fill="#FF9500"/><ellipse cx="16" cy="4" rx="1" ry="1.5" fill="#FF9500"/></svg>' : '')+
-            (!m.foto ? ' <span class="badge badge-purple" style="font-size:9px;padding:1px 6px">SEM FOTO</span>' : '')+
+            (!m.foto ? ' <span class="badge badge-purple" style="font-size:var(--fs-xs);padding:1px 6px">SEM FOTO</span>' : '')+
           '</div>'+
           '<div class="ed-list-meta">ROL '+_mbEsc(m.rol||'—')+' · '+_mbEsc(m.funcao||'Membro')+' · '+_mbEsc(m.cidade||'')+'/'+_mbEsc(m.estado||'')+'</div>'+
         '</div>'+
@@ -723,9 +723,9 @@ function mbAtualizarCardLista() {
         '</div>'+
         '<div style="flex:1;min-width:0;cursor:pointer" onclick="mbCard_selecionarPreview(\''+m.id+'\')">'+
           '<div style="font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(m.nome||'—')+'</div>'+
-          '<div style="font-size:10px;color:var(--text-muted)">ROL '+m.rol+' · '+(m.funcao||'Membro')+'</div>'+
+          '<div style="font-size:var(--fs-xs);color:var(--text-muted)">ROL '+m.rol+' · '+(m.funcao||'Membro')+'</div>'+
         '</div>'+
-        '<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;flex-shrink:0" onclick="event.stopPropagation();mbCard_downloadPDF(\''+m.id+'\')" title="PDF Carteirinha">'+
+        '<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:var(--fs-xs);flex-shrink:0" onclick="event.stopPropagation();mbCard_downloadPDF(\''+m.id+'\')" title="PDF Carteirinha">'+
           '<i data-lucide="file-down" class="ic-13"></i> PDF'+
         '</button>'+
       '</div>';
@@ -791,8 +791,8 @@ function _mbBuildAniversariantes() {
           (m.foto ? '<img src="'+(MB._fotoCache[m.foto]||'')+'">' : _mbEsc((m.nome||'?')[0].toUpperCase()))+
         '</div>'+
         '<div style="flex:1;min-width:0">'+
-          '<div style="font-size:13px;font-weight:700;color:var(--text)">'+_mbEsc(m.nome)+'</div>'+
-          '<div style="font-size:11px;color:var(--text-muted)">'+_mbEsc(m.nascimento)+' · Fará '+(((_mbIdade(m.nascimento)||0)+1))+' anos</div>'+
+          '<div style="font-size:var(--fs-sm);font-weight:700;color:var(--text)">'+_mbEsc(m.nome)+'</div>'+
+          '<div style="font-size:var(--fs-xs);color:var(--text-muted)">'+_mbEsc(m.nascimento)+' · Fará '+(((_mbIdade(m.nascimento)||0)+1))+' anos</div>'+
         '</div>'+
         '<span class="badge '+(hoje?'badge-gold':'badge-teal')+'">'+
           (hoje?'🎉 HOJE!':dias+' dia'+(dias!==1?'s':''))+
@@ -865,7 +865,7 @@ function _mbBuildForm() {
       '</div>'+
     '</div>'+
 
-    '<div style="background:var(--glass-bg-premium);border:var(--glass-border-premium);border-radius:18px;padding:20px;margin-bottom:96px;backdrop-filter:blur(20px)">'+
+    '<div style="background:var(--glass-bg-premium);border:var(--glass-border-premium);border-radius:var(--r-3);padding:20px;margin-bottom:96px;backdrop-filter:blur(20px)">'+
     '<div class="mb-form-grid" id="mb-form">'+
 
       /* Identificação */
@@ -1006,7 +1006,7 @@ function _mbBuildForm() {
           '</div>'+
         '</div>'+
         '<div id="mb-zoom-wrap" style="margin-top:14px;display:'+(MB.fotoData?'block':'none')+'">'+
-          '<div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:4px">Zoom</div>'+
+          '<div style="font-size:var(--fs-xs);font-weight:600;color:var(--text-muted);margin-bottom:4px">Zoom</div>'+
           '<input type="range" min="1" max="3" step="0.1" value="'+MB.fotoZoom+'" oninput="MB.fotoZoom=parseFloat(this.value);mbAtualizarFotoPreview()" style="width:100%">'+
         '</div>'+
         '</div>'+
@@ -1637,8 +1637,8 @@ function mbAbrirModalAniv() {
             (m.foto ? '<img src="'+(MB._fotoCache[m.foto]||'')+'">' : _mbEsc((m.nome||'?')[0].toUpperCase()))+
           '</div>'+
           '<div style="flex:1;min-width:0">'+
-            '<div style="font-size:13px;font-weight:700;color:var(--text)">'+_mbEsc(m.nome)+'</div>'+
-            '<div style="font-size:11px;color:var(--text-muted)">'+_mbEsc(m.nascimento)+' · Fará '+idade+' anos</div>'+
+            '<div style="font-size:var(--fs-sm);font-weight:700;color:var(--text)">'+_mbEsc(m.nome)+'</div>'+
+            '<div style="font-size:var(--fs-xs);color:var(--text-muted)">'+_mbEsc(m.nascimento)+' · Fará '+idade+' anos</div>'+
           '</div>'+
           '<span class="badge '+(hoje?'badge-gold':'badge-teal')+'">'+
             (hoje ? '🎉 HOJE!' : dias+' dia'+(dias!==1?'s':''))+
@@ -2020,7 +2020,7 @@ function mbImportarJSON(e) {
 .mb-qr-opt { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:12px; cursor:pointer; text-align:left;
   border:1px solid var(--border); background:var(--bg-card2, transparent); font-size:12px; line-height:1.4; }
 .mb-qr-opt input { margin-top:2px; accent-color: var(--teal); }
-.mb-qr-opt small { display:block; color:var(--text-dim); font-size:11px; }
+.mb-qr-opt small { display:block; color:var(--text-dim); font-size:var(--fs-xs); }
 .mb-card-back .back-address {
   padding-top: 3px;
   border-top: 1px solid rgba(217,224,240,0.2);
@@ -2041,7 +2041,7 @@ function mbImportarJSON(e) {
   padding-bottom: 4px;
 }
 .mb-card-preview-label {
-  font-size: 10px; font-weight: 700; letter-spacing: 1px;
+  font-size:var(--fs-xs); font-weight: 700; letter-spacing: 1px;
   text-transform: uppercase; color: var(--text-muted);
   text-align: center; margin-bottom: 6px;
 }
@@ -2064,7 +2064,7 @@ function mbImportarJSON(e) {
 .mb-toolbar-more-dd {
   position: absolute; right: 0; top: calc(100% + 6px);
   background: var(--bg3); border: 1px solid var(--border);
-  border-radius: 14px; padding: 6px;
+  border-radius:var(--r-3); padding: 6px;
   box-shadow: 0 8px 32px rgba(0,0,0,.28); z-index: 500;
   min-width: 200px; display: none; flex-direction: column; gap: 2px;
 }
@@ -2072,7 +2072,7 @@ function mbImportarJSON(e) {
 .mb-toolbar-more-dd button,
 .mb-toolbar-more-dd label {
   display: flex; align-items: center; gap: 9px;
-  padding: 9px 12px; border-radius: 9px; border: none;
+  padding: 9px 12px; border-radius:var(--r-1); border: none;
   background: none; cursor: pointer; font-size: 12px; font-weight: 600;
   color: var(--text); text-align: left; width: 100%;
   font-family: 'Plus Jakarta Sans', sans-serif; transition: background .15s;
@@ -2080,7 +2080,7 @@ function mbImportarJSON(e) {
 .mb-toolbar-more-dd button:hover,
 .mb-toolbar-more-dd label:hover { background: var(--bg4); }
 .mb-toolbar-more-dd .dd-label {
-  font-size: 10px; font-weight: 800; color: var(--text-muted);
+  font-size:var(--fs-xs); font-weight: 800; color: var(--text-muted);
   text-transform: uppercase; letter-spacing: .07em; padding: 4px 12px 2px;
 }
 
@@ -2096,13 +2096,13 @@ function mbImportarJSON(e) {
 }
 .mb-card-panel-preview {
   background: var(--glass-bg-premium); border: var(--glass-border-premium);
-  border-radius: 18px; padding: 18px 16px 16px;
+  border-radius:var(--r-3); padding: 18px 16px 16px;
   backdrop-filter: blur(14px);
   display: flex; flex-direction: column; align-items: center; gap: 14px;
 }
 .mb-card-panel-list {
   background: var(--glass-bg-premium); border: var(--glass-border-premium);
-  border-radius: 18px; padding: 16px;
+  border-radius:var(--r-3); padding: 16px;
   backdrop-filter: blur(14px);
 }
 .mb-card-panel-actions {
@@ -2132,11 +2132,11 @@ function mbImportarJSON(e) {
 .mb-lote-item.selected { border-color: var(--teal); background: var(--teal-dim); }
 .mb-lote-item-active { border-color: var(--teal-border) !important; box-shadow: inset 3px 0 0 var(--teal); }
 .mb-lote-check {
-  width: 20px; height: 20px; border-radius: 6px;
+  width: 20px; height: 20px; border-radius:var(--r-1);
   border: 2px solid var(--border); background: var(--bg4);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; transition: all .15s;
-  font-size: 11px; color: transparent;
+  font-size:var(--fs-xs); color: transparent;
 }
 .mb-lote-item.selected .mb-lote-check {
   background: var(--teal); border-color: var(--teal); color: #fff;
@@ -2154,15 +2154,15 @@ function mbImportarJSON(e) {
   position: fixed; bottom: 24px; left: 50%;
   transform: translateX(-50%);
   background: var(--bg3); border: 1px solid var(--border);
-  border-radius: 14px; padding: 14px 20px;
+  border-radius:var(--r-3); padding: 14px 20px;
   box-shadow: 0 8px 32px rgba(0,0,0,.4);
   z-index: 9999; min-width: 260px;
   text-align: center; display: none;
 }
-#mb-pdf-toast .pt-label { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
-#mb-pdf-toast .pt-bar-wrap { background: var(--border); border-radius: 4px; height: 6px; overflow: hidden; }
-#mb-pdf-toast .pt-bar { height: 100%; background: var(--teal); border-radius: 4px; transition: width .3s; }
-#mb-pdf-toast .pt-sub { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+#mb-pdf-toast .pt-label { font-size:var(--fs-sm); font-weight: 700; color: var(--text); margin-bottom: 8px; }
+#mb-pdf-toast .pt-bar-wrap { background: var(--border); border-radius:var(--r-1); height: 6px; overflow: hidden; }
+#mb-pdf-toast .pt-bar { height: 100%; background: var(--teal); border-radius:var(--r-1); transition: width var(--dur-slow); }
+#mb-pdf-toast .pt-sub { font-size:var(--fs-xs); color: var(--text-muted); margin-top: 6px; }
 </style>
 
 <!-- Container oculto de renderização para capturas PDF -->
@@ -2417,7 +2417,7 @@ function _mbBuildCarteirinha() {
   var panelPreview =
     '<div class="mb-card-panel-preview">'+
       '<div style="text-align:center">'+
-        '<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">'+_mbEsc(selected.nome||'Membro')+'</div>'+
+        '<div style="font-size:var(--fs-xs);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">'+_mbEsc(selected.nome||'Membro')+'</div>'+
         '<div class="mb-card-preview-label">Frente</div>'+
         mbCard_htmlFrente(selected, false)+
         '<div class="mb-card-preview-label" style="margin-top:14px">Verso</div>'+
@@ -2458,9 +2458,9 @@ function _mbBuildCarteirinha() {
         '</div>'+
         '<div style="flex:1;min-width:0;cursor:pointer" onclick="mbCard_selecionarPreview(\''+m.id+'\')">'+
           '<div style="font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(m.nome||'—')+'</div>'+
-          '<div style="font-size:10px;color:var(--text-muted)">ROL '+m.rol+' · '+(m.funcao||'Membro')+'</div>'+
+          '<div style="font-size:var(--fs-xs);color:var(--text-muted)">ROL '+m.rol+' · '+(m.funcao||'Membro')+'</div>'+
         '</div>'+
-        '<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;flex-shrink:0" onclick="event.stopPropagation();mbCard_downloadPDF(\''+m.id+'\')" title="PDF Carteirinha">'+
+        '<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:var(--fs-xs);flex-shrink:0" onclick="event.stopPropagation();mbCard_downloadPDF(\''+m.id+'\')" title="PDF Carteirinha">'+
           '<i data-lucide="file-down" class="ic-13"></i> PDF'+
         '</button>'+
       '</div>';
