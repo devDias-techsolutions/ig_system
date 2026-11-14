@@ -4,19 +4,19 @@
   display: flex; align-items: center; gap: 14px;
 }
 .idt-marca .brand-mark { width: 56px; height: 56px; font-size: 20px; flex-shrink: 0; border-radius: 16px; background: linear-gradient(135deg, var(--teal-dark), var(--teal)); box-shadow: 0 6px 18px var(--teal-glow); }
-.idt-marca-nome { font-size: 17px; font-weight: 800; color: var(--text); line-height: 1.2; }
+.idt-marca-nome { font-size: var(--fs-md); font-weight: 800; color: var(--text); line-height: 1.2; }
 .idt-marca-lema { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
-.idt-ajuda { font-size: 11px; color: var(--text-dim); line-height: 1.4; }
+.idt-ajuda { font-size: var(--fs-xs); color: var(--text-dim); line-height: 1.4; }
 
 .idt-cor-bloco { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
 .idt-cor-botao {
   position: relative; display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 14px 8px 8px;
-  background: var(--bg3); border: 1.5px solid var(--border-strong); border-radius: var(--radius-md, 14px); cursor: pointer;
+  background: var(--bg3); border: 1.5px solid var(--border-strong); border-radius: var(--r-3); cursor: pointer;
 }
 .idt-cor-botao input[type="color"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: 0; padding: 0; }
-.idt-cor-amostra { width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; background: var(--teal); box-shadow: 0 0 0 1px var(--border) inset; }
-.idt-cor-texto { flex: 1; font-size: 15px; font-weight: 700; color: var(--text); }
+.idt-cor-amostra { width: 40px; height: 40px; border-radius: var(--r-2); flex-shrink: 0; background: var(--teal); box-shadow: 0 0 0 1px var(--border) inset; }
+.idt-cor-texto { flex: 1; font-size: var(--fs-md); font-weight: 700; color: var(--text); }
 .idt-cor-botao svg { flex-shrink: 0; color: var(--text-muted); }
 .idt-cor-hex { text-transform: uppercase; }
 .idt-recentes-rotulo { font-size: 12px; font-weight: 700; color: var(--text-muted); margin: 0 0 8px; }
@@ -26,7 +26,7 @@
 
 .idt-grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 16px; }
 .idt-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-.idt-card h3 { font-size: 13px; font-weight: 700; color: var(--text); margin: 0; }
+.idt-card h3 { font-size: var(--fs-sm); font-weight: 700; color: var(--text); margin: 0; }
 .idt-card p { font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.45; }
 .idt-imagem {
   height: 120px; border-radius: var(--radius-sm); border: 1px dashed var(--border-strong);
