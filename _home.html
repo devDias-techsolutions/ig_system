@@ -99,23 +99,8 @@ button.bn-card:focus-visible { outline: 2px solid var(--teal); outline-offset: 2
 .bn-card.feat .bn-lab { color: inherit; opacity: .85; }
 .bn-card.feat .bn-num { font-size: var(--fs-2xl); color: inherit; font-variant-numeric: tabular-nums; }
 .bn-card.feat .bn-sub { color: inherit; opacity: .8; }
-.bn-card.feat .bn-ghost { color: currentColor; opacity: .14; width: 84px; height: 84px; right: -8px; bottom: -14px; }
-/* medidor em marca d'água: 12 barras largas no fundo do cartão; acesas = proporção de ativos no total (dado real) */
-.bn-meter { position: absolute; z-index: -1; left: var(--sp-4); right: var(--sp-4); bottom: 0; height: 28%; display: flex; align-items: flex-end; gap: 4px; pointer-events: none; }
-.bn-meter i { flex: 1; display: block; border-radius: 4px 4px 0 0; background: currentColor; opacity: .1; }
-.bn-meter i.on { opacity: .22; }
-.bn-meter i:nth-child(1) { height: 34%; }
-.bn-meter i:nth-child(2) { height: 40%; }
-.bn-meter i:nth-child(3) { height: 46%; }
-.bn-meter i:nth-child(4) { height: 52%; }
-.bn-meter i:nth-child(5) { height: 58%; }
-.bn-meter i:nth-child(6) { height: 64%; }
-.bn-meter i:nth-child(7) { height: 70%; }
-.bn-meter i:nth-child(8) { height: 76%; }
-.bn-meter i:nth-child(9) { height: 82%; }
-.bn-meter i:nth-child(10) { height: 88%; }
-.bn-meter i:nth-child(11) { height: 94%; }
-.bn-meter i:nth-child(12) { height: 100%; }
+.bn-card.feat .bn-ghost { color: currentColor; opacity: .16; width: 132px; height: 132px; right: -14px; top: 50%; bottom: auto; transform: translateY(-50%) rotate(-14deg); }
+.bn-card.feat .bn-ghost svg { fill-opacity: .4; stroke-width: 1.6; }
 
 .hm-bento { grid-template-columns: repeat(20, minmax(0, 1fr)); grid-auto-rows: minmax(68px, auto); }
 .hm-bento .bn-card { grid-column: span 10; }
@@ -342,13 +327,12 @@ function _kpiSkeleton() {
 }
 
 /* Mosaico: 1 destaque (Ativos, ou o primeiro número) + cartões menores; indicadores de atenção viram faixa âmbar. */
-function _bnCard(k, feat, sub, barras) {
+function _bnCard(k, feat, sub) {
   var dest = k.destino ? escHtml(k.destino) : '';
   var abre = dest ? 'button type="button" onclick="navigateTo(\'' + dest + '\')"' : 'div';
   var ic = k.icone ? escHtml(k.icone) : 'activity';
   return '<' + abre + ' class="bn-card' + (feat ? ' feat' : '') + '" data-k="' + escHtml(k.curto || '') + '">' +
-    (feat && barras < 0 ? '<span class="bn-ghost" aria-hidden="true"><i data-lucide="' + ic + '"></i></span>' : '') +
-    (feat && barras >= 0 ? '<span class="bn-meter" aria-hidden="true">' + [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function (n) { return '<i' + (n <= barras ? ' class="on"' : '') + '></i>'; }).join('') + '</span>' : '') +
+    (feat ? '<span class="bn-ghost" aria-hidden="true"><i data-lucide="' + ic + '"></i></span>' : '') +
     (feat ? '' : '<span class="bn-ico"><i data-lucide="' + ic + '"></i></span>') +
     '<span class="bn-txt"><span class="bn-lab">' + escHtml(feat ? (k.rotulo || k.curto || '') : (k.curto || k.rotulo || '')) + '</span>' +
     '<span class="bn-num">' + escHtml(k.valor || 0) + '</span>' +
@@ -365,7 +349,7 @@ function _kpiHtml(d) {
     var f = stats[iF];
     var irmaos = stats.filter(function (k) { return k.destino && k.destino === f.destino; });
     var total = irmaos.reduce(function (t, k) { return t + (k.valor || 0); }, 0);
-    html += '<div class="hm-bento">' + _bnCard(f, true, irmaos.length > 1 ? 'de ' + total + ' cadastrados' : '', irmaos.length > 1 && total ? Math.round((f.valor || 0) / total * 12) : -1) +
+    html += '<div class="hm-bento">' + _bnCard(f, true, irmaos.length > 1 ? 'de ' + total + ' cadastrados' : '') +
       stats.filter(function (k, n) { return n !== iF; }).map(function (k) { return _bnCard(k, false, ''); }).join('') + '</div>';
   }
   html += alertas.map(function (k) {
