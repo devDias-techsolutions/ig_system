@@ -895,3 +895,18 @@ test('Home: aniversariantes do mês só trazem nome e dia/mês, só de ativos, e
   assert.equal(r.data.itens[0].hoje, true);
   assert.equal(env.run("mb_aniversariantesDoMes('invalido', 3)").success, false);
 });
+
+// ═══ Escola Dominical (migração, etapa 1: backend sem tela) ═══
+test('EBD: carrega, expõe wrappers ed_* e o manifesto ainda não está registrado', () => {
+  const env = freshEnv();
+  assert.equal(env.run("typeof ed_listarClasses"), 'function');
+  assert.equal(env.run("typeof EscolaDominicalManifesto"), 'object');
+  assert.equal(env.run("Modulos.ativos().some(function(m){return m.id==='escola-dominical';})"), false);
+  assert.equal(env.run("EscolaDominicalManifesto.abas.length"), 7);
+  assert.equal(env.run("EscolaDominicalManifesto.perfis.indexOf('professor')>-1"), true);
+});
+
+test('EBD: endpoints exigem sessão válida', () => {
+  const env = freshEnv();
+  assert.equal(env.run("ed_listarClasses('invalido')").success, false);
+});
