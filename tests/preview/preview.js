@@ -84,6 +84,7 @@ async function irPara(page, rota, esperada) {
       const { ctx, page, erros } = await nova(browser, vp, t.sessao);
       await page.goto(ORIGIN);
       await irPara(page, t.sessao ? t.rota : null, t.nome === 'login' ? 'login' : t.rota);
+      if (process.env.TEMA) { await page.evaluate((x) => { document.documentElement.setAttribute('data-theme', x); }, process.env.TEMA); await page.waitForTimeout(300); } // TEMA=light|dark
       const arq = path.join(OUT, `${t.nome}-${tam}.png`);
       await page.screenshot({ path: arq });
       relatorio.push({ tela: t.nome, tam, erros });

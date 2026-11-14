@@ -145,7 +145,7 @@
 ───────────────────────────────────────────── */
 
 [data-theme="light"] {
-  --bg:               #F8FAFC; /* Slate 50 */
+  --bg:               #F1F1F1; /* cinza-claro neutro, sem tom azulado */
   --bg2:              #FFFFFF; /* Pure White */
   --bg3:              #F1F5F9; /* Slate 100 */
   --bg4:              #E2E8F0; /* Slate 200 */
@@ -964,16 +964,11 @@ textarea { height: auto; min-height: 110px; padding: 16px 18px; resize: vertical
 
 
 /* ─────────────────────────────────────────────
-   LIGHT MODE BACKGROUND — INSPIRAÇÃO SaaS
+   LIGHT MODE BACKGROUND — liso, cinza-claro neutro (#F1F1F1)
 ───────────────────────────────────────────── */
-[data-theme="light"] body::before {
-  background:
-    radial-gradient(ellipse at 5% 0%, color-mix(in srgb, var(--teal) 13%, transparent) 0%, transparent 40%),
-    radial-gradient(ellipse at 95% 5%, rgba(47,128,237,0.10) 0%, transparent 40%),
-    radial-gradient(ellipse at 50% 100%, rgba(139,110,255,0.07) 0%, transparent 45%),
-    linear-gradient(150deg, #DFF0F8 0%, #EBF1FA 40%, #E3EDF6 100%);
-}
-[data-theme="light"] .orb { opacity: .06; }
+[data-theme="light"] body::before { background: var(--bg); }
+[data-theme="light"] body::after { display: none; }
+[data-theme="light"] .orb { display: none; }
 
 /* ─────────────────────────────────────────────
    TOPNAV — PREMIUM SaaS STYLE
