@@ -96,9 +96,9 @@
 /* ── Search ── */
 .ed-search-wrap { position: relative; }
 .ed-search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--text-muted); display: flex; }
-.ed-search { width: 100%; height: 42px; padding: 0 14px 0 38px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg-glass); color: var(--text); font-family: 'Plus Jakarta Sans',sans-serif; font-size:var(--fs-sm); }
+.ed-search { width: 100%; height: 40px; padding: 0 14px 0 38px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg-glass); color: var(--text); font-family: 'Plus Jakarta Sans',sans-serif; font-size:var(--fs-sm); }
 .ed-search:focus { outline: none; border-color: color-mix(in srgb, var(--teal) 45%, transparent); }
-.ed-filter-select { height: 42px; padding: 0 12px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg-glass); color: var(--text); font-family: 'Plus Jakarta Sans',sans-serif; font-size:var(--fs-sm); }
+.ed-filter-select { height: 40px; padding: 0 12px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg-glass); color: var(--text); font-family: 'Plus Jakarta Sans',sans-serif; font-size:var(--fs-sm); }
 
 /* ── Empty state ── */
 .mb-empty { text-align: center; padding: 56px 24px; color: var(--text-muted); }
@@ -114,7 +114,7 @@
 .mb-atalhos .hm-mod.active .hm-mod-icon { box-shadow: 0 0 0 3px var(--teal-glow-soft), 0 6px 14px -8px var(--teal-glow); }
 .mb-atalhos .hm-mod.active .hm-mod-name { color: var(--teal); }
 .mb-fab {
-  position: fixed; z-index: 60; right: var(--gutter); bottom: calc(76px + env(safe-area-inset-bottom, 0px) + var(--sp-4));
+  position: fixed; z-index: 60; right: var(--gutter); bottom: calc(var(--sp-5) + env(safe-area-inset-bottom, 0px));
   width: 56px; height: 56px; border-radius: 50%; border: 0; cursor: pointer; display: grid; place-items: center;
   color: var(--on-teal, #fff); background: var(--teal); box-shadow: var(--shadow-lg), 0 10px 22px -10px var(--teal-glow);
   transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
@@ -123,7 +123,6 @@
 .mb-fab:hover { transform: translateY(-2px); }
 .mb-fab:active { transform: scale(.95); }
 .mb-fab:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
-@media (min-width: 1024px) { .mb-fab { bottom: var(--sp-6); } }
 @media (prefers-reduced-motion: reduce) { .mb-fab { transition: none; } .mb-fab:hover { transform: none; } }
 
 /* ── Resumo em chips ── */
@@ -140,7 +139,7 @@
 
 /* ── Formulário (mesma linguagem da Início: cartão claro liso, títulos fortes, campos sobre o fundo) ── */
 .mb-form-card {
-  margin-bottom: 96px; padding: var(--sp-5); border-radius: var(--r-3); border: 1px solid var(--border);
+  margin-bottom: 96px; padding: var(--sp-4); border-radius: var(--r-3); border: 1px solid var(--border);
   background: var(--bg-glass); box-shadow: var(--shadow-sm);
 }
 [data-theme="light"] .mb-form-card { background: #FFFFFF; }
@@ -150,12 +149,7 @@
 .mb-form-grid { display: grid; grid-template-columns: 1fr; gap: 0; }
 @media (min-width: 640px) { .mb-form-grid { grid-template-columns: 1fr 1fr; column-gap: 16px; } }
 .mb-form-full { grid-column: 1 / -1; }
-.mb-form-section {
-  grid-column: 1 / -1;
-  font-size: var(--fs-md); font-weight: 800; letter-spacing: -.01em;
-  color: var(--text); padding: var(--sp-2) 0 var(--sp-2);
-  border-bottom: 1px solid var(--border); margin: var(--sp-2) 0 var(--sp-3);
-}
+.mb-form-gap { grid-column: 1 / -1; height: var(--sp-4); } /* respiro entre blocos (sem subtítulos) */
 
 /* ── Foto upload/preview ── */
 .mb-foto-card { padding: var(--sp-4); border-radius: var(--r-3); background: var(--bg); border: 1px solid var(--border); }
@@ -906,7 +900,6 @@ function _mbBuildForm() {
     '<div class="mb-form-grid" id="mb-form">'+
 
       /* Identificação */
-      '<div class="mb-form-section">Identificação</div>'+
       '<div class="field">'+
         '<label>ROL</label>'+
         '<input type="text" id="mbf-rol" value="'+rol+'" placeholder="0001">'+
@@ -918,7 +911,7 @@ function _mbBuildForm() {
       '</div>'+
 
       /* Dados pessoais */
-      '<div class="mb-form-section">Dados Pessoais</div>'+
+      '<div class="mb-form-gap"></div>'+
       '<div class="field">'+
         '<label>Sexo <span class="req">*</span></label>'+
         '<select id="mbf-sexo">'+
@@ -957,7 +950,7 @@ function _mbBuildForm() {
       '<div class="field"><label>CPF</label><input type="text" id="mbf-cpf" value="'+v('cpf')+'" placeholder="000.000.000-00"></div>'+
 
       /* Eclesiástico */
-      '<div class="mb-form-section">Dados Eclesiásticos</div>'+
+      '<div class="mb-form-gap"></div>'+
       '<div class="field">'+
         '<label>Mês/Ano de Batismo <span class="req">*</span></label>'+
         '<input type="text" id="mbf-batismo" value="'+v('batismo')+'" placeholder="MM/AAAA" maxlength="7" oninput="this.value=_mbMaskMesAno(this.value)">'+
@@ -975,7 +968,7 @@ function _mbBuildForm() {
       '</div>'+
 
       /* Endereço */
-      '<div class="mb-form-section">Endereço</div>'+
+      '<div class="mb-form-gap"></div>'+
       '<div class="field">'+
         '<label>Rua <span class="req">*</span></label>'+
         '<input type="text" id="mbf-rua" value="'+v('rua')+'" placeholder="Nome da rua">'+
@@ -1011,7 +1004,7 @@ function _mbBuildForm() {
       '</div>'+
 
       /* Contato */
-      '<div class="mb-form-section">Contato</div>'+
+      '<div class="mb-form-gap"></div>'+
       '<div class="field">'+
         '<label>Celular <span class="req">*</span></label>'+
         '<input type="tel" id="mbf-celular" value="'+v('celular')+'" placeholder="(31) 99999-9999" maxlength="15" oninput="this.value=_mbMaskPhone(this.value)">'+
@@ -1020,7 +1013,7 @@ function _mbBuildForm() {
       '<div class="field"><label>E-mail</label><input type="email" id="mbf-email" value="'+v('email')+'" placeholder="email@exemplo.com"></div>'+
 
       /* Foto */
-      '<div class="mb-form-section mb-form-full">Foto 3×4</div>'+
+      '<div class="mb-form-gap"></div>'+
       '<div class="mb-form-full">'+
         '<div class="mb-foto-card">'+
         '<div class="mb-foto-row">'+

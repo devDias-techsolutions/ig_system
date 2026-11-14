@@ -159,40 +159,28 @@ test('desktop: sidebar com Início, módulos, Usuários e Identidade; o item ati
   assert.deepEqual(erros, []);
 });
 
-test('celular: menu inferior no lugar da sidebar, sem duplicar navegação nas telas', async () => {
+test('celular: sem menu inferior; a sidebar vira gaveta (sanduíche) com os mesmos destinos', async () => {
   const backend = criarBackend();
   const { page, erros } = await abrir(browser, backend, { viewport: { width: 390, height: 844 } });
   await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  assert.equal(await page.locator('#app-bnav, .app-bnav, .bn-item').count(), 0, 'não existe mais menu inferior');
   assert.ok(!(await page.isVisible('#app-sidebar')));
-  assert.ok(!(await page.isVisible('#app-bnav')), 'Início não tem menu inferior (os atalhos o substituem)');
   const atalhos = await page.$$eval('.hm-mods .hm-mod', (els) => els.map((e) => e.innerText.trim()));
   assert.deepEqual(atalhos, ['Membros', 'Usuários', 'Identidade']);
   await irParaMembros(page);
-  assert.ok(await page.isVisible('#app-bnav'));
-  assert.deepEqual(await page.$$eval('#app-bnav .bn-item', (els) => els.map((e) => e.innerText.trim())), ['Início', 'Membros', 'Usuários', 'Identidade']);
-  await page.click('#app-bnav .bn-item:has-text("Usuários")');
+  assert.ok(await page.isVisible('.nav-burger'));
+  await page.click('.nav-burger');
+  await page.waitForFunction(() => document.body.classList.contains('nav-open'));
+  await page.waitForTimeout(400);
+  assert.ok(await page.isVisible('#app-sidebar'));
+  const itens = await page.$$eval('#app-sidebar .sb-item', (els) => els.map((e) => e.innerText.trim()));
+  assert.deepEqual(itens, ['Início', 'Membros', 'Usuários', 'Identidade']);
+  await page.click('#app-sidebar .sb-item:has-text("Usuários")');
   await esperarTela(page, 'usuarios');
-  assert.equal(await page.locator('#app-bnav').count(), 1);
-  assert.equal(await page.locator('.usr-bottom-nav, .bottom-nav').count(), 0);
-  assert.deepEqual(erros, []);
-});
-
-test('celular: com mais de 5 destinos os excedentes vão para "Mais"', async () => {
-  const backend = criarBackend();
-  const { page, erros } = await abrir(browser, backend, { viewport: { width: 390, height: 844 } });
-  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
-  await irParaMembros(page);
-  await page.evaluate(() => {
-    ['a', 'b', 'c', 'd'].forEach((x) => { MODULOS.push({ id: x, nome: 'Mod ' + x, descricao: '', icone: 'box', rota: 'mod-' + x, render: 'renderHome', perfis: ['admin', 'secretaria'] }); });
-    renderNav(true);
-  });
-  const barra = await page.$$eval('#app-bnav .bn-item', (els) => els.map((e) => e.innerText.trim()));
-  assert.equal(barra.length, 5);
-  assert.equal(barra[4], 'Mais');
-  await page.click('#app-bnav .bn-item:has-text("Mais")');
-  await page.waitForSelector('#modal-mais.open');
-  const extras = await page.$$eval('#bnav-more-list .sb-item', (els) => els.map((e) => e.innerText.trim()));
-  assert.ok(extras.includes('Usuários') && extras.includes('Identidade') && extras.length === 4, extras.join(','));
+  assert.ok(!(await page.evaluate(() => document.body.classList.contains('nav-open'))), 'gaveta fecha ao navegar');
+  await page.click('.nav-burger');
+  await page.keyboard.press('Escape');
+  assert.ok(!(await page.evaluate(() => document.body.classList.contains('nav-open'))), 'Esc fecha a gaveta');
   assert.deepEqual(erros, []);
 });
 
@@ -615,9 +603,9 @@ test('layout: botões da barra de ações não mudam de lugar entre "tudo salvo"
       // espera a barra parar de se mover (animações de entrada) antes de medir
       let ant = -1, atual = -2;
       for (let i = 0; i < 25 && ant !== atual; i++) { ant = atual; await page.waitForTimeout(200); atual = await page.evaluate(() => document.querySelector('.action-bar').getBoundingClientRect().bottom); }
-      const nav = await page.evaluate(() => document.querySelector('.app-bnav').getBoundingClientRect().top);
+      const nav = await page.evaluate(() => innerHeight);
       const info = await page.evaluate(() => ({ sy: window.scrollY, h: document.documentElement.scrollHeight, ih: innerHeight, ab: document.querySelector('.action-bar').getBoundingClientRect().top, cssBottom: getComputedStyle(document.querySelector('.action-bar')).bottom, pos: getComputedStyle(document.querySelector('.action-bar')).position, mq: matchMedia('(max-width: 1023px)').matches, iw: innerWidth, scrollers: Array.from(document.querySelectorAll('*')).filter((n) => n.scrollTop > 0).map((n) => n.tagName + '.' + n.className + ':' + n.scrollTop).slice(0, 5), vv: window.visualViewport && [visualViewport.height, visualViewport.offsetTop] }));
-      assert.ok(atual <= nav, 'barra de ações acima do menu inferior: ' + JSON.stringify({ barra: atual, nav, ...info }));
+      assert.ok(atual <= nav, 'barra de ações dentro da tela: ' + JSON.stringify({ barra: atual, nav, ...info }));
     }
     await page.context().close();
   }

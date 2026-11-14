@@ -23,6 +23,8 @@
 .hm-art { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; color: #fff; }
 .hm-art svg { position: absolute; right: 0; top: 0; width: 100%; height: 100%; }
 .hm-top { position: absolute; top: calc(var(--sp-3) * -1); right: var(--gutter); z-index: 2; }
+.hm-burger { position: absolute; top: calc(var(--sp-3) * -1); left: var(--gutter); z-index: 2; margin: 0; }
+.hm-burger i, .hm-burger svg { width: 20px; height: 20px; }
 .hm-menu-wrap { position: relative; flex-shrink: 0; }
 .hm-me {
   width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; font-family: inherit;
@@ -234,6 +236,7 @@ function renderHome() {
     '<header class="hm-hero hm-rise" style="--i:' + (i++) + '">' +
       '<div class="hm-art" aria-hidden="true">' + _homeArte() + '</div>' +
       '<div class="hm-hero-in">' +
+      '<button type="button" class="hm-me nav-burger hm-burger" onclick="abrirMenuNav()" aria-label="Abrir menu" aria-expanded="false"><i data-lucide="menu"></i></button>' +
       '<div class="hm-top">' +
         '<div class="hm-menu-wrap">' +
           '<button type="button" class="hm-me" id="hm-me-btn" aria-label="Menu do usuário" aria-haspopup="true" onclick="homeToggleMenu(event)">' + escHtml(getInitials(App.session.nome || '')) + '</button>' +
