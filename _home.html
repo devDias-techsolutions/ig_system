@@ -238,13 +238,13 @@ function renderHome() {
   html += '<section class="hm-block hm-rise" style="--i:' + (i++) + '">' +
     '<h2 class="hm-h">Atalhos</h2>' +
     '<div class="hm-mods">' +
-      (mods.length || podeUsuarios
-        ? mods.map(function (m) { return _moduleBtn(m.icone, m.nome, m.descricao, m.rota); }).join('') +
-          (podeUsuarios ? _moduleBtn('shield-check', 'Usuários', 'Acessos, perfis e permissões', 'usuarios') : '')
+      (mods.length
+        ? mods.map(function (m) { return _moduleBtn(m.icone, m.nome, m.descricao, m.rota); }).join('')
         : _homeEstado('layout-grid', 'Nenhum módulo disponível',
             perfil === 'admin'
               ? 'Ative módulos na aba <b>Config</b> da planilha (chave <b>MODULOS_ATIVOS</b>) ou instale um módulo.'
               : 'Peça ao administrador para liberar módulos para o seu perfil.')) +
+      (podeUsuarios ? _moduleBtn('shield-check', 'Usuários', 'Acessos, perfis e permissões', 'usuarios') : '') +
     '</div>' +
   '</section>';
 

@@ -68,7 +68,7 @@ test('perfil secretaria entra na Home do seu perfil (sem administração) e abre
   assert.ok(!/Usuários/.test(texto), 'secretaria não vê o atalho nem o grupo de usuários');
   assert.ok(!/Atividade recente/.test(texto), 'secretaria não vê atividade de administração');
   assert.match(texto, /Membros ativos/i);
-  assert.match(texto, /Aniversariantes do mês/);
+  assert.match(texto, /Aniversariantes do mês/i);
   await page.evaluate(() => navigateTo('membros'));
   await esperarTela(page, 'membros');
   assert.deepEqual(erros, []);
