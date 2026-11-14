@@ -562,49 +562,48 @@ body::after {
 }
 
 /* ══ GRUPO DE INDICADORES — cartão mestre (Início, Membros, módulos) ══
-   Um assunto por cartão: título + descrição, métricas dentro, faixa de atenção e UMA seta.
-   O ícone é um bloco 3D reto (face + espessura) que vaza pela borda superior. */
-.kpi-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: var(--sp-6) var(--sp-4); padding-top: var(--sp-4); }
+   Um assunto por cartão. Cabeçalho = faixa em degradê (cor do assunto → transparente, da esquerda para a direita)
+   com o rótulo e o título; abaixo, números grandes (32 px) com o nome embaixo e, se houver, linhas de atenção.
+   Sem ícone em bloco, sem 3D, sem barras: o número é o foco. */
+.kpi-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: var(--sp-4); }
 .kpi-group {
   --kpi-color: var(--teal); --kpi-dim: var(--teal-dim); --kpi-border: var(--teal-border); --kpi-shadow: var(--teal-glow);
-  --kg-dark: color-mix(in srgb, var(--kpi-color) 52%, #000);
-  position: relative; isolation: isolate; padding: var(--sp-6) var(--sp-4) var(--sp-4); border-radius: var(--r-3);
+  position: relative; isolation: isolate; overflow: hidden; border-radius: var(--r-3);
   border: 1px solid var(--border); background: var(--bg-glass);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,.05);
   transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
   animation: cardIn .55s var(--ease-spring) both;
 }
-[data-theme="light"] .kpi-group { background: rgba(255,255,255,.9); border: 1px solid rgba(255,255,255,.7); box-shadow: 0 10px 30px -5px rgba(0,32,96,.10); }
+[data-theme="light"] .kpi-group { background: rgba(255,255,255,.92); border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(15,23,42,.05), 0 8px 24px -12px rgba(15,23,42,.10); }
 .kpi-groups > :nth-child(2) { animation-delay: .08s; } .kpi-groups > :nth-child(3) { animation-delay: .16s; }
 .kpi-group.is-link { cursor: pointer; }
 .kpi-group.is-link:hover { transform: translateY(-2px); border-color: var(--kpi-border); box-shadow: var(--shadow); }
 .kpi-group.is-link:focus-visible { outline: 2px solid var(--kpi-color); outline-offset: 3px; }
-.kg-gem {
-  position: absolute; left: var(--sp-4); top: calc(var(--sp-4) * -1); width: 40px; height: 40px; border-radius: var(--r-2); display: grid; place-items: center; color: #fff;
-  background: linear-gradient(145deg, color-mix(in srgb, var(--kpi-color) 88%, #fff), var(--kpi-color) 55%, color-mix(in srgb, var(--kpi-color) 80%, #000));
-  box-shadow: 0 3px 0 var(--kg-dark), inset 0 1px 0 rgba(255,255,255,.4);
+.kg-head {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--kpi-color) 24%, transparent), color-mix(in srgb, var(--kpi-color) 8%, transparent) 55%, transparent 100%);
+  border-bottom: 1px solid color-mix(in srgb, var(--kpi-color) 16%, var(--border));
 }
-.kg-gem i, .kg-gem svg { width: 20px; height: 20px; stroke-width: 2; }
-.kg-name { padding: 0 var(--sp-6) 0 0; min-height: 22px; font-size: var(--fs-lg); font-weight: 800; letter-spacing: -.025em; line-height: 1.15; color: var(--text); }
-.kg-sub { margin-top: 3px; padding: 0 var(--sp-6) 0 0; font-size: var(--fs-xs); color: var(--text-muted); }
-.kg-stats { display: grid; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); margin-top: var(--sp-4); border-radius: var(--r-2); border: 1px solid var(--border); background: rgba(255,255,255,.04); }
-[data-theme="light"] .kg-stats { background: #F1F6FB; }
-.kg-stat { padding: 12px 14px; min-width: 0; }
-.kg-stat + .kg-stat { border-left: 1px solid var(--border); }
-.kg-lab { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-xs); font-weight: 700; letter-spacing: .02em; color: var(--text-muted); }
-.kg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; background: var(--kpi-color); }
-.kg-dot.ok { background: var(--success); } .kg-dot.bad { background: var(--danger); } .kg-dot.info { background: var(--cyan); } .kg-dot.warn { background: var(--gold); }
-.kg-num { margin-top: 6px; font-size: var(--fs-2xl); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--text);
+.kg-titles { min-width: 0; }
+.kg-eyebrow { display: block; font-size: var(--fs-xs); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--kpi-color); }
+[data-theme="light"] .kg-eyebrow { color: color-mix(in srgb, var(--kpi-color) 82%, #000); }
+.kg-name { margin-top: 2px; font-size: var(--fs-lg); font-weight: 700; letter-spacing: -.01em; line-height: 1.2; color: var(--text); }
+.kpi-group .kpi-go { position: static; width: auto; height: auto; flex-shrink: 0; display: inline-flex; align-items: center; gap: 2px; border-radius: 0; background: none;
+  font-size: var(--fs-sm); font-weight: 600; color: var(--kpi-color); }
+[data-theme="light"] .kpi-group .kpi-go { color: color-mix(in srgb, var(--kpi-color) 82%, #000); }
+.kpi-group .kpi-go i, .kpi-group .kpi-go svg { width: 16px; height: 16px; }
+.kg-stats { display: grid; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); gap: var(--sp-3); padding: var(--sp-4); }
+.kg-stat { min-width: 0; }
+.kg-num { font-size: var(--fs-2xl); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--text);
   animation: kpiValue .8s var(--ease-spring) .1s both; }
-.kg-alert { display: flex; align-items: center; gap: 10px; margin-top: var(--sp-3); padding: 10px 14px; border-radius: var(--r-2); font-size: var(--fs-sm); font-weight: 600; color: var(--text);
-  background: color-mix(in srgb, var(--cyan) 12%, transparent); border: 1px solid color-mix(in srgb, var(--cyan) 30%, transparent); }
-.kg-alert i, .kg-alert svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--cyan); }
-.kg-alert b { font-size: var(--fs-md); font-weight: 800; }
-.kg-alert .kg-more { margin-left: auto; font-size: var(--fs-xs); font-weight: 800; color: var(--cyan); }
-[data-theme="light"] .kg-alert i, [data-theme="light"] .kg-alert svg, [data-theme="light"] .kg-alert .kg-more { color: #2457c9; }
-.kpi-group .kpi-go { top: 14px; right: 14px; }
+.kg-lab { margin-top: 2px; font-size: var(--fs-sm); font-weight: 500; color: var(--text-muted); line-height: 1.3; }
+.kg-alert { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border-top: 1px solid var(--border); font-size: var(--fs-sm); font-weight: 500; color: var(--text); }
+.kg-alert b { min-width: 28px; font-size: var(--fs-lg); font-weight: 800; font-variant-numeric: tabular-nums; }
+.kg-alert .kg-more { margin-left: auto; padding: var(--sp-1) var(--sp-3); border-radius: var(--r-pill); font-size: var(--fs-xs); font-weight: 700;
+  color: var(--gold); background: color-mix(in srgb, var(--gold) 14%, transparent); }
+[data-theme="light"] .kg-alert .kg-more { color: #92400E; background: #FEF3C7; }
 .kpi-group.is-loading { pointer-events: none; }
-.kpi-group.is-loading::before { display: none; }
 
 /* ══════════════════════════════════════════════════
    LAYOUT SYSTEM — estrutura mínima de toda tela (ver docs/LAYOUT.md)
@@ -1545,24 +1544,23 @@ function _kpiCard(icon, colorClass, value, label, tag, valueId, destino) {
   '</div>';
 }
 
-/* Grupo de indicadores: { cor, icone, titulo, sub, destino?, stats:[{label,valor,dot?,id?}], alertas:[{icone,valor,texto,id?,mais?}] }
-   Com destino, o grupo inteiro abre a tela (uma seta só); sem destino, é só leitura. */
+/* Grupo de indicadores: { cor, titulo, sub, destino?, stats:[{label,valor,id?}], alertas:[{valor,texto,id?}] }
+   Cabeçalho em faixa (rótulo = titulo, título = sub). Com destino, o grupo inteiro abre a tela ("Ver tudo"); sem destino, é só leitura. */
 function _kpiGroup(o) {
   var nav = o.destino ? 'navigateTo(\'' + escHtml(o.destino) + '\')' : '';
   var link = o.destino ? ' is-link" role="button" tabindex="0" aria-label="' + escHtml(o.titulo) + ': abrir" onclick="' + nav + '" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();' + nav + '}' : '';
   var stats = (o.stats || []).map(function (st) {
-    return '<div class="kg-stat"><div class="kg-lab"><i class="kg-dot ' + escHtml(st.dot || '') + '"></i>' + escHtml(st.label) + '</div>' +
-      '<div class="kg-num"' + (st.id ? ' id="' + escHtml(st.id) + '"' : '') + '>' + escHtml(st.valor) + '</div></div>';
+    return '<div class="kg-stat"><div class="kg-num"' + (st.id ? ' id="' + escHtml(st.id) + '"' : '') + '>' + escHtml(st.valor) + '</div>' +
+      '<div class="kg-lab">' + escHtml(st.label) + '</div></div>';
   }).join('');
   var alertas = (o.alertas || []).map(function (a) {
-    return '<div class="kg-alert"><i data-lucide="' + escHtml(a.icone || 'image-off') + '"></i><b' + (a.id ? ' id="' + escHtml(a.id) + '"' : '') + '>' + escHtml(a.valor) + '</b> ' + escHtml(a.texto) +
+    return '<div class="kg-alert"><b' + (a.id ? ' id="' + escHtml(a.id) + '"' : '') + '>' + escHtml(a.valor) + '</b> <span>' + escHtml(a.texto) + '</span>' +
       (o.destino ? '<span class="kg-more">Ver lista ›</span>' : '') + '</div>';
   }).join('');
   return '<section class="kpi-group ' + escHtml(o.cor || 'kc-teal') + link + '">' +
-    '<div class="kg-gem"><i data-lucide="' + escHtml(o.icone || 'activity') + '"></i></div>' +
-    '<div class="kg-name">' + escHtml(o.titulo) + '</div>' +
-    (o.sub ? '<div class="kg-sub">' + escHtml(o.sub) + '</div>' : '') +
-    (o.destino ? '<span class="kpi-go" aria-hidden="true"><i data-lucide="chevron-right"></i></span>' : '') +
+    '<div class="kg-head"><div class="kg-titles"><span class="kg-eyebrow">' + escHtml(o.titulo) + '</span>' +
+      (o.sub ? '<div class="kg-name">' + escHtml(o.sub) + '</div>' : '') + '</div>' +
+    (o.destino ? '<span class="kpi-go" aria-hidden="true">Ver tudo<i data-lucide="chevron-right"></i></span>' : '') + '</div>' +
     (stats ? '<div class="kg-stats" style="--n:' + (o.stats || []).length + '">' + stats + '</div>' : '') +
     alertas +
   '</section>';
