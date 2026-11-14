@@ -37,9 +37,9 @@ function usuarios() {
 function serializar(perfil) {
   const sessao = { token: 'tok', id: 'u1', nome: 'Ana Souza', email: 'ana@igreja.test', perfil, primeiroAcesso: false };
   const kpis = (process.env.SEM_MODULOS ? [] : [
-    { icone: 'users', cor: 'kc-teal', valor: 128, rotulo: 'Membros ativos', curto: 'Ativos' },
-    { icone: 'user-x', cor: 'kc-gold', valor: 14, rotulo: 'Membros inativos', curto: 'Inativos' },
-    { icone: 'camera', cor: 'kc-blue', valor: 37, rotulo: 'Membros sem foto', curto: 'Sem foto' },
+    { icone: 'users', cor: 'kc-teal', valor: 128, rotulo: 'Membros ativos', curto: 'Ativos', destino: 'membros' },
+    { icone: 'user-x', cor: 'kc-gold', valor: 14, rotulo: 'Membros inativos', curto: 'Inativos', destino: 'membros' },
+    { icone: 'camera', cor: 'kc-blue', valor: 37, rotulo: 'Membros sem foto', curto: 'Sem foto', dica: 'Complete os cadastros', destino: 'membros', alerta: true },
   ]).concat([{ icone: 'shield-check', cor: 'kc-green', valor: 3, rotulo: 'Usuários do sistema', curto: 'Usuários' }]);
   const fns = {
     getSession: () => ok(SESSAO),
