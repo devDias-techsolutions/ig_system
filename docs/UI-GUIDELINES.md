@@ -67,3 +67,7 @@ A navegação principal **nunca** é mais forte que o conteúdo.
 - [ ] Estados: vazio, carregando e erro desenhados.
 - [ ] Sem `alert/confirm/prompt`; nada de CSS obsoleto sobreposto (remova).
 - [ ] `npm test` verde; se corrigiu valores antigos, `npm run ui:baseline`.
+
+## Escala compacta de controles (todas as telas, sem exceção por largura)
+
+Botão `.btn` 40px (`.btn-sm` 32, `.btn-lg` 44) · campo/select/busca 40px · rótulo de campo 12px/700 sem caixa alta · espaço entre campos `--sp-3` · aba 44px · `.icon-btn` 40px (36px dentro de cabeçalhos de cartão) · barra superior 56px. Ações secundárias em cabeçalhos de cartão são ícones (com `aria-label`/`title`), não botões com texto. Telas de detalhe não usam subtítulos de seção: só respiro (`--sp-4`) entre os blocos.
