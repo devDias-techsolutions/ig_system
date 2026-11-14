@@ -28,6 +28,7 @@
   display: inline-flex; align-items: center; min-height: 36px; padding: 0 var(--sp-4); border-radius: var(--r-pill);
   font-size: var(--fs-sm); font-weight: 700; color: #fff; background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .22);
 }
+.hm-pill::before { content: ''; width: 8px; height: 8px; margin-right: var(--sp-2); border-radius: 50%; background: var(--hero-gold); }
 .hm-menu-wrap { position: relative; flex-shrink: 0; }
 .hm-me {
   width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; font-family: inherit;
@@ -38,11 +39,11 @@
 .hm-me:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .hm-brand { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--sp-3); margin-top: var(--sp-1); }
 .hm-logo {
-  width: 76px; height: 76px; flex-shrink: 0; border-radius: 50%; overflow: hidden; display: grid; place-items: center;
-  background: rgba(255, 255, 255, .1); box-shadow: 0 0 0 2px var(--hero-gold), 0 0 0 5px rgba(232, 194, 107, .22), 0 10px 24px -8px rgba(0, 0, 0, .45);
+  width: 104px; height: 104px; flex-shrink: 0; border-radius: 50%; overflow: hidden; display: grid; place-items: center;
+  background: #FFFFFF; box-shadow: 0 0 0 2px var(--hero-gold), 0 0 0 5px rgba(232, 194, 107, .22), 0 10px 24px -8px rgba(0, 0, 0, .45);
 }
-.hm-logo .brand-mark { font-size: var(--fs-lg); }
-.hm-logo .brand-mark img { padding: 8px; }
+.hm-logo .brand-mark { font-size: var(--fs-xl); color: var(--hero-a); }
+.hm-logo .brand-mark img { padding: 0; }
 .hm-id-txt { min-width: 0; }
 .hm-eyebrow { font-size: var(--fs-xs); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--hero-gold); }
 .hm-title { margin-top: var(--sp-1); font-size: var(--fs-lg); font-weight: 800; letter-spacing: -.035em; line-height: 1.12; color: #fff; overflow-wrap: anywhere; }
@@ -61,7 +62,7 @@
   padding: 0; border: 0; background: none; color: inherit; font-family: inherit; cursor: pointer;
 }
 .hm-mod-icon {
-  width: 56px; height: 56px; border-radius: var(--r-3); display: grid; place-items: center; color: var(--teal);
+  width: 56px; height: 56px; border-radius: var(--r-3); display: grid; place-items: center; color: var(--kpi-color, var(--teal));
   background: var(--bg-glass); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
   transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
 }
@@ -94,7 +95,7 @@ button.bn-card:focus-visible { outline: 2px solid var(--teal); outline-offset: 2
 .bn-sub { font-size: var(--fs-xs); color: var(--text-dim); }
 /* destaque: fundo sólido na cor da igreja, número grande, ícone-marca d'água e brilho */
 .bn-card.feat {
-  grid-column: 1 / -1; flex-direction: column; align-items: flex-start; justify-content: flex-end; min-height: 116px; border-color: transparent;
+  grid-column: 1 / -1; flex-direction: column; align-items: flex-start; justify-content: center; min-height: 0; border-color: transparent;
   color: var(--on-teal, #fff);
   background: radial-gradient(circle at 85% 15%, rgba(255, 255, 255, .28), transparent 45%), linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
   box-shadow: 0 12px 28px -14px var(--teal-glow);
@@ -103,7 +104,6 @@ button.bn-card:focus-visible { outline: 2px solid var(--teal); outline-offset: 2
 .bn-card.feat .bn-num { font-size: var(--fs-2xl); color: inherit; }
 .bn-card.feat .bn-sub { color: inherit; opacity: .8; }
 .bn-card.feat .bn-ghost { color: currentColor; opacity: .2; width: 112px; height: 112px; right: -14px; bottom: -18px; }
-.bn-card.feat .bn-ico { position: absolute; right: var(--sp-4); top: var(--sp-3); color: inherit; background: rgba(255, 255, 255, .22); box-shadow: none; }
 /* destaque + 2 menores: lado a lado também no celular */
 .hm-bento.par { grid-template-columns: 1.15fr 1fr; }
 .hm-bento.par .bn-card.feat { grid-column: 1; grid-row: span 2; }
@@ -121,11 +121,16 @@ button.bn-card:focus-visible { outline: 2px solid var(--teal); outline-offset: 2
   border: 1px solid color-mix(in srgb, var(--warning) 40%, transparent); border-radius: var(--r-3);
   background: color-mix(in srgb, var(--warning) 14%, transparent);
 }
-.hm-alert-ico { width: 36px; height: 36px; border-radius: var(--r-2); flex-shrink: 0; display: grid; place-items: center; background: color-mix(in srgb, var(--warning) 22%, transparent); color: var(--warning); }
+.hm-alert-ico { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; background: #FFFFFF; color: color-mix(in srgb, var(--warning) 70%, #000); }
 .hm-alert-ico i { width: 18px; height: 18px; }
 .hm-alert-txt { flex: 1; min-width: 0; font-size: var(--fs-sm); line-height: 1.4; color: var(--text); }
-.hm-alert-txt b { font-weight: 800; }
-.hm-alert .btn { flex-shrink: 0; }
+.hm-alert-txt b { display: block; font-weight: 800; }
+.hm-alert-txt span { display: block; font-size: var(--fs-xs); color: var(--text-muted); }
+.hm-alert-go {
+  flex-shrink: 0; min-height: 40px; padding: 0 var(--sp-4); border: 0; border-radius: var(--r-pill); cursor: pointer; font-family: inherit;
+  font-size: var(--fs-sm); font-weight: 800; color: #fff; background: color-mix(in srgb, var(--warning) 62%, #000);
+}
+.hm-alert-go:focus-visible { outline: 2px solid var(--warning); outline-offset: 2px; }
 
 /* ── Aniversariantes: 3 cartões lado a lado ── */
 .hm-anivs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
@@ -274,7 +279,7 @@ function renderHome() {
               ? 'Ative módulos na aba <b>Config</b> da planilha (chave <b>MODULOS_ATIVOS</b>) ou instale um módulo.'
               : 'Peça ao administrador para liberar módulos para o seu perfil.')) +
       /* mesmos destinos do menu (módulos, Usuários, Identidade), conforme o perfil */
-      navItens().filter(function (it) { return it.rota !== 'home'; }).map(function (it) { return _moduleBtn(it.icone, it.nome, '', it.rota); }).join('') +
+      navItens().filter(function (it) { return it.rota !== 'home'; }).map(function (it, n) { return _moduleBtn(it.icone, it.nome, '', it.rota, n); }).join('') +
     '</div>' +
   '</section>';
 
@@ -337,8 +342,8 @@ function _bnCard(k, feat, sub) {
   var ic = k.icone ? escHtml(k.icone) : 'activity';
   return '<' + abre + ' class="bn-card ' + escHtml(k.cor || 'kc-teal') + (feat ? ' feat' : '') + '" data-k="' + escHtml(k.curto || '') + '">' +
     '<span class="bn-ghost" aria-hidden="true"><i data-lucide="' + ic + '"></i></span>' +
-    '<span class="bn-ico"><i data-lucide="' + ic + '"></i></span>' +
-    '<span class="bn-txt"><span class="bn-lab">' + escHtml(k.rotulo || k.curto || '') + '</span>' +
+    (feat ? '' : '<span class="bn-ico"><i data-lucide="' + ic + '"></i></span>') +
+    '<span class="bn-txt"><span class="bn-lab">' + escHtml(feat ? (k.rotulo || k.curto || '') : (k.curto || k.rotulo || '')) + '</span>' +
     '<span class="bn-num">' + escHtml(k.valor || 0) + '</span>' +
     (sub ? '<span class="bn-sub">' + escHtml(sub) + '</span>' : '') + '</span>' +
   '</' + (dest ? 'button' : 'div') + '>';
@@ -358,10 +363,12 @@ function _kpiHtml(d) {
   }
   html += alertas.map(function (k) {
     var ic = k.icone === 'camera' ? 'image-off' : (k.icone || 'alert-triangle');
+    var rot = String(k.rotulo || k.curto || '').toLowerCase();
+    if (k.valor === 1) rot = rot.replace(/^membros\b/, 'membro');
     return '<div class="hm-alert" data-k="' + escHtml(k.curto || '') + '">' +
       '<span class="hm-alert-ico"><i data-lucide="' + escHtml(ic) + '"></i></span>' +
-      '<div class="hm-alert-txt"><b>' + escHtml(k.valor) + '</b> ' + escHtml(String(k.rotulo || k.curto || '').toLowerCase()) + '</div>' +
-      (k.destino ? '<button type="button" class="btn btn-ghost btn-sm" onclick="navigateTo(\'' + escHtml(k.destino) + '\')">Resolver</button>' : '') +
+      '<div class="hm-alert-txt"><b>' + escHtml(k.valor) + ' ' + escHtml(rot) + '</b>' + (k.dica ? '<span>' + escHtml(k.dica) + '</span>' : '') + '</div>' +
+      (k.destino ? '<button type="button" class="hm-alert-go" onclick="navigateTo(\'' + escHtml(k.destino) + '\')">Resolver</button>' : '') +
     '</div>';
   }).join('');
   return html;
@@ -381,8 +388,9 @@ function _activitySkeleton() {
 }
 
 
-function _moduleBtn(icon, name, desc, view) {
-  return '<button class="hm-mod" onclick="navigateTo(\'' + view + '\')"' + (desc ? ' title="' + escHtml(desc) + '"' : '') + '>' +
+var HOME_CORES = ['kc-teal', 'kc-blue', 'kc-gold', 'kc-green', 'kc-purple'];
+function _moduleBtn(icon, name, desc, view, n) {
+  return '<button class="hm-mod ' + HOME_CORES[(n || 0) % HOME_CORES.length] + '" onclick="navigateTo(\'' + view + '\')"' + (desc ? ' title="' + escHtml(desc) + '"' : '') + '>' +
     '<div class="hm-mod-icon"><i data-lucide="' + escHtml(icon) + '"></i></div>' +
     '<div class="hm-mod-name">' + escHtml(name) + '</div>' +
   '</button>';
