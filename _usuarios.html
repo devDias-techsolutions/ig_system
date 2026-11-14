@@ -27,8 +27,8 @@
   color:rgba(255,255,255,0.7); transition:all .2s;
 }
 .usr-hero-back:hover { background:rgba(255,255,255,0.12); color:#fff; transform:translateX(-2px); }
-.usr-hero-title { font-size:22px; font-weight:900; color:#fff; letter-spacing:-.6px; }
-.usr-hero-sub { font-size:11px; color:rgba(255,255,255,.5); margin-top:3px; font-family:'DM Mono',monospace; text-transform:uppercase; letter-spacing:.5px; }
+.usr-hero-title { font-size:var(--fs-lg); font-weight:900; color:#fff; letter-spacing:-.6px; }
+.usr-hero-sub { font-size:var(--fs-xs); color:rgba(255,255,255,.5); margin-top:3px; font-family:'DM Mono',monospace; text-transform:uppercase; letter-spacing:.5px; }
 
 /* ── CONTENT ── */
 /* ── SECTION HEADER ── */
@@ -62,7 +62,7 @@
   height:34px; padding:0 14px; border-radius:100px;
   border:1.5px solid var(--border); background:var(--bg-glass);
   font-family:'Plus Jakarta Sans',sans-serif; font-size:12px; font-weight:700;
-  color:var(--text-muted); cursor:pointer; transition:all .18s;
+  color:var(--text-muted); cursor:pointer; transition:all var(--dur);
 }
 .usr-filter-btn.active {
   background:var(--teal-dim); border-color:var(--teal-border); color:var(--teal);
@@ -74,7 +74,7 @@
 .usr-item {
   background:var(--bg-glass);
   border:1px solid var(--border);
-  border-radius:18px; padding:14px 18px;
+  border-radius:var(--r-3); padding:14px 18px;
   display:flex; align-items:center; gap:14px;
   transition:border-color .2s, box-shadow .2s;
   position:relative; overflow:hidden;
@@ -89,19 +89,26 @@
   --usr-admin-fg:#FF7D93; --usr-sec-fg:#B7A0FF;
   width:46px; height:46px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
-  font-weight:800; font-size:15px; flex-shrink:0;
+  font-weight:800; font-size:var(--fs-md); flex-shrink:0;
   border:2px solid rgba(255,255,255,.1);
 }
 .usr-item-body { flex:1; min-width:0; }
 .usr-item-name { font-size:14px; font-weight:700; color:var(--text); }
-.usr-item-email { font-size:11px; color:var(--text-muted); margin-top:2px; font-family:'DM Mono',monospace; }
+.usr-item-email { font-size:var(--fs-xs); color:var(--text-muted); margin-top:2px; font-family:'DM Mono',monospace; overflow-wrap:anywhere; }
 .usr-item-meta { display:flex; align-items:center; gap:8px; margin-top:6px; flex-wrap:wrap; }
 .usr-item-actions { display:flex; gap:6px; flex-shrink:0; }
 .usr-act-btn {
-  width:34px; height:34px; border-radius:10px;
+  width:34px; height:34px; border-radius:var(--r-2);
   border:1px solid var(--border); background:var(--bg3); cursor:pointer;
   display:flex; align-items:center; justify-content:center;
-  color:var(--text-muted); transition:all .18s;
+  color:var(--text-muted); transition:all var(--dur);
+}
+/* celular: ações numa linha própria (alvo de toque de 44 px), sem cobrir nome e e-mail */
+@media (max-width:480px) {
+  .usr-item { flex-wrap:wrap; }
+  .usr-item-actions { flex-basis:100%; justify-content:flex-end; gap:8px; padding-top:12px; border-top:1px solid var(--border); }
+  .usr-item-actions:empty { display:none; }
+  .usr-act-btn { width:44px; height:44px; }
 }
 .usr-act-btn:hover { background:var(--bg4); color:var(--text); border-color:var(--border-strong); }
 .usr-act-btn.danger:hover { background:rgba(255,94,122,0.10); color:var(--danger); border-color:rgba(255,94,122,.3); }
@@ -119,29 +126,29 @@
 /* ── MATRIZ DE PERMISSÕES ── */
 .perm-card {
   background: var(--bg-glass); border: 1px solid var(--border);
-  border-radius: 18px; overflow: hidden; margin-bottom: 12px;
+  border-radius:var(--r-3); overflow: hidden; margin-bottom: 12px;
 }
 /* Wrapper de scroll horizontal para a tabela — necessário no mobile */
 .perm-table-wrap {
   overflow-x: auto; -webkit-overflow-scrolling: touch;
 }
 .perm-table-wrap::-webkit-scrollbar { height: 3px; }
-.perm-table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.perm-table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius:var(--r-1); }
 .perm-module-header {
   display: flex; align-items: center; gap: 10px;
   padding: 14px 18px; border-bottom: 1px solid var(--border);
   background: var(--bg3);
 }
 .perm-module-icon {
-  width: 32px; height: 32px; border-radius: 9px;
+  width: 32px; height: 32px; border-radius:var(--r-1);
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.perm-module-name  { font-size: 13px; font-weight: 800; color: var(--text); }
-.perm-module-desc  { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.perm-module-name  { font-size:var(--fs-sm); font-weight: 800; color: var(--text); }
+.perm-module-desc  { font-size:var(--fs-xs); color: var(--text-muted); margin-top: 1px; }
 
 .perm-table { width: 100%; border-collapse: collapse; }
 .perm-table th {
-  padding: 10px 18px; font-size: 10px; font-weight: 800; text-transform: uppercase;
+  padding: 10px 18px; font-size:var(--fs-xs); font-weight: 800; text-transform: uppercase;
   letter-spacing: .06em; color: var(--text-muted); text-align: left;
   border-bottom: 1px solid var(--border); background: var(--bg3);
 }
@@ -157,19 +164,19 @@
 
 .perm-check {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 22px; height: 22px; border-radius: 6px;
+  width: 22px; height: 22px; border-radius:var(--r-1);
 }
 .perm-check.yes { background: rgba(54,211,153,.15); color: var(--success); border: 1px solid rgba(54,211,153,.3); }
 .perm-check.no  { background: rgba(255,94,122,.10); color: var(--danger);  border: 1px solid rgba(255,94,122,.2); opacity: .6; }
 
 .perm-perfil-badge {
   display: inline-flex; align-items: center; gap: 6px;
-  font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 100px;
+  font-size:var(--fs-xs); font-weight: 700; padding: 3px 10px; border-radius: 100px;
 }
 
 .perm-legend {
   display: flex; gap: 16px; flex-wrap: wrap;
-  padding: 12px 18px; font-size: 11px; color: var(--text-muted);
+  padding: 12px 18px; font-size:var(--fs-xs); color: var(--text-muted);
   border-top: 1px solid var(--border); background: var(--bg3); align-items: center;
 }
 .perm-legend-item { display: flex; align-items: center; gap: 6px; }
@@ -213,7 +220,7 @@ function renderUsuarios() {
 
       /* Header */
       '<div class="usr-section-header">'+
-        '<div id="usr-count" style="font-size:13px;color:var(--text-muted)">Carregando...</div>'+
+        '<div id="usr-count" style="font-size:var(--fs-sm);color:var(--text-muted)">Carregando...</div>'+
         (isAdmin ?
           '<button class="btn btn-primary btn-sm" onclick="usrOpenModalNovoUsuario()">'+
             '<i data-lucide="user-plus" class="ic-15"></i> Novo Usuário'+
@@ -261,8 +268,8 @@ function _usrSkeletonItem() {
   return '<div class="usr-item">'+
     '<div class="skeleton" style="width:46px;height:46px;border-radius:50%;flex-shrink:0"></div>'+
     '<div style="flex:1">'+
-      '<div class="skeleton" style="width:55%;height:13px;border-radius:5px;margin-bottom:8px"></div>'+
-      '<div class="skeleton" style="width:75%;height:11px;border-radius:4px;margin-bottom:6px"></div>'+
+      '<div class="skeleton" style="width:55%;height:13px;border-radius:var(--r-1);margin-bottom:8px"></div>'+
+      '<div class="skeleton" style="width:75%;height:11px;border-radius:var(--r-1);margin-bottom:6px"></div>'+
       '<div class="skeleton" style="width:35%;height:20px;border-radius:100px"></div>'+
     '</div>'+
   '</div>';
@@ -271,18 +278,18 @@ function _usrSkeletonItem() {
 // ── CARREGAR USUÁRIOS ─────────────────────────────────────
 function _usrCarregar() {
   var listEl = document.getElementById('usr-list');
-  if (listEl) listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px"><div class="loader-spinner" style="margin:0 auto 12px"></div>Carregando...</div>';
+  if (listEl) listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:var(--fs-sm)"><div class="loader-spinner" style="margin:0 auto 12px"></div>Carregando...</div>';
 
   google.script.run
     .withFailureHandler(function(e) {
       var msg = (e && e.message) ? e.message : 'Erro de conexão.';
-      if (listEl) listEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--danger);font-size:13px;display:flex;align-items:center;justify-content:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' + msg + '</div>';
+      if (listEl) listEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--danger);font-size:var(--fs-sm);display:flex;align-items:center;justify-content:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' + msg + '</div>';
       showToast('Erro: ' + msg, 'error');
     })
     .withSuccessHandler(function(res) {
       if (!res || !res.success) {
         var msg = res ? res.error : 'Erro desconhecido.';
-        if (listEl) listEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--danger);font-size:13px;display:flex;align-items:center;justify-content:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' + msg + '</div>';
+        if (listEl) listEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--danger);font-size:var(--fs-sm);display:flex;align-items:center;justify-content:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' + msg + '</div>';
         showToast(msg, 'error');
         return;
       }
@@ -321,7 +328,7 @@ function _usrRenderLista() {
     listEl.innerHTML = '<div class="usr-empty">'+
       '<div class="usr-empty-icon"><i data-lucide="users" style="width:44px;height:44px"></i></div>'+
       '<div class="usr-empty-title">Nenhum usuário encontrado</div>'+
-      '<div style="font-size:13px;margin-top:4px">Tente outro filtro ou busca.</div>'+
+      '<div style="font-size:var(--fs-sm);margin-top:4px">Tente outro filtro ou busca.</div>'+
     '</div>';
     return;
   }
@@ -345,11 +352,11 @@ function _usrRenderLista() {
       '<div class="usr-item'+(ativo?'':' inativo')+'">'+
         '<div class="usr-avatar" style="background:'+cor.bg+';color:'+cor.fg+'">'+ini+'</div>'+
         '<div class="usr-item-body">'+
-          '<div class="usr-item-name">'+_usrEsc(u.Nome)+(isSelf?' <span style="font-size:10px;color:var(--teal)">(você)</span>':(!ativo?' <span style="font-size:10px;color:var(--text-dim)">(inativo)</span>':''))+'</div>'+
+          '<div class="usr-item-name">'+_usrEsc(u.Nome)+(isSelf?' <span style="font-size:var(--fs-xs);color:var(--teal)">(você)</span>':(!ativo?' <span style="font-size:var(--fs-xs);color:var(--text-dim)">(inativo)</span>':''))+'</div>'+
           '<div class="usr-item-email">'+_usrEsc(u.Email||'')+'</div>'+
           '<div class="usr-item-meta">'+
-            '<span class="badge '+perfilClass+'" style="font-size:10px;padding:2px 10px;border-radius:100px;font-weight:800">'+perfilLabel+'</span>'+
-            (u.UltLogin ? '<span style="font-size:10px;color:var(--text-dim)">Último login: '+u.UltLogin+'</span>' : '')+
+            '<span class="badge '+perfilClass+'" style="font-size:var(--fs-xs);padding:2px 10px;border-radius:100px;font-weight:800">'+perfilLabel+'</span>'+
+            (u.UltLogin ? '<span style="font-size:var(--fs-xs);color:var(--text-dim)">Último login: '+u.UltLogin+'</span>' : '')+
           '</div>'+
         '</div>'+
         '<div class="usr-item-actions">'+
@@ -416,9 +423,9 @@ function _modalNovoUsuario() {
             '<input type="password" id="nusr-senha" placeholder="Mín. 8 caracteres" style="padding-right:48px">'+
             '<button type="button" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-dim);display:flex" onclick="usrTogglePwd(\'nusr-senha\',this)"><i data-lucide="eye" class="ic-18"></i></button>'+
           '</div>'+
-          '<div style="font-size:11px;color:var(--text-muted);margin-top:4px">O usuário será solicitado a trocar no primeiro acesso.</div>'+
+          '<div style="font-size:var(--fs-xs);color:var(--text-muted);margin-top:4px">O usuário será solicitado a trocar no primeiro acesso.</div>'+
         '</div>'+
-        '<div id="nusr-err" style="display:none;background:rgba(255,94,122,0.10);border:1px solid rgba(255,94,122,.3);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--danger)"></div>'+
+        '<div id="nusr-err" style="display:none;background:rgba(255,94,122,0.10);border:1px solid rgba(255,94,122,.3);border-radius:12px;padding:10px 14px;font-size:var(--fs-sm);color:var(--danger)"></div>'+
       '</div>'+
       '<div class="modal-footer">'+
         '<button class="btn btn-secondary btn-full" onclick="usrCloseModal(\'modal-novo-usr\')">Cancelar</button>'+
@@ -476,7 +483,7 @@ function _modalEditarUsuario() {
         '<button class="btn btn-ghost btn-sm" style="width:36px;padding:0" onclick="usrCloseModal(\'modal-editar-usr\')"><i data-lucide="x" class="ic-16"></i></button>'+
       '</div>'+
       '<div class="modal-body">'+
-        '<div id="eusr-email-label" style="background:var(--bg4);border-radius:10px;padding:8px 14px;font-size:12px;font-family:\'DM Mono\',monospace;color:var(--text-muted);margin-bottom:16px"></div>'+
+        '<div id="eusr-email-label" style="background:var(--bg4);border-radius:var(--r-2);padding:8px 14px;font-size:12px;font-family:\'DM Mono\',monospace;color:var(--text-muted);margin-bottom:16px"></div>'+
         '<div class="field"><label>Nome completo *</label><input type="text" id="eusr-nome" placeholder="Nome do usuário"></div>'+
         '<div class="field"><label>Perfil *</label>'+
           '<select id="eusr-perfil">'+
@@ -484,7 +491,7 @@ function _modalEditarUsuario() {
             '<option value="admin">Admin</option>'+
           '</select>'+
         '</div>'+
-        '<div id="eusr-err" style="display:none;background:rgba(255,94,122,0.10);border:1px solid rgba(255,94,122,.3);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--danger)"></div>'+
+        '<div id="eusr-err" style="display:none;background:rgba(255,94,122,0.10);border:1px solid rgba(255,94,122,.3);border-radius:12px;padding:10px 14px;font-size:var(--fs-sm);color:var(--danger)"></div>'+
         '<input type="hidden" id="eusr-id">'+
       '</div>'+
       '<div class="modal-footer">'+
@@ -544,9 +551,9 @@ function _modalResetarSenha() {
             '<input type="password" id="reset-usr-senha" placeholder="Mín. 8 caracteres" style="padding-right:48px">'+
             '<button type="button" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-dim);display:flex" onclick="usrTogglePwd(\'reset-usr-senha\',this)"><i data-lucide="eye" class="ic-18"></i></button>'+
           '</div>'+
-          '<div style="font-size:11px;color:var(--text-muted);margin-top:4px">O usuário será solicitado a trocar no próximo acesso.</div>'+
+          '<div style="font-size:var(--fs-xs);color:var(--text-muted);margin-top:4px">O usuário será solicitado a trocar no próximo acesso.</div>'+
         '</div>'+
-        '<div id="reset-usr-err" style="display:none;background:rgba(255,94,122,0.10);border:1px solid rgba(255,94,122,.3);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--danger)"></div>'+
+        '<div id="reset-usr-err" style="display:none;background:rgba(255,94,122,0.10);border:1px solid rgba(255,94,122,.3);border-radius:12px;padding:10px 14px;font-size:var(--fs-sm);color:var(--danger)"></div>'+
         '<input type="hidden" id="reset-usr-id">'+
       '</div>'+
       '<div class="modal-footer">'+
@@ -645,7 +652,7 @@ function usrSetTab(tab) {
   if (tab === 'usuarios') {
     content.innerHTML =
       '<div class="usr-section-header">'+
-        '<div id="usr-count" style="font-size:13px;color:var(--text-muted)">'+UsrState.usuarios.length+' usuário(s)</div>'+
+        '<div id="usr-count" style="font-size:var(--fs-sm);color:var(--text-muted)">'+UsrState.usuarios.length+' usuário(s)</div>'+
         (App.session.perfil === 'admin' ?
           '<button class="btn btn-primary btn-sm" onclick="usrOpenModalNovoUsuario()">'+
             '<i data-lucide="user-plus" class="ic-15"></i> Novo Usuário'+
@@ -671,7 +678,7 @@ function usrSetTab(tab) {
 
     // Mostrar loading enquanto busca do banco
     var content = document.getElementById('usr-content');
-    if (content) content.innerHTML = '<div style="text-align:center;padding:48px 24px;color:var(--text-muted)"><div class="loader-spinner" style="margin:0 auto 12px"></div><div style="font-size:13px">Carregando permissões…</div></div>';
+    if (content) content.innerHTML = '<div style="text-align:center;padding:48px 24px;color:var(--text-muted)"><div class="loader-spinner" style="margin:0 auto 12px"></div><div style="font-size:var(--fs-sm)">Carregando permissões…</div></div>';
 
     google.script.run
       .withFailureHandler(function() {
@@ -890,7 +897,7 @@ function usrRenderPermissoes() {
         '<div class="perm-legend">'+
           '<span class="perm-legend-item"><span class="perm-check yes">'+svgCheck+'</span> Permitido</span>'+
           '<span class="perm-legend-item"><span class="perm-check no">'+svgX+'</span> Sem acesso</span>'+
-          (isAdmin ? '<span class="perm-legend-item" style="color:var(--text-muted);font-size:10px;margin-left:auto">Clique para editar</span>' : '')+
+          (isAdmin ? '<span class="perm-legend-item" style="color:var(--text-muted);font-size:var(--fs-xs);margin-left:auto">Clique para editar</span>' : '')+
         '</div>'+
       '</div>';
   });
@@ -915,7 +922,7 @@ function _permModuleIconPath(icon) {
   var s = document.createElement('style');
   s.id  = 'perm-toggle-style';
   s.textContent =
-    '.perm-toggle { cursor:pointer; background:none; border:none; padding:0; display:inline-flex; align-items:center; justify-content:center; transition:transform .12s, box-shadow .12s; }' +
+    '.perm-toggle { cursor:pointer; background:none; border:none; padding:0; display:inline-flex; align-items:center; justify-content:center; transition:transform var(--dur-fast), box-shadow var(--dur-fast); }' +
     '.perm-toggle:hover { transform:scale(1.18); box-shadow:0 0 0 3px rgba(255,255,255,0.08); }' +
     '[data-theme="light"] .perm-toggle:hover { box-shadow:0 0 0 3px rgba(0,0,0,0.06); }' +
     '#perm-save-btn.dirty { background:var(--teal); animation:permDirtyPulse 1.4s ease-in-out infinite; }' +
@@ -960,15 +967,15 @@ document.addEventListener('click', function(e) {
 .usr-mob-cfg-dd {
   position: fixed; right: 12px; top: 56px;
   background: var(--bg3); border: 1px solid var(--border);
-  border-radius: 14px; padding: 7px; z-index: 9998;
+  border-radius:var(--r-3); padding: 7px; z-index: 9998;
   min-width: 210px; display: none; flex-direction: column; gap: 2px;
   box-shadow: 0 12px 40px rgba(0,0,0,.32);
 }
 .usr-mob-cfg-dd.open { display: flex; }
 .usr-mob-cfg-dd button {
   display: flex; align-items: center; gap: 10px;
-  padding: 10px 13px; border-radius: 9px; border: none; background: none;
-  cursor: pointer; font-size: 13px; font-weight: 600;
+  padding: 10px 13px; border-radius:var(--r-1); border: none; background: none;
+  cursor: pointer; font-size:var(--fs-sm); font-weight: 600;
   color: var(--text); text-align: left; width: 100%; transition: background .15s;
   font-family: 'Plus Jakarta Sans', sans-serif;
 }

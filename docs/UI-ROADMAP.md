@@ -17,7 +17,7 @@ Regras em `docs/UI-GUIDELINES.md`; estrutura em `docs/LAYOUT.md`.
 | UI-1 | `UI-GUIDELINES.md`, tokens de escala no `index.html`, `tests/ui.test.js` + `ui-baseline.json` | Feita |
 | UI-2 | Normalizar peças repetidas. **Feito:** abas (48 px, indicador sólido), barra inferior e menu lateral discretos (ativo = cor + linha fina, sem pílula/brilho), KPI compacto (`.kpi-group` e `.kpi-card`: bloco 40 px, número 32 px, sem aura/texto em degradê) e fim do halo pulsante em todo ícone de KPI. **Falta:** cabeçalho (topnav) em uma linha | Parcial |
 | UI-2b | Revisão da UI-2: bloco do KPI alinhado ao título (sem recuo solto) com respiro, KPI sem vidro empilhado dentro do painel, abas com dica de rolagem (esmaecer na borda) e aba ativa sempre visível no celular | Feita |
-| UI-3 | Aplicar em Home → Membros → Usuários → Identidade (uma tela por PR). **Feito:** Home (zerada: fonte/raio/duração; resta 1 animação contínua, o ponto do perfil). **Membros:** UI fora do cartão nas escalas (resta só o cartão impresso, com tamanhos próprios). **Falta:** Usuários, Identidade | Parcial |
+| UI-3 | Aplicar em Home → Membros → Usuários → Identidade (uma tela por PR). **Feito:** Home (zerada: fonte/raio/duração; resta 1 animação contínua, o ponto do perfil). **Membros:** UI fora do cartão nas escalas (resta só o cartão impresso, com tamanhos próprios). **Usuários:** nas escalas; no celular as ações do usuário ficam numa linha própria (44 px) sem cobrir o e-mail. **Falta:** Identidade | Parcial |
 | UI-4 | Telas de acesso (login, primeiro acesso, recuperar senha) | Pendente |
 | UI-5 | Zerar o limite de valores fora da escala (`npm run ui:baseline` a cada ganho) | Contínuo |
 
