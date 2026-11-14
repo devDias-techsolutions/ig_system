@@ -10,15 +10,19 @@
 @keyframes hmRise { to { opacity: 1; transform: translateY(0); } }
 
 /* ── Cartão institucional (topo): cor profunda da igreja, logo grande, grafismo temático ── */
+/* A página da Início não tem moldura: o cartão vai de borda a borda, colado ao topo; o resto fica em .hm-body */
+.page.hm { max-width: none; padding: 0 0 var(--sp-7); }
+.hm-body, .hm-hero-in { max-width: var(--page-w, 1120px); margin: 0 auto; padding: 0 var(--gutter); }
+.hm-hero-in { position: relative; z-index: 1; }
 .hm-hero {
-  position: relative; z-index: 5; margin-bottom: var(--sp-6); padding: var(--sp-5); color: #fff;
-  border-radius: var(--r-4); box-shadow: var(--shadow-lg);
+  position: relative; z-index: 5; margin-bottom: var(--sp-6); color: #fff;
+  padding: calc(var(--sp-5) + env(safe-area-inset-top, 0px)) 0 var(--sp-6);
+  border-radius: 0 0 var(--r-4) var(--r-4); box-shadow: var(--shadow-lg);
   background: linear-gradient(140deg, var(--hero-b) 0%, var(--hero-a) 100%);
 }
 .hm-art { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; color: #fff; }
 .hm-art svg { position: absolute; right: 0; top: 0; width: 100%; height: 100%; }
 .hm-art .ouro { color: var(--hero-gold); }
-.hm-top, .hm-brand { position: relative; z-index: 1; }
 .hm-top { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
 .hm-pill {
   display: inline-flex; align-items: center; min-height: 36px; padding: 0 var(--sp-4); border-radius: var(--r-pill);
@@ -32,9 +36,9 @@
 }
 .hm-me:hover { background: rgba(255, 255, 255, .24); }
 .hm-me:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-.hm-brand { display: flex; align-items: center; gap: var(--sp-5); margin-top: var(--sp-5); }
+.hm-brand { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--sp-4); margin-top: var(--sp-2); }
 .hm-logo {
-  width: 88px; height: 88px; flex-shrink: 0; border-radius: 50%; overflow: hidden; display: grid; place-items: center;
+  width: 96px; height: 96px; flex-shrink: 0; border-radius: 50%; overflow: hidden; display: grid; place-items: center;
   background: rgba(255, 255, 255, .1); box-shadow: 0 0 0 3px var(--hero-gold), 0 0 0 7px rgba(232, 194, 107, .22), 0 10px 24px -8px rgba(0, 0, 0, .45);
 }
 .hm-logo .brand-mark { font-size: var(--fs-xl); }
@@ -42,39 +46,36 @@
 .hm-id-txt { min-width: 0; }
 .hm-eyebrow { font-size: var(--fs-xs); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--hero-gold); }
 .hm-title { margin-top: var(--sp-1); font-size: var(--fs-xl); font-weight: 800; letter-spacing: -.035em; line-height: 1.12; color: #fff; overflow-wrap: anywhere; }
-.hm-lema { margin-top: var(--sp-2); padding-left: var(--sp-3); border-left: 2px solid var(--hero-gold); font-size: var(--fs-sm); font-style: italic; line-height: 1.5; color: rgba(255, 255, 255, .82); }
-@media (max-width: 480px) {
-  .hm-hero { padding: var(--sp-4); }
-  .hm-brand { gap: var(--sp-4); }
-  .hm-logo { width: 72px; height: 72px; }
-  .hm-logo .brand-mark { font-size: var(--fs-lg); }
-}
+.hm-lema { max-width: 520px; margin: var(--sp-2) auto 0; font-size: var(--fs-sm); font-style: italic; line-height: 1.5; color: rgba(255, 255, 255, .82); }
+@media (max-width: 480px) { .hm-title { font-size: var(--fs-lg); } }
 
 /* ── Blocos e títulos ── */
 .hm-block { margin-bottom: var(--sp-6); }
 .hm-h { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-3); font-size: var(--fs-md); font-weight: 800; letter-spacing: -.01em; color: var(--text); }
 .hm-h a, .hm-h button { font-size: var(--fs-sm); font-weight: 700; color: var(--teal); background: none; border: 0; cursor: pointer; font-family: inherit; padding: 0; }
 
-/* ── Atalhos ── */
-.hm-mods { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: var(--sp-3); }
+/* ── Atalhos: compactos (cabem vários), ícone preenchido em duas camadas ── */
+.hm-mods { display: grid; grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); gap: var(--sp-3) var(--sp-2); }
 .hm-mod {
   display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); width: 100%; text-align: center;
-  padding: var(--sp-4) var(--sp-2); border: 1px solid var(--border); border-radius: var(--r-3); background: var(--bg-glass);
-  color: inherit; font-family: inherit; cursor: pointer;
+  padding: 0; border: 0; background: none; color: inherit; font-family: inherit; cursor: pointer;
+}
+.hm-mod-icon {
+  width: 56px; height: 56px; border-radius: var(--r-3); display: grid; place-items: center; color: var(--teal);
+  background: var(--bg-glass); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
   transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
 }
-[data-theme="light"] .hm-mod { background: #FFFFFF; box-shadow: 0 1px 2px rgba(15, 23, 42, .04); }
-.hm-mod:hover { transform: translateY(-2px); border-color: var(--teal-border); box-shadow: var(--shadow); }
-.hm-mod:active { transform: translateY(-1px) scale(.99); }
-.hm-mod:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
-.hm-mod-icon { width: 48px; height: 48px; border-radius: var(--r-2); display: grid; place-items: center; background: var(--teal-dim); color: var(--teal); }
-.hm-mod-icon i { width: 22px; height: 22px; }
-.hm-mod-name { font-size: var(--fs-sm); font-weight: 700; letter-spacing: -.01em; color: var(--text); }
+[data-theme="light"] .hm-mod-icon { background: #FFFFFF; }
+.hm-mod-icon i, .hm-mod-icon svg { width: 26px; height: 26px; fill: currentColor; fill-opacity: .24; stroke-width: 2; }
+.hm-mod:hover .hm-mod-icon { transform: translateY(-2px); border-color: var(--teal-border); box-shadow: var(--shadow); }
+.hm-mod:active .hm-mod-icon { transform: scale(.97); }
+.hm-mod:focus-visible { outline: 2px solid var(--teal); outline-offset: 4px; border-radius: var(--r-2); }
+.hm-mod-name { font-size: var(--fs-xs); font-weight: 700; letter-spacing: -.01em; color: var(--text); overflow-wrap: anywhere; }
 
 /* ── Indicadores em mosaico: um destaque + cartões menores ── */
 .hm-bento { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
 .bn-card {
-  position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: var(--sp-2); min-height: 108px; text-align: left;
+  position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: var(--sp-2); min-height: 96px; text-align: left;
   padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--r-3); background: var(--bg-glass); color: inherit; font-family: inherit;
 }
 [data-theme="light"] .bn-card { background: #FFFFFF; box-shadow: 0 1px 2px rgba(15, 23, 42, .04); }
@@ -89,9 +90,14 @@ button.bn-card:focus-visible { outline: 2px solid var(--teal); outline-offset: 2
 .bn-card.feat .bn-num { font-size: var(--fs-2xl); color: var(--teal); }
 .bn-ico { position: absolute; right: var(--sp-4); top: var(--sp-4); width: 40px; height: 40px; border-radius: var(--r-2); display: grid; place-items: center; background: var(--teal-dim); color: var(--teal); }
 .bn-ico i { width: 20px; height: 20px; }
+/* destaque + 2 menores: lado a lado também no celular (como no desenho aprovado) */
+.hm-bento.par { grid-template-columns: 1.25fr 1fr; }
+.hm-bento.par .bn-card.feat { grid-column: 1; grid-row: span 2; }
+.hm-bento.par .bn-card:not(.feat) { min-height: 0; grid-column: 2; }
 @media (min-width: 900px) {
   .hm-bento { grid-template-columns: 1.5fr 1fr 1fr; }
   .bn-card.feat { grid-column: auto; }
+  .hm-bento.par { grid-template-columns: 1.5fr 1fr; }
 }
 
 /* ── Faixa de atenção ── */
@@ -106,13 +112,19 @@ button.bn-card:focus-visible { outline: 2px solid var(--teal); outline-offset: 2
 .hm-alert-txt b { font-weight: 800; }
 .hm-alert .btn { flex-shrink: 0; }
 
-/* ── Aniversariantes (usa a lista de atividade; só a etiqueta "Hoje" é própria) ── */
-.hm-aniv-dia { flex-shrink: 0; font-size: var(--fs-xs); font-weight: 700; color: var(--text-muted); }
-.hm-aniv-dia.hoje { padding: 3px var(--sp-2); border-radius: var(--r-pill); color: var(--hero-a); background: var(--hero-gold); }
+/* ── Aniversariantes: 3 cartões lado a lado ── */
+.hm-anivs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
+.hm-aniv {
+  display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); padding: var(--sp-4) var(--sp-2); text-align: center;
+  border: 1px solid var(--border); border-radius: var(--r-3); background: var(--bg-glass); min-width: 0;
+}
+[data-theme="light"] .hm-aniv { background: #FFFFFF; box-shadow: var(--shadow-sm); }
+.hm-aniv-av { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-size: var(--fs-sm); font-weight: 800; color: var(--teal); background: var(--teal-dim); }
+.hm-aniv.hoje .hm-aniv-av { box-shadow: 0 0 0 2px var(--hero-gold); }
+.hm-aniv-nome { max-width: 100%; font-size: var(--fs-sm); font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hm-aniv-dia { padding: 3px var(--sp-3); border-radius: var(--r-pill); font-size: var(--fs-xs); font-weight: 700; color: var(--text-muted); background: var(--teal-dim); }
+.hm-aniv-dia.hoje { color: var(--hero-a); background: var(--hero-gold); }
 
-/* ── Colunas: aniversariantes | atividade ── */
-.hm-cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 var(--sp-5); }
-@media (min-width: 1100px) { .hm-cols.duas { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 
 /* ── Atividade ── */
 .activity-list { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--r-3); background: var(--bg-glass); overflow: hidden; }
@@ -199,7 +211,8 @@ function renderHome() {
   var mods   = modulosDoPerfil(perfil);
   var podeUsuarios = cfg.admin && ROUTE_PERMISSIONS.usuarios.indexOf(perfil) !== -1;
   var comAtividade = _homeTem(cfg, 'atividade');
-  var comAniv = mods.some(function (m) { return m.rota === 'membros'; });
+  var modAniv = mods.filter(function (m) { return m.rota === 'membros'; })[0]; /* aniversariantes vêm do cadastro */
+  var comAniv = !!modAniv;
   var i = 0; // ordem da entrada escalonada
 
   /* ══ Cartão institucional (nome, logo, lema e cor vêm da aba Config; menu do usuário mora aqui) ══ */
@@ -207,6 +220,7 @@ function renderHome() {
     '<div class="page hm">' +
     '<header class="hm-hero hm-rise" style="--i:' + (i++) + '">' +
       '<div class="hm-art" aria-hidden="true">' + _homeArte() + '</div>' +
+      '<div class="hm-hero-in">' +
       '<div class="hm-top">' +
         '<span class="hm-pill">' + sauda + (nome ? ', ' + escHtml(nome) : '') + '</span>' +
         '<div class="hm-menu-wrap">' +
@@ -232,7 +246,9 @@ function renderHome() {
           (IDENTIDADE.lema ? '<p class="hm-lema">' + escHtml(IDENTIDADE.lema) + '</p>' : '') +
         '</div>' +
       '</div>' +
-    '</header>';
+      '</div>' +
+    '</header>' +
+    '<div class="hm-body">';
 
   /* ══ Atalhos (módulos liberados ao perfil + Usuários, quando permitido) ══ */
   html += '<section class="hm-block hm-rise" style="--i:' + (i++) + '">' +
@@ -256,25 +272,23 @@ function renderHome() {
     '</section>';
   }
 
-  /* ══ Aniversariantes do mês | Atividade recente ══ */
-  if (comAniv || comAtividade) {
-    html += '<div class="hm-cols' + (comAniv && comAtividade ? ' duas' : '') + '">';
-    if (comAniv) {
-      html += '<section class="panel hm-rise" style="--i:' + (i++) + '">' +
-        '<div class="panel-head"><h2 class="panel-title">Aniversariantes do mês</h2><span class="bn-sub" id="aniv-count"></span></div>' +
-        '<div class="activity-list" id="aniv-list">' + _activitySkeleton() + _activitySkeleton() + _activitySkeleton() + '</div>' +
-      '</section>';
-    }
-    if (comAtividade) {
-      html += '<section class="panel hm-rise" style="--i:' + (i++) + '">' +
-        '<div class="panel-head"><h2 class="panel-title">Atividade recente</h2></div>' +
-        '<div class="activity-list" id="activity-list">' + _activitySkeleton() + _activitySkeleton() + _activitySkeleton() + '</div>' +
-      '</section>';
-    }
-    html += '</div>';
+  /* ══ Aniversariantes do mês ══ */
+  if (comAniv) {
+    html += '<section class="hm-block hm-rise" style="--i:' + (i++) + '">' +
+      '<h2 class="hm-h">Aniversariantes do mês <button type="button" onclick="navigateTo(\'' + modAniv.rota + '\')">Ver tudo</button></h2>' +
+      '<div class="hm-anivs" id="aniv-list">' + _anivSkeleton() + _anivSkeleton() + _anivSkeleton() + '</div>' +
+    '</section>';
   }
 
-  html += '</div>'; /* /hm */
+  /* ══ Atividade recente ══ */
+  if (comAtividade) {
+    html += '<section class="panel hm-rise" style="--i:' + (i++) + '">' +
+      '<div class="panel-head"><h2 class="panel-title">Atividade recente</h2></div>' +
+      '<div class="activity-list" id="activity-list">' + _activitySkeleton() + _activitySkeleton() + _activitySkeleton() + '</div>' +
+    '</section>';
+  }
+
+  html += '</div></div>'; /* /hm-body /hm */
 
   renderView(html);
 
@@ -322,7 +336,7 @@ function _kpiHtml(d) {
     var f = stats[iF];
     var irmaos = stats.filter(function (k) { return k.destino && k.destino === f.destino; });
     var total = irmaos.reduce(function (t, k) { return t + (k.valor || 0); }, 0);
-    html += '<div class="hm-bento">' + _bnCard(f, true, irmaos.length > 1 ? 'de ' + total + ' cadastrados' : '') +
+    html += '<div class="hm-bento' + (stats.length === 3 ? ' par' : '') + '">' + _bnCard(f, true, irmaos.length > 1 ? 'de ' + total + ' cadastrados' : '') +
       stats.filter(function (k, n) { return n !== iF; }).map(function (k) { return _bnCard(k, false, ''); }).join('') + '</div>';
   }
   html += alertas.map(function (k) {
@@ -336,6 +350,9 @@ function _kpiHtml(d) {
   return html;
 }
 
+function _anivSkeleton() {
+  return '<div class="hm-aniv"><div class="skeleton" style="width:48px;height:48px;border-radius:50%"></div><div class="skeleton" style="width:70%;height:13px"></div><div class="skeleton" style="width:40px;height:18px;border-radius:var(--r-pill)"></div></div>';
+}
 function _activitySkeleton() {
   return '<div class="activity-item">' +
     '<div class="skeleton" style="width:36px;height:36px;border-radius:50%;flex-shrink:0"></div>' +
@@ -448,20 +465,15 @@ function _loadAniv() {
         return;
       }
       var d = res.data || {}, itens = d.itens || [];
-      var cont = document.getElementById('aniv-count');
-      if (cont) cont.textContent = d.total ? d.total + ' neste mês' : '';
       if (!itens.length) {
         mostrar(_homeEstado('cake', 'Nenhum aniversariante neste mês', 'Membros ativos com data de nascimento neste mês aparecem aqui.'));
         return;
       }
       mostrar(itens.map(function (x) {
-        return '<div class="activity-item">' +
-          '<div class="activity-icon" style="font-size:var(--fs-xs);font-weight:800">' + escHtml(getInitials(x.nome)) + '</div>' +
-          '<div class="activity-body">' +
-            '<div class="activity-text">' + escHtml(x.nome) + '</div>' +
-            '<div class="activity-time">' + dd(x.dia) + '/' + dd(x.mes) + '</div>' +
-          '</div>' +
-          (x.hoje ? '<span class="hm-aniv-dia hoje">Hoje</span>' : '') +
+        return '<div class="hm-aniv' + (x.hoje ? ' hoje' : '') + '">' +
+          '<div class="hm-aniv-av">' + escHtml(getInitials(x.nome)) + '</div>' +
+          '<div class="hm-aniv-nome">' + escHtml(x.nome) + '</div>' +
+          '<span class="hm-aniv-dia' + (x.hoje ? ' hoje' : '') + '">' + (x.hoje ? 'Hoje' : dd(x.dia) + '/' + dd(x.mes)) + '</span>' +
         '</div>';
       }).join(''));
     })
@@ -473,7 +485,7 @@ function _loadAniv() {
 }
 function _homeRecarregarAniv() {
   var el = document.getElementById('aniv-list');
-  if (el) el.innerHTML = _activitySkeleton() + _activitySkeleton() + _activitySkeleton();
+  if (el) el.innerHTML = _anivSkeleton() + _anivSkeleton() + _anivSkeleton();
   _loadAniv();
 }
 

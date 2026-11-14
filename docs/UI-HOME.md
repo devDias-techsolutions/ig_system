@@ -8,17 +8,19 @@
 
 ## Estrutura (de cima para baixo)
 
-1. **Cartão institucional** (`.hm-hero`) — sem barra superior (a topnav fica oculta só na Início: `renderView` em `index.html`).
+1. **Cartão institucional** (`.hm-hero`) — **de borda a borda, colado ao topo** (só os cantos de baixo arredondados), **logo centralizado em cima** do nome, sem barra superior (a topnav fica oculta só na Início: `renderView` em `index.html`).
    - Fundo: degradê profundo da **cor da igreja** (`--hero-a`/`--hero-b`, calculados em `aplicarIdentidade()` escurecendo `COR_PRIMARIA` até o texto branco ter contraste ≥ 5:1). Dourado de apoio: `--hero-gold`.
    - Linha de cima: pílula "Bom dia, Nome" + botão redondo com as iniciais do usuário. O botão abre o **menu do usuário** (Alterar senha, Alternar tema, Sair) — é o substituto da topnav.
    - Marca: **logo 88 px** (72 px no celular) com anel dourado (`IDENTIDADE.logoUrl`, ou iniciais se não houver), eyebrow (visão do perfil), **nome da igreja** e **lema**.
    - Grafismo temático em SVG (`_homeArte()`): arcos concêntricos, cruz em marca d'água, malha de pontos e brilhos. Só formas; sem animação infinita.
-2. **Atalhos** (`.hm-mods`/`.hm-mod`) — módulos liberados ao perfil + Usuários (admin). Tiles verticais.
+2. **Atalhos** (`.hm-mods`/`.hm-mod`) — módulos liberados ao perfil + Usuários (admin). **Compactos** (ícone 56 px + rótulo, ~5 por linha no celular) com **ícone preenchido** (traço + preenchimento translúcido).
 3. **Indicadores em mosaico** (`.hm-bento`, `#kpi-grid`) — 1 cartão **destaque** (Membros ativos, com "de N cadastrados") + cartões menores. Vêm de `getKpisHome`. Indicadores marcados `alerta: true` no servidor não viram cartão: viram a **faixa âmbar** abaixo ("N membros sem foto · Resolver" → abre Membros).
-4. **Aniversariantes do mês** (painel) — 3 pessoas, "Hoje" destacado. Endpoint novo `mb_aniversariantesDoMes(token, 3)` (`Membros.js`): só nome + dia/mês + `hoje`, só ativos, exige sessão. Só aparece para perfis com o módulo Membros.
+4. **Aniversariantes do mês** — 3 cartões lado a lado (iniciais, nome, data), "Hoje" em dourado. Endpoint novo `mb_aniversariantesDoMes(token, 3)` (`Membros.js`): só nome + dia/mês + `hoje`, só ativos, exige sessão. Só aparece para perfis com o módulo Membros.
 5. **Atividade recente** (painel, só admin) — `getAtividadeRecente`.
 
-Desktop: mosaico em 3 colunas (destaque 1,5×); aniversariantes e atividade lado a lado (≥ 1100 px). Celular: destaque em linha inteira, menores em 2 colunas.
+Mosaico: com exatamente 3 indicadores, destaque à esquerda e 2 menores empilhados à direita (também no celular); com outra quantidade, destaque em linha inteira e menores em 2 colunas.
+
+**Fundo geral (tema claro): `#F1F1F1` liso** (sem degradê azulado, sem grade e sem orbes) — vale para todas as telas.
 
 ## Regras que se mantêm
 - Só tokens (`--sp-*`, `--fs-*`, `--r-*`, `--dur*`); nada de cor fixa além das `--hero-*` do shell.
@@ -31,6 +33,9 @@ Desktop: mosaico em 3 colunas (destaque 1,5×); aniversariantes e atividade lado
 - `index.html`: tokens `--hero-*`, `aplicarIdentidade()`, `renderView` (oculta a topnav na Início).
 - `Membros.js`: `aniversariantesDoMes` / `mb_aniversariantesDoMes`.
 - Testes: `tests/runtime.test.js` (endpoint), `tests/e2e/fluxos.e2e.js` (Home), `tests/static.test.js`.
+
+## Conferir visualmente
+`TEMA=light npm run preview -- /tmp/prev admin` (ou `dark`) gera as capturas; compare com a imagem de referência.
 
 ## Estado
 | Item | Situação |
