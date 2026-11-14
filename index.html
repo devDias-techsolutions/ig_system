@@ -498,7 +498,6 @@ body::after {
   position: relative; overflow: hidden; display: flex; flex-direction: column; gap: var(--sp-3);
   isolation: isolate; padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--r-3);
   background: var(--bg-glass);
-  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
   box-shadow: var(--shadow-sm);
   transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
   animation: cardIn .55s var(--ease-spring) both;
@@ -569,10 +568,9 @@ body::after {
 .kpi-group {
   --kpi-color: var(--teal); --kpi-dim: var(--teal-dim); --kpi-border: var(--teal-border); --kpi-shadow: var(--teal-glow);
   --kg-dark: color-mix(in srgb, var(--kpi-color) 52%, #000);
-  position: relative; isolation: isolate; padding: var(--sp-5) var(--sp-4) var(--sp-4); border-radius: var(--r-3);
+  position: relative; isolation: isolate; padding: var(--sp-6) var(--sp-4) var(--sp-4); border-radius: var(--r-3);
   border: 1px solid var(--border); background: var(--bg-glass);
   box-shadow: var(--shadow-sm);
-  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
   transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
   animation: cardIn .55s var(--ease-spring) both;
 }
@@ -587,8 +585,8 @@ body::after {
   box-shadow: 0 3px 0 var(--kg-dark), inset 0 1px 0 rgba(255,255,255,.4);
 }
 .kg-gem i, .kg-gem svg { width: 20px; height: 20px; stroke-width: 2; }
-.kg-name { padding: 0 var(--sp-6) 0 var(--sp-6); min-height: 22px; font-size: var(--fs-lg); font-weight: 800; letter-spacing: -.025em; line-height: 1.15; color: var(--text); }
-.kg-sub { margin-top: 3px; padding: 0 var(--sp-6) 0 var(--sp-6); font-size: var(--fs-xs); color: var(--text-muted); }
+.kg-name { padding: 0 var(--sp-6) 0 0; min-height: 22px; font-size: var(--fs-lg); font-weight: 800; letter-spacing: -.025em; line-height: 1.15; color: var(--text); }
+.kg-sub { margin-top: 3px; padding: 0 var(--sp-6) 0 0; font-size: var(--fs-xs); color: var(--text-muted); }
 .kg-stats { display: grid; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); margin-top: var(--sp-4); border-radius: var(--r-2); border: 1px solid var(--border); background: rgba(255,255,255,.04); }
 [data-theme="light"] .kg-stats { background: #F1F6FB; }
 .kg-stat { padding: 12px 14px; min-width: 0; }
@@ -710,6 +708,11 @@ body::after {
   transition: background var(--dur), color var(--dur);
 }
 .tab:hover { background: var(--bg4); color: var(--text); }
+@media (max-width: 480px) {
+  .tabs { padding-right: 0; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); }
+  .tab { padding: 0 var(--sp-3); }
+  .tab:last-child { margin-right: var(--sp-6); }
+}
 .tab.active { color: var(--teal); }
 /* indicador sólido de 3 px (sem brilho), cresce do centro */
 .tab::after {
@@ -1582,9 +1585,17 @@ function tabsHtml(itens, ativo, fn, prefixoId) {
   }).join('') + '</div>';
 }
 
+// Mantém a aba ativa visível quando as abas rolam na horizontal (celular)
+function tabsRevelar() {
+  var t = document.querySelector('.tabs .tab.active'); if (!t || !t.parentNode) return;
+  var box = t.parentNode;
+  box.scrollLeft = Math.max(0, t.offsetLeft - (box.clientWidth - t.offsetWidth) / 2);
+}
+
 function renderView(html) {
   var viewport = document.getElementById('app-viewport');
   viewport.innerHTML = '<div class="view-container">' + html + '</div>';
+  tabsRevelar();
 
   // Mostrar/ocultar topnav persistente conforme tipo de view
   var topnav  = document.getElementById('main-topnav');
