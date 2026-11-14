@@ -50,3 +50,5 @@ Mosaico: com exatamente 3 indicadores, destaque à esquerda e 2 menores empilhad
 - Cores: **uma paleta só** (cor da igreja + dourado de apoio no hero). Cor semântica apenas em status (faixa âmbar de atenção, erro). Nada de cor por posição ou por assunto na Início.
 - Faixa de atenção: ícone em círculo branco, título + dica (`dica` vem do servidor) e botão **Resolver** sólido âmbar-escuro; singular/plural tratado.
 - Sem saudação: só o botão com as iniciais (menu do usuário) no canto superior direito.
+
+- Mosaico compacto (14/11): destaque sem altura mínima (≈ 2 cartões menores), ícone-marca d'água dentro do cartão (84 px, −12°, canto direito); cartões menores com **rótulo à esquerda e número à direita na mesma linha** (56 px de altura).
