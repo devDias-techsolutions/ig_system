@@ -875,3 +875,23 @@ test('qr: página pública não precisa de login, é noindex e não contém dado
   assert.ok(out, 'doGet devolveu algo');
   assert.ok(!JSON.stringify(out).includes('123.456'));
 });
+
+test('Home: aniversariantes do mês só trazem nome e dia/mês, só de ativos, e exigem sessão', () => {
+  const { env } = envMembros();
+  const hoje = new Date(), m = hoje.getMonth() + 1, d = hoje.getDate();
+  const dd = (n) => (n < 10 ? '0' : '') + n;
+  const outroMes = dd(m === 12 ? 1 : m + 1);
+  env.ctx.__ms = [
+    { nome: 'Hoje Ativo',   ativo: true,  nascimento: dd(d) + '/' + dd(m) + '/1990', telefone: '999' },
+    { nome: 'Outro Mes',    ativo: true,  nascimento: '10/' + outroMes + '/1990' },
+    { nome: 'Inativo',      ativo: false, nascimento: dd(d) + '/' + dd(m) + '/1980' }
+  ];
+  env.run("__ms.forEach(function (x) { mb_salvarMembro('tok', x); })");
+  const r = env.run("mb_aniversariantesDoMes('tok', 3)");
+  assert.equal(r.success, true);
+  assert.equal(r.data.total, 1);
+  assert.deepEqual(Object.keys(r.data.itens[0]).sort(), ['dia', 'hoje', 'mes', 'nome']);
+  assert.equal(r.data.itens[0].nome, 'Hoje Ativo');
+  assert.equal(r.data.itens[0].hoje, true);
+  assert.equal(env.run("mb_aniversariantesDoMes('invalido', 3)").success, false);
+});

@@ -119,6 +119,8 @@
   --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
   /* Escalas fixas (docs/UI-GUIDELINES.md): texto 12/14/16/20/28 (+32 só para número de KPI), raios 8/12/16/24 e movimento 150/200/250 ms */
   --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 20px; --fs-xl: 28px; --fs-2xl: 32px;
+  /* Cartão institucional da Início: derivado da cor da igreja em aplicarIdentidade(); texto sempre branco */
+  --hero-a: #062f2b; --hero-b: #0b5f57; --hero-gold: #E8C26B;
   --r-1: 8px; --r-2: 12px; --r-3: 16px; --r-4: 24px; --r-pill: 999px;
   --dur-fast: 150ms; --dur: 200ms; --dur-slow: 250ms;
   --sidebar-w: 264px;
@@ -1598,7 +1600,8 @@ function renderView(html) {
   // Mostrar/ocultar topnav persistente conforme tipo de view
   var topnav  = document.getElementById('main-topnav');
   var isAuth  = authRequired.indexOf(App.currentView || '') !== -1;
-  if (topnav) topnav.style.display = isAuth ? '' : 'none';
+  // A Início tem cartão institucional próprio (com o menu do usuário dentro): sem barra superior
+  if (topnav) topnav.style.display = (isAuth && App.currentView !== 'home') ? '' : 'none';
   renderNav(isAuth);
 
   // Tela nova começa no topo (senão herda a rolagem da anterior e o topo fica sob a barra)
@@ -1667,8 +1670,14 @@ function aplicarIdentidade() {
     var _cw = (1.05) / (_hi + 0.05);                 // pior caso do texto branco (ponta clara do gradiente)
     var _cd = (_lo + 0.05) / (_dk + 0.05);          // pior caso do texto escuro (ponta escura)
     root.setProperty('--on-teal', _cd > _cw ? '#0B1620' : '#fff');
+    // cartão institucional: tom profundo da cor da igreja, escuro o bastante para texto branco (contraste ≥ 5:1)
+    var _b0 = _hexRgb(IDENTIDADE.corPrimaria), _ha = _mix(_b0, [0, 0, 0], .68), _hb = _mix(_b0, [0, 0, 0], .42);
+    for (var _k = 0; _k < 10 && _lum(_hb) > .16; _k++) _hb = _mix(_hb, [0, 0, 0], .12);
+    for (var _j = 0; _j < 10 && _lum(_ha) > .08; _j++) _ha = _mix(_ha, [0, 0, 0], .12);
+    root.setProperty('--hero-a', _rgbHex(_ha));
+    root.setProperty('--hero-b', _rgbHex(_hb));
   } else {
-    ['--on-teal','--teal','--teal-light','--teal-dark','--teal-dim','--teal-border','--teal-glow','--teal-glow-soft'].forEach(function (v) { root.removeProperty(v); });
+    ['--hero-a','--hero-b','--on-teal','--teal','--teal-light','--teal-dark','--teal-dim','--teal-border','--teal-glow','--teal-glow-soft'].forEach(function (v) { root.removeProperty(v); });
   }
   document.title = IDENTIDADE.nome + ' — Gestão Ministerial';
   if (IDENTIDADE.logoUrl) {

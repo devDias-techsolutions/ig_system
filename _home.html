@@ -9,67 +9,110 @@
 .hm-rise { opacity: 0; transform: translateY(12px); animation: hmRise .55s var(--ease-spring) forwards; animation-delay: calc(var(--i, 0) * 70ms); }
 @keyframes hmRise { to { opacity: 1; transform: translateY(0); } }
 
-/* ── Cabeçalho de identidade ── */
-.hm-head {
-  margin-bottom: var(--sp-5);
-  position: relative; overflow: hidden; padding: var(--sp-5);
-  border: 1px solid var(--border); border-radius: var(--r-4);
-  background: linear-gradient(135deg, var(--teal-dim) 0%, transparent 58%), var(--bg-glass);
+/* ── Cartão institucional (topo): cor profunda da igreja, logo grande, grafismo temático ── */
+.hm-hero {
+  position: relative; z-index: 5; margin-bottom: var(--sp-6); padding: var(--sp-5); color: #fff;
+  border-radius: var(--r-4); box-shadow: var(--shadow-lg);
+  background: linear-gradient(140deg, var(--hero-b) 0%, var(--hero-a) 100%);
 }
-[data-theme="light"] .hm-head {
-  background: linear-gradient(135deg, var(--teal-dim) 0%, transparent 58%), #FFFFFF;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 12px 28px -16px rgba(15, 23, 42, .12);
+.hm-art { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; color: #fff; }
+.hm-art svg { position: absolute; right: 0; top: 0; width: 100%; height: 100%; }
+.hm-art .ouro { color: var(--hero-gold); }
+.hm-top, .hm-brand { position: relative; z-index: 1; }
+.hm-top { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.hm-pill {
+  display: inline-flex; align-items: center; min-height: 36px; padding: 0 var(--sp-4); border-radius: var(--r-pill);
+  font-size: var(--fs-sm); font-weight: 700; color: #fff; background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .22);
 }
-.hm-head::after {
-  content: ''; position: absolute; right: -90px; top: -90px; width: 280px; height: 280px; border-radius: 50%;
-  background: radial-gradient(circle, var(--teal-glow-soft), transparent 66%); pointer-events: none;
+.hm-menu-wrap { position: relative; flex-shrink: 0; }
+.hm-me {
+  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; font-family: inherit;
+  font-size: var(--fs-sm); font-weight: 800; color: #fff; background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .28);
+  transition: background var(--dur) var(--ease);
 }
-.hm-id { position: relative; z-index: 1; display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-4); }
+.hm-me:hover { background: rgba(255, 255, 255, .24); }
+.hm-me:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.hm-brand { display: flex; align-items: center; gap: var(--sp-5); margin-top: var(--sp-5); }
+.hm-logo {
+  width: 88px; height: 88px; flex-shrink: 0; border-radius: 50%; overflow: hidden; display: grid; place-items: center;
+  background: rgba(255, 255, 255, .1); box-shadow: 0 0 0 3px var(--hero-gold), 0 0 0 7px rgba(232, 194, 107, .22), 0 10px 24px -8px rgba(0, 0, 0, .45);
+}
+.hm-logo .brand-mark { font-size: var(--fs-xl); }
+.hm-logo .brand-mark img { padding: 10px; }
 .hm-id-txt { min-width: 0; }
-.hm-greet { font-size: var(--fs-xl); font-weight: 800; letter-spacing: -.035em; line-height: 1.1; color: var(--text); overflow-wrap: anywhere; }
-.hm-title { margin-top: var(--sp-2); font-size: var(--fs-md); font-weight: 600; letter-spacing: -.01em; line-height: 1.3; color: var(--text-muted); overflow-wrap: anywhere; }
-/* perfil: pílula com ponto vivo, no canto do cabeçalho */
-.hm-role {
-  flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 100px;
-  font-size: var(--fs-xs); font-weight: 800; letter-spacing: .02em; color: var(--teal-dark);
-  background: var(--teal-dim); border: 1px solid var(--teal-border); box-shadow: 0 6px 18px -8px var(--teal-glow);
+.hm-eyebrow { font-size: var(--fs-xs); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--hero-gold); }
+.hm-title { margin-top: var(--sp-1); font-size: var(--fs-xl); font-weight: 800; letter-spacing: -.035em; line-height: 1.12; color: #fff; overflow-wrap: anywhere; }
+.hm-lema { margin-top: var(--sp-2); padding-left: var(--sp-3); border-left: 2px solid var(--hero-gold); font-size: var(--fs-sm); font-style: italic; line-height: 1.5; color: rgba(255, 255, 255, .82); }
+@media (max-width: 480px) {
+  .hm-hero { padding: var(--sp-4); }
+  .hm-brand { gap: var(--sp-4); }
+  .hm-logo { width: 72px; height: 72px; }
+  .hm-logo .brand-mark { font-size: var(--fs-lg); }
 }
-[data-theme="dark"] .hm-role, :root:not([data-theme="light"]) .hm-role { color: var(--teal-light); }
-.hm-role-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); animation: livePing 2.4s ease-out infinite; }
-@media (max-width: 480px) { .hm-id { flex-direction: column-reverse; align-items: flex-start; gap: var(--sp-3); } }
-.hm-lema { margin-top: var(--sp-2); padding-left: var(--sp-3); border-left: 2px solid var(--teal); font-size: var(--fs-sm); font-style: italic; line-height: 1.5; color: var(--text-muted); }
-.hm-sub {
-  position: relative; z-index: 1; margin-top: var(--sp-4); padding-top: var(--sp-4); border-top: 1px solid var(--border);
-  font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.6;
-}
-.hm-sub b { color: var(--text); font-weight: 700; }
 
-/* ── Títulos de seção ── */
+/* ── Blocos e títulos ── */
+.hm-block { margin-bottom: var(--sp-6); }
+.hm-h { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-3); font-size: var(--fs-md); font-weight: 800; letter-spacing: -.01em; color: var(--text); }
+.hm-h a, .hm-h button { font-size: var(--fs-sm); font-weight: 700; color: var(--teal); background: none; border: 0; cursor: pointer; font-family: inherit; padding: 0; }
 
-
-/* ── Colunas: módulos | atividade ── */
-.hm-cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 var(--sp-5); margin-top: var(--sp-5); }
-@media (min-width: 1100px) { .hm-cols.com-atividade { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); } }
-
-/* ── Módulos ── */
-.hm-mods { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--sp-3); }
+/* ── Atalhos ── */
+.hm-mods { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: var(--sp-3); }
 .hm-mod {
-  position: relative; overflow: hidden; isolation: isolate; display: flex; align-items: center; gap: var(--sp-3); width: 100%; text-align: left;
-  padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--r-3); background: var(--bg-glass);
+  display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); width: 100%; text-align: center;
+  padding: var(--sp-4) var(--sp-2); border: 1px solid var(--border); border-radius: var(--r-3); background: var(--bg-glass);
   color: inherit; font-family: inherit; cursor: pointer;
-  transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background var(--dur) var(--ease);
+  transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
 }
 [data-theme="light"] .hm-mod { background: #FFFFFF; box-shadow: 0 1px 2px rgba(15, 23, 42, .04); }
 .hm-mod:hover { transform: translateY(-2px); border-color: var(--teal-border); box-shadow: var(--shadow); }
 .hm-mod:active { transform: translateY(-1px) scale(.99); }
 .hm-mod:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
-.hm-mod-icon { width: 44px; height: 44px; border-radius: var(--r-2); flex-shrink: 0; display: grid; place-items: center; background: var(--teal-dim); color: var(--teal); }
+.hm-mod-icon { width: 48px; height: 48px; border-radius: var(--r-2); display: grid; place-items: center; background: var(--teal-dim); color: var(--teal); }
 .hm-mod-icon i { width: 22px; height: 22px; }
-.hm-mod-txt { flex: 1; min-width: 0; }
-.hm-mod-name { font-size: var(--fs-md); font-weight: 800; letter-spacing: -.02em; color: var(--text); }
-.hm-mod-desc { margin-top: 2px; font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.4; }
-.hm-mod-go { width: 16px; height: 16px; color: var(--text-dim); flex-shrink: 0; transition: transform var(--dur) var(--ease), color var(--dur); }
-.hm-mod:hover .hm-mod-go { transform: translateX(3px); color: var(--teal); }
+.hm-mod-name { font-size: var(--fs-sm); font-weight: 700; letter-spacing: -.01em; color: var(--text); }
+
+/* ── Indicadores em mosaico: um destaque + cartões menores ── */
+.hm-bento { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+.bn-card {
+  position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: var(--sp-2); min-height: 108px; text-align: left;
+  padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--r-3); background: var(--bg-glass); color: inherit; font-family: inherit;
+}
+[data-theme="light"] .bn-card { background: #FFFFFF; box-shadow: 0 1px 2px rgba(15, 23, 42, .04); }
+button.bn-card { cursor: pointer; transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+button.bn-card:hover { transform: translateY(-2px); border-color: var(--teal-border); box-shadow: var(--shadow); }
+button.bn-card:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.bn-lab { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); }
+.bn-num { font-size: var(--fs-2xl); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--text); }
+.bn-sub { font-size: var(--fs-xs); color: var(--text-dim); }
+.bn-card.feat { grid-column: 1 / -1; min-height: 140px; border-color: var(--teal-border); background: linear-gradient(135deg, var(--teal-dim) 0%, transparent 70%), var(--bg-glass); }
+[data-theme="light"] .bn-card.feat { background: linear-gradient(135deg, var(--teal-dim) 0%, transparent 70%), #FFFFFF; }
+.bn-card.feat .bn-num { font-size: var(--fs-2xl); color: var(--teal); }
+.bn-ico { position: absolute; right: var(--sp-4); top: var(--sp-4); width: 40px; height: 40px; border-radius: var(--r-2); display: grid; place-items: center; background: var(--teal-dim); color: var(--teal); }
+.bn-ico i { width: 20px; height: 20px; }
+@media (min-width: 900px) {
+  .hm-bento { grid-template-columns: 1.5fr 1fr 1fr; }
+  .bn-card.feat { grid-column: auto; }
+}
+
+/* ── Faixa de atenção ── */
+.hm-alert {
+  display: flex; align-items: center; gap: var(--sp-3); margin-top: var(--sp-3); padding: var(--sp-3) var(--sp-4);
+  border: 1px solid color-mix(in srgb, var(--warning) 40%, transparent); border-radius: var(--r-3);
+  background: color-mix(in srgb, var(--warning) 14%, transparent);
+}
+.hm-alert-ico { width: 36px; height: 36px; border-radius: var(--r-2); flex-shrink: 0; display: grid; place-items: center; background: color-mix(in srgb, var(--warning) 22%, transparent); color: var(--warning); }
+.hm-alert-ico i { width: 18px; height: 18px; }
+.hm-alert-txt { flex: 1; min-width: 0; font-size: var(--fs-sm); line-height: 1.4; color: var(--text); }
+.hm-alert-txt b { font-weight: 800; }
+.hm-alert .btn { flex-shrink: 0; }
+
+/* ── Aniversariantes (usa a lista de atividade; só a etiqueta "Hoje" é própria) ── */
+.hm-aniv-dia { flex-shrink: 0; font-size: var(--fs-xs); font-weight: 700; color: var(--text-muted); }
+.hm-aniv-dia.hoje { padding: 3px var(--sp-2); border-radius: var(--r-pill); color: var(--hero-a); background: var(--hero-gold); }
+
+/* ── Colunas: aniversariantes | atividade ── */
+.hm-cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 var(--sp-5); }
+@media (min-width: 1100px) { .hm-cols.duas { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 
 /* ── Atividade ── */
 .activity-list { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--r-3); background: var(--bg-glass); overflow: hidden; }
@@ -96,13 +139,12 @@
 .hm-empty .btn { margin-top: var(--sp-3); }
 
 /* ── Esqueletos (mesmas medidas do conteúdo, sem "pulo" na troca) ── */
-.kpi-card.is-loading { pointer-events: none; }
-.kpi-card.is-loading:hover { transform: none; box-shadow: none; border-color: var(--border); }
+.bn-card.is-loading { pointer-events: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .hm-rise { animation: none; opacity: 1; transform: none; }
-  .kpi-card, .hm-mod, .hm-mod-go { transition: none; }
-  .kpi-card:hover, .hm-mod:hover { transform: none; }
+  .kpi-card, .hm-mod, button.bn-card, .hm-me { transition: none; }
+  .kpi-card:hover, .hm-mod:hover, button.bn-card:hover { transform: none; }
 }
 </style>
 
@@ -131,6 +173,21 @@ function _homeEstado(icone, titulo, desc, extra, erro) {
   '</div>';
 }
 
+/* Grafismo do cartão: arcos concêntricos, cruz em marca d'água, malha de pontos e brilhos (só formas; cor vem do CSS) */
+function _homeArte() {
+  return '<svg viewBox="0 0 640 320" preserveAspectRatio="xMaxYMid slice" focusable="false">' +
+    '<defs><pattern id="hmDots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.3" fill="currentColor"/></pattern></defs>' +
+    '<g fill="none" stroke="currentColor" stroke-width="1.2" opacity=".09">' +
+      '<circle cx="560" cy="70" r="90"/><circle cx="560" cy="70" r="150"/><circle cx="560" cy="70" r="210"/><circle cx="560" cy="70" r="270"/>' +
+    '</g>' +
+    '<g class="ouro" fill="currentColor" opacity=".13"><rect x="548" y="96" width="22" height="170" rx="4"/><rect x="494" y="146" width="130" height="22" rx="4"/></g>' +
+    '<rect x="400" y="200" width="240" height="120" fill="url(#hmDots)" opacity=".16"/>' +
+    '<g class="ouro" fill="currentColor" opacity=".55">' +
+      '<path d="M470 40l3 9 9 3-9 3-3 9-3-9-9-3 9-3z"/><path d="M604 214l2.4 7 7 2.4-7 2.4-2.4 7-2.4-7-7-2.4 7-2.4z"/><path d="M420 262l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>' +
+    '</g>' +
+  '</svg>';
+}
+
 function renderHome() {
   if (!App.session) { navigateTo('login'); return; }
 
@@ -142,37 +199,44 @@ function renderHome() {
   var mods   = modulosDoPerfil(perfil);
   var podeUsuarios = cfg.admin && ROUTE_PERMISSIONS.usuarios.indexOf(perfil) !== -1;
   var comAtividade = _homeTem(cfg, 'atividade');
+  var comAniv = mods.some(function (m) { return m.rota === 'membros'; });
   var i = 0; // ordem da entrada escalonada
 
-  /* ══ Cabeçalho de identidade (nome, logo, lema e cor vêm da aba Config) ══ */
+  /* ══ Cartão institucional (nome, logo, lema e cor vêm da aba Config; menu do usuário mora aqui) ══ */
   var html =
     '<div class="page hm">' +
-    '<header class="hm-head hm-rise" style="--i:' + (i++) + '">' +
-      '<div class="hm-id">' +
+    '<header class="hm-hero hm-rise" style="--i:' + (i++) + '">' +
+      '<div class="hm-art" aria-hidden="true">' + _homeArte() + '</div>' +
+      '<div class="hm-top">' +
+        '<span class="hm-pill">' + sauda + (nome ? ', ' + escHtml(nome) : '') + '</span>' +
+        '<div class="hm-menu-wrap">' +
+          '<button type="button" class="hm-me" id="hm-me-btn" aria-label="Menu do usuário" aria-haspopup="true" onclick="homeToggleMenu(event)">' + escHtml(getInitials(App.session.nome || '')) + '</button>' +
+          '<div class="user-dropdown" id="hm-user-dd">' +
+            '<div class="user-dd-header">' +
+              '<div class="user-dd-nome">' + escHtml(App.session.nome || '') + '</div>' +
+              '<div class="user-dd-email">' + escHtml(App.session.email || '') + '</div>' +
+              '<div style="margin-top:8px"><span class="badge badge-teal">' + escHtml(PERFIL_LABEL[perfil] || perfil) + '</span></div>' +
+            '</div>' +
+            '<button class="user-dd-item" onclick="showTrocarSenha()"><i data-lucide="key" class="ic-15"></i> Alterar senha</button>' +
+            '<button class="user-dd-item" onclick="closeDropdown();toggleTheme()"><i data-lucide="moon" class="ic-15"></i> Alternar tema</button>' +
+            '<hr class="divider" style="margin:6px 0">' +
+            '<button class="user-dd-item danger" onclick="handleLogout()"><i data-lucide="log-out" class="ic-15"></i> Sair</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="hm-brand">' +
+        '<div class="hm-logo"><span class="brand-mark">' + brandMarkInner() + '</span></div>' +
         '<div class="hm-id-txt">' +
-          '<div class="hm-greet">' + sauda + (nome ? ', ' + escHtml(nome) : '') + '</div>' +
+          '<div class="hm-eyebrow">' + cfg.visao + '</div>' +
           '<h1 class="hm-title">' + escHtml(IDENTIDADE.nome) + '</h1>' +
           (IDENTIDADE.lema ? '<p class="hm-lema">' + escHtml(IDENTIDADE.lema) + '</p>' : '') +
         '</div>' +
-        '<span class="hm-role"><span class="hm-role-dot"></span>' + escHtml(PERFIL_LABEL[perfil] || perfil) + '</span>' +
       '</div>' +
-      '<p class="hm-sub"><b>' + cfg.visao + '</b> · ' + cfg.sub + '</p>' +
     '</header>';
 
-  /* ══ Indicadores ══ */
-  if (_homeTem(cfg, 'kpis')) {
-    html +=
-      '<section class="panel hm-rise" style="--i:' + (i++) + '">' +
-        '<div class="panel-head"><h2 class="panel-title">Indicadores</h2></div>' +
-        '<div class="kpi-groups" id="kpi-grid">' + _kpiSkeleton() + _kpiSkeleton() + '</div>' +
-      '</section>';
-  }
-
-  /* ══ Módulos (+ Administração) | Atividade ══ */
-  html += '<div class="hm-cols' + (comAtividade ? ' com-atividade' : '') + '">';
-
-  html += '<section class="panel hm-rise" style="--i:' + (i++) + '">' +
-    '<div class="panel-head"><h2 class="panel-title">Módulos</h2></div>' +
+  /* ══ Atalhos (módulos liberados ao perfil + Usuários, quando permitido) ══ */
+  html += '<section class="hm-block hm-rise" style="--i:' + (i++) + '">' +
+    '<h2 class="hm-h">Atalhos</h2>' +
     '<div class="hm-mods">' +
       (mods.length
         ? mods.map(function (m) { return _moduleBtn(m.icone, m.nome, m.descricao, m.rota); }).join('')
@@ -180,80 +244,96 @@ function renderHome() {
             perfil === 'admin'
               ? 'Ative módulos na aba <b>Config</b> da planilha (chave <b>MODULOS_ATIVOS</b>) ou instale um módulo.'
               : 'Peça ao administrador para liberar módulos para o seu perfil.')) +
+      (podeUsuarios ? _moduleBtn('shield-check', 'Usuários', 'Acessos, perfis e permissões', 'usuarios') : '') +
     '</div>' +
-    (podeUsuarios
-      ? '<div class="panel-head"><h2 class="panel-title">Administração</h2></div>' +
-        '<div class="hm-mods">' + _moduleBtn('shield-check', 'Usuários', 'Acessos, perfis e permissões', 'usuarios') + '</div>'
-      : '') +
   '</section>';
 
-  if (comAtividade) {
-    html += '<section class="panel hm-rise" style="--i:' + (i++) + '">' +
-      '<div class="panel-head"><h2 class="panel-title">Atividade recente</h2></div>' +
-      '<div class="activity-list" id="activity-list">' + _activitySkeleton() + _activitySkeleton() + _activitySkeleton() + '</div>' +
+  /* ══ Indicadores em mosaico + faixa de atenção ══ */
+  if (_homeTem(cfg, 'kpis')) {
+    html += '<section class="hm-block hm-rise" style="--i:' + (i++) + '">' +
+      '<h2 class="hm-h">Indicadores</h2>' +
+      '<div id="kpi-grid">' + _kpiSkeleton() + '</div>' +
     '</section>';
   }
 
-  html += '</div></div>'; /* /hm-cols /hm */
+  /* ══ Aniversariantes do mês | Atividade recente ══ */
+  if (comAniv || comAtividade) {
+    html += '<div class="hm-cols' + (comAniv && comAtividade ? ' duas' : '') + '">';
+    if (comAniv) {
+      html += '<section class="panel hm-rise" style="--i:' + (i++) + '">' +
+        '<div class="panel-head"><h2 class="panel-title">Aniversariantes do mês</h2><span class="bn-sub" id="aniv-count"></span></div>' +
+        '<div class="activity-list" id="aniv-list">' + _activitySkeleton() + _activitySkeleton() + _activitySkeleton() + '</div>' +
+      '</section>';
+    }
+    if (comAtividade) {
+      html += '<section class="panel hm-rise" style="--i:' + (i++) + '">' +
+        '<div class="panel-head"><h2 class="panel-title">Atividade recente</h2></div>' +
+        '<div class="activity-list" id="activity-list">' + _activitySkeleton() + _activitySkeleton() + _activitySkeleton() + '</div>' +
+      '</section>';
+    }
+    html += '</div>';
+  }
+
+  html += '</div>'; /* /hm */
 
   renderView(html);
 
-  /* Fechar dropdown ao clicar fora (registrado uma única vez) */
+  /* Fechar o menu do usuário ao clicar fora ou com Esc (registrado uma única vez) */
   if (!window.__homeDocClick) {
     window.__homeDocClick = true;
     document.addEventListener('click', function (e) {
-      var dd  = document.getElementById('user-dropdown');
-      var btn = document.getElementById('avatar-btn');
-      if (dd && btn && !btn.contains(e.target) && !dd.contains(e.target)) dd.classList.remove('open');
+      var dd = document.getElementById('hm-user-dd');
+      var wrap = dd && dd.parentNode;
+      if (dd && wrap && !wrap.contains(e.target)) dd.classList.remove('open');
     });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDropdown(); });
   }
 
   if (_homeTem(cfg, 'kpis')) _loadKpis();
+  if (comAniv) _loadAniv();
   if (comAtividade) _loadActivity();
 }
 
 /* ── HELPERS ── */
 function _kpiSkeleton() {
-  return '<div class="kpi-group is-loading">' +
-    '<div class="kg-head"><div class="kg-titles">' +
-      '<div class="skeleton" style="width:72px;height:12px;border-radius:var(--r-1)"></div>' +
-      '<div class="skeleton" style="width:150px;height:18px;border-radius:var(--r-1);margin-top:6px"></div>' +
-    '</div></div>' +
-    '<div class="kg-stats" style="--n:2">' +
-      '<div class="skeleton" style="height:56px;border-radius:var(--r-2)"></div>' +
-      '<div class="skeleton" style="height:56px;border-radius:var(--r-2)"></div>' +
-    '</div>' +
+  return '<div class="hm-bento">' +
+    '<div class="bn-card feat is-loading"><div class="skeleton" style="width:110px;height:12px;border-radius:var(--r-1)"></div><div class="skeleton" style="width:84px;height:32px;border-radius:var(--r-1)"></div></div>' +
+    '<div class="bn-card is-loading"><div class="skeleton" style="width:70px;height:12px;border-radius:var(--r-1)"></div><div class="skeleton" style="width:56px;height:32px;border-radius:var(--r-1)"></div></div>' +
   '</div>';
 }
 
-/* Agrupa os indicadores do servidor por tela de destino (um cartão mestre por assunto).
-   Os que não têm destino ficam como cartões soltos. */
-var HOME_GRUPOS = {
-  membros:  { titulo: 'Membros',  sub: 'Cadastro da igreja', icone: 'users',        cor: 'kc-teal' },
-  usuarios: { titulo: 'Usuários', sub: 'Acesso ao sistema',  icone: 'shield-check', cor: 'kc-green' }
-};
-var HOME_DOT = { Ativos: 'ok', Inativos: 'bad' };
+/* Mosaico: 1 destaque (Ativos, ou o primeiro número) + cartões menores; indicadores de atenção viram faixa âmbar. */
+function _bnCard(k, feat, sub) {
+  var dest = k.destino ? escHtml(k.destino) : '';
+  var abre = dest ? 'button type="button" onclick="navigateTo(\'' + dest + '\')"' : 'div';
+  return '<' + abre + ' class="bn-card' + (feat ? ' feat' : '') + '" data-k="' + escHtml(k.curto || '') + '">' +
+    (feat && k.icone ? '<span class="bn-ico"><i data-lucide="' + escHtml(k.icone) + '"></i></span>' : '') +
+    '<span class="bn-lab">' + escHtml(k.rotulo || k.curto || '') + '</span>' +
+    '<span><span class="bn-num">' + escHtml(k.valor || 0) + '</span>' + (sub ? '<span class="bn-sub" style="display:block;margin-top:4px">' + escHtml(sub) + '</span>' : '') + '</span>' +
+  '</' + (dest ? 'button' : 'div') + '>';
+}
 function _kpiHtml(d) {
-  var ordem = [], porDestino = {}, soltos = '';
-  d.forEach(function (k) {
-    if (!k.destino) { soltos += _kpiCard(k.icone, k.cor, k.valor || 0, k.rotulo, k.curto); return; }
-    if (!porDestino[k.destino]) { porDestino[k.destino] = []; ordem.push(k.destino); }
-    porDestino[k.destino].push(k);
-  });
-  var html = ordem.map(function (dest) {
-    var itens = porDestino[dest];
-    var meta = HOME_GRUPOS[dest] || { titulo: itens[0].curto, sub: '', icone: itens[0].icone, cor: itens[0].cor };
-    return _kpiGroup({
-      cor: meta.cor, icone: meta.icone, titulo: meta.titulo, sub: meta.sub, destino: dest,
-      stats: itens.filter(function (k) { return !k.alerta; }).map(function (k) {
-        return { label: k.dentro || k.curto, valor: k.valor || 0, dot: HOME_DOT[k.curto] || '' };
-      }),
-      alertas: itens.filter(function (k) { return k.alerta; }).map(function (k) {
-        return { icone: k.icone === 'camera' ? 'image-off' : k.icone, valor: k.valor || 0, texto: String(k.curto).toLowerCase() };
-      })
-    });
+  var stats = d.filter(function (k) { return !k.alerta; });
+  var alertas = d.filter(function (k) { return k.alerta && (k.valor || 0) > 0; });
+  var iF = 0;
+  stats.forEach(function (k, n) { if (k.curto === 'Ativos' && iF === 0 && n >= 0) iF = n; });
+  var html = '';
+  if (stats.length) {
+    var f = stats[iF];
+    var irmaos = stats.filter(function (k) { return k.destino && k.destino === f.destino; });
+    var total = irmaos.reduce(function (t, k) { return t + (k.valor || 0); }, 0);
+    html += '<div class="hm-bento">' + _bnCard(f, true, irmaos.length > 1 ? 'de ' + total + ' cadastrados' : '') +
+      stats.filter(function (k, n) { return n !== iF; }).map(function (k) { return _bnCard(k, false, ''); }).join('') + '</div>';
+  }
+  html += alertas.map(function (k) {
+    var ic = k.icone === 'camera' ? 'image-off' : (k.icone || 'alert-triangle');
+    return '<div class="hm-alert" data-k="' + escHtml(k.curto || '') + '">' +
+      '<span class="hm-alert-ico"><i data-lucide="' + escHtml(ic) + '"></i></span>' +
+      '<div class="hm-alert-txt"><b>' + escHtml(k.valor) + '</b> ' + escHtml(String(k.rotulo || k.curto || '').toLowerCase()) + '</div>' +
+      (k.destino ? '<button type="button" class="btn btn-ghost btn-sm" onclick="navigateTo(\'' + escHtml(k.destino) + '\')">Resolver</button>' : '') +
+    '</div>';
   }).join('');
-  return html + (soltos ? '<div class="kpi-grid" style="grid-column:1/-1">' + soltos + '</div>' : '');
+  return html;
 }
 
 function _activitySkeleton() {
@@ -268,14 +348,9 @@ function _activitySkeleton() {
 
 
 function _moduleBtn(icon, name, desc, view) {
-  return '<button class="hm-mod" onclick="navigateTo(\'' + view + '\')">' +
+  return '<button class="hm-mod" onclick="navigateTo(\'' + view + '\')"' + (desc ? ' title="' + escHtml(desc) + '"' : '') + '>' +
     '<div class="hm-mod-icon"><i data-lucide="' + escHtml(icon) + '"></i></div>' +
-    '<div class="hm-mod-txt">' +
-      '<div class="hm-mod-name">' + escHtml(name) + '</div>' +
-      (desc ? '<div class="hm-mod-desc">' + escHtml(desc) + '</div>' : '') +
-    '</div>' +
-    '<i data-lucide="' + escHtml(icon) + '" class="card-ghost" aria-hidden="true"></i>' +
-    '<i data-lucide="arrow-right" class="hm-mod-go"></i>' +
+    '<div class="hm-mod-name">' + escHtml(name) + '</div>' +
   '</button>';
 }
 
@@ -313,7 +388,7 @@ function _loadKpis() {
 }
 function _homeRecarregarKpis() {
   var grid = document.getElementById('kpi-grid');
-  if (grid) grid.innerHTML = _kpiSkeleton() + _kpiSkeleton();
+  if (grid) grid.innerHTML = _kpiSkeleton();
   _loadKpis();
 }
 
@@ -357,14 +432,66 @@ function _homeRecarregarAtividade() {
   _loadActivity();
 }
 
-/* ── DROPDOWN ── */
+function _loadAniv() {
+  function mostrar(html) {
+    var el = document.getElementById('aniv-list');
+    if (!el) return;
+    el.innerHTML = html;
+    if (window.lucide) setTimeout(function () { lucide.createIcons(); }, 0);
+  }
+  function dd(n) { return (n < 10 ? '0' : '') + n; }
+  google.script.run
+    .withSuccessHandler(function (res) {
+      if (!res || !res.success) {
+        mostrar(_homeEstado('alert-triangle', 'Não foi possível carregar os aniversariantes',
+          'Tente novamente em instantes.', _homeRetry('_homeRecarregarAniv'), true));
+        return;
+      }
+      var d = res.data || {}, itens = d.itens || [];
+      var cont = document.getElementById('aniv-count');
+      if (cont) cont.textContent = d.total ? d.total + ' neste mês' : '';
+      if (!itens.length) {
+        mostrar(_homeEstado('cake', 'Nenhum aniversariante neste mês', 'Membros ativos com data de nascimento neste mês aparecem aqui.'));
+        return;
+      }
+      mostrar(itens.map(function (x) {
+        return '<div class="activity-item">' +
+          '<div class="activity-icon" style="font-size:var(--fs-xs);font-weight:800">' + escHtml(getInitials(x.nome)) + '</div>' +
+          '<div class="activity-body">' +
+            '<div class="activity-text">' + escHtml(x.nome) + '</div>' +
+            '<div class="activity-time">' + dd(x.dia) + '/' + dd(x.mes) + '</div>' +
+          '</div>' +
+          (x.hoje ? '<span class="hm-aniv-dia hoje">Hoje</span>' : '') +
+        '</div>';
+      }).join(''));
+    })
+    .withFailureHandler(function () {
+      mostrar(_homeEstado('wifi-off', 'Sem conexão com o servidor',
+        'Verifique sua internet e tente novamente.', _homeRetry('_homeRecarregarAniv'), true));
+    })
+    .mb_aniversariantesDoMes(App.session.token, 3);
+}
+function _homeRecarregarAniv() {
+  var el = document.getElementById('aniv-list');
+  if (el) el.innerHTML = _activitySkeleton() + _activitySkeleton() + _activitySkeleton();
+  _loadAniv();
+}
+
+/* ── MENU DO USUÁRIO (dentro do cartão institucional) ── */
+function homeToggleMenu(e) {
+  if (e) e.stopPropagation();
+  var d = document.getElementById('hm-user-dd');
+  if (d) d.classList.toggle('open');
+}
 function toggleUserDropdown() {
   var dd = document.getElementById('user-dropdown');
   if (dd) dd.classList.toggle('open');
 }
 function closeDropdown() {
-  var dd = document.getElementById('user-dropdown');
-  if (dd) dd.classList.remove('open');
+  ['user-dropdown', 'hm-user-dd'].forEach(function (id) {
+    var dd = document.getElementById(id);
+    if (dd) dd.classList.remove('open');
+  });
 }
 
 function homeToggleNavCfg(e) {

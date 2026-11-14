@@ -301,21 +301,22 @@ test('UI premium: camada compartilhada (painel, KPI, botão, aba) com movimento 
   assert.doesNotMatch(h, /kpiHalo/);
 });
 
-test('ícone fantasma: KPI e módulo do Início têm marca d\'água no mesmo componente', () => {
+test('ícone fantasma: KPI tem marca d\'água no componente', () => {
   assert.match(read('index.html'), /_kpiCard[\s\S]{0,900}class="card-ghost"/);
-  assert.match(read('_home.html'), /_moduleBtn[\s\S]{0,700}class="card-ghost"/);
   assert.match(read('index.html'), /\.card-ghost\s*\{/);
 });
 
-test('Início: sem logo duplicado no cabeçalho; KPI que navega tem seta, e o servidor informa o destino', () => {
-  assert.doesNotMatch(read('_home.html'), /hm-logo/);
+test('Início: logo grande só no cartão institucional (sem barra superior); KPI que navega tem seta, e o servidor informa o destino', () => {
+  assert.match(read('_home.html'), /hm-logo/);
+  assert.match(read('index.html'), /currentView !== 'home'/);
   assert.match(read('index.html'), /kpi-go/);
   assert.match(read('Membros.js'), /destino: 'membros'/);
   assert.match(read('Dashboard.js'), /destino: 'usuarios'/);
 });
 
-test('grupo de indicadores: Início e Membros usam _kpiGroup (uma seta só, destino no grupo) e o servidor marca o alerta', () => {
-  assert.match(read('_home.html'), /_kpiGroup\(/);
+test('grupo de indicadores: Membros usa _kpiGroup (uma seta só, destino no grupo); Início usa mosaico; servidor marca o alerta', () => {
+  assert.match(read('_home.html'), /hm-bento/);
+  assert.match(read('_membros.html'), /_kpiGroup\(/);
   assert.match(read('index.html'), /function _kpiGroup[\s\S]{0,1800}kpi-go/);
   assert.match(read('Membros.js'), /alerta: true/);
 });

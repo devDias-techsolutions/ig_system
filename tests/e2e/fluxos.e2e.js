@@ -18,9 +18,8 @@ async function comoAdmin() {
 
 const kpis = (page) => page.evaluate(() => {
   const o = {};
-  document.querySelectorAll('#kpi-grid .kg-stat, #kpi-grid .kg-alert').forEach((c) => {
-    const rot = c.querySelector('.kg-lab') ? c.querySelector('.kg-lab').textContent : c.textContent.replace(/[0-9]+|Ver lista ›/g, '');
-    o[rot.trim()] = Number((c.textContent.match(/[0-9]+/) || [0])[0]);
+  document.querySelectorAll('#kpi-grid [data-k]').forEach((c) => {
+    o[c.getAttribute('data-k')] = Number((c.textContent.match(/[0-9]+/) || [0])[0]);
   });
   return o;
 });
@@ -64,11 +63,12 @@ test('perfil secretaria entra na Home do seu perfil (sem administração) e abre
   await entrar(page, 'sec@igreja.test', 'Sec#Teste1', 'home');
   await page.waitForFunction(() => !document.querySelector('#kpi-grid .is-loading'), null, { timeout: 6000 });
   const texto = await page.evaluate(() => document.querySelector('.hm').innerText.replace(/\s+/g, ' '));
-  assert.match(texto, /Seu espaço de trabalho/);
+  assert.match(texto, /Seu espaço de trabalho/i);
   assert.ok(!/Administração/.test(texto), 'secretaria não vê o bloco de administração na Home');
-  assert.ok(!/Acesso ao sistema/.test(texto), 'secretaria não vê o grupo de usuários');
+  assert.ok(!/Usuários/.test(texto), 'secretaria não vê o atalho nem o grupo de usuários');
   assert.ok(!/Atividade recente/.test(texto), 'secretaria não vê atividade de administração');
-  assert.match(texto, /Cadastro da igreja[\s\S]*Ativos/);
+  assert.match(texto, /Membros ativos/i);
+  assert.match(texto, /Aniversariantes do mês/i);
   await page.evaluate(() => navigateTo('membros'));
   await esperarTela(page, 'membros');
   assert.deepEqual(erros, []);
@@ -85,7 +85,9 @@ test('Home: nome, lema e cor da igreja vêm da aba Config; sem logo aparecem as 
   assert.equal(await page.textContent('.hm-title'), 'Igreja Vida Nova');
   assert.equal(await page.textContent('.hm-lema'), 'O Senhor é o meu pastor');
   assert.match(await page.title(), /^Igreja Vida Nova/);
-  assert.equal(await page.locator('.hm-logo').count(), 0, 'logo só na barra superior');
+  assert.equal(await page.locator('.hm-logo').count(), 1, 'logo grande no cartão institucional');
+  assert.equal(await page.textContent('.hm-logo .brand-mark span'), 'VN');
+  assert.equal(await page.isVisible('#main-topnav'), false, 'Início não tem barra superior');
   assert.equal(await page.textContent('#topnav-mark span'), 'VN');
   const cor = await page.evaluate(() => document.documentElement.style.getPropertyValue('--teal').trim());
   assert.ok(cor.length === 7 && cor[0] === '#', 'cor da marca aplicada: ' + cor);
@@ -212,7 +214,7 @@ test('Home: falha ao carregar indicadores mostra erro com "Tentar de novo" que f
   await page.waitForSelector('#kpi-grid .hm-empty.erro', { timeout: 6000 });
   falhar = false;
   await page.click('#kpi-grid .hm-empty.erro .btn');
-  await page.waitForSelector('#kpi-grid .kpi-group:not(.is-loading)', { timeout: 6000 });
+  await page.waitForSelector('#kpi-grid .bn-card:not(.is-loading)', { timeout: 6000 });
 });
 
 // ── Membros × Home (o defeito do cache apareceu aqui) ───────
@@ -238,7 +240,7 @@ test('membros: cadastrar, inativar e excluir refletem na lista e nos números da
   await irParaHome(page);
   const t = await textoKpis(page);
   assert.match(t, /Inativos/i, t);
-  assert.equal(await page.evaluate(() => [...document.querySelectorAll('#kpi-grid .kg-stat')].map((c) => c.innerText.replace(/\s+/g, ' ')).find((x) => /inativos/i.test(x)).match(/[0-9]+/)[0]), '1', t);
+  assert.equal(await page.evaluate(() => [...document.querySelectorAll('#kpi-grid .bn-card')].map((c) => c.innerText.replace(/\s+/g, ' ')).find((x) => /inativos/i.test(x)).match(/[0-9]+/)[0]), '1', t);
 
   // excluir
   await irParaMembros(page);
@@ -247,7 +249,7 @@ test('membros: cadastrar, inativar e excluir refletem na lista e nos números da
   assert.ok(!(await page.evaluate(() => document.getElementById('mb-lista-container').innerText)).includes('Fulano'));
 
   await irParaHome(page);
-  assert.equal(await page.evaluate(() => [...document.querySelectorAll('#kpi-grid > *')].map((c) => c.innerText.replace(/\s+/g, ' ')).find((x) => /inativos/i.test(x)).match(/[0-9]+/)[0]), '0');
+  assert.equal(await page.evaluate(() => [...document.querySelectorAll('#kpi-grid .bn-card')].map((c) => c.innerText.replace(/\s+/g, ' ')).find((x) => /inativos/i.test(x)).match(/[0-9]+/)[0]), '0');
   assert.deepEqual(erros, []);
 });
 
@@ -621,6 +623,7 @@ test('topo no celular mostra o nome curto da igreja ao lado do logo', async () =
   await definirConfig(backend, 'NOME_CURTO', 'Vida Nova');
   const { page } = await abrir(browser, backend, { viewport: { width: 360, height: 740 } });
   await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  await irParaMembros(page);
   const r = await page.evaluate(() => { const n = document.querySelector('.topnav-name'); const b = n.getBoundingClientRect(); return { txt: n.textContent, visivel: b.width > 0 && getComputedStyle(n).display !== 'none', dentro: b.right <= innerWidth - 60 }; });
   assert.equal(r.txt, 'Vida Nova');
   assert.ok(r.visivel, 'nome curto visível no topo');
