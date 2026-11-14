@@ -508,6 +508,7 @@ function mbSetTab(tab) {
   document.querySelectorAll('.tab').forEach(function(b){
     b.classList.toggle('active', b.getAttribute('onclick') === "mbSetTab('"+tab+"')");
   });
+  if (typeof tabsRevelar === 'function') tabsRevelar();
   if (tab !== 'form') _mbLimparRascunho();
   if (tab === 'lista') {
     _mbLoad(function(){ _mbRenderPanel(); });
