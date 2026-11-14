@@ -12,10 +12,10 @@
     "infinitas": 0
   },
   "_login.html": {
-    "fonte": 10,
+    "fonte": 0,
     "raio": 0,
-    "duracao": 2,
-    "infinitas": 4
+    "duracao": 0,
+    "infinitas": 0
   },
   "_membros-cartas.html": {
     "fonte": 10,
@@ -30,13 +30,13 @@
     "infinitas": 0
   },
   "_primeiro-acesso.html": {
-    "fonte": 3,
+    "fonte": 0,
     "raio": 0,
     "duracao": 0,
     "infinitas": 0
   },
   "_recuperar-senha.html": {
-    "fonte": 6,
+    "fonte": 0,
     "raio": 0,
     "duracao": 0,
     "infinitas": 0

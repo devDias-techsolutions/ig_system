@@ -19,7 +19,7 @@ Regras em `docs/UI-GUIDELINES.md`; estrutura em `docs/LAYOUT.md`.
 | UI-3b | **Início redesenhada conforme wireframe aprovado** (cartão institucional sem topnav, atalhos, mosaico, faixa de atenção, aniversariantes, atividade). Referência obrigatória: `docs/UI-HOME.md` + `docs/img/home-wireframe-design.png` | Feita |
 | UI-2b | Revisão da UI-2: bloco do KPI alinhado ao título (sem recuo solto) com respiro, KPI sem vidro empilhado dentro do painel, abas com dica de rolagem (esmaecer na borda) e aba ativa sempre visível no celular | Feita |
 | UI-3 | Aplicar em Home → Membros → Usuários → Identidade (uma tela por PR). **Todas feitas**: Home e Identidade zeradas; Membros só com o cartão impresso fora da escala; Usuários com ações em linha própria no celular (44 px) | Feita |
-| UI-4 | Telas de acesso (login, primeiro acesso, recuperar senha) | Pendente |
+| UI-4 | Telas de acesso (login, primeiro acesso, recuperar senha) | Concluída: CSS único em `_login.html`, só tokens, sem animação contínua, estados finais em `.auth-estado` |
 | UI-5 | Zerar o limite de valores fora da escala (`npm run ui:baseline` a cada ganho) | Contínuo |
 
 ## Diagnóstico que originou o plano
