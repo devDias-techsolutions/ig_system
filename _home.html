@@ -16,67 +16,62 @@
 .hm-hero-in { position: relative; z-index: 1; }
 .hm-hero {
   position: relative; z-index: 5; margin-bottom: var(--sp-5); color: #fff;
-  padding: calc(var(--sp-3) + env(safe-area-inset-top, 0px)) 0 var(--sp-4);
+  padding: calc(var(--sp-5) + env(safe-area-inset-top, 0px)) 0 var(--sp-4);
   border-radius: 0 0 var(--r-4) var(--r-4); box-shadow: var(--shadow-lg);
   background: linear-gradient(140deg, var(--hero-b) 0%, var(--hero-a) 100%);
 }
 .hm-art { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; color: #fff; }
 .hm-art svg { position: absolute; right: 0; top: 0; width: 100%; height: 100%; }
-.hm-top { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
-.hm-pill {
-  display: inline-flex; align-items: center; min-height: 36px; padding: 0 var(--sp-4); border-radius: var(--r-pill);
-  font-size: var(--fs-sm); font-weight: 700; color: #fff; background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .22);
-}
-.hm-pill::before { content: ''; width: 8px; height: 8px; margin-right: var(--sp-2); border-radius: 50%; background: var(--hero-gold); }
+.hm-top { position: absolute; top: calc(var(--sp-3) * -1); right: var(--gutter); z-index: 2; }
 .hm-menu-wrap { position: relative; flex-shrink: 0; }
 .hm-me {
-  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; font-family: inherit;
+  width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; font-family: inherit;
   font-size: var(--fs-sm); font-weight: 800; color: #fff; background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .28);
   transition: background var(--dur) var(--ease);
 }
 .hm-me:hover { background: rgba(255, 255, 255, .24); }
 .hm-me:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-.hm-brand { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--sp-2); margin-top: var(--sp-3); }
+.hm-brand { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--sp-2);  }
 .hm-logo {
-  width: 72px; height: 72px; flex-shrink: 0; border-radius: 50%; overflow: hidden; display: grid; place-items: center;
+  width: 64px; height: 64px; flex-shrink: 0; border-radius: 50%; overflow: hidden; display: grid; place-items: center;
   background: #FFFFFF; box-shadow: 0 0 0 2px var(--hero-gold), 0 10px 24px -10px rgba(0, 0, 0, .5);
 }
 .hm-logo .brand-mark { font-size: var(--fs-lg); color: var(--hero-a); }
 .hm-logo .brand-mark img { padding: 0; }
 .hm-id-txt { min-width: 0; }
-.hm-eyebrow { font-size: var(--fs-xs); font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--hero-gold); }
-.hm-title { margin-top: var(--sp-1); font-size: var(--fs-lg); font-weight: 800; letter-spacing: -.02em; line-height: 1.2; color: #fff; overflow-wrap: anywhere; }
+.hm-eyebrow { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--hero-gold); }
+.hm-title { margin-top: var(--sp-1); font-size: var(--fs-md); font-weight: 800; letter-spacing: -.01em; line-height: 1.25; color: #fff; overflow-wrap: anywhere; }
 .hm-lema { max-width: 520px; margin: var(--sp-1) auto 0; font-size: var(--fs-sm); font-style: italic; line-height: 1.5; color: rgba(255, 255, 255, .82); }
-@media (min-width: 768px) { .hm-logo { width: 96px; height: 96px; } .hm-title { font-size: var(--fs-xl); } }
+@media (min-width: 768px) { .hm-logo { width: 88px; height: 88px; } .hm-title { font-size: var(--fs-lg); } }
 
 /* ── Blocos e títulos ── */
 .hm-block { margin-bottom: var(--sp-5); }
-.hm-h { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-3); font-size: var(--fs-md); font-weight: 800; letter-spacing: -.01em; color: var(--text); }
+.hm-h { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-3); font-size: var(--fs-md); font-weight: 700; letter-spacing: -.01em; color: var(--text); }
 .hm-h a, .hm-h button { font-size: var(--fs-sm); font-weight: 700; color: var(--teal); background: none; border: 0; cursor: pointer; font-family: inherit; padding: 0; }
 
 /* ── Atalhos: círculos, todos na cor da igreja (cor por assunto só em status) ── */
-.hm-mods { display: grid; grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); gap: var(--sp-3) var(--sp-2); }
+.hm-mods { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: var(--sp-3) var(--sp-2); }
 .hm-mod {
   display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); width: 100%; text-align: center;
   padding: 0; border: 0; background: none; color: inherit; font-family: inherit; cursor: pointer;
 }
 .hm-mod-icon {
-  width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; color: var(--on-teal, #fff);
+  width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; color: var(--on-teal, #fff);
   background: var(--teal); box-shadow: 0 6px 14px -8px var(--teal-glow);
   transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
 }
-.hm-mod-icon i, .hm-mod-icon svg { width: 24px; height: 24px; stroke-width: 2; }
+.hm-mod-icon i, .hm-mod-icon svg { width: 22px; height: 22px; stroke-width: 2; }
 .hm-mod:hover .hm-mod-icon { transform: translateY(-2px); box-shadow: 0 10px 18px -8px var(--teal-glow); }
 .hm-mod:active .hm-mod-icon { transform: scale(.97); }
 .hm-mod:focus-visible { outline: 2px solid var(--teal); outline-offset: 4px; border-radius: var(--r-3); }
-.hm-mod-name { font-size: var(--fs-xs); font-weight: 700; letter-spacing: -.01em; color: var(--text); overflow-wrap: anywhere; }
+.hm-mod-name { font-size: var(--fs-xs); font-weight: 600; letter-spacing: -.01em; color: var(--text); overflow-wrap: anywhere; }
 
 /* ── Indicadores em mosaico: destaque na cor da igreja + cartões coloridos por assunto ── */
 .hm-bento { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
 .bn-card {
   --kpi-color: var(--teal);
-  position: relative; overflow: hidden; isolation: isolate; display: flex; align-items: center; gap: var(--sp-3); min-height: 76px; text-align: left;
-  padding: var(--sp-3) var(--sp-4); border: 1px solid var(--border); border-radius: var(--r-3); color: inherit; font-family: inherit;
+  position: relative; overflow: hidden; isolation: isolate; display: flex; align-items: center; gap: var(--sp-3); min-height: 0; text-align: left;
+  padding: var(--sp-3); border: 1px solid var(--border); border-radius: var(--r-3); color: inherit; font-family: inherit;
   background: var(--bg-glass);
 }
 [data-theme="light"] .bn-card { background: #FFFFFF; box-shadow: var(--shadow-sm); }
@@ -85,22 +80,22 @@ button.bn-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
 button.bn-card:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
 .bn-ghost { position: absolute; z-index: -1; right: -10px; bottom: -14px; width: 76px; height: 76px; color: var(--kpi-color); opacity: .12; pointer-events: none; }
 .bn-ghost svg { width: 100%; height: 100%; fill: currentColor; fill-opacity: .35; stroke-width: 1.5; }
-.bn-ico { width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; color: var(--on-teal, #fff); background: var(--teal); }
-.bn-ico i, .bn-ico svg { width: 18px; height: 18px; }
+.bn-ico { width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; color: var(--on-teal, #fff); background: var(--teal); }
+.bn-ico i, .bn-ico svg { width: 16px; height: 16px; }
 .bn-txt { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .bn-lab { font-size: var(--fs-xs); font-weight: 700; color: var(--text-muted); line-height: 1.25; }
-.bn-num { font-size: var(--fs-xl); font-weight: 800; letter-spacing: -.03em; line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--text); }
+.bn-num { font-size: var(--fs-lg); font-weight: 800; letter-spacing: -.03em; line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--text); }
 .bn-sub { font-size: var(--fs-xs); color: var(--text-dim); }
 /* destaque: fundo sólido na cor da igreja, número grande, ícone-marca d'água e brilho */
 .bn-card.feat {
-  grid-column: 1 / -1; min-height: 0; padding: var(--sp-4); border-color: transparent; color: var(--on-teal, #fff);
+  grid-column: 1 / -1; min-height: 0; padding: var(--sp-3) var(--sp-4); border-color: transparent; color: var(--on-teal, #fff);
   background: radial-gradient(circle at 85% 15%, rgba(255, 255, 255, .22), transparent 50%), linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
   box-shadow: 0 10px 22px -14px var(--teal-glow);
 }
 .bn-card.feat.is-loading { flex-direction: column; align-items: flex-start; }
 .bn-card.feat .bn-txt { gap: 0; }
 .bn-card.feat .bn-lab { color: inherit; opacity: .85; }
-.bn-card.feat .bn-num { font-size: var(--fs-2xl); color: inherit; }
+.bn-card.feat .bn-num { font-size: var(--fs-xl); color: inherit; }
 .bn-card.feat .bn-sub { color: inherit; opacity: .8; }
 .bn-card.feat .bn-ghost { color: currentColor; opacity: .14; width: 84px; height: 84px; right: -8px; bottom: -14px; }
 @media (min-width: 900px) {
@@ -214,9 +209,6 @@ function renderHome() {
 
   var perfil = App.session.perfil || '';
   var cfg    = HOME_PERFIL[perfil] || HOME_PERFIL_PADRAO;
-  var nome   = String(App.session.nome || '').split(' ')[0];
-  var hora   = new Date().getHours();
-  var sauda  = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
   var mods   = modulosDoPerfil(perfil);
   var podeUsuarios = cfg.admin && ROUTE_PERMISSIONS.usuarios.indexOf(perfil) !== -1;
   var comAtividade = _homeTem(cfg, 'atividade');
@@ -231,7 +223,6 @@ function renderHome() {
       '<div class="hm-art" aria-hidden="true">' + _homeArte() + '</div>' +
       '<div class="hm-hero-in">' +
       '<div class="hm-top">' +
-        '<span class="hm-pill">' + sauda + (nome ? ', ' + escHtml(nome) : '') + '</span>' +
         '<div class="hm-menu-wrap">' +
           '<button type="button" class="hm-me" id="hm-me-btn" aria-label="Menu do usuário" aria-haspopup="true" onclick="homeToggleMenu(event)">' + escHtml(getInitials(App.session.nome || '')) + '</button>' +
           '<div class="user-dropdown" id="hm-user-dd">' +

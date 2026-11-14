@@ -49,4 +49,4 @@ Mosaico: com exatamente 3 indicadores, destaque à esquerda e 2 menores empilhad
 - Logo: **círculo branco de 96 px** com anel dourado fino; a imagem preenche o círculo (sem margem interna). Iniciais em cor escura se não houver logo.
 - Cores: **uma paleta só** (cor da igreja + dourado de apoio no hero). Cor semântica apenas em status (faixa âmbar de atenção, erro). Nada de cor por posição ou por assunto na Início.
 - Faixa de atenção: ícone em círculo branco, título + dica (`dica` vem do servidor) e botão **Resolver** sólido âmbar-escuro; singular/plural tratado.
-- Pílula de saudação com ponto dourado.
+- Sem saudação: só o botão com as iniciais (menu do usuário) no canto superior direito.
