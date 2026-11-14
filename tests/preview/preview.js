@@ -88,6 +88,11 @@ async function irPara(page, rota, esperada) {
       const arq = path.join(OUT, `${t.nome}-${tam}.png`);
       await page.screenshot({ path: arq });
       relatorio.push({ tela: t.nome, tam, erros });
+      if (t.nome === 'membros') {
+        await page.evaluate(() => { if (typeof mbNovoMembro === 'function') mbNovoMembro(); });
+        await page.waitForTimeout(700);
+        await page.screenshot({ path: path.join(OUT, `membros-form-${tam}.png`) });
+      }
       if (t.nome === 'usuarios') {
         await page.evaluate(() => { if (typeof usrRenderPermissoes === 'function') usrRenderPermissoes(); });
         await page.waitForTimeout(500);

@@ -543,7 +543,7 @@ test('carteirinha: logo enviado fica dentro do cabeçalho, em caixa pequena e se
   const { page } = await abrir(browser, backend);
   await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   await page.evaluate(() => navigateTo('membros'));
-  await page.waitForSelector('.tab, [data-tab]');
+  await page.waitForSelector('.mb-atalhos');
   await page.evaluate(() => {
     const w = document.createElement('div'); w.id = 'cartao-teste'; w.style.cssText = 'position:fixed;top:0;left:0;z-index:99999';
     w.innerHTML = mbCard_htmlFrente({ nome: 'Maria Silva', rol: '1', funcao: 'Membro' }, false); document.body.appendChild(w);
@@ -558,23 +558,23 @@ test('carteirinha: logo enviado fica dentro do cabeçalho, em caixa pequena e se
   assert.ok(r.dentro, 'logo dentro do cabeçalho: ' + JSON.stringify(r));
 });
 
-test('padrão: KPIs de Membros são os mesmos cards do Início e seguem a cor da marca', async () => {
+test('padrão: Membros tem resumo enxuto em chips (sem indicadores grandes) e a Início usa a cor da marca', async () => {
   const backend = criarBackend();
   await definirConfig(backend, 'COR_PRIMARIA', '#7c3aed');
   const { page } = await abrir(browser, backend);
   await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  const feat = await page.evaluate(() => getComputedStyle(document.querySelector('.bn-card.feat')).backgroundImage);
+  assert.doesNotMatch(feat, /rgb\(10, 61, 98\)/);
   await page.evaluate(() => navigateTo('membros'));
-  await page.waitForSelector('.kpi-group');
+  await page.waitForSelector('.mb-chips');
   const r = await page.evaluate(() => ({
-    n: document.querySelectorAll('.kpi-group').length,
-    soltos: document.querySelectorAll('.kpi-card').length,
-    antigo: document.querySelectorAll('.mb-kpi-card, .kpi-hero-status').length,
-    cor: getComputedStyle(document.querySelector('.kpi-group.kc-teal .kg-eyebrow')).color
+    chips: document.querySelectorAll('.mb-chip').length,
+    grandes: document.querySelectorAll('.kpi-group, .kpi-card, .mb-kpi-card, .kpi-hero-status').length,
+    ativos: document.getElementById('mbkv-ativos').textContent
   }));
-  assert.equal(r.n, 2);
-  assert.equal(r.soltos, 0);
-  assert.equal(r.antigo, 0);
-  assert.notEqual(r.cor, 'rgb(10, 61, 98)');
+  assert.ok(r.chips >= 4);
+  assert.equal(r.grandes, 0);
+  assert.match(r.ativos, /^\d+$/);
 });
 
 test('identidade: cor salva vira "cor recente" e pode ser reaplicada; sem recentes não mostra o bloco', async () => {
