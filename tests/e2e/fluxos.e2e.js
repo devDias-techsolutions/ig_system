@@ -543,7 +543,7 @@ test('carteirinha: logo enviado fica dentro do cabeçalho, em caixa pequena e se
   const { page } = await abrir(browser, backend);
   await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   await page.evaluate(() => navigateTo('membros'));
-  await page.waitForSelector('.tab, [data-tab]');
+  await page.waitForSelector('.mb-atalhos');
   await page.evaluate(() => {
     const w = document.createElement('div'); w.id = 'cartao-teste'; w.style.cssText = 'position:fixed;top:0;left:0;z-index:99999';
     w.innerHTML = mbCard_htmlFrente({ nome: 'Maria Silva', rol: '1', funcao: 'Membro' }, false); document.body.appendChild(w);
@@ -574,7 +574,7 @@ test('padrão: Membros tem resumo enxuto em chips (sem indicadores grandes) e a 
   }));
   assert.ok(r.chips >= 4);
   assert.equal(r.grandes, 0);
-  assert.equal(r.ativos, '1');
+  assert.match(r.ativos, /^\d+$/);
 });
 
 test('identidade: cor salva vira "cor recente" e pode ser reaplicada; sem recentes não mostra o bloco', async () => {

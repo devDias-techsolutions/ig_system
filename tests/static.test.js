@@ -246,7 +246,9 @@ test('layout: telas migradas usam .page como raiz e barra de ações padrão', (
 // ═══ 6. PADRONIZAÇÃO DOS MÓDULOS (Etapa 15b) ═════════════════
 test('padrão: Membros, Usuários e Identidade usam a barra de módulo do shell (sem versão própria)', () => {
   ['_membros.html', '_usuarios.html', '_identidade.html'].forEach((f) => assert.match(read(f), /moduleBarHtml\(/, f + ' sem moduleBarHtml'));
-  ['_membros.html', '_usuarios.html'].forEach((f) => assert.match(read(f), /tabsHtml\(/, f + ' sem tabsHtml'));
+  assert.match(read('_usuarios.html'), /tabsHtml\(/, '_usuarios.html sem tabsHtml');
+  assert.match(read('_membros.html'), /mb-atalhos[\s\S]{0,400}hm-mod-icon/, 'Membros: seções devem ser os atalhos circulares da Início');
+  assert.match(read('_membros.html'), /class="mb-fab/, 'Membros: "Novo membro" é o botão flutuante (+)');
   const proprio = findings(/\.(?:mb-topnav-(?:module|crumb)|mb-tabs?|usr-tabs?)\b/, ['_membros.html', '_usuarios.html']);
   assert.deepEqual(proprio, [], 'cabeçalho/abas próprios:\n' + proprio.join('\n'));
 });
