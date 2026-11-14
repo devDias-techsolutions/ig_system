@@ -171,8 +171,7 @@ test('celular: sem menu inferior; a sidebar vira gaveta (sanduíche) com os mesm
   assert.ok(await page.isVisible('.nav-burger'));
   await page.click('.nav-burger');
   await page.waitForFunction(() => document.body.classList.contains('nav-open'));
-  await page.waitForTimeout(400);
-  assert.ok(await page.isVisible('#app-sidebar'));
+  await page.waitForSelector('#app-sidebar', { state: 'visible', timeout: 5000 });
   const itens = await page.$$eval('#app-sidebar .sb-item', (els) => els.map((e) => e.innerText.trim()));
   assert.deepEqual(itens, ['Início', 'Membros', 'Usuários', 'Identidade']);
   await page.click('#app-sidebar .sb-item:has-text("Usuários")');
