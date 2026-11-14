@@ -19,32 +19,31 @@ function _renderSolicitarEmail() {
   renderView(
     '<div id="view-recuperar-senha">' +
       '<div class="login-bg"></div>' +
-      '<div class="login-bg-grid"></div>' +
       '<div class="pa-wrapper">' +
         '<div class="pa-card">' +
 
-          '<button class="btn btn-ghost btn-sm" onclick="navigateTo(\'login\')" style="margin-bottom:20px;padding:0;gap:6px">' +
+          '<button class="btn btn-ghost btn-sm" onclick="navigateTo(\'login\')" style="margin-bottom:var(--sp-3);padding:0">' +
             '<i data-lucide="arrow-left" class="ic-16"></i> Voltar ao login' +
           '</button>' +
 
-          '<div class="pa-badge" style="background:rgba(138,180,248,0.1);border-color:rgba(138,180,248,0.25);color:#8ab4f8" style="display:inline-flex;align-items:center;gap:5px"><i data-lucide="key" class="ic-13"></i>Recuperação de Senha</div>' +
+          '<div class="pa-badge"><i data-lucide="key" class="ic-13"></i>Recuperação de Senha</div>' +
           '<h2 class="pa-title">Esqueceu sua senha?</h2>' +
           '<p class="pa-sub">Informe seu e-mail cadastrado. Enviaremos um link para redefinição de senha.</p>' +
 
           '<div class="login-error-msg" id="rec-error">' +
-            '<i data-lucide="alert-triangle" style="width:13px;height:13px;flex-shrink:0"></i><span id="rec-error-text"></span>' +
+            '<i data-lucide="alert-triangle" class="ic-13" style="flex-shrink:0"></i><span id="rec-error-text"></span>' +
           '</div>' +
 
           /* Sucesso */
           '<div id="rec-success" style="display:none">' +
-            '<div style="text-align:center;padding:24px 0">' +
-              '<div style="margin-bottom:16px;display:flex;justify-content:center"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>' +
-              '<h3 style="font-size:17px;font-weight:700;color:#fff;margin-bottom:8px">E-mail enviado!</h3>' +
-              '<p style="font-size:13px;color:var(--text-muted);line-height:1.6">' +
+            '<div class="auth-estado">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>' +
+              '<h3>E-mail enviado!</h3>' +
+              '<p>' +
                 'Se o e-mail estiver cadastrado, você receberá o link de recuperação em breve.<br>' +
-                '<span style="color:var(--text-dim);font-size:12px">(Verifique também sua caixa de spam)</span>' +
+                '<small>(Verifique também sua caixa de spam)</small>' +
               '</p>' +
-              '<button class="btn btn-primary btn-full" style="margin-top:24px" onclick="navigateTo(\'login\')">' +
+              '<button class="btn btn-primary btn-full" onclick="navigateTo(\'login\')">' +
                 'Voltar ao login' +
               '</button>' +
             '</div>' +
@@ -120,7 +119,6 @@ function _renderRedefinirSenha(token) {
   renderView(
     '<div id="view-recuperar-senha">' +
       '<div class="login-bg"></div>' +
-      '<div class="login-bg-grid"></div>' +
       '<div class="pa-wrapper">' +
         '<div class="pa-card" id="redef-card">' +
           '<div class="loader-spinner" style="margin:40px auto"></div>' +
@@ -136,10 +134,10 @@ function _renderRedefinirSenha(token) {
         _buildRedefForm(token, res.data.nome);
       } else {
         document.getElementById('redef-card').innerHTML =
-          '<div style="text-align:center;padding:24px 0">' +
-            '<div style="margin-bottom:16px;display:flex;justify-content:center"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--danger,#ef4444)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>' +
-            '<h3 style="font-size:17px;font-weight:700;color:var(--red);margin-bottom:8px">Link inválido ou expirado</h3>' +
-            '<p style="font-size:13px;color:var(--text-muted);margin-bottom:24px">' +
+          '<div class="auth-estado erro">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="var(--danger,#ef4444)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>' +
+            '<h3>Link inválido ou expirado</h3>' +
+            '<p>' +
               res.error +
             '</p>' +
             '<button class="btn btn-primary btn-full" onclick="navigateTo(\'recuperar-senha\')">' +
@@ -163,7 +161,7 @@ function _buildRedefForm(token, nome) {
     '<p class="pa-sub">Olá, <strong>' + nome + '</strong>! Defina sua nova senha abaixo.</p>' +
 
     '<div class="login-error-msg" id="redef-error">' +
-      '<i data-lucide="alert-triangle" style="width:13px;height:13px;flex-shrink:0"></i><span id="redef-error-text"></span>' +
+      '<i data-lucide="alert-triangle" class="ic-13" style="flex-shrink:0"></i><span id="redef-error-text"></span>' +
     '</div>' +
 
     '<div class="field">' +
@@ -256,10 +254,10 @@ function handleRedefinirSenha(token) {
         setBtnLoading(btn, false);
         if (res.success) {
           document.getElementById('redef-card').innerHTML =
-            '<div style="text-align:center;padding:24px 0">' +
-              '<div style="margin-bottom:16px;display:flex;justify-content:center"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--green,#34d399)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>' +
-              '<h3 style="font-size:17px;font-weight:700;color:var(--green);margin-bottom:8px">Senha redefinida!</h3>' +
-              '<p style="font-size:13px;color:var(--text-muted);margin-bottom:24px">Sua senha foi alterada com sucesso. Faça login com suas novas credenciais.</p>' +
+            '<div class="auth-estado ok">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="var(--green,#34d399)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' +
+              '<h3>Senha redefinida!</h3>' +
+              '<p>Sua senha foi alterada com sucesso. Faça login com suas novas credenciais.</p>' +
               '<button class="btn btn-primary btn-full" onclick="navigateTo(\'login\')">' +
                 'Ir para o login' +
               '</button>' +

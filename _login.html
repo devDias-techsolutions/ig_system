@@ -1,288 +1,110 @@
 <style>
 /* ══════════════════════════════════════════════════
-   LOGIN PREMIUM v3
+   TELAS DE ENTRADA: login, primeiro acesso, recuperar senha
+   Fonte única do CSS destas telas (tokens do sistema, sem animação contínua).
 ══════════════════════════════════════════════════ */
-#view-login { min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; }
+#view-login, #view-primeiro-acesso, #view-recuperar-senha { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
 
-/* ── FUNDO MESH ── */
+/* Fundo: degradê estático da cor da igreja */
 .login-bg {
-  position: fixed; inset: 0; z-index: 0;
-  background:
-    radial-gradient(ellipse 85% 65% at 50% -8%, color-mix(in srgb, var(--teal) 20%, transparent) 0%, transparent 60%),
-    radial-gradient(ellipse 55% 45% at 90% 95%, rgba(0,150,180,.08) 0%, transparent 55%),
-    var(--bg);
-  pointer-events: none;
-}
-.login-bg-grid {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background-image:
-    linear-gradient(color-mix(in srgb, var(--teal) 2.8%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--teal) 2.8%, transparent) 1px, transparent 1px);
-  background-size: 56px 56px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 75%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 75%);
-}
-/* partículas flutuantes */
-.login-bg-glow {
-  position: fixed; pointer-events: none; z-index: 0;
-}
-.login-bg-glow::before {
-  content: ''; position: absolute;
-  top: 20vh; left: 10vw;
-  width: 300px; height: 300px; border-radius: 50%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--teal) 7%, transparent) 0%, transparent 65%);
-  animation: floatGlow 8s ease-in-out infinite;
-}
-.login-bg-glow::after {
-  content: ''; position: absolute;
-  bottom: 15vh; right: 8vw;
-  width: 240px; height: 240px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(0,180,220,.06) 0%, transparent 65%);
-  animation: floatGlow 11s ease-in-out infinite reverse;
-}
-@keyframes floatGlow {
-  0%,100% { transform: translateY(0) scale(1); opacity: .7; }
-  50%      { transform: translateY(-28px) scale(1.08); opacity: 1; }
+  background: radial-gradient(ellipse 85% 60% at 50% -8%, color-mix(in srgb, var(--teal) 18%, transparent) 0%, transparent 60%), var(--bg);
 }
 
-/* ── WRAPPER ── */
-.login-wrapper {
+.login-wrapper, .pa-wrapper {
   position: relative; z-index: 1; flex: 1;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 24px var(--gutter) 48px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: var(--sp-5) var(--gutter) var(--sp-6);
 }
 
-/* ── SPLIT EM COLUNAS — telas largas (notebook/desktop) ──
-   Em vez de empilhar header+card verticalmente (causa de overflow
-   em viewports baixas), distribui lado a lado. A altura total passa
-   a ser a do maior elemento, não a soma dos dois. ── */
-.login-split {
-  display: flex; flex-direction: column; align-items: center;
-  width: 100%;
-}
+/* Telas largas: marca e cartão lado a lado (a altura é a do maior, não a soma) */
+.login-split { display: flex; flex-direction: column; align-items: center; width: 100%; }
 .login-split-divider { display: none; }
-
 @media (min-width: 900px) {
-  .login-split {
-    flex-direction: row; align-items: center; justify-content: center;
-    gap: 56px; max-width: 920px;
-  }
+  .login-split { flex-direction: row; justify-content: center; gap: var(--sp-7, 56px); max-width: 920px; }
   .login-header { margin-bottom: 0; flex: 1 1 320px; max-width: 340px; }
-  .login-logo-ring, .login-logo-icon { width: 112px; height: 112px; }
-  .login-logo-ring { margin: 0 auto 26px; }
-  .login-church-name { font-size: clamp(24px, 2.6vw, 30px); }
-  .login-split-divider {
-    display: block; width: 1px; align-self: stretch;
-    background: linear-gradient(180deg, transparent, var(--border2) 20%, var(--border2) 80%, transparent);
-    min-height: 280px;
-  }
+  .login-logo-ring { width: 96px; height: 96px; }
+  .login-split-divider { display: block; width: 1px; align-self: stretch; min-height: 240px; background: linear-gradient(180deg, transparent, var(--border2) 20%, var(--border2) 80%, transparent); }
   .login-card { flex-shrink: 0; }
 }
-
-/* ── MODO COMPACTO — viewports baixas (notebook com barras de favoritos,
-   janela não maximizada etc.) — garante que o botão "Entrar" nunca
-   fique cortado, sem depender de o usuário perceber que pode rolar.
-   Continua valendo como rede de segurança mesmo com o split acima. ── */
+/* Viewports baixas: o botão "Entrar" nunca fica cortado */
 @media (max-height: 760px) {
-  .login-wrapper { padding: 16px var(--gutter) 20px; }
-  .login-header  { margin-bottom: 20px; }
-  .login-logo-ring, .login-logo-icon { width: 64px; height: 64px; margin-bottom: 14px; }
-  .login-logo-ring { margin: 0 auto 14px; }
-  .login-card     { padding: 24px 24px; }
-  .login-card .field { margin-bottom: 14px; }
-  .login-card-sub { margin-bottom: 16px; }
-  .login-footer   { margin-top: 12px; }
-}
-@media (min-width: 900px) and (max-height: 760px) {
-  .login-logo-ring, .login-logo-icon { width: 80px; height: 80px; }
-  .login-split-divider { min-height: 220px; }
+  .login-wrapper, .pa-wrapper { padding: var(--sp-4) var(--gutter); }
+  .login-header { margin-bottom: var(--sp-4); }
+  .login-logo-ring { width: 64px; height: 64px; margin-bottom: var(--sp-3); }
 }
 
-/* ── HEADER ── */
-.login-header { text-align: center; margin-bottom: 40px; }
-
+/* ── Marca ── */
+.login-header { text-align: center; margin-bottom: var(--sp-6); }
 .login-logo-ring {
-  position: relative; width: 92px; height: 92px; margin: 0 auto 22px;
+  position: relative; width: 72px; height: 72px; margin: 0 auto var(--sp-4); border-radius: 50%;
+  background: var(--teal); border: 2px solid color-mix(in srgb, var(--teal) 55%, transparent);
+  box-shadow: 0 8px 24px -10px var(--teal-glow);
 }
-.login-logo-bg {
-  position: absolute; inset: 0; border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, var(--teal-light), var(--teal-dark));
-  border: 2px solid color-mix(in srgb, var(--teal) 55%, transparent);
-  box-shadow: 0 4px 24px color-mix(in srgb, var(--teal) 30%, transparent), inset 0 1px 0 rgba(255,255,255,.12);
-  animation: ringPulse 3s ease-in-out infinite;
-}
-@keyframes ringPulse {
-  0%,100% { box-shadow: 0 4px 24px color-mix(in srgb, var(--teal) 30%, transparent), inset 0 1px 0 rgba(255,255,255,.12), 0 0 0 0 color-mix(in srgb, var(--teal) 35%, transparent); }
-  50%      { box-shadow: 0 4px 32px color-mix(in srgb, var(--teal) 45%, transparent), inset 0 1px 0 rgba(255,255,255,.12), 0 0 0 14px transparent; }
-}
-.login-logo-ring::before, .login-logo-ring::after {
-  content: ''; position: absolute; border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--teal) 14%, transparent);
-  animation: orbitRing 12s linear infinite;
-}
-.login-logo-ring::before { inset: -14px; }
-.login-logo-ring::after  { inset: -26px; animation-direction: reverse; animation-duration: 18s; border-color: color-mix(in srgb, var(--teal) 7%, transparent); }
-@keyframes orbitRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-.login-logo-icon {
-  position: relative; z-index: 1;
-  width: 92px; height: 92px;
-  display: flex; align-items: center; justify-content: center;
-}
-
-.login-church-name {
-  font-size: clamp(20px,5vw,26px); font-weight: 900;
-  color: var(--text); letter-spacing: -.5px; line-height: 1.15;
-}
+.login-logo-icon { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.login-church-name { font-size: var(--fs-lg); font-weight: 800; letter-spacing: -.02em; line-height: 1.2; color: var(--text); }
 [data-theme="dark"] .login-church-name { color: #fff; }
-.login-church-sub {
-  font-size: 11px; color: var(--text-muted); margin-top: 5px;
-  font-family: 'DM Mono',monospace; letter-spacing: .7px; text-transform: uppercase;
-}
+@media (min-width: 900px) { .login-church-name { font-size: var(--fs-xl); } }
+.login-church-sub { margin-top: var(--sp-1); font-size: var(--fs-xs); color: var(--text-muted); font-family: 'DM Mono', monospace; letter-spacing: .06em; text-transform: uppercase; }
 
-/* ── CARD ── */
-.login-card {
-  width: 100%; max-width: 420px;
-  background: var(--bg-glass2);
-  border: 1px solid var(--border2);
-  border-radius: var(--r-xl);
-  padding: 36px 28px;
-  box-shadow: var(--shadow-lg), 0 0 60px color-mix(in srgb, var(--teal) 6%, transparent);
-  position: relative; overflow: hidden;
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+/* ── Cartão (login e pa compartilham) ── */
+.login-card, .pa-card {
+  position: relative; overflow: hidden; width: 100%; max-width: 420px;
+  background: var(--bg-glass2); border: 1px solid var(--border2); border-radius: var(--r-4);
+  padding: var(--sp-5); box-shadow: var(--shadow-lg);
 }
-/* Glow accent top */
-.login-card::before {
-  content: ''; position: absolute;
-  top: 0; left: 15%; right: 15%; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--teal), transparent);
-}
-/* Ambient inner glow */
-.login-card::after {
-  content: ''; position: absolute;
-  top: -60px; left: 50%; transform: translateX(-50%);
-  width: 200px; height: 200px; border-radius: 50%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--teal) 8%, transparent) 0%, transparent 65%);
-  pointer-events: none;
-}
+.pa-card { max-width: 440px; }
+.login-card::before, .pa-card::before { content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 2px; background: linear-gradient(90deg, transparent, var(--teal), transparent); }
+.pa-card::before { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+.login-card-title, .pa-title { font-size: var(--fs-lg); font-weight: 800; letter-spacing: -.02em; color: var(--text); margin-bottom: var(--sp-1); }
+.login-card-sub, .pa-sub { font-size: var(--fs-sm); color: var(--text-muted); margin-bottom: var(--sp-4); }
+.login-card .field, .pa-card .field { margin-bottom: var(--sp-3); }
 
-.login-card-title { font-size: 20px; font-weight: 900; color: var(--text); margin-bottom: 4px; letter-spacing: -.4px; }
-.login-card-sub   { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
-
-/* senha toggle */
-.pwd-toggle-btn {
-  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
-  background: none; border: none; cursor: pointer;
-  color: var(--text-dim); padding: 0;
-  display: flex; align-items: center; transition: color .15s;
-}
-.pwd-toggle-btn:hover { color: var(--text-muted); }
-
-/* força da senha */
-.pwd-strength { margin-top: 8px; display: none; }
-.pwd-strength.visible { display: block; }
-.pwd-strength-bar { height: 3px; border-radius: 100px; background: var(--bg4); overflow: hidden; margin-bottom: 5px; }
-.pwd-strength-fill { height: 100%; border-radius: 100px; transition: width .3s var(--ease), background .3s; }
-.pwd-strength-label { font-size: 11px; color: var(--text-dim); font-family: 'DM Mono',monospace; }
-
-/* esqueci senha */
-.forgot-link {
-  background: none; border: none; cursor: pointer; color: var(--teal);
-  font-size: 13px; font-weight: 700; padding: 0; text-decoration: none;
-  font-family: 'Plus Jakarta Sans',sans-serif; transition: color .15s;
-}
-.forgot-link:hover { color: var(--teal-light); text-decoration: underline; }
-.login-forgot-row { display: flex; justify-content: flex-end; margin-top: -8px; margin-bottom: 20px; }
-
-/* erro inline */
-.login-error-msg {
-  background: var(--red-dim); border: 1px solid rgba(255,107,107,.22);
-  border-radius: var(--r-sm); padding: 12px 16px;
-  font-size: 13px; color: var(--red);
-  display: none; align-items: center; gap: 8px; margin-bottom: 16px;
-}
-.login-error-msg.visible { display: flex; }
-
-/* rodapé */
-.login-footer {
-  margin-top: 22px; text-align: center;
-  font-size: 11px; color: var(--text-dim);
-  font-family: 'DM Mono',monospace; letter-spacing: .3px;
-}
-
-/* ── PRIMEIRO ACESSO / RECUPERAR SENHA ── */
-#view-primeiro-acesso, #view-recuperar-senha {
-  min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
-}
-.pa-wrapper {
-  position: relative; z-index: 1; flex: 1;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 24px 20px 48px;
-}
-.pa-card {
-  width: 100%; max-width: 440px;
-  background: var(--bg-glass2);
-  border: 1px solid var(--border2);
-  border-radius: var(--r-xl); padding: 36px 28px;
-  box-shadow: var(--shadow-lg); position: relative; overflow: hidden;
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-}
-.pa-card::before {
-  content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-}
 .pa-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: var(--gold-dim); border: 1px solid rgba(226,182,90,.22);
-  color: var(--gold); border-radius: 100px;
-  font-size: 11px; font-weight: 700; font-family: 'DM Mono',monospace;
-  letter-spacing: .6px; text-transform: uppercase; padding: 5px 12px; margin-bottom: 16px;
+  display: inline-flex; align-items: center; gap: var(--sp-2); margin-bottom: var(--sp-3); padding: var(--sp-1) var(--sp-3);
+  background: var(--gold-dim); border: 1px solid color-mix(in srgb, var(--gold) 28%, transparent); color: var(--gold); border-radius: var(--r-pill, 100px);
+  font-size: var(--fs-xs); font-weight: 700; font-family: 'DM Mono', monospace; letter-spacing: .04em; text-transform: uppercase;
 }
-.pa-title { font-size: 20px; font-weight: 900; color: var(--text); margin-bottom: 4px; letter-spacing: -.3px; }
-.pa-sub   { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
-.pa-info-box {
-  background: var(--bg4); border: 1px solid var(--border);
-  border-radius: var(--r-sm); padding: 12px 16px;
-  font-size: 13px; color: var(--text-muted);
-  display: flex; align-items: flex-start; gap: 10px; margin-bottom: 24px;
-}
+.pa-info-box { display: flex; align-items: flex-start; gap: var(--sp-2); margin-bottom: var(--sp-4); padding: var(--sp-3); background: var(--bg4); border: 1px solid var(--border); border-radius: var(--r-2); font-size: var(--fs-sm); color: var(--text-muted); }
 .pa-info-box span:first-child { flex-shrink: 0; color: var(--teal); }
-.pwd-rules { list-style: none; display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
-.pwd-rules li { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-dim); transition: color .2s; }
+
+/* Senha */
+.pwd-toggle-btn { position: absolute; right: var(--sp-3); top: 50%; transform: translateY(-50%); display: flex; align-items: center; padding: 0; background: none; border: none; cursor: pointer; color: var(--text-dim); transition: color var(--dur-fast); }
+.pwd-toggle-btn:hover { color: var(--text-muted); }
+.pwd-strength { margin-top: var(--sp-2); display: none; }
+.pwd-strength.visible { display: block; }
+.pwd-strength-bar { height: 3px; margin-bottom: var(--sp-1); border-radius: 100px; background: var(--bg4); overflow: hidden; }
+.pwd-strength-fill { height: 100%; border-radius: 100px; transition: width var(--dur-slow) var(--ease), background var(--dur-slow); }
+.pwd-strength-label { font-size: var(--fs-xs); color: var(--text-dim); font-family: 'DM Mono', monospace; }
+.pwd-rules { list-style: none; display: flex; flex-direction: column; gap: var(--sp-1); margin-top: var(--sp-2); }
+.pwd-rules li { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-xs); color: var(--text-dim); transition: color var(--dur); }
 .pwd-rules li.ok { color: var(--green); }
-.pwd-rules li.ok::before    { content: '✓'; color: var(--green); font-weight: 700; }
+.pwd-rules li.ok::before { content: '✓'; color: var(--green); font-weight: 700; }
 .pwd-rules li:not(.ok)::before { content: '○'; color: var(--text-dim); }
 
-/* OR divider */
-.or-divider {
-  display: flex; align-items: center; gap: 12px;
-  color: var(--text-dim); font-size: 12px; margin: 20px 0;
-}
+.forgot-link { background: none; border: none; cursor: pointer; padding: 0; color: var(--teal); font-family: inherit; font-size: var(--fs-sm); font-weight: 700; transition: color var(--dur-fast); }
+.forgot-link:hover { color: var(--teal-light); text-decoration: underline; }
+.login-forgot-row { display: flex; justify-content: flex-end; margin: calc(var(--sp-2) * -1) 0 var(--sp-4); }
+
+.login-error-msg { display: none; align-items: center; gap: var(--sp-2); margin-bottom: var(--sp-3); padding: var(--sp-3); background: var(--red-dim); border: 1px solid color-mix(in srgb, var(--red) 28%, transparent); border-radius: var(--r-2); font-size: var(--fs-sm); color: var(--red); }
+.login-error-msg.visible { display: flex; }
+.login-footer { margin-top: var(--sp-4); text-align: center; font-size: var(--fs-xs); color: var(--text-dim); font-family: 'DM Mono', monospace; }
+.or-divider { display: flex; align-items: center; gap: var(--sp-3); margin: var(--sp-4) 0; color: var(--text-dim); font-size: var(--fs-xs); }
 .or-divider::before, .or-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-@media (max-width: 480px) {
-  .login-card, .pa-card { padding: 26px 18px; border-radius: var(--r-lg); }
-}
+/* Estados finais (e-mail enviado, link inválido, senha redefinida) */
+.auth-estado { text-align: center; padding: var(--sp-4) 0; }
+.auth-estado svg { width: 40px; height: 40px; margin-bottom: var(--sp-3); }
+.auth-estado h3 { font-size: var(--fs-md); font-weight: 700; color: var(--text); margin-bottom: var(--sp-2); }
+.auth-estado.erro h3 { color: var(--red); }
+.auth-estado.ok h3 { color: var(--green); }
+.auth-estado p { font-size: var(--fs-sm); line-height: 1.5; color: var(--text-muted); margin-bottom: var(--sp-4); }
+.auth-estado small { display: block; margin-top: var(--sp-2); font-size: var(--fs-xs); color: var(--text-dim); }
 
-/* ── Ícones de input — visíveis em dark e light ── */
-.login-card .input-icon,
-.pa-card    .input-icon {
-  color: #F1F1F1;
-  opacity: 0.50;
-}
-.login-card .input-wrap input:focus ~ .input-icon,
-.login-card .input-wrap:focus-within .input-icon,
-.pa-card    .input-wrap:focus-within .input-icon {
-  opacity: 1;
-  color: var(--teal);
-}
-[data-theme="light"] .login-card .input-icon,
-[data-theme="light"] .pa-card    .input-icon {
-  color: var(--teal);
-  opacity: 0.9;
-}
+/* Ícones de input legíveis em escuro e claro */
+.login-card .input-icon, .pa-card .input-icon { color: #F1F1F1; opacity: .5; }
+.login-card .input-wrap:focus-within .input-icon, .pa-card .input-wrap:focus-within .input-icon { opacity: 1; color: var(--teal); }
+[data-theme="light"] .login-card .input-icon, [data-theme="light"] .pa-card .input-icon { color: var(--teal); opacity: .9; }
 </style>
 
 <script>
@@ -294,7 +116,6 @@ function renderLogin() {
   renderView(
     '<div id="view-login">' +
       '<div class="login-bg"></div>' +
-      '<div class="login-bg-grid"></div>' +
       '<div class="login-wrapper">' +
 
         '<div class="login-split">' +
@@ -302,9 +123,8 @@ function renderLogin() {
         /* ── HEADER ── */
         '<div class="login-header">' +
           '<div class="login-logo-ring">' +
-            '<div class="login-logo-bg"></div>' +
             '<div class="login-logo-icon">' +
-              '<span class="brand-mark" style="font-size:22px">' + brandMarkInner() + '</span>' +
+              '<span class="brand-mark" style="font-size:var(--fs-lg)">' + brandMarkInner() + '</span>' +
             '</div>' +
           '</div>' +
           '<h1 class="login-church-name">' + escHtml(IDENTIDADE.nome) + '</h1>' +
