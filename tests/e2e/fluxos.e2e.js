@@ -65,7 +65,7 @@ test('perfil secretaria entra na Home do seu perfil (sem administração) e abre
   const texto = await page.evaluate(() => document.querySelector('.hm').innerText.replace(/\s+/g, ' '));
   assert.match(texto, /Seu espaço de trabalho/i);
   assert.ok(!/Administração/.test(texto), 'secretaria não vê o bloco de administração na Home');
-  assert.ok(!/Usuários/.test(texto), 'secretaria não vê o atalho nem o grupo de usuários');
+  assert.ok(!/Identidade/.test(texto), 'secretaria não vê o atalho de Identidade (só admin)');
   assert.ok(!/Atividade recente/.test(texto), 'secretaria não vê atividade de administração');
   assert.match(texto, /Membros ativos/i);
   assert.match(texto, /Aniversariantes do mês/i);
@@ -164,6 +164,10 @@ test('celular: menu inferior no lugar da sidebar, sem duplicar navegação nas t
   const { page, erros } = await abrir(browser, backend, { viewport: { width: 390, height: 844 } });
   await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   assert.ok(!(await page.isVisible('#app-sidebar')));
+  assert.ok(!(await page.isVisible('#app-bnav')), 'Início não tem menu inferior (os atalhos o substituem)');
+  const atalhos = await page.$$eval('.hm-mods .hm-mod', (els) => els.map((e) => e.innerText.trim()));
+  assert.deepEqual(atalhos, ['Membros', 'Usuários', 'Identidade']);
+  await irParaMembros(page);
   assert.ok(await page.isVisible('#app-bnav'));
   assert.deepEqual(await page.$$eval('#app-bnav .bn-item', (els) => els.map((e) => e.innerText.trim())), ['Início', 'Membros', 'Usuários', 'Identidade']);
   await page.click('#app-bnav .bn-item:has-text("Usuários")');
@@ -177,6 +181,7 @@ test('celular: com mais de 5 destinos os excedentes vão para "Mais"', async () 
   const backend = criarBackend();
   const { page, erros } = await abrir(browser, backend, { viewport: { width: 390, height: 844 } });
   await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  await irParaMembros(page);
   await page.evaluate(() => {
     ['a', 'b', 'c', 'd'].forEach((x) => { MODULOS.push({ id: x, nome: 'Mod ' + x, descricao: '', icone: 'box', rota: 'mod-' + x, render: 'renderHome', perfis: ['admin', 'secretaria'] }); });
     renderNav(true);
