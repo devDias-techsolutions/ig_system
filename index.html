@@ -659,17 +659,19 @@ body::after {
   position: sticky; bottom: 12px; z-index: 20;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   background: var(--bg-glass-strong); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  min-height: 72px; /* altura fixa: o texto de status não empurra os botões */
   padding: 10px 12px 10px 16px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   box-shadow: var(--shadow-lg);
 }
 /* ao rolar até um item, deixa folga para a barra fixa não cobri-lo */
 .page :is(button, input, select, textarea, label, a) { scroll-margin-bottom: 110px; }
+}
 .action-bar-status { font-size: 12px; color: var(--text-muted); }
 .action-bar-status.pendente { color: var(--warning); font-weight: 700; }
 .action-bar-btns { display: flex; gap: 8px; flex-shrink: 0; }
 @media (max-width: 1023px) {
   .page { padding-bottom: calc(var(--sp-5) + 8px); }
-  .action-bar { bottom: calc(84px + env(safe-area-inset-bottom)); }
+  .action-bar { bottom: calc(var(--sp-3) + env(safe-area-inset-bottom)); }
 }
 
 .ic-13 { width: 13px; height: 13px; } .ic-14 { width: 14px; height: 14px; } .ic-15 { width: 15px; height: 15px; }
@@ -1176,7 +1178,7 @@ textarea { height: auto; min-height: 110px; padding: 16px 18px; resize: vertical
    NAVEGAÇÃO: sidebar (desktop) + menu inferior (celular)
    Os itens vêm dos módulos ativos e do perfil — nenhum módulo é citado aqui.
 ═════════════════════════════════════════════ */
-.app-sidebar, .app-bnav { display: none; }
+.app-sidebar, .nav-scrim { display: none; }
 
 .app-sidebar {
   position: fixed; left: 0; top: 0; bottom: 0; width: var(--sidebar-w);
@@ -1187,9 +1189,6 @@ textarea { height: auto; min-height: 110px; padding: 16px 18px; resize: vertical
   backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);
   z-index: 150; overflow-y: auto;
 }
-/* modal aberto: o menu inferior sai de cena (o #app é um contexto de empilhamento e o menu ficaria por cima do rodapé do modal) */
-.app-bnav { transition: transform .25s var(--ease); }
-body:has(.modal-overlay.open) .app-bnav { transform: translateY(110%); pointer-events: none; }
 [data-theme="light"] .app-sidebar { background: #FFFFFF; }
 .sb-brand { display: flex; align-items: center; gap: var(--sp-3); padding: 0 var(--sp-2) var(--sp-4); border-bottom: 1px solid var(--border); margin-bottom: var(--sp-2); }
 .sb-logo { width: 44px; height: 44px; border-radius: 14px; flex-shrink: 0; overflow: hidden; background: linear-gradient(135deg, var(--teal-dark), var(--teal)); box-shadow: 0 6px 18px var(--teal-glow); }
@@ -1218,33 +1217,18 @@ body:has(.modal-overlay.open) .app-bnav { transform: translateY(110%); pointer-e
 .sb-foot-nome { font-size: var(--fs-sm); font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sb-foot-perfil { font-size: var(--fs-xs); color: var(--text-muted); }
 
-/* Celular: menu inferior */
-.app-bnav {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 150;
-  align-items: stretch; justify-content: space-around; gap: 2px;
-  padding: var(--sp-2) var(--sp-2) max(var(--sp-2), env(safe-area-inset-bottom));
-  background: var(--bg-glass-strong); border-top: 1px solid var(--border);
-  backdrop-filter: blur(28px) saturate(200%); -webkit-backdrop-filter: blur(28px) saturate(200%);
-}
-[data-theme="light"] .app-bnav { background: rgba(255,255,255,.96); }
-.bn-item {
-  position: relative; flex: 1; max-width: 88px; min-width: 0; min-height: 48px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-  padding: 4px; border: none; border-radius: var(--r-2); background: none; cursor: pointer;
-  font-family: inherit; font-size: var(--fs-xs); font-weight: 600; color: var(--text-dim);
-  transition: color var(--dur-fast) var(--ease);
-}
-.bn-item i { width: 20px; height: 20px; }
-.bn-item span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bn-item.active { color: var(--teal); }
-.bn-item.active::before { content: ''; position: absolute; top: -9px; left: 50%; width: 24px; height: 3px; margin-left: -12px; border-radius: 0 0 3px 3px; background: var(--teal); }
-
+/* Celular: a sidebar vira gaveta (sanduíche); na Início os atalhos também navegam */
+.nav-burger { display: none; flex-shrink: 0; }
 @media (max-width: 1023px) {
-  body.nav-on .app-bnav { display: flex; }
-  body.nav-on #app { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
-  /* Início: os atalhos da própria tela fazem o papel do menu inferior */
-  body.nav-on.on-home .app-bnav { display: none; }
-  body.nav-on.on-home #app { padding-bottom: 0; }
+  body.nav-on .nav-burger { display: grid; }
+  body.nav-on .app-sidebar {
+    display: flex; width: min(300px, 84vw); z-index: 320; transform: translateX(-102%); visibility: hidden;
+    transition: transform var(--dur-slow) var(--ease), visibility 0s linear var(--dur-slow); box-shadow: var(--shadow-lg);
+  }
+  body.nav-open .app-sidebar { transform: none; visibility: visible; transition-delay: 0s; }
+  body.nav-on .nav-scrim { display: block; position: fixed; inset: 0; z-index: 310; background: rgba(0, 0, 0, .5); opacity: 0; pointer-events: none; transition: opacity var(--dur-slow) var(--ease); }
+  body.nav-open .nav-scrim { opacity: 1; pointer-events: auto; }
+  body.nav-open { overflow: hidden; }
 }
 @media (min-width: 1024px) {
   body.nav-on .app-sidebar { display: flex; }
@@ -1253,7 +1237,7 @@ body:has(.modal-overlay.open) .app-bnav { transform: translateY(110%); pointer-e
   /* a marca já está na sidebar */
   body.nav-on .topnav-left { visibility: hidden; }
 }
-/* "Usuários" já está na sidebar (desktop) e no menu inferior (celular) */
+/* "Usuários" já está na sidebar / gaveta */
 body.nav-on #topnav-usuarios-btn { display: none !important; }
 .sw { display:flex; align-items:center; gap:12px; min-height:48px; padding:0 16px; border-radius:var(--radius-sm); cursor:pointer; user-select:none;
   background:var(--bg-glass); border:1px solid var(--border); transition:border-color .2s, background .2s; }
@@ -1272,6 +1256,17 @@ body.nav-on #topnav-usuarios-btn { display: none !important; }
   background:var(--bg-glass); border:1px solid var(--border); color:var(--text-muted); transition:border-color .2s, color .2s, transform .15s; }
 .icon-btn:hover { border-color:var(--teal-border); color:var(--teal); }
 .icon-btn:active { transform:scale(.94); }
+/* Celular: controles compactos (cabe mais informação na tela; alvo de toque continua ≥ 40px) */
+@media (max-width: 640px) {
+  .btn { height: 44px; padding: 0 var(--sp-4); font-size: 13px; }
+  .btn-sm { height: 36px; padding: 0 var(--sp-3); }
+  .btn-lg { height: 48px; padding: 0 var(--sp-5); font-size: 14px; }
+  input[type="text"], input[type="email"], input[type="password"], input[type="tel"], input[type="date"], input[type="number"], select { height: 44px; padding: 0 var(--sp-3); }
+  textarea { min-height: 88px; padding: var(--sp-3); }
+  .field { gap: 6px; margin-bottom: var(--sp-3); }
+  .field label { font-size: 11px; letter-spacing: .06em; }
+  .icon-btn { width: 40px; height: 40px; }
+  .topnav { height: 56px; }
 .menu-pop { position:absolute; right:0; top:calc(100% + 6px); z-index:50; min-width:190px; padding:6px; border-radius:var(--radius-sm); background:var(--bg3, #fff);
   border:1px solid var(--border); box-shadow:0 18px 40px -12px rgba(0,0,0,.35); animation:cardIn .18s ease both; }
 .menu-pop button { width:100%; display:flex; align-items:center; gap:10px; min-height:44px; padding:0 12px; border:0; border-radius:8px; background:none; cursor:pointer;
@@ -1297,6 +1292,7 @@ body.nav-on #topnav-usuarios-btn { display: none !important; }
 -->
 <header id="main-topnav" class="topnav" style="display:none" role="banner">
   <div class="topnav-left">
+    <button type="button" class="icon-btn nav-burger" onclick="navAbrir()" aria-label="Abrir menu" aria-controls="app-sidebar"><i data-lucide="menu"></i></button>
     <div class="topnav-logo-icon">
       <span id="topnav-mark" class="brand-mark"></span>
     </div>
@@ -1356,14 +1352,7 @@ body.nav-on #topnav-usuarios-btn { display: none !important; }
 
 <!-- ══ NAVEGAÇÃO (montada por renderNav) ══ -->
 <aside id="app-sidebar" class="app-sidebar" aria-label="Navegação principal"></aside>
-<nav id="app-bnav" class="app-bnav" aria-label="Navegação principal"></nav>
-<div class="modal-overlay" id="modal-mais" onclick="if(event.target===this)fecharMaisNav()">
-  <div class="modal-box">
-    <h3 style="font-size:var(--fs-lg);font-weight:800;color:var(--text);margin-bottom:var(--sp-4)">Mais opções</h3>
-    <div id="bnav-more-list" style="display:flex;flex-direction:column;gap:var(--sp-2)"></div>
-  </div>
-</div>
-
+<div id="nav-scrim" class="nav-scrim" onclick="navFechar()"></div>
 <div id="app-loader">
   <div class="loader-logo">
     <span id="loader-mark" class="brand-mark"></span>
@@ -1703,7 +1692,7 @@ function brandMarkInner() {
     (IDENTIDADE.logoUrl ? '<img src="' + escHtml(IDENTIDADE.logoUrl) + '" alt="" onload="this.previousElementSibling.style.visibility=\'hidden\'" onerror="this.style.display=\'none\'">' : '');
 }
 
-// ── NAVEGAÇÃO (sidebar no desktop, menu inferior no celular) ──
+// ── NAVEGAÇÃO (sidebar no desktop, gaveta com botão sanduíche no celular) ──
 // Itens = Início (se o perfil tem home) + módulos do perfil + Usuários (se permitido)
 function navItens() {
   var perfil = App.session ? App.session.perfil : '';
@@ -1715,14 +1704,11 @@ function navItens() {
   return itens;
 }
 
-var NAV_BNAV_MAX = 5; // acima disso, o excedente vai para "Mais"
-
 function renderNav(isAuth) {
   var sb = document.getElementById('app-sidebar');
-  var bn = document.getElementById('app-bnav');
   var ativo = !!(isAuth && App.session);
   document.body.classList.toggle('nav-on', ativo);
-  if (!ativo || !sb || !bn) return;
+  if (!ativo || !sb) { navFechar(); return; }
 
   var atual = App.currentView;
   var itens = navItens();
@@ -1744,36 +1730,15 @@ function renderNav(isAuth) {
       '<div class="sb-foot-txt"><div class="sb-foot-nome">' + escHtml(nome) + '</div><div class="sb-foot-perfil">' + escHtml(PERFIL_LABEL[App.session.perfil] || App.session.perfil) + '</div></div>' +
       '<button class="topnav-icon-btn" onclick="handleLogout()" title="Sair" aria-label="Sair"><i data-lucide="log-out" class="ic-17"></i></button></div>';
 
-  // Menu inferior: cabem NAV_BNAV_MAX itens; se passar, o último vira "Mais"
-  var visiveis = itens, extras = [];
-  if (itens.length > NAV_BNAV_MAX) { visiveis = itens.slice(0, NAV_BNAV_MAX - 1); extras = itens.slice(NAV_BNAV_MAX - 1); }
-  var html = visiveis.map(function (it) {
-    return '<button class="bn-item' + (it.rota === atual ? ' active' : '') + '" onclick="navNavegar(\'' + it.rota + '\')">' +
-      '<i data-lucide="' + it.icone + '"></i><span>' + escHtml(it.nome) + '</span></button>';
-  }).join('');
-  if (extras.length) {
-    var emExtra = extras.some(function (it) { return it.rota === atual; });
-    html += '<button class="bn-item' + (emExtra ? ' active' : '') + '" onclick="abrirMaisNav()"><i data-lucide="layout-grid"></i><span>Mais</span></button>';
-    document.getElementById('bnav-more-list').innerHTML = extras.map(function (it) {
-      return '<button class="sb-item' + (it.rota === atual ? ' active' : '') + '" onclick="navNavegar(\'' + it.rota + '\')">' +
-        '<i data-lucide="' + it.icone + '"></i><span>' + escHtml(it.nome) + '</span></button>';
-    }).join('');
-  }
-  bn.innerHTML = html;
 }
 
 function navNavegar(rota) {
-  fecharMaisNav();
+  navFechar();
   if (App.currentView !== rota) navigateTo(rota);
 }
-function abrirMaisNav() {
-  var m = document.getElementById('modal-mais');
-  if (m) { m.classList.add('open'); if (window.lucide) lucide.createIcons(); }
-}
-function fecharMaisNav() {
-  var m = document.getElementById('modal-mais');
-  if (m) m.classList.remove('open');
-}
+function navAbrir() { document.body.classList.add('nav-open'); var b = document.querySelector('#app-sidebar .sb-item.active, #app-sidebar .sb-item'); if (b) b.focus(); }
+function navFechar() { document.body.classList.remove('nav-open'); }
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') navFechar(); });
 
 // ── TOPNAV — DADOS DE SESSÃO ─────────────────────────────
 // Depois do login: completa a identidade com o que a página pública não leva (assinatura do pastor)

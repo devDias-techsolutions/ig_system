@@ -114,7 +114,7 @@
 .mb-atalhos .hm-mod.active .hm-mod-icon { box-shadow: 0 0 0 3px var(--teal-glow-soft), 0 6px 14px -8px var(--teal-glow); }
 .mb-atalhos .hm-mod.active .hm-mod-name { color: var(--teal); }
 .mb-fab {
-  position: fixed; z-index: 60; right: var(--gutter); bottom: calc(76px + env(safe-area-inset-bottom, 0px) + var(--sp-4));
+  position: fixed; z-index: 60; right: var(--gutter); bottom: calc(env(safe-area-inset-bottom, 0px) + var(--sp-4));
   width: 56px; height: 56px; border-radius: 50%; border: 0; cursor: pointer; display: grid; place-items: center;
   color: var(--on-teal, #fff); background: var(--teal); box-shadow: var(--shadow-lg), 0 10px 22px -10px var(--teal-glow);
   transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
@@ -147,15 +147,12 @@
 .mb-form-card .field label { font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0; text-transform: none; }
 .mb-form-card input, .mb-form-card select, .mb-form-card textarea { backdrop-filter: none; background: var(--bg); border-radius: var(--r-2); }
 .mb-form-card input:focus, .mb-form-card select:focus, .mb-form-card textarea:focus { background: var(--bg); box-shadow: 0 0 0 3px var(--teal-glow-soft); }
+@media (max-width: 640px) { .mb-form-card { padding: var(--sp-4); } }
 .mb-form-grid { display: grid; grid-template-columns: 1fr; gap: 0; }
 @media (min-width: 640px) { .mb-form-grid { grid-template-columns: 1fr 1fr; column-gap: 16px; } }
 .mb-form-full { grid-column: 1 / -1; }
-.mb-form-section {
-  grid-column: 1 / -1;
-  font-size: var(--fs-md); font-weight: 800; letter-spacing: -.01em;
-  color: var(--text); padding: var(--sp-2) 0 var(--sp-2);
-  border-bottom: 1px solid var(--border); margin: var(--sp-2) 0 var(--sp-3);
-}
+/* Sem títulos de seção: só um respiro entre os blocos (identificação, pessoais, igreja, endereço, contato, foto) */
+.mb-form-gap { grid-column: 1 / -1; height: var(--sp-5); }
 
 /* ── Foto upload/preview ── */
 .mb-foto-card { padding: var(--sp-4); border-radius: var(--r-3); background: var(--bg); border: 1px solid var(--border); }
@@ -906,7 +903,6 @@ function _mbBuildForm() {
     '<div class="mb-form-grid" id="mb-form">'+
 
       /* Identificação */
-      '<div class="mb-form-section">Identificação</div>'+
       '<div class="field">'+
         '<label>ROL</label>'+
         '<input type="text" id="mbf-rol" value="'+rol+'" placeholder="0001">'+
@@ -918,7 +914,7 @@ function _mbBuildForm() {
       '</div>'+
 
       /* Dados pessoais */
-      '<div class="mb-form-section">Dados Pessoais</div>'+
+      '<div class="mb-form-gap"></div>'+
       '<div class="field">'+
         '<label>Sexo <span class="req">*</span></label>'+
         '<select id="mbf-sexo">'+
@@ -957,7 +953,7 @@ function _mbBuildForm() {
       '<div class="field"><label>CPF</label><input type="text" id="mbf-cpf" value="'+v('cpf')+'" placeholder="000.000.000-00"></div>'+
 
       /* Eclesiástico */
-      '<div class="mb-form-section">Dados Eclesiásticos</div>'+
+      '<div class="mb-form-gap"></div>'+
       '<div class="field">'+
         '<label>Mês/Ano de Batismo <span class="req">*</span></label>'+
         '<input type="text" id="mbf-batismo" value="'+v('batismo')+'" placeholder="MM/AAAA" maxlength="7" oninput="this.value=_mbMaskMesAno(this.value)">'+
@@ -975,7 +971,7 @@ function _mbBuildForm() {
       '</div>'+
 
       /* Endereço */
-      '<div class="mb-form-section">Endereço</div>'+
+      '<div class="mb-form-gap"></div>'+
       '<div class="field">'+
         '<label>Rua <span class="req">*</span></label>'+
         '<input type="text" id="mbf-rua" value="'+v('rua')+'" placeholder="Nome da rua">'+
@@ -1011,7 +1007,7 @@ function _mbBuildForm() {
       '</div>'+
 
       /* Contato */
-      '<div class="mb-form-section">Contato</div>'+
+      '<div class="mb-form-gap"></div>'+
       '<div class="field">'+
         '<label>Celular <span class="req">*</span></label>'+
         '<input type="tel" id="mbf-celular" value="'+v('celular')+'" placeholder="(31) 99999-9999" maxlength="15" oninput="this.value=_mbMaskPhone(this.value)">'+
@@ -1020,7 +1016,8 @@ function _mbBuildForm() {
       '<div class="field"><label>E-mail</label><input type="email" id="mbf-email" value="'+v('email')+'" placeholder="email@exemplo.com"></div>'+
 
       /* Foto */
-      '<div class="mb-form-section mb-form-full">Foto 3×4</div>'+
+      '<div class="mb-form-gap"></div>'+
+      '<div class="mb-form-full field" style="margin-bottom:var(--sp-2)"><label>Foto 3×4</label></div>'+
       '<div class="mb-form-full">'+
         '<div class="mb-foto-card">'+
         '<div class="mb-foto-row">'+
