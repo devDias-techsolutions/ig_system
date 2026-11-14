@@ -22,7 +22,6 @@
 }
 .hm-art { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; color: #fff; }
 .hm-art svg { position: absolute; right: 0; top: 0; width: 100%; height: 100%; }
-.hm-art .ouro { color: var(--hero-gold); }
 .hm-top { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
 .hm-pill {
   display: inline-flex; align-items: center; min-height: 36px; padding: 0 var(--sp-4); border-radius: var(--r-pill);
@@ -37,58 +36,57 @@
 }
 .hm-me:hover { background: rgba(255, 255, 255, .24); }
 .hm-me:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-.hm-brand { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--sp-3); margin-top: var(--sp-1); }
+.hm-brand { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--sp-3); margin-top: var(--sp-5); }
 .hm-logo {
-  width: 104px; height: 104px; flex-shrink: 0; border-radius: 50%; overflow: hidden; display: grid; place-items: center;
-  background: #FFFFFF; box-shadow: 0 0 0 2px var(--hero-gold), 0 0 0 5px rgba(232, 194, 107, .22), 0 10px 24px -8px rgba(0, 0, 0, .45);
+  width: 96px; height: 96px; flex-shrink: 0; border-radius: 50%; overflow: hidden; display: grid; place-items: center;
+  background: #FFFFFF; box-shadow: 0 0 0 2px var(--hero-gold), 0 10px 24px -10px rgba(0, 0, 0, .5);
 }
 .hm-logo .brand-mark { font-size: var(--fs-xl); color: var(--hero-a); }
 .hm-logo .brand-mark img { padding: 0; }
 .hm-id-txt { min-width: 0; }
-.hm-eyebrow { font-size: var(--fs-xs); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--hero-gold); }
-.hm-title { margin-top: var(--sp-1); font-size: var(--fs-lg); font-weight: 800; letter-spacing: -.035em; line-height: 1.12; color: #fff; overflow-wrap: anywhere; }
+.hm-eyebrow { font-size: var(--fs-xs); font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--hero-gold); }
+.hm-title { margin-top: var(--sp-1); font-size: var(--fs-xl); font-weight: 800; letter-spacing: -.03em; line-height: 1.12; color: #fff; overflow-wrap: anywhere; }
 .hm-lema { max-width: 520px; margin: var(--sp-2) auto 0; font-size: var(--fs-sm); font-style: italic; line-height: 1.5; color: rgba(255, 255, 255, .82); }
-@media (min-width: 768px) { .hm-title { font-size: var(--fs-xl); } }
+@media (min-width: 768px) { .hm-title { font-size: var(--fs-2xl); } }
 
 /* ── Blocos e títulos ── */
 .hm-block { margin-bottom: var(--sp-5); }
 .hm-h { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-3); font-size: var(--fs-md); font-weight: 800; letter-spacing: -.01em; color: var(--text); }
 .hm-h a, .hm-h button { font-size: var(--fs-sm); font-weight: 700; color: var(--teal); background: none; border: 0; cursor: pointer; font-family: inherit; padding: 0; }
 
-/* ── Atalhos: compactos (cabem vários), ícone preenchido em duas camadas ── */
+/* ── Atalhos: círculos, todos na cor da igreja (cor por assunto só em status) ── */
 .hm-mods { display: grid; grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); gap: var(--sp-3) var(--sp-2); }
 .hm-mod {
   display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); width: 100%; text-align: center;
   padding: 0; border: 0; background: none; color: inherit; font-family: inherit; cursor: pointer;
 }
 .hm-mod-icon {
-  width: 56px; height: 56px; border-radius: var(--r-3); display: grid; place-items: center; color: var(--kpi-color, var(--teal));
-  background: var(--bg-glass); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+  width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; color: var(--teal);
+  background: var(--teal-dim); border: 1px solid var(--teal-border);
   transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
 }
-[data-theme="light"] .hm-mod-icon { background: #FFFFFF; }
-.hm-mod-icon i, .hm-mod-icon svg { width: 26px; height: 26px; fill: currentColor; fill-opacity: .24; stroke-width: 2; }
-.hm-mod:hover .hm-mod-icon { transform: translateY(-2px); border-color: var(--teal-border); box-shadow: var(--shadow); }
+.hm-mod-icon i, .hm-mod-icon svg { width: 24px; height: 24px; stroke-width: 1.9; }
+.hm-mod:hover .hm-mod-icon { transform: translateY(-2px); border-color: var(--teal); }
 .hm-mod:active .hm-mod-icon { transform: scale(.97); }
-.hm-mod:focus-visible { outline: 2px solid var(--teal); outline-offset: 4px; border-radius: var(--r-2); }
+.hm-mod:focus-visible { outline: 2px solid var(--teal); outline-offset: 4px; border-radius: var(--r-3); }
 .hm-mod-name { font-size: var(--fs-xs); font-weight: 700; letter-spacing: -.01em; color: var(--text); overflow-wrap: anywhere; }
 
 /* ── Indicadores em mosaico: destaque na cor da igreja + cartões coloridos por assunto ── */
 .hm-bento { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
 .bn-card {
-  --kpi-color: var(--teal); --kpi-dim: var(--teal-dim); --kpi-border: var(--teal-border);
+  --kpi-color: var(--teal);
   position: relative; overflow: hidden; isolation: isolate; display: flex; align-items: center; gap: var(--sp-3); min-height: 76px; text-align: left;
-  padding: var(--sp-3) var(--sp-4); border: 1px solid var(--kpi-border); border-radius: var(--r-3); color: inherit; font-family: inherit;
-  background: linear-gradient(135deg, var(--kpi-dim) 0%, transparent 70%), var(--bg-glass);
+  padding: var(--sp-3) var(--sp-4); border: 1px solid var(--border); border-radius: var(--r-3); color: inherit; font-family: inherit;
+  background: var(--bg-glass);
 }
-[data-theme="light"] .bn-card { background: linear-gradient(135deg, var(--kpi-dim) 0%, transparent 70%), #FFFFFF; box-shadow: var(--shadow-sm); }
+[data-theme="light"] .bn-card { background: #FFFFFF; box-shadow: var(--shadow-sm); }
 button.bn-card { cursor: pointer; transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
 button.bn-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
 button.bn-card:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
 .bn-ghost { position: absolute; z-index: -1; right: -10px; bottom: -14px; width: 76px; height: 76px; color: var(--kpi-color); opacity: .12; pointer-events: none; }
 .bn-ghost svg { width: 100%; height: 100%; fill: currentColor; fill-opacity: .35; stroke-width: 1.5; }
-.bn-ico { width: 38px; height: 38px; flex-shrink: 0; border-radius: var(--r-2); display: grid; place-items: center; color: var(--kpi-color); background: var(--kpi-dim); box-shadow: inset 0 0 0 1px var(--kpi-border); }
-.bn-ico i, .bn-ico svg { width: 20px; height: 20px; fill: currentColor; fill-opacity: .25; }
+.bn-ico { width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; color: var(--kpi-color); background: var(--teal-dim); }
+.bn-ico i, .bn-ico svg { width: 18px; height: 18px; }
 .bn-txt { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .bn-lab { font-size: var(--fs-xs); font-weight: 700; color: var(--text-muted); line-height: 1.25; }
 .bn-num { font-size: var(--fs-xl); font-weight: 800; letter-spacing: -.03em; line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--text); }
@@ -103,7 +101,7 @@ button.bn-card:focus-visible { outline: 2px solid var(--teal); outline-offset: 2
 .bn-card.feat .bn-lab { color: inherit; opacity: .85; text-transform: uppercase; letter-spacing: .08em; }
 .bn-card.feat .bn-num { font-size: var(--fs-2xl); color: inherit; }
 .bn-card.feat .bn-sub { color: inherit; opacity: .8; }
-.bn-card.feat .bn-ghost { color: currentColor; opacity: .2; width: 112px; height: 112px; right: -14px; bottom: -18px; }
+.bn-card.feat .bn-ghost { color: currentColor; opacity: .14; width: 112px; height: 112px; right: -14px; bottom: -18px; }
 /* destaque + 2 menores: lado a lado também no celular */
 .hm-bento.par { grid-template-columns: 1.15fr 1fr; }
 .hm-bento.par .bn-card.feat { grid-column: 1; grid-row: span 2; }
@@ -205,18 +203,13 @@ function _homeEstado(icone, titulo, desc, extra, erro) {
   '</div>';
 }
 
-/* Grafismo do cartão: arcos concêntricos, cruz em marca d'água, malha de pontos e brilhos (só formas; cor vem do CSS) */
+/* Grafismo do cartão: só arcos concêntricos e cruz em marca d'água, bem discretos (cor vem do CSS) */
 function _homeArte() {
   return '<svg viewBox="0 0 640 320" preserveAspectRatio="xMaxYMid slice" focusable="false">' +
-    '<defs><pattern id="hmDots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.3" fill="currentColor"/></pattern></defs>' +
-    '<g fill="none" stroke="currentColor" stroke-width="1.2" opacity=".09">' +
+    '<g fill="none" stroke="currentColor" stroke-width="1.2" opacity=".08">' +
       '<circle cx="560" cy="70" r="90"/><circle cx="560" cy="70" r="150"/><circle cx="560" cy="70" r="210"/><circle cx="560" cy="70" r="270"/>' +
     '</g>' +
-    '<g class="ouro" fill="currentColor" opacity=".13"><rect x="548" y="96" width="22" height="170" rx="4"/><rect x="494" y="146" width="130" height="22" rx="4"/></g>' +
-    '<rect x="400" y="200" width="240" height="120" fill="url(#hmDots)" opacity=".16"/>' +
-    '<g class="ouro" fill="currentColor" opacity=".55">' +
-      '<path d="M470 40l3 9 9 3-9 3-3 9-3-9-9-3 9-3z"/><path d="M604 214l2.4 7 7 2.4-7 2.4-2.4 7-2.4-7-7-2.4 7-2.4z"/><path d="M420 262l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>' +
-    '</g>' +
+    '<g fill="currentColor" opacity=".07"><rect x="548" y="96" width="22" height="170" rx="4"/><rect x="494" y="146" width="130" height="22" rx="4"/></g>' +
   '</svg>';
 }
 
@@ -340,8 +333,8 @@ function _bnCard(k, feat, sub) {
   var dest = k.destino ? escHtml(k.destino) : '';
   var abre = dest ? 'button type="button" onclick="navigateTo(\'' + dest + '\')"' : 'div';
   var ic = k.icone ? escHtml(k.icone) : 'activity';
-  return '<' + abre + ' class="bn-card ' + escHtml(k.cor || 'kc-teal') + (feat ? ' feat' : '') + '" data-k="' + escHtml(k.curto || '') + '">' +
-    '<span class="bn-ghost" aria-hidden="true"><i data-lucide="' + ic + '"></i></span>' +
+  return '<' + abre + ' class="bn-card' + (feat ? ' feat' : '') + '" data-k="' + escHtml(k.curto || '') + '">' +
+    (feat ? '<span class="bn-ghost" aria-hidden="true"><i data-lucide="' + ic + '"></i></span>' : '') +
     (feat ? '' : '<span class="bn-ico"><i data-lucide="' + ic + '"></i></span>') +
     '<span class="bn-txt"><span class="bn-lab">' + escHtml(feat ? (k.rotulo || k.curto || '') : (k.curto || k.rotulo || '')) + '</span>' +
     '<span class="bn-num">' + escHtml(k.valor || 0) + '</span>' +
@@ -388,9 +381,8 @@ function _activitySkeleton() {
 }
 
 
-var HOME_CORES = ['kc-teal', 'kc-blue', 'kc-gold', 'kc-green', 'kc-purple'];
 function _moduleBtn(icon, name, desc, view, n) {
-  return '<button class="hm-mod ' + HOME_CORES[(n || 0) % HOME_CORES.length] + '" onclick="navigateTo(\'' + view + '\')"' + (desc ? ' title="' + escHtml(desc) + '"' : '') + '>' +
+  return '<button class="hm-mod" onclick="navigateTo(\'' + view + '\')"' + (desc ? ' title="' + escHtml(desc) + '"' : '') + '>' +
     '<div class="hm-mod-icon"><i data-lucide="' + escHtml(icon) + '"></i></div>' +
     '<div class="hm-mod-name">' + escHtml(name) + '</div>' +
   '</button>';
