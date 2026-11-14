@@ -562,7 +562,7 @@ test('padrão: KPIs de Membros são os mesmos cards do Início e seguem a cor da
     n: document.querySelectorAll('.kpi-group').length,
     soltos: document.querySelectorAll('.kpi-card').length,
     antigo: document.querySelectorAll('.mb-kpi-card, .kpi-hero-status').length,
-    cor: getComputedStyle(document.querySelector('.kpi-group .kg-dot:not(.ok):not(.bad):not(.warn)')).backgroundColor
+    cor: getComputedStyle(document.querySelector('.kpi-group.kc-teal .kg-eyebrow')).color
   }));
   assert.equal(r.n, 2);
   assert.equal(r.soltos, 0);

@@ -215,9 +215,14 @@ function renderHome() {
 /* ── HELPERS ── */
 function _kpiSkeleton() {
   return '<div class="kpi-group is-loading">' +
-    '<div class="skeleton" style="width:50%;height:22px;border-radius:var(--r-1)"></div>' +
-    '<div class="skeleton" style="width:35%;height:12px;border-radius:var(--r-1);margin-top:8px"></div>' +
-    '<div class="skeleton" style="width:100%;height:84px;border-radius:var(--r-3);margin-top:16px"></div>' +
+    '<div class="kg-head"><div class="kg-titles">' +
+      '<div class="skeleton" style="width:72px;height:12px;border-radius:var(--r-1)"></div>' +
+      '<div class="skeleton" style="width:150px;height:18px;border-radius:var(--r-1);margin-top:6px"></div>' +
+    '</div></div>' +
+    '<div class="kg-stats" style="--n:2">' +
+      '<div class="skeleton" style="height:56px;border-radius:var(--r-2)"></div>' +
+      '<div class="skeleton" style="height:56px;border-radius:var(--r-2)"></div>' +
+    '</div>' +
   '</div>';
 }
 
