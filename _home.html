@@ -82,37 +82,48 @@ button.bn-card:focus-visible { outline: 2px solid var(--teal); outline-offset: 2
 .bn-ghost svg { width: 100%; height: 100%; fill: currentColor; fill-opacity: .35; stroke-width: 1.5; }
 .bn-ico { width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; color: var(--on-teal, #fff); background: var(--teal); }
 .bn-ico i, .bn-ico svg { width: 16px; height: 16px; }
-.bn-txt { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.bn-txt { min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
 .bn-lab { font-size: var(--fs-xs); font-weight: 700; color: var(--text-muted); line-height: 1.25; }
-.bn-num { font-size: var(--fs-lg); font-weight: 800; letter-spacing: -.03em; line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--text); }
+.bn-num { font-size: var(--fs-lg); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--text); }
 .bn-sub { font-size: var(--fs-xs); color: var(--text-dim); }
 /* destaque: fundo sólido na cor da igreja, número grande, ícone-marca d'água e brilho */
 /* Proporção fixa, qualquer que seja o volume de dados: destaque 1.15fr | coluna 1fr; 2 menores empilhados ao lado (mock).
    Outras quantidades: destaque em largura total e menores em 2 colunas. Alturas mínimas travadas. */
 .bn-card.feat {
-  grid-column: 1 / -1; min-height: 88px; padding: var(--sp-3) var(--sp-4); border-color: transparent; color: var(--on-teal, #fff);
+  grid-column: 1 / -1; min-height: 88px; padding: var(--sp-4); border-color: transparent; color: var(--on-teal, #fff);
   background: radial-gradient(circle at 85% 15%, rgba(255, 255, 255, .22), transparent 50%), linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
   box-shadow: 0 10px 22px -14px var(--teal-glow);
 }
 .bn-card.feat.is-loading { flex-direction: column; align-items: flex-start; }
-.bn-card.feat .bn-txt { gap: 0; }
+.bn-card.feat .bn-txt { gap: var(--sp-2); }
 .bn-card.feat .bn-lab { color: inherit; opacity: .85; }
 .bn-card.feat .bn-num { font-size: var(--fs-2xl); color: inherit; font-variant-numeric: tabular-nums; }
 .bn-card.feat .bn-sub { color: inherit; opacity: .8; }
 .bn-card.feat .bn-ghost { color: currentColor; opacity: .14; width: 84px; height: 84px; right: -8px; bottom: -14px; }
-/* medidor: 5 barras, acesas = proporção de ativos no total (dado real, não decoração) */
-.bn-meter { position: absolute; right: var(--sp-4); bottom: var(--sp-3); display: flex; align-items: flex-end; gap: 4px; height: 36px; }
-.bn-meter i { display: block; width: 6px; border-radius: 3px; background: currentColor; opacity: .28; }
-.bn-meter i.on { opacity: 1; }
-.bn-meter i:nth-child(1) { height: 30%; } .bn-meter i:nth-child(2) { height: 48%; } .bn-meter i:nth-child(3) { height: 66%; }
-.bn-meter i:nth-child(4) { height: 82%; } .bn-meter i:nth-child(5) { height: 100%; }
+/* medidor em marca d'água: 12 barras largas no fundo do cartão; acesas = proporção de ativos no total (dado real) */
+.bn-meter { position: absolute; z-index: -1; left: var(--sp-4); right: var(--sp-4); bottom: 0; height: 28%; display: flex; align-items: flex-end; gap: 4px; pointer-events: none; }
+.bn-meter i { flex: 1; display: block; border-radius: 4px 4px 0 0; background: currentColor; opacity: .1; }
+.bn-meter i.on { opacity: .22; }
+.bn-meter i:nth-child(1) { height: 34%; }
+.bn-meter i:nth-child(2) { height: 40%; }
+.bn-meter i:nth-child(3) { height: 46%; }
+.bn-meter i:nth-child(4) { height: 52%; }
+.bn-meter i:nth-child(5) { height: 58%; }
+.bn-meter i:nth-child(6) { height: 64%; }
+.bn-meter i:nth-child(7) { height: 70%; }
+.bn-meter i:nth-child(8) { height: 76%; }
+.bn-meter i:nth-child(9) { height: 82%; }
+.bn-meter i:nth-child(10) { height: 88%; }
+.bn-meter i:nth-child(11) { height: 94%; }
+.bn-meter i:nth-child(12) { height: 100%; }
+
 .hm-bento { grid-template-columns: repeat(20, minmax(0, 1fr)); grid-auto-rows: minmax(68px, auto); }
 .hm-bento .bn-card { grid-column: span 10; }
 .hm-bento .bn-card:last-child:nth-child(even) { grid-column: 1 / -1; } /* sem cartão órfão (destaque + 2 menores não entra: 3 filhos) */
-.hm-bento .bn-card.feat { grid-column: 1 / span 11; grid-row: span 2; flex-direction: column; align-items: flex-start; justify-content: center; min-height: 148px; }
+.hm-bento .bn-card.feat { grid-column: 1 / span 11; grid-row: span 2; flex-direction: column; align-items: flex-start; justify-content: center; min-height: 160px; }
 .hm-bento .bn-card:nth-child(2), .hm-bento .bn-card:nth-child(3) { grid-column: 12 / span 9; flex-direction: column; align-items: flex-start; justify-content: center; gap: var(--sp-1); }
 .hm-bento .bn-card:nth-child(2) .bn-ico, .hm-bento .bn-card:nth-child(3) .bn-ico { display: none; }
-.hm-bento .bn-card:nth-child(2) .bn-txt, .hm-bento .bn-card:nth-child(3) .bn-txt { gap: 0; }
+.hm-bento .bn-card:nth-child(2) .bn-txt, .hm-bento .bn-card:nth-child(3) .bn-txt { gap: var(--sp-2); }
 .hm-bento .bn-card:nth-child(n+4) { grid-column: span 10; }
 /* só destaque, ou destaque + 1 menor: sem coluna lateral */
 .hm-bento .bn-card.feat:nth-last-child(-n+2) { grid-column: 1 / -1; grid-row: auto; flex-direction: row; align-items: center; min-height: 88px; }
@@ -337,7 +348,7 @@ function _bnCard(k, feat, sub, barras) {
   var ic = k.icone ? escHtml(k.icone) : 'activity';
   return '<' + abre + ' class="bn-card' + (feat ? ' feat' : '') + '" data-k="' + escHtml(k.curto || '') + '">' +
     (feat && barras < 0 ? '<span class="bn-ghost" aria-hidden="true"><i data-lucide="' + ic + '"></i></span>' : '') +
-    (feat && barras >= 0 ? '<span class="bn-meter" aria-hidden="true">' + [1, 2, 3, 4, 5].map(function (n) { return '<i' + (n <= barras ? ' class="on"' : '') + '></i>'; }).join('') + '</span>' : '') +
+    (feat && barras >= 0 ? '<span class="bn-meter" aria-hidden="true">' + [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function (n) { return '<i' + (n <= barras ? ' class="on"' : '') + '></i>'; }).join('') + '</span>' : '') +
     (feat ? '' : '<span class="bn-ico"><i data-lucide="' + ic + '"></i></span>') +
     '<span class="bn-txt"><span class="bn-lab">' + escHtml(feat ? (k.rotulo || k.curto || '') : (k.curto || k.rotulo || '')) + '</span>' +
     '<span class="bn-num">' + escHtml(k.valor || 0) + '</span>' +
@@ -354,7 +365,7 @@ function _kpiHtml(d) {
     var f = stats[iF];
     var irmaos = stats.filter(function (k) { return k.destino && k.destino === f.destino; });
     var total = irmaos.reduce(function (t, k) { return t + (k.valor || 0); }, 0);
-    html += '<div class="hm-bento">' + _bnCard(f, true, irmaos.length > 1 ? 'de ' + total + ' cadastrados' : '', irmaos.length > 1 && total ? Math.round((f.valor || 0) / total * 5) : -1) +
+    html += '<div class="hm-bento">' + _bnCard(f, true, irmaos.length > 1 ? 'de ' + total + ' cadastrados' : '', irmaos.length > 1 && total ? Math.round((f.valor || 0) / total * 12) : -1) +
       stats.filter(function (k, n) { return n !== iF; }).map(function (k) { return _bnCard(k, false, ''); }).join('') + '</div>';
   }
   html += alertas.map(function (k) {
