@@ -4,11 +4,11 @@ Estrutura mínima de toda tela. Fica no shell (`index.html`, bloco "LAYOUT SYSTE
 
 | Bloco | Uso |
 | --- | --- |
-| `.page` (`.page-narrow`) | Raiz do conteúdo: largura máxima, respiro lateral (`--gutter`) e espaço do menu inferior. |
+| `.page` (`.page-narrow`) | Raiz do conteúdo: largura máxima, respiro lateral (`--gutter`) (sem menu inferior: no celular a navegação é a gaveta do botão sanduíche e os atalhos da Início). |
 | `.page-head` > `.page-title` + `.page-sub` | Título da tela e uma linha de apoio. |
 | `.panel` > `.panel-head` > `.panel-title` (+ `.panel-text`) | **Setor** (container de vidro). Todo grupo de conteúdo de uma tela fica dentro de um `.panel`. |
 | `.form-grid` (+ `.field`, `.span-all`) | Campos em colunas; 1 coluna no celular. |
-| `.action-bar` > `.action-bar-status` + `.action-bar-btns` | Barra de ações fixa na base. No celular fica acima do menu inferior. |
+| `.action-bar` > `.action-bar-status` + `.action-bar-btns` | Barra de ações fixa na base. Altura mínima fixa (72px) para que o texto de status não mexa nos botões. |
 
 ## Setorização (como uma tela se divide)
 
