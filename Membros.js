@@ -131,6 +131,28 @@ var Membros = (function () {
     });
   }
 
+  // ══ ANIVERSARIANTES DO MÊS (Home) ═══════════════════════
+  // Devolve só o necessário para o cartão da Home: nome, dia/mês e "hoje".
+  // Não expõe telefone, endereço nem a data completa (sem o ano).
+  function aniversariantesDoMes(token, limite) {
+    return withAuth(token, function(sess) {
+      var agora = new Date();
+      var mes = agora.getMonth() + 1, hoje = agora.getDate();
+      var max = Math.max(1, Math.min(Number(limite) || 3, 12));
+      var lista = [];
+      _safeRows().forEach(function (r) {
+        if (!_isAtivo(r.ativo)) return;
+        var m = String(_formatarData(r.nascimento)).match(/^(\d{2})\/(\d{2})\/\d{4}$/);
+        if (!m || Number(m[2]) !== mes) return;
+        lista.push({ nome: String(r.nome || '').trim(), dia: Number(m[1]), mes: mes, hoje: Number(m[1]) === hoje });
+      });
+      lista.sort(function (a, b) { return a.dia - b.dia || (a.nome < b.nome ? -1 : 1); });
+      // quem já passou fica por último: primeiro hoje e os próximos
+      var proximos = lista.filter(function (x) { return x.dia >= hoje; }), passados = lista.filter(function (x) { return x.dia < hoje; });
+      return Util.ok({ total: lista.length, itens: proximos.concat(passados).slice(0, max) });
+    });
+  }
+
   function getProximoRol(token) {
     return withAuth(token, function(sess) {
       return Util.ok(_proximoRol());
@@ -405,6 +427,7 @@ var Membros = (function () {
 
   return {
     listarMembros:        listarMembros,
+    aniversariantesDoMes: aniversariantesDoMes,
     getProximoRol:        getProximoRol,
     salvarMembro:         salvarMembro,
     deletarMembro:        deletarMembro,
@@ -473,6 +496,7 @@ function _safe_mb(fn) {
 }
 
 function mb_listarMembros(token)        { return _safe_mb(function(){ return Membros.listarMembros(token); }); }
+function mb_aniversariantesDoMes(token, limite) { return _safe_mb(function(){ return Membros.aniversariantesDoMes(token, limite); }); }
 function mb_getProximoRol(token)        { return _safe_mb(function(){ return Membros.getProximoRol(token); }); }
 function mb_registrarCarta(token, d)    { return _safe_mb(function(){ return Membros.registrarCarta(token, d); }); }
 function mb_listarCartas(token, membroId) { return _safe_mb(function(){ return Membros.listarCartas(token, membroId); }); }
