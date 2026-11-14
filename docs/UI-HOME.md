@@ -52,3 +52,7 @@ Mosaico: com exatamente 3 indicadores, destaque à esquerda e 2 menores empilhad
 - Sem saudação: só o botão com as iniciais (menu do usuário) no canto superior direito.
 
 - Mosaico compacto (14/11): destaque sem altura mínima (≈ 2 cartões menores), ícone-marca d'água dentro do cartão (84 px, −12°, canto direito); cartões menores com **rótulo à esquerda e número à direita na mesma linha** (56 px de altura).
+
+## Membros no mesmo estilo (14/11)
+- Os indicadores grandes saíram da lista de Membros: ficou uma fileira de **chips** (`.mb-chips`: no total, ativos, inativos, aniversariantes no mês, sem foto em âmbar). Os ids `mbkv-*` foram mantidos.
+- Formulário (`.mb-form-card`): cartão claro liso (sem vidro/blur), títulos de seção em `--fs-md` 800 (sem caixa-alta), rótulos pequenos em negrito, campos sobre o fundo `--bg` com `--r-2`, cartão da foto no mesmo tom. Use isso como modelo para os formulários de Usuários e Identidade.

@@ -106,19 +106,39 @@
 .mb-empty-title { font-size: 16px; font-weight: 800; color: var(--text); }
 .mb-empty-sub   { font-size:var(--fs-sm); margin-top: 6px; line-height: 1.6; }
 
-/* ── Formulário ── */
+/* ── Resumo em chips ── */
+.mb-chips { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-bottom: var(--sp-4); }
+.mb-chip {
+  display: inline-flex; align-items: center; gap: var(--sp-1); min-height: 32px; padding: 0 var(--sp-3); border-radius: var(--r-pill);
+  font-size: var(--fs-xs); font-weight: 600; color: var(--text-muted); background: var(--bg-glass); border: 1px solid var(--border);
+}
+[data-theme="light"] .mb-chip { background: #FFFFFF; }
+.mb-chip b { font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+.mb-chip.ok b { color: var(--teal); }
+.mb-chip.warn { color: color-mix(in srgb, var(--warning) 70%, #000); border-color: color-mix(in srgb, var(--warning) 45%, transparent); background: color-mix(in srgb, var(--warning) 14%, transparent); }
+.mb-chip.warn b { color: inherit; }
+
+/* ── Formulário (mesma linguagem da Início: cartão claro liso, títulos fortes, campos sobre o fundo) ── */
+.mb-form-card {
+  margin-bottom: 96px; padding: var(--sp-5); border-radius: var(--r-3); border: 1px solid var(--border);
+  background: var(--bg-glass); box-shadow: var(--shadow-sm);
+}
+[data-theme="light"] .mb-form-card { background: #FFFFFF; }
+.mb-form-card .field label { font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0; text-transform: none; }
+.mb-form-card input, .mb-form-card select, .mb-form-card textarea { backdrop-filter: none; background: var(--bg); border-radius: var(--r-2); }
+.mb-form-card input:focus, .mb-form-card select:focus, .mb-form-card textarea:focus { background: var(--bg); box-shadow: 0 0 0 3px var(--teal-glow-soft); }
 .mb-form-grid { display: grid; grid-template-columns: 1fr; gap: 0; }
 @media (min-width: 640px) { .mb-form-grid { grid-template-columns: 1fr 1fr; column-gap: 16px; } }
 .mb-form-full { grid-column: 1 / -1; }
 .mb-form-section {
   grid-column: 1 / -1;
-  font-size:var(--fs-xs); font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
-  color: var(--teal); padding: 8px 0 6px;
-  border-bottom: 1px solid var(--teal-border); margin: 8px 0 4px;
+  font-size: var(--fs-md); font-weight: 800; letter-spacing: -.01em;
+  color: var(--text); padding: var(--sp-2) 0 var(--sp-2);
+  border-bottom: 1px solid var(--border); margin: var(--sp-2) 0 var(--sp-3);
 }
 
 /* ── Foto upload/preview ── */
-.mb-foto-card { padding: 16px; border-radius:var(--r-3); background: var(--bg-glass); border: 1px solid var(--border); }
+.mb-foto-card { padding: var(--sp-4); border-radius: var(--r-3); background: var(--bg); border: 1px solid var(--border); }
 .mb-foto-hint { font-size: 12px; line-height: 1.4; color: var(--text-muted); margin-top: 2px; }
 .mb-foto-btn {
   width: 100%; min-height: 52px; padding: 0 18px; border-radius:var(--r-3);
@@ -734,24 +754,19 @@ function mbAtualizarCardLista() {
   if (window.lucide) lucide.createIcons();
 }
 
+/* Resumo enxuto (substitui os indicadores grandes): uma fileira de chips com os mesmos números */
+function _mbChip(id, valor, rotulo, cls, icone) {
+  return '<span class="mb-chip' + (cls ? ' ' + cls : '') + '">' + (icone ? '<i data-lucide="' + icone + '" class="ic-13"></i>' : '') +
+    '<b id="' + id + '">' + valor + '</b> ' + rotulo + '</span>';
+}
 function _mbKpiGroups(total, ativos, inativos, aniv, semFoto) {
-  return (
-    '<section class="panel">' +
-      '<div class="panel-head"><h2 class="panel-title">Indicadores</h2></div>' +
-      '<div class="kpi-groups">' +
-        _kpiGroup({ cor: 'kc-teal', icone: 'users', titulo: 'Cadastro', sub: 'Membros da igreja', stats: [
-          { label: 'Total',    valor: total,    id: 'mbkv-total' },
-          { label: 'Ativos',   valor: ativos,   id: 'mbkv-ativos',   dot: 'ok' },
-          { label: 'Inativos', valor: inativos, id: 'mbkv-inativos', dot: 'bad' }
-        ] }) +
-        _kpiGroup({ cor: 'kc-gold', icone: 'bell-ring', titulo: 'Atenção', sub: 'O que precisa de cuidado', stats: [
-          { label: 'Aniversariantes do mês', valor: aniv, id: 'mbkv-aniv', dot: 'warn' }
-        ], alertas: [
-          { icone: 'image-off', valor: semFoto, id: 'mbkv-semfoto', texto: 'sem foto' }
-        ] }) +
-      '</div>' +
-    '</section>'
-  );
+  return '<div class="mb-chips" aria-label="Resumo do cadastro">' +
+    _mbChip('mbkv-total', total, 'no total') +
+    _mbChip('mbkv-ativos', ativos, ativos === 1 ? 'ativo' : 'ativos', 'ok') +
+    _mbChip('mbkv-inativos', inativos, inativos === 1 ? 'inativo' : 'inativos') +
+    _mbChip('mbkv-aniv', aniv, 'aniversariantes no mês', '', 'cake') +
+    (semFoto ? _mbChip('mbkv-semfoto', semFoto, 'sem foto', 'warn', 'image-off') : '') +
+  '</div>';
 }
 
 function _mbAnimKpis() {
@@ -865,7 +880,7 @@ function _mbBuildForm() {
       '</div>'+
     '</div>'+
 
-    '<div style="background:var(--glass-bg-premium);border:var(--glass-border-premium);border-radius:var(--r-3);padding:20px;margin-bottom:96px;backdrop-filter:blur(20px)">'+
+    '<div class="mb-form-card">'+
     '<div class="mb-form-grid" id="mb-form">'+
 
       /* Identificação */

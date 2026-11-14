@@ -283,10 +283,10 @@ test('setor: Home, Membros, Usuários e Identidade agrupam o conteúdo em .panel
   assert.deepEqual(proprio, [], 'containers/títulos de setor próprios:\n' + proprio.join('\n'));
 });
 
-test('padrão: KPI de Membros usa o mesmo grupo de indicadores do Início (sem estilo próprio, sem hero, sem pulso)', () => {
+test('padrão: Membros tem só um resumo enxuto em chips (sem indicadores grandes, sem hero, sem pulso)', () => {
   const m = read('_membros.html');
-  assert.match(m, /_kpiGroup\(/);
-  assert.doesNotMatch(m, /mb-kpi|kpi-hero|kpiPulse|\.kpi-group/);
+  assert.match(m, /mb-chips/);
+  assert.doesNotMatch(m, /_kpiGroup\(|mb-kpi|kpi-hero|kpiPulse|\.kpi-group/);
   assert.doesNotMatch(read('_home.html'), /^\.kpi-card\s*\{/m);
   assert.match(read('index.html'), /^\.kpi-card\s*\{/m);
   assert.match(read('_identidade.html'), /\.idt-marca \.brand-mark\s*\{[^}]*background:/);
@@ -314,9 +314,8 @@ test('Início: logo grande só no cartão institucional (sem barra superior); KP
   assert.match(read('Dashboard.js'), /destino: 'usuarios'/);
 });
 
-test('grupo de indicadores: Membros usa _kpiGroup (uma seta só, destino no grupo); Início usa mosaico; servidor marca o alerta', () => {
+test('indicadores: Início usa mosaico; Membros só chips; servidor marca o alerta', () => {
   assert.match(read('_home.html'), /hm-bento/);
-  assert.match(read('_membros.html'), /_kpiGroup\(/);
   assert.match(read('index.html'), /function _kpiGroup[\s\S]{0,1800}kpi-go/);
   assert.match(read('Membros.js'), /alerta: true/);
 });
