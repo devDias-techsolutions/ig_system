@@ -238,7 +238,7 @@ test('membros: cadastrar, inativar e excluir refletem na lista e nos números da
   const id = await page.evaluate(() => MB.membros[0].id);
   await page.evaluate((i) => mbEditarMembro(i), id);
   await page.waitForSelector('#mbf-ativo');
-  await page.click('label.sw');
+  await page.locator('label.sw').first().evaluate((el) => el.click()); // evita o travamento intermitente de rolagem do runner
   await page.evaluate(() => mbSalvarForm());
   await page.waitForFunction(() => MB.tab === 'lista' && MB.membros.length === 1 && MB.membros[0].ativo === false, null, { timeout: 6000 });
 
