@@ -14,11 +14,21 @@
 .edm-hero-kicker { font-size: var(--fs-xs); font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--hero-gold, #E8C27A); }
 .edm-hero-title { font-size: var(--fs-xl); font-weight: 800; letter-spacing: -.02em; margin-top: var(--sp-1); }
 .edm-hero-sub { font-size: var(--fs-sm); opacity: .85; margin-top: var(--sp-1); }
-.edm-atalhos { display: flex; gap: var(--sp-5); padding: var(--sp-2) var(--gutter) var(--sp-2); overflow-x: auto; scrollbar-width: none; max-width: var(--page-w, 1120px); margin: 0 auto; }
+/* Atalhos em linha: o seguinte aparece cortado + esmaecimento na borda indica que há mais (some ao chegar no fim) */
+.edm-atalhos { display: flex; gap: var(--sp-3); padding: var(--sp-2) var(--gutter); overflow-x: auto; scrollbar-width: none; max-width: var(--page-w, 1120px); margin: 0 auto; scroll-padding: 0 var(--gutter); }
 .edm-atalhos::-webkit-scrollbar { display: none; }
-.edm-atalhos .hm-mod { width: auto; min-width: 72px; }
-.edm-atalhos .hm-mod:not(.active) .hm-mod-icon { opacity: .6; }
-.edm-atalhos .hm-mod.active .hm-mod-name { color: var(--teal); }
+.edm-atalhos.mais-dir { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 48px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 48px), transparent); }
+.edm-atalhos.mais-esq { -webkit-mask-image: linear-gradient(270deg, #000 calc(100% - 48px), transparent); mask-image: linear-gradient(270deg, #000 calc(100% - 48px), transparent); }
+.edm-atalhos.mais-esq.mais-dir { -webkit-mask-image: linear-gradient(90deg, transparent, #000 48px, #000 calc(100% - 48px), transparent); mask-image: linear-gradient(90deg, transparent, #000 48px, #000 calc(100% - 48px), transparent); }
+.edm-atalhos .hm-mod { flex: 0 0 auto; width: 72px; }
+/* não selecionado: fundo branco + contorno na cor da igreja; selecionado: sólido */
+.edm-atalhos .hm-mod:not(.active) .hm-mod-icon { background: #fff; color: var(--teal); border: 1.5px solid var(--teal); box-shadow: none; }
+[data-theme="dark"] .edm-atalhos .hm-mod:not(.active) .hm-mod-icon { background: var(--bg2); }
+/* demo */
+.edm-demo { margin-top: var(--sp-4); padding-top: var(--sp-4); border-top: 1px solid var(--border); }
+.edm-demo-t { font-size: var(--fs-sm); font-weight: 800; color: var(--text); }
+.edm-demo-d { margin: var(--sp-1) 0 var(--sp-3); font-size: var(--fs-xs); color: var(--text-muted); }
+.edm-atalhos .hm-mod.active .hm-mod-name { color: var(--teal); font-weight: 800; }
 .edm-filtros { display: grid; grid-template-columns: 1fr 1.2fr; gap: var(--sp-2); margin-bottom: var(--sp-3); }
 .edm-filtros .field { margin: 0; }
 .edm-aula-row { display: flex; gap: var(--sp-2); align-items: flex-end; }
@@ -226,7 +236,12 @@ function renderEscolaDominical() {
       '<div class="modal-footer"><button class="btn btn-primary btn-full" onclick="edmFecharModal(\'modal-edm-extras\')">Concluir</button></div>' +
     '</div></div>'
   );
-  setTimeout(function () { if (window.lucide) lucide.createIcons(); edmIr(EDM.tela); }, 0);
+  setTimeout(function () { if (window.lucide) lucide.createIcons(); edmIr(EDM.tela); var n = document.querySelector('.edm-atalhos'); if (n) { n.addEventListener('scroll', edmAtalhosDica, { passive: true }); edmAtalhosDica(); } }, 0);
+}
+function edmAtalhosDica() {
+  var n = document.querySelector('.edm-atalhos'); if (!n) return;
+  n.classList.toggle('mais-esq', n.scrollLeft > 4);
+  n.classList.toggle('mais-dir', n.scrollLeft + n.clientWidth < n.scrollWidth - 4);
 }
 function edmIr(t) {
   EDM.tela = t;
@@ -234,8 +249,10 @@ function edmIr(t) {
   for (var i = 0; i < bs.length; i++) {
     var on = bs[i].getAttribute('data-tela') === t;
     bs[i].classList.toggle('active', on);
-    if (on && bs[i].scrollIntoView) { try { bs[i].scrollIntoView({ inline: 'center', block: 'nearest' }); } catch (e) {} }
   }
+  var ativo = document.querySelector('.edm-atalhos .hm-mod.active'), caixa = document.querySelector('.edm-atalhos');
+  if (ativo && caixa) caixa.scrollLeft = Math.max(0, ativo.offsetLeft - (caixa.clientWidth - ativo.offsetWidth) / 2);
+  edmAtalhosDica();
   var ti = document.getElementById('edm-titulo');
   if (ti) ti.textContent = EDM_TITULOS[t] || '';
   var gear = document.getElementById('edm-gear'); if (gear) gear.style.display = (edmPodeEditar() && (t === 'chamada' || t === 'ranking')) ? '' : 'none';
@@ -771,11 +788,30 @@ function edmAjustes() {
           '<option value="pontos"' + (c.modoRanking === 'pontos' ? ' selected' : '') + '>Por pontos totais (presença + bíblia + revista + extras)</option></select></div>' +
         '<div class="edm-pts-grid"><div class="field"><label for="edm-cfg-p1">Pts presença</label><input type="number" min="0" max="100" id="edm-cfg-p1" value="' + c.pontos.presenca + '"></div>' +
         '<div class="field"><label for="edm-cfg-p2">Pts bíblia</label><input type="number" min="0" max="100" id="edm-cfg-p2" value="' + c.pontos.biblia + '"></div>' +
-        '<div class="field"><label for="edm-cfg-p3">Pts revista</label><input type="number" min="0" max="100" id="edm-cfg-p3" value="' + c.pontos.revista + '"></div></div>';
+        '<div class="field"><label for="edm-cfg-p3">Pts revista</label><input type="number" min="0" max="100" id="edm-cfg-p3" value="' + c.pontos.revista + '"></div></div>' +
+        (App.session.perfil === 'admin' ? '<div class="edm-demo"><div class="edm-demo-t">Dados de teste</div><div class="edm-demo-d">Preenche a Escola Dominical como se estivesse em uso há um trimestre, ou zera tudo.</div>' +
+          '<div class="edm-form-btns"><button class="btn btn-secondary" onclick="edmDemo(\'popular\')">Popular</button><button class="btn btn-danger" onclick="edmDemo(\'limpar\')">Limpar base</button></div></div>' : '');
       document.getElementById('edm-form-rodape').innerHTML = '<div class="edm-form-btns"><button class="btn btn-secondary" onclick="edmFecharModal(\'modal-edm-form\')">Cancelar</button><button class="btn btn-primary" id="edm-form-salvar" onclick="edmSalvarAjustes()">Salvar</button></div>';
       edmAbrirModal('modal-edm-form');
     })
     .ed_getConfigEbd(App.session.token);
+}
+function edmDemo(acao) {
+  var popular = acao === 'popular';
+  showConfirm(popular ? 'Criar 5 turmas com alunos, professores, 12 domingos já lançados e a aula de hoje aberta. Só funciona com a base vazia.' : 'Apagar turmas, alunos, professores, aulas e chamadas da Escola Dominical? Isso não pode ser desfeito.',
+    { title: popular ? 'Popular dados de teste' : 'Limpar base da Escola Dominical', confirmLabel: popular ? 'Popular' : 'Limpar tudo', danger: !popular }).then(function (ok) {
+    if (!ok) return;
+    showToast(popular ? 'Criando dados de teste…' : 'Limpando…', 'info');
+    var run = google.script.run
+      .withFailureHandler(function (e) { showToast((e && e.message) || 'Erro na operação.', 'error'); })
+      .withSuccessHandler(function (r) {
+        if (!r || !r.success) { showToast((r && r.error) || 'Operação não concluída.', 'error'); return; }
+        edmFecharModal('modal-edm-form');
+        showToast((r.data && r.data.mensagem) || 'Pronto.', 'success');
+        EDM.alunos = []; EDM.rk.modo = ''; edmIr(EDM.tela);
+      });
+    if (popular) run.ed_popularDemo(App.session.token); else run.ed_limparBase(App.session.token);
+  });
 }
 function edmSalvarAjustes() {
   var dados = { modoChamada: _edmV('edm-cfg-chamada'), modoRanking: _edmV('edm-cfg-ranking'), pontos: { presenca: _edmV('edm-cfg-p1'), biblia: _edmV('edm-cfg-p2'), revista: _edmV('edm-cfg-p3') } };

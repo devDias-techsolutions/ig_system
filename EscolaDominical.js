@@ -1594,6 +1594,127 @@ var EscolaDominical = (function () {
   function alertaDiario()      { _alertaDiarioFn(); }
   function alertaSegundaFeira(){ _alertaSegundaFeiraFn(); }
 
+
+  // ══════════════════════════════════════════
+  //  DADOS DE DEMONSTRAÇÃO (somente admin)
+  //  popularDemo: 5 turmas, 4–15 alunos cada, professores, 12 domingos já lançados
+  //  + a aula de hoje aberta para chamada. limparBase: zera as abas da EBD.
+  // ══════════════════════════════════════════
+
+  var DEMO_ABAS = ['Chamadas', 'ChamadasInfo', 'Aulas', 'Professores', 'Alunos', 'Classes'];
+
+  var DEMO_NOMES = ['Ana', 'Beatriz', 'Carla', 'Daniela', 'Eduarda', 'Fernanda', 'Gabriela', 'Helena', 'Isabela', 'Joana', 'Karina', 'Larissa', 'Marina', 'Natália', 'Olívia', 'Priscila', 'Rebeca', 'Sara', 'Tatiane', 'Valéria',
+    'André', 'Bruno', 'Caio', 'Daniel', 'Eduardo', 'Felipe', 'Gabriel', 'Henrique', 'Igor', 'João', 'Lucas', 'Mateus', 'Nicolas', 'Otávio', 'Paulo', 'Rafael', 'Samuel', 'Tiago', 'Vitor', 'Davi'];
+  var DEMO_SOBRENOMES = ['Silva', 'Souza', 'Oliveira', 'Santos', 'Pereira', 'Costa', 'Rodrigues', 'Almeida', 'Nascimento', 'Lima', 'Araújo', 'Fernandes', 'Carvalho', 'Gomes', 'Martins', 'Rocha', 'Ribeiro', 'Alves', 'Monteiro', 'Barros', 'Dias', 'Teixeira', 'Moreira', 'Cardoso'];
+  var DEMO_TURMAS = [
+    { nome: 'Maternal',     faixa: '0 a 3 anos',   idade: [1, 3],   licao: 'Lições Bíblicas Maternal',     profs: 2 },
+    { nome: 'Juniores',     faixa: '7 a 11 anos',  idade: [7, 11],  licao: 'Lições Bíblicas Juniores',     profs: 1 },
+    { nome: 'Adolescentes', faixa: '12 a 17 anos', idade: [12, 17], licao: 'Lições Bíblicas Adolescentes', profs: 2 },
+    { nome: 'Jovens',       faixa: '18 a 29 anos', idade: [18, 29], licao: 'Lições Bíblicas Jovens',       profs: 1 },
+    { nome: 'Adultos',      faixa: 'Acima de 30',  idade: [30, 70], licao: 'Lições Bíblicas Adultos',      profs: 2 }
+  ];
+  var DEMO_LICOES = ['A Criação e a Queda', 'O Chamado de Abraão', 'A Fé de Isaque', 'Jacó e a Bênção', 'José no Egito', 'O Livramento do Êxodo', 'A Lei no Sinai', 'A Travessia do Jordão', 'Gideão e a Obediência', 'Rute, Fidelidade e Graça', 'Davi e Golias', 'A Sabedoria de Salomão', 'Elias no Carmelo', 'O Retorno do Exílio'];
+
+  function _demoRnd(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+  function _demoPick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  function _demoData(d) { return Utilities.formatDate(d, Session.getScriptTimeZone(), 'dd/MM/yyyy'); }
+
+  // Anexa linhas de uma vez só (rápido), respeitando a ordem de colunas real da aba
+  function _demoInserir(nome, objetos) {
+    if (!objetos.length) return;
+    var sheet = Util.getSheet(nome);
+    var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    var linhas = objetos.map(function (o) { return headers.map(function (h) { return o[h] !== undefined ? o[h] : ''; }); });
+    sheet.getRange(sheet.getLastRow() + 1, 1, linhas.length, headers.length).setValues(linhas);
+    Util.invalidarCache(nome);
+  }
+
+  function popularDemo(token) {
+    return withAuth(token, function (sess) {
+      if (sess.perfil !== 'admin') return Util.err('Somente o administrador pode popular dados de teste.');
+      if (_safeSheetObjects('Classes').length || _safeSheetObjects('Alunos').length) {
+        return Util.err('A base da Escola Dominical já tem dados. Limpe a base antes de popular.');
+      }
+      var cfg = _getConfig();
+      var ptP = Number(cfg.PONTOS_PRESENCA) || 1, ptB = Number(cfg.PONTOS_BIBLIA) || 2, ptR = Number(cfg.PONTOS_REVISTA) || 2;
+      var extrasCad = _safeSheetObjects('PontosExtras').filter(function (r) { return _isAtivo(r.Ativo); });
+      var hoje = new Date(); hoje.setHours(12, 0, 0, 0);
+      var ano = String(hoje.getFullYear());
+      var agora = Util.now();
+
+      // Aulas: 12 domingos anteriores (lançados) + hoje (aberta para chamada)
+      var domingo = new Date(hoje); domingo.setDate(domingo.getDate() - domingo.getDay());
+      if (_demoData(domingo) === _demoData(hoje)) domingo.setDate(domingo.getDate() - 7);
+      var datas = [];
+      for (var k = 11; k >= 0; k--) { var d = new Date(domingo); d.setDate(d.getDate() - 7 * k); datas.push(d); }
+      var contaTri = {};
+      var aulas = datas.concat([hoje]).map(function (d, i) {
+        var tri = String(Math.floor(d.getMonth() / 3) + 1);
+        var chaveTri = d.getFullYear() + '-' + tri;
+        contaTri[chaveTri] = (contaTri[chaveTri] || 0) + 1;
+        var num = contaTri[chaveTri];
+        return { ID: Util.uuid(), Data: _demoData(d), Trimestre: tri, NumLicao: num, Titulo: DEMO_LICOES[(num - 1) % DEMO_LICOES.length], Ano: String(d.getFullYear()), CriadoPor: sess.email, CriadoEm: agora, _lancada: i < datas.length };
+      });
+
+      var classes = [], alunos = [], professores = [], chamadas = [], infos = [], usados = {};
+      DEMO_TURMAS.forEach(function (t) {
+        var classeId = Util.uuid();
+        classes.push({ ID: classeId, Nome: t.nome, FaixaEtaria: t.faixa, LicaoCPAD: t.licao, Ativo: true, CriadoEm: agora });
+        var nomeUnico = function () {
+          for (var n = 0; n < 50; n++) { var nm = _demoPick(DEMO_NOMES) + ' ' + _demoPick(DEMO_SOBRENOMES); if (!usados[nm]) { usados[nm] = true; return nm; } }
+          return _demoPick(DEMO_NOMES) + ' ' + _demoPick(DEMO_SOBRENOMES) + ' ' + _demoRnd(2, 9);
+        };
+        var nasc = function (faixa) { var a = _demoRnd(faixa[0], faixa[1]); return _demoData(new Date(hoje.getFullYear() - a, _demoRnd(0, 11), _demoRnd(1, 28))); };
+        var mesAlunos = [];
+        for (var i = 0, qtd = _demoRnd(4, 15); i < qtd; i++) {
+          var al = { ID: Util.uuid(), Nome: nomeUnico(), DataNasc: nasc(t.idade), ClasseID: classeId, Telefone: '(31) 9' + _demoRnd(8000, 9999) + '-' + _demoRnd(1000, 9999), Endereco: '', Email: '', TotalPontos: 0, Ativo: true, CriadoEm: agora, _freq: 0.55 + Math.random() * 0.4 };
+          mesAlunos.push(al); alunos.push(al);
+        }
+        for (var p = 0; p < t.profs; p++) {
+          professores.push({ ID: Util.uuid(), AlunoOrigemID: '', UsuarioID: '', Nome: nomeUnico(), ClasseID: classeId, Telefone: '(31) 9' + _demoRnd(8000, 9999) + '-' + _demoRnd(1000, 9999), DataNasc: nasc([28, 60]), Endereco: '', Email: '', Cursos: p === 0 ? 'Teologia básica' : '', Ativo: true, CriadoEm: agora });
+        }
+        aulas.forEach(function (a) {
+          if (!a._lancada) return;
+          var visitantes = 0, oferta = 0;
+          mesAlunos.forEach(function (al) {
+            var presente = Math.random() < al._freq;
+            var biblia = presente && Math.random() < 0.7, revista = presente && Math.random() < 0.6;
+            var extras = [];
+            if (presente && extrasCad.length && Math.random() < 0.15) { var ex = _demoPick(extrasCad); extras.push({ nome: ex.Nome, pontos: Number(ex.Pontos) || 0 }); }
+            var total = (presente ? ptP : 0) + (biblia ? ptB : 0) + (revista ? ptR : 0) + extras.reduce(function (s, e) { return s + e.pontos; }, 0);
+            var ofe = presente && Math.random() < 0.5 ? _demoRnd(1, 10) : 0;
+            oferta += ofe; al.TotalPontos += total;
+            chamadas.push({ ID: Util.uuid(), AulaID: a.ID, ClasseID: classeId, AlunoID: al.ID, Presente: presente, Biblia: biblia, Revista: revista, PontosExtrasJSON: JSON.stringify(extras), TotalPontos: total, TotalOfertas: ofe, LancadoPor: sess.email, CriadoEm: agora });
+          });
+          visitantes = _demoRnd(0, 3);
+          infos.push({ ID: Util.uuid(), AulaID: a.ID, ClasseID: classeId, NumVisitantes: visitantes, TotalOferta: oferta, Observacoes: '', LancadoPor: sess.email, CriadoEm: agora });
+        });
+      });
+
+      _demoInserir('Classes', classes);
+      _demoInserir('Alunos', alunos);
+      _demoInserir('Professores', professores);
+      _demoInserir('Aulas', aulas);
+      _demoInserir('Chamadas', chamadas);
+      _demoInserir('ChamadasInfo', infos);
+      return Util.ok({ mensagem: 'Dados de teste criados: ' + classes.length + ' turmas, ' + alunos.length + ' alunos, ' + professores.length + ' professores, ' + aulas.length + ' aulas (a de hoje aberta para chamada).', turmas: classes.length, alunos: alunos.length, professores: professores.length, aulas: aulas.length, chamadas: chamadas.length });
+    });
+  }
+
+  // Zera as abas da EBD (mantém cabeçalho e a lista de Pontos Extras)
+  function limparBase(token) {
+    return withAuth(token, function (sess) {
+      if (sess.perfil !== 'admin') return Util.err('Somente o administrador pode limpar a base da Escola Dominical.');
+      DEMO_ABAS.forEach(function (nome) {
+        var sheet = Util.getSheet(nome);
+        var n = sheet.getLastRow() - 1;
+        if (n > 0) sheet.deleteRows(2, n);
+        Util.invalidarCache(nome);
+      });
+      return Util.ok({ mensagem: 'Base da Escola Dominical zerada.' });
+    });
+  }
+
   return {
     listarClasses:          listarClasses,
     listarClassesTodas:     listarClassesTodas,
@@ -1631,6 +1752,8 @@ var EscolaDominical = (function () {
     getResumoAulas:         getResumoAulas,
     getDadosIniciais:       getDadosIniciais,
     ed_diagnostico:         ed_diagnostico,
+    popularDemo:            popularDemo,
+    limparBase:             limparBase,
 
     getConfigAlertas:       getConfigAlertas,
     salvarConfigAlertas:    salvarConfigAlertas,
@@ -1659,6 +1782,8 @@ function _safe_ed(fn, args) {
 }
 
 function ed_diagnostico(token)                         { return _safe_ed(function(){ return EscolaDominical.ed_diagnostico(token); }, []); }
+function ed_popularDemo(token)                         { return _safe_ed(function(){ return EscolaDominical.popularDemo(token); }, []); }
+function ed_limparBase(token)                          { return _safe_ed(function(){ return EscolaDominical.limparBase(token); }, []); }
 function ed_listarClasses(token)                       { return _safe_ed(function(){ return EscolaDominical.listarClasses(token); }, []); }
 function ed_listarClassesTodas(token)                  { return _safe_ed(function(){ return EscolaDominical.listarClassesTodas(token); }, []); }
 function ed_criarClasse(token, dados)                  { return _safe_ed(function(){ return EscolaDominical.criarClasse(token, dados); }, []); }

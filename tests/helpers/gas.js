@@ -52,6 +52,7 @@ function makeSheet(name) {
     getRange: (r, c, nr = 1, nc = 1) => makeRange(sheet, r, c, nr, nc),
     appendRow: (row) => { sheet._rows.push(row.slice()); },
     deleteRow: (i) => { sheet._rows.splice(i - 1, 1); },
+    deleteRows: (i, n) => { sheet._rows.splice(i - 1, n); },
     setFrozenRows: () => {},
     autoResizeColumns: () => {},
     clear: () => { sheet._rows = []; },
