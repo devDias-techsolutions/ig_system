@@ -36,11 +36,16 @@ function usuarios() {
 // Devolve o código JS (string) com as funções simuladas, para ser injetado na página.
 function serializar(perfil) {
   const sessao = { token: 'tok', id: 'u1', nome: 'Ana Souza', email: 'ana@igreja.test', perfil, primeiroAcesso: false };
+  const M = { modulo: 'membros', moduloNome: 'Membros', moduloIcone: 'users' };
+  const E = { modulo: 'escola-dominical', moduloNome: 'Escola Dominical', moduloIcone: 'book-open', destino: 'escola-dominical' };
   const kpis = (process.env.SEM_MODULOS ? [] : [
-    { icone: 'users', cor: 'kc-teal', valor: 128, rotulo: 'Membros ativos', curto: 'Ativos', destino: 'membros' },
-    { icone: 'user-x', cor: 'kc-gold', valor: 14, rotulo: 'Membros inativos', curto: 'Inativos', destino: 'membros' },
-    { icone: 'camera', cor: 'kc-blue', valor: 37, rotulo: 'Membros sem foto', curto: 'Sem foto', dica: 'Complete os cadastros', destino: 'membros', alerta: true },
-  ]).concat([{ icone: 'shield-check', cor: 'kc-green', valor: 3, rotulo: 'Usuários do sistema', curto: 'Usuários' }]);
+    { icone: 'users', cor: 'kc-teal', valor: 128, rotulo: 'Membros ativos', curto: 'Ativos', destino: 'membros', ...M },
+    { icone: 'user-x', cor: 'kc-gold', valor: 14, rotulo: 'Membros inativos', curto: 'Inativos', destino: 'membros', ...M },
+    { icone: 'camera', cor: 'kc-blue', valor: 37, rotulo: 'Membros sem foto', curto: 'Sem foto', dica: 'Complete os cadastros', destino: 'membros', alerta: true, ...M },
+    { icone: 'graduation-cap', cor: 'kc-gold', valor: 58, rotulo: 'Alunos da EBD', curto: 'Alunos', ...E },
+    { icone: 'users-round', cor: 'kc-blue', valor: 5, rotulo: 'Turmas', curto: 'Turmas', ...E },
+    { icone: 'book-user', cor: 'kc-green', valor: 8, rotulo: 'Professores', curto: 'Professores', ...E },
+  ]).concat([{ icone: 'shield-check', cor: 'kc-green', valor: 3, rotulo: 'Usuários do sistema', curto: 'Usuários', modulo: 'sistema', moduloNome: 'Administração', moduloIcone: 'shield-check' }]);
   const fns = {
     getSession: () => ok(SESSAO),
     login: () => ok(SESSAO),
