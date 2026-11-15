@@ -119,6 +119,11 @@ button.bn-card:focus-visible { outline: 2px solid var(--teal); outline-offset: 2
 .hm-bento .bn-card.feat + .bn-card:last-child { grid-column: 1 / -1; flex-direction: row; align-items: center; }
 .hm-bento .bn-card.feat + .bn-card:last-child .bn-ico { display: grid; }
 
+/* ── Grupo de indicadores por módulo ── */
+.hm-kg + .hm-kg { margin-top: var(--sp-5); }
+.hm-kg-t { display: flex; align-items: center; gap: var(--sp-2); margin: 0 0 var(--sp-2); font-size: var(--fs-sm); font-weight: 700; color: var(--text-muted); }
+.hm-kg-t i, .hm-kg-t svg { width: 16px; height: 16px; color: var(--teal); }
+
 /* ── Faixa de atenção ── */
 .hm-alert {
   display: flex; align-items: center; gap: var(--sp-3); margin-top: var(--sp-3); padding: var(--sp-3) var(--sp-4);
@@ -344,7 +349,7 @@ function _bnCard(k, feat, sub) {
     (sub ? '<span class="bn-sub">' + escHtml(sub) + '</span>' : '') + '</span>' +
   '</' + (dest ? 'button' : 'div') + '>';
 }
-function _kpiHtml(d) {
+function _kpiBloco(d) {
   var stats = d.filter(function (k) { return !k.alerta; });
   var alertas = d.filter(function (k) { return k.alerta && (k.valor || 0) > 0; });
   var iF = 0;
@@ -352,7 +357,8 @@ function _kpiHtml(d) {
   var html = '';
   if (stats.length) {
     var f = stats[iF];
-    var irmaos = stats.filter(function (k) { return k.destino && k.destino === f.destino; });
+    // "de N cadastrados" só faz sentido para ativos + inativos (mesmo assunto), não para contagens de assuntos diferentes
+    var irmaos = f.curto === 'Ativos' ? stats.filter(function (k) { return k.destino && k.destino === f.destino; }) : [];
     var total = irmaos.reduce(function (t, k) { return t + (k.valor || 0); }, 0);
     html += '<div class="hm-bento">' + _bnCard(f, true, irmaos.length > 1 ? 'de ' + total + ' cadastrados' : '') +
       stats.filter(function (k, n) { return n !== iF; }).map(function (k) { return _bnCard(k, false, ''); }).join('') + '</div>';
@@ -368,6 +374,20 @@ function _kpiHtml(d) {
     '</div>';
   }).join('');
   return html;
+}
+/* Um grupo por módulo, com o nome do módulo como título: fica claro de qual módulo vem cada número. */
+function _kpiHtml(d) {
+  var grupos = [], idx = {};
+  d.forEach(function (k) {
+    var id = k.modulo || 'geral';
+    if (idx[id] === undefined) { idx[id] = grupos.length; grupos.push({ id: id, nome: k.moduloNome || '', icone: k.moduloIcone || 'layout-grid', kpis: [] }); }
+    grupos[idx[id]].kpis.push(k);
+  });
+  return grupos.map(function (g) {
+    return '<div class="hm-kg" data-modulo="' + escHtml(g.id) + '">' +
+      (g.nome ? '<h3 class="hm-kg-t"><i data-lucide="' + escHtml(g.icone) + '"></i>' + escHtml(g.nome) + '</h3>' : '') +
+      _kpiBloco(g.kpis) + '</div>';
+  }).join('');
 }
 
 function _anivSkeleton() {

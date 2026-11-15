@@ -2067,7 +2067,7 @@ var EscolaDominicalManifesto = {
     var turmas = Util.sheetToObjects('Classes').filter(function (c) { return ativo(c.Ativo); }).length;
     var profs  = Util.sheetToObjects('Professores').filter(function (p) { return ativo(p.Ativo); }).length;
     return [
-      { id: 'ed_alunos', rotulo: 'Alunos ativos', curto: 'Alunos', valor: alunos, icone: 'graduation-cap', cor: 'kc-gold', destino: 'escola-dominical' },
+      { id: 'ed_alunos', rotulo: 'Alunos da EBD', curto: 'Alunos', valor: alunos, icone: 'graduation-cap', cor: 'kc-gold', destino: 'escola-dominical' },
       { id: 'ed_turmas', rotulo: 'Turmas', curto: 'Turmas', valor: turmas, icone: 'users-round', cor: 'kc-blue', destino: 'escola-dominical' },
       { id: 'ed_profs',  rotulo: 'Professores', curto: 'Professores', valor: profs, icone: 'book-user', cor: 'kc-green', destino: 'escola-dominical' }
     ];

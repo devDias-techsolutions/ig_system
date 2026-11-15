@@ -57,3 +57,7 @@ Mosaico: com exatamente 3 indicadores, destaque à esquerda e 2 menores empilhad
 - Os indicadores grandes saíram da lista de Membros: ficou uma fileira de **chips** (`.mb-chips`: no total, ativos, inativos, aniversariantes no mês, sem foto em âmbar). Os ids `mbkv-*` foram mantidos.
 - Formulário (`.mb-form-card`): cartão claro liso (sem vidro/blur), títulos de seção em `--fs-md` 800 (sem caixa-alta), rótulos pequenos em negrito, campos sobre o fundo `--bg` com `--r-2`, cartão da foto no mesmo tom. Use isso como modelo para os formulários de Usuários e Identidade.
 - As abas de Membros viraram **atalhos circulares** (`.mb-atalhos` reutilizando `.hm-mod`: Membros, Carteirinhas, Cartas; o ativo ganha anel e rótulo na cor da igreja). **"Novo Membro" é o botão flutuante "+"** (`.mb-fab`, canto inferior direito, acima do menu no celular) na lista. Mesmo padrão a seguir em Usuários.
+
+## Indicadores agrupados por módulo
+- Cada indicador sai do servidor com `modulo`, `moduloNome` e `moduloIcone` (`Modulos.kpis` preenche; o de Usuários vem como "Administração"). A Home monta **um grupo por módulo**, com o nome do módulo como título (`.hm-kg`, `.hm-kg-t`), e cada grupo tem o seu mosaico e as suas faixas de atenção.
+- "de N cadastrados" só aparece no destaque "Ativos" (ativos + inativos do mesmo assunto).

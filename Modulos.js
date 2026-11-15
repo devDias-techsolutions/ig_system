@@ -80,7 +80,10 @@ var Modulos = (function () {
     ativos().forEach(function (m) {
       if (typeof m.kpis !== 'function') return;
       if (perfil && (m.perfis || ['admin']).indexOf(perfil) === -1) return;
-      try { (m.kpis() || []).forEach(function (k) { out.push(k); }); }
+      try {
+        // Cada indicador carrega o módulo de origem: a Home agrupa por módulo para ficar claro de onde vem.
+        (m.kpis() || []).forEach(function (k) { k.modulo = m.id; k.moduloNome = m.nome; k.moduloIcone = m.icone || 'box'; out.push(k); });
+      }
       catch (e) { Logger.log('[Modulos.kpis ' + m.id + '] ' + e.message); }
     });
     return out;
