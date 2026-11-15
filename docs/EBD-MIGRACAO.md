@@ -18,6 +18,7 @@ Origem: `modulos-pendentes/escola-dominical/` (legado, mantido como referência)
 | E3b | Professores (vínculo usuário↔turma) e Aulas | feito |
 | E3c | Visão geral (mock aprovado), Ranking, modos configuráveis (ícone de ajustes no cabeçalho de Chamada/Ranking) | feito |
 | E3d | Relatórios: por turma + geral da aula (igual ao original), aberto automaticamente após salvar a chamada; compartilhar resumo (WhatsApp/copiar) | feito |
+| E3e | Aba **Chamada** como no original (histórico do trimestre → turmas da aula → chamada em leitura/edição), oferta em padrão bancário, loading ao salvar, **retrato da aula**, trava de transferência e regra do professor | feito |
 | E4 | Integração: Membros ("Importar da EBD"), KPIs da Home, atividade | pendente |
 | E5 | Alertas automáticos + importador 5 passos | pendente |
 
@@ -47,3 +48,14 @@ Origem: `modulos-pendentes/escola-dominical/` (legado, mantido como referência)
 - Geral da aula: soma das turmas + aproveitamento por turma. Professor vê só as suas turmas.
 - Após **Salvar chamada** abre o relatório da turma com atalho para o geral. "Compartilhar" usa `navigator.share` ou copia o texto.
 - A ordem das turmas é a da planilha (o original usava uma lista fixa de nomes da igreja, que não cabe no white-label).
+
+## Aba Chamada (E3e)
+- Fluxo em 3 níveis: **Histórico do trimestre em curso** (botão "Nova aula" no topo, só admin/secretaria; cada aula com `OK` = todas as turmas lançadas ou `!` = pendência) → **Turmas da aula** (status por turma; "Relatório geral da aula") → **Chamada da turma**.
+- Chamada já lançada abre **somente leitura**; botão "Editar chamada" só aparece se `podeEditar`: professor apenas **no dia da aula**; secretaria/admin a qualquer momento. O servidor também recusa (`salvarChamada`).
+- Oferta: máscara bancária (`edmOferta`): dígitos entram pela direita (1000 → 10,00). Salvar mostra spinner "Salvando chamada…" até a resposta; só então o toast.
+- Endpoint novo: `ed_getHistoricoChamadas`. `ed_getChamada` devolve `podeEditar`, `turmaNome`, `aula`, `retratoFixo`.
+
+## Travas dos relatórios (retrato)
+- No **primeiro salvamento** da chamada de uma turma/aula, `ChamadasInfo` ganha `Matriculados` e `RetratoJSON` (quem estava na turma: alunos + professores, com nome). Colunas são acrescentadas automaticamente em planilhas antigas (`_garantirColunas`).
+- `getRelatorioAula` usa `Matriculados` do retrato (aula lançada) → excluir/incluir/transferir aluno **não altera** percentuais antigos. `getChamada` de aula lançada lista o retrato; regravar ignora quem não estava nele. Aulas lançadas antes desta versão (sem retrato) continuam calculando pela turma atual.
+- **Transferência de turma travada** durante o trimestre em curso (`editarAluno` recusa mudar `ClasseID`). Trimestre em curso = o da aula mais recente, se ela for futura ou tiver até 28 dias; depois disso a transferência é liberada (virada do trimestre).

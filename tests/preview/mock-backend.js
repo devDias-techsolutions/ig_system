@@ -68,8 +68,14 @@ function serializar(perfil) {
         ['Eduarda Martins', 1, 1, 1], ['Felipe Araújo', 1, 0, 1], ['Gabriela Rocha', 1, 1, 0],
       ].map(function (x, i) { return { alunoId: 'al' + i, nome: x[0], isProfessor: false, presente: !!x[1], biblia: !!x[2], revista: !!x[3], pontosExtras: [] }; }),
       extras: [{ ID: 'e1', Nome: 'Memorizou o versículo', Pontos: 3 }], pontos: { presenca: 1, biblia: 2, revista: 2 },
-      jaLancada: false, turmaInfo: { numVisitantes: 3, totalOferta: 45, observacoes: '' },
+      jaLancada: true, podeEditar: true, turmaNome: 'Jovens', aula: { numLicao: '7', data: '15/11/2026' }, turmaInfo: { numVisitantes: 3, totalOferta: 45, observacoes: '' },
     }),
+    ed_getHistoricoChamadas: () => ok({ trimestre: '4', ano: '2026', pendentes: 2, podeCriarAula: true, aulas: [
+      { id: 'a7', numLicao: '7', data: '15/11/2026', turmas: 5, lancadas: 3, status: 'pendente', hoje: true, futura: false },
+      { id: 'a6', numLicao: '6', data: '08/11/2026', turmas: 5, lancadas: 5, status: 'ok', hoje: false, futura: false },
+      { id: 'a5', numLicao: '5', data: '01/11/2026', turmas: 5, lancadas: 4, status: 'pendente', hoje: false, futura: false },
+      { id: 'a4', numLicao: '4', data: '25/10/2026', turmas: 5, lancadas: 5, status: 'ok', hoje: false, futura: false },
+    ] }),
     ed_salvarChamada: () => ok({ mensagem: 'Chamada salva com sucesso.' }),
     ed_getRelatorioAula: () => ok({
       modo: 'completa', aula: { id: 'a7', numLicao: '7', trimestre: '4', data: '15/11/2026', titulo: '' }, totalTurmas: 2,

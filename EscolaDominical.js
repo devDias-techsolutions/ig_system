@@ -13,7 +13,7 @@ var EscolaDominical = (function () {
     Professores:  ['ID', 'AlunoOrigemID', 'UsuarioID', 'Nome', 'ClasseID', 'Telefone', 'DataNasc', 'Endereco', 'Email', 'Cursos', 'Ativo', 'CriadoEm'],
     Aulas:        ['ID', 'Data', 'Trimestre', 'NumLicao', 'Titulo', 'Ano', 'CriadoPor', 'CriadoEm'],
     Chamadas:     ['ID', 'AulaID', 'ClasseID', 'AlunoID', 'Presente', 'Biblia', 'Revista', 'PontosExtrasJSON', 'TotalPontos', 'TotalOfertas', 'LancadoPor', 'CriadoEm'],
-    ChamadasInfo: ['ID', 'AulaID', 'ClasseID', 'NumVisitantes', 'TotalOferta', 'Observacoes', 'LancadoPor', 'CriadoEm'],
+    ChamadasInfo: ['ID', 'AulaID', 'ClasseID', 'NumVisitantes', 'TotalOferta', 'Observacoes', 'LancadoPor', 'CriadoEm', 'Matriculados', 'RetratoJSON'],
     PontosExtras: ['ID', 'Nome', 'Pontos', 'Ativo']
   };
 
@@ -211,6 +211,11 @@ var EscolaDominical = (function () {
       if (dados.ClasseID) {
         var classe = Util.findById('Classes', dados.ClasseID);
         if (!classe) return Util.err('Classe não encontrada.');
+        // Trava: durante o trimestre em curso o aluno não troca de turma (preserva o histórico e os percentuais).
+        if (dados.ClasseID !== row.ClasseID) {
+          var emCurso = _trimestreEmCurso();
+          if (emCurso) return Util.err('Transferência de turma travada durante o trimestre em curso (' + emCurso.trimestre + 'º trimestre ' + emCurso.ano + '). Faça a mudança na virada do trimestre.');
+        }
       }
 
       Util.updateRow('Alunos', row._rowIndex, {
@@ -410,6 +415,64 @@ var EscolaDominical = (function () {
   }
 
   // ══════════════════════════════════════════
+  //  RETRATO DA AULA, TRAVAS E DATAS
+  // ══════════════════════════════════════════
+
+  function _hojeBR() { return _parseDateBR(Util.now()); }
+  function _mesmoDia(a, b) {
+    return !!a && !!b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+
+  // Planilhas antigas não têm as colunas do retrato: acrescenta ao final do cabeçalho, sem mexer nos dados.
+  function _garantirColunas(nome, colunas) {
+    var sheet = Util.getSheet(nome);
+    var lc = sheet.getLastColumn();
+    var atuais = lc > 0 ? sheet.getRange(1, 1, 1, lc).getValues()[0] : [];
+    colunas.forEach(function (c) {
+      if (atuais.indexOf(c) === -1) {
+        sheet.getRange(1, atuais.length + 1).setValue(c);
+        atuais.push(c);
+      }
+    });
+  }
+
+  // Quem estava matriculado na turma agora (alunos + professores ativos), para congelar na aula.
+  function _retratoAtual(classeId) {
+    var lista = [];
+    _safeSheetObjects('Professores').forEach(function (p) {
+      if (p.ClasseID === classeId && _isAtivo(p.Ativo)) lista.push({ i: p.ID, n: p.Nome, p: 1 });
+    });
+    _safeSheetObjects('Alunos').forEach(function (a) {
+      if (a.ClasseID === classeId && _isAtivo(a.Ativo)) lista.push({ i: a.ID, n: a.Nome, p: 0 });
+    });
+    return lista;
+  }
+
+  function _lerRetrato(info) {
+    if (!info || !info.RetratoJSON) return null;
+    try { var r = JSON.parse(info.RetratoJSON); return r && r.length !== undefined ? r : null; }
+    catch (e) { return null; }
+  }
+
+  // Professor só lança/edita a chamada no dia da aula; secretaria e admin a qualquer momento.
+  function _podeEditarChamada(sess, aula) {
+    if (sess.perfil !== 'professor') return true;
+    return _mesmoDia(_dataAula(aula), _hojeBR());
+  }
+
+  // Trimestre em curso = o da aula mais recente, enquanto ela for futura ou tiver até 28 dias.
+  function _trimestreEmCurso() {
+    var aulas = _safeSheetObjects('Aulas');
+    if (!aulas.length) return null;
+    aulas.forEach(function (a) { a._t = _dataAula(a).getTime(); });
+    aulas.sort(function (a, b) { return b._t - a._t; });
+    var ult = aulas[0];
+    var idade = (_hojeBR().getTime() - ult._t) / 86400000;
+    if (idade > 28) return null;
+    return { trimestre: String(ult.Trimestre), ano: String(ult.Ano || _dataAula(ult).getFullYear()) };
+  }
+
+  // ══════════════════════════════════════════
   //  CHAMADAS
   // ══════════════════════════════════════════
 
@@ -485,6 +548,22 @@ var EscolaDominical = (function () {
         return r.AulaID === aulaId && r.ClasseID === classeId;
       });
       var info = infoRows.length ? infoRows[0] : {};
+      // Aula já lançada: a lista é o retrato do dia (quem estava na turma), não a turma de hoje.
+      var retrato = _lerRetrato(info);
+      if (retrato) {
+        resultado = retrato.map(function (x) {
+          var cr = chamadaMap[x.i] || {};
+          var ex = [];
+          try { ex = cr.PontosExtrasJSON ? JSON.parse(cr.PontosExtrasJSON) : []; } catch (e) { ex = []; }
+          return {
+            alunoId: x.i, nome: x.n, isProfessor: x.p === 1,
+            presente: cr.Presente === true || cr.Presente === 'TRUE',
+            biblia:   cr.Biblia   === true || cr.Biblia   === 'TRUE',
+            revista:  cr.Revista  === true || cr.Revista  === 'TRUE',
+            pontosExtras: ex, totalPontos: cr.TotalPontos || 0, totalOfertas: cr.TotalOfertas || 0, chamadaId: cr.ID || null
+          };
+        });
+      }
       var turmaInfo = {
         numVisitantes: Number(info.NumVisitantes) || 0,
         totalOferta:   Number(info.TotalOferta)   || 0,
@@ -513,7 +592,14 @@ var EscolaDominical = (function () {
 
       var cfgPts = _getConfig();
       var pontos = { presenca: Number(cfgPts.PONTOS_PRESENCA) || 1, biblia: Number(cfgPts.PONTOS_BIBLIA) || 2, revista: Number(cfgPts.PONTOS_REVISTA) || 2 };
-      return Util.ok({ modo: _modoChamada(cfgPts), alunos: resultado, extras: extras, pontos: pontos, jaLancada: chamadas.length > 0, turmaInfo: turmaInfo, historicoPresenca: histMap, totalLicoes: aulasTrimestre.length, trimestre: trimAtual });
+      var classeRow = Util.findById('Classes', classeId) || {};
+      return Util.ok({
+        modo: _modoChamada(cfgPts), alunos: resultado, extras: extras, pontos: pontos, jaLancada: chamadas.length > 0,
+        turmaInfo: turmaInfo, historicoPresenca: histMap, totalLicoes: aulasTrimestre.length, trimestre: trimAtual,
+        podeEditar: _podeEditarChamada(sess, aulaAtual), retratoFixo: !!retrato,
+        aula: { id: aulaId, numLicao: aulaAtual.NumLicao, titulo: aulaAtual.Titulo, data: aulaAtual.Data, trimestre: trimAtual },
+        turmaNome: classeRow.Nome || ''
+      });
     });
   }
 
@@ -522,6 +608,28 @@ var EscolaDominical = (function () {
       if (!aulaId || !classeId || !registros) return Util.err('Dados incompletos.');
       var ok = _classesDoProfessor(sess);
       if (ok !== null && !ok[String(classeId)]) return Util.err('Sem permissão para registrar chamada nesta turma.');
+      var aulaRow = Util.findById('Aulas', aulaId);
+      if (!aulaRow) return Util.err('Aula não encontrada.');
+      if (!_podeEditarChamada(sess, aulaRow)) return Util.err('O professor só pode lançar ou editar a chamada no dia da aula. Peça à secretaria.');
+
+      // Retrato: a primeira gravação congela quem estava na turma; edições seguintes usam o mesmo grupo.
+      _garantirColunas('ChamadasInfo', ['Matriculados', 'RetratoJSON']);
+      var infoPrev = null;
+      _safeSheetObjects('ChamadasInfo').forEach(function (r) { if (r.AulaID === aulaId && r.ClasseID === classeId) infoPrev = r; });
+      var retratoSalvo = _lerRetrato(infoPrev);
+      var retratoNovo  = retratoSalvo || _retratoAtual(classeId);
+      var retratoIds = {};
+      retratoNovo.forEach(function (x) { retratoIds[x.i] = true; });
+      if (retratoSalvo) {
+        registros = registros.filter(function (r) { return retratoIds[r.alunoId]; });
+      } else {
+        // Primeira gravação: quem foi marcado mas não está mais ativo entra no retrato com o nome do cadastro.
+        registros.forEach(function (r) {
+          if (retratoIds[r.alunoId]) return;
+          var a = Util.findById('Alunos', r.alunoId) || Util.findById('Professores', r.alunoId);
+          if (a) { retratoNovo.push({ i: a.ID, n: a.Nome, p: a.AlunoOrigemID !== undefined ? 1 : 0 }); retratoIds[a.ID] = true; }
+        });
+      }
 
       var config     = _getConfig();
       var ptPresenca = Number(config.PONTOS_PRESENCA) || 1;
@@ -584,13 +692,12 @@ var EscolaDominical = (function () {
       });
 
       // Salvar / atualizar ChamadasInfo (visitantes, oferta, observações da turma)
-      if (turmaInfo) {
-        var ti = turmaInfo;
-        var infoRows = _safeSheetObjects('ChamadasInfo');
+      if (turmaInfo || !retratoSalvo) {
         var existInfo = null;
-        infoRows.forEach(function(r) {
+        _safeSheetObjects('ChamadasInfo').forEach(function(r) {
           if (r.AulaID === aulaId && r.ClasseID === classeId) existInfo = r;
         });
+        var ti = turmaInfo || (existInfo ? { numVisitantes: existInfo.NumVisitantes, totalOferta: existInfo.TotalOferta, observacoes: existInfo.Observacoes } : {});
         var infoObj = {
           AulaID:        aulaId,
           ClasseID:      classeId,
@@ -598,7 +705,9 @@ var EscolaDominical = (function () {
           TotalOferta:   Number(ti.totalOferta)   || 0,
           Observacoes:   String(ti.observacoes    || '').trim(),
           LancadoPor:    sess.email,
-          CriadoEm:      Util.now()
+          CriadoEm:      Util.now(),
+          Matriculados:  retratoNovo.length,
+          RetratoJSON:   JSON.stringify(retratoNovo)
         };
         if (existInfo) {
           infoObj.ID = existInfo.ID;
@@ -610,6 +719,43 @@ var EscolaDominical = (function () {
       }
 
       return Util.ok({ mensagem: 'Chamada salva com sucesso.' });
+    });
+  }
+
+  // Histórico do trimestre em curso: cada aula com quantas turmas já lançaram a chamada.
+  // status: 'ok' (todas lançadas) | 'pendente' (falta alguma). Professor só conta as próprias turmas.
+  function getHistoricoChamadas(token, filtros) {
+    return withAuth(token, function (sess) {
+      filtros = filtros || {};
+      var ok = _classesDoProfessor(sess);
+      var aulas = _safeSheetObjects('Aulas');
+      aulas.forEach(function (a) { a._t = _dataAula(a).getTime(); });
+      aulas.sort(function (x, y) { return y._t - x._t; });
+      var tri = null;
+      if (filtros.trimestre && filtros.ano) tri = { trimestre: String(filtros.trimestre), ano: String(filtros.ano) };
+      else if (aulas.length) tri = { trimestre: String(aulas[0].Trimestre), ano: String(aulas[0].Ano || _dataAula(aulas[0]).getFullYear()) };
+      var classes = _safeSheetObjects('Classes').filter(function (c) { return _isAtivo(c.Ativo) && (ok === null || ok[String(c.ID)]); });
+      var feitas = {};
+      _safeSheetObjects('Chamadas').forEach(function (c) { (feitas[c.AulaID] = feitas[c.AulaID] || {})[c.ClasseID] = true; });
+      var hoje = _hojeBR();
+      var lista = aulas.filter(function (a) {
+        return tri && String(a.Trimestre) === tri.trimestre && String(a.Ano || _dataAula(a).getFullYear()) === tri.ano;
+      }).map(function (a) {
+        var f = feitas[a.ID] || {};
+        var lan = classes.filter(function (c) { return f[c.ID]; }).length;
+        var d = _dataAula(a);
+        return {
+          id: a.ID, numLicao: a.NumLicao, titulo: a.Titulo || '', data: a.Data, trimestre: a.Trimestre,
+          turmas: classes.length, lancadas: lan,
+          status: classes.length && lan >= classes.length ? 'ok' : 'pendente',
+          hoje: _mesmoDia(d, hoje), futura: d.getTime() > hoje.getTime() && !_mesmoDia(d, hoje)
+        };
+      });
+      return Util.ok({
+        trimestre: tri ? tri.trimestre : '', ano: tri ? tri.ano : '', aulas: lista,
+        pendentes: lista.filter(function (x) { return x.status === 'pendente' && !x.futura; }).length,
+        podeCriarAula: sess.perfil !== 'professor'
+      });
     });
   }
 
@@ -835,16 +981,26 @@ var EscolaDominical = (function () {
       var aula = Util.findById('Aulas', aulaId);
       if (!aula) return Util.err('Aula não encontrada.');
       var ok = _classesDoProfessor(sess);
-      var classes = _safeSheetObjects('Classes').filter(function (c) { return _isAtivo(c.Ativo) && (ok === null || ok[String(c.ID)]); });
-      var alunos  = _safeSheetObjects('Alunos').filter(function (a) { return _isAtivo(a.Ativo); });
-      var profs   = _safeSheetObjects('Professores').filter(function (p) { return _isAtivo(p.Ativo); });
       var chamadas = _safeSheetObjects('Chamadas').filter(function (c) { return c.AulaID === aulaId; });
       var infos = {};
       _safeSheetObjects('ChamadasInfo').forEach(function (i) { if (i.AulaID === aulaId) infos[i.ClasseID] = i; });
+      var lancadas = {};
+      chamadas.forEach(function (c) { lancadas[c.ClasseID] = true; });
+      Object.keys(infos).forEach(function (k) { lancadas[k] = true; });
+      // Turma já lançada entra sempre (mesmo se hoje estiver inativa); as demais só se ativas.
+      var classes = _safeSheetObjects('Classes').filter(function (c) {
+        return (lancadas[c.ID] || _isAtivo(c.Ativo)) && (ok === null || ok[String(c.ID)]);
+      });
+      var alunos  = _safeSheetObjects('Alunos').filter(function (a) { return _isAtivo(a.Ativo); });
+      var profs   = _safeSheetObjects('Professores').filter(function (p) { return _isAtivo(p.Ativo); });
 
       var geral = { matriculados: 0, presentes: 0, ausentes: 0, visitantes: 0, biblias: 0, revistas: 0, oferta: 0, turmasLancadas: 0 };
       var turmas = classes.map(function (c) {
-        var mat = alunos.filter(function (a) { return a.ClasseID === c.ID; }).length + profs.filter(function (p) { return p.ClasseID === c.ID; }).length;
+        // Aula lançada: matriculados = retrato gravado no lançamento (não muda com exclusão/inclusão/transferência).
+        var infoC = infos[c.ID] || null;
+        var retr  = _lerRetrato(infoC);
+        var mat = retr ? retr.length
+          : alunos.filter(function (a) { return a.ClasseID === c.ID; }).length + profs.filter(function (p) { return p.ClasseID === c.ID; }).length;
         var regs = chamadas.filter(function (x) { return x.ClasseID === c.ID; });
         var pres = 0, bib = 0, rev = 0;
         regs.forEach(function (x) {
@@ -1740,6 +1896,7 @@ var EscolaDominical = (function () {
     getChamada:             getChamada,
     salvarChamada:          salvarChamada,
     listarChamadasPorAula:  listarChamadasPorAula,
+    getHistoricoChamadas:   getHistoricoChamadas,
     getRankingAlunos:       getRankingAlunos,
     getRanking:             getRanking,
     getVisaoGeral:          getVisaoGeral,
@@ -1803,6 +1960,7 @@ function ed_editarAula(token, id, dados)               { return _safe_ed(functio
 function ed_excluirAula(token, id)                     { return _safe_ed(function(){ return EscolaDominical.excluirAula(token, id); }, []); }
 function ed_getChamada(token, aulaId, classeId)        { return _safe_ed(function(){ return EscolaDominical.getChamada(token, aulaId, classeId); }, []); }
 function ed_salvarChamada(token, aulaId, classeId, r, ti) { return _safe_ed(function(){ return EscolaDominical.salvarChamada(token, aulaId, classeId, r, ti); }, []); }
+function ed_getHistoricoChamadas(token, filtros)       { return _safe_ed(function(){ return EscolaDominical.getHistoricoChamadas(token, filtros); }, []); }
 function ed_listarChamadasPorAula(token, aulaId)       { return _safe_ed(function(){ return EscolaDominical.listarChamadasPorAula(token, aulaId); }, []); }
 function ed_getRankingAlunos(token, classeId)          { return _safe_ed(function(){ return EscolaDominical.getRankingAlunos(token, classeId); }, []); }
 function ed_getRanking(token, filtros)                  { return _safe_ed(function(){ return EscolaDominical.getRanking(token, filtros); }, []); }
