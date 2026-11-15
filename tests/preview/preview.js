@@ -94,7 +94,7 @@ async function irPara(page, rota, esperada) {
         await page.screenshot({ path: path.join(OUT, `membros-form-${tam}.png`) });
       }
       if (t.nome === 'escola-dominical') {
-        for (const sub of ['turmas', 'alunos']) {
+        for (const sub of ['turmas', 'alunos', 'professores', 'aulas']) {
           await page.evaluate((x) => edmIr(x), sub);
           await page.waitForTimeout(600);
           await page.screenshot({ path: path.join(OUT, `ebd-${sub}-${tam}.png`) });

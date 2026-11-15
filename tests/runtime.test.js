@@ -914,3 +914,9 @@ test('EBD: endpoints exigem sessão válida', () => {
   const env = freshEnv();
   assert.equal(env.run("ed_listarClasses('invalido')").success, false);
 });
+
+test('EBD: professor não pode editar nem excluir aulas, turmas, alunos ou professores', () => {
+  const env = envComPerfil('professor', { Usuarios: [COLS_USUARIOS], Aulas: [['ID', 'Data', 'Trimestre', 'NumLicao', 'Titulo', 'Ano', 'CriadoPor', 'CriadoEm'], ['a1', '15/11/2026', '4', '7', '', '2026', 'x', '']] });
+  ['ed_editarAula(\'tok\',\'a1\',{})', 'ed_excluirAula(\'tok\',\'a1\')', 'ed_criarClasse(\'tok\',{Nome:\'X\'})', 'ed_criarProfessor(\'tok\',{Nome:\'X\'})', 'ed_excluirAluno(\'tok\',\'z\')']
+    .forEach((c) => assert.equal(env.run(c).success, false, c));
+});

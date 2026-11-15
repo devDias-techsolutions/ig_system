@@ -86,3 +86,36 @@ test('EBD: secretaria cria turma e aluno pela tela e a busca filtra a lista', as
   assert.match(await page.innerText('#edm-alunos-lista'), /Nenhum aluno encontrado/);
   assert.deepEqual(erros, []);
 });
+
+test('EBD: secretaria cadastra aula e professor vinculado a usuário e turma', async () => {
+  const backend = criarBackend(); semear(backend);
+  const { env } = backend;
+  env.ctx.__u = { ID: 'u9', Nome: 'Paulo Prof', Email: 'prof@igreja.test', SenhaHash: sha(env, 'Prof#Teste1'), Perfil: 'professor', PrimeiroAcesso: false, Ativo: true, TokenRecupSenha: '', ExpirToken: '', CriadoEm: '01/11/2026 10:00:00', UltimoLogin: '' };
+  env.run("Util.insertRow('Usuarios', __u)");
+  const { page, erros } = await abrir(browser, backend);
+  await entrar(page, 'sec@igreja.test', 'Sec#Teste1', 'home');
+  await page.evaluate(() => navigateTo('escola-dominical'));
+  await esperarTela(page, 'escola-dominical');
+  await page.waitForSelector('.edm-atalhos');
+  await page.click('.edm-atalhos .hm-mod[data-tela="aulas"]');
+  await page.waitForSelector('.edm-fab');
+  await page.evaluate(() => edmFormAula());
+  await page.fill('#edm-u-num', '8');
+  await page.fill('#edm-u-data', '2026-11-22');
+  await page.evaluate(() => edmSalvarAula2());
+  await page.waitForSelector('.edm-card:has-text("Lição 8")', { timeout: 6000 });
+  assert.equal(backend.ss.getSheetByName('Aulas')._rows.length, 3);
+
+  await page.click('.edm-atalhos .hm-mod[data-tela="professores"]');
+  await page.waitForSelector('.edm-fab');
+  await page.evaluate(() => edmFormProfessor());
+  await page.fill('#edm-p-nome', 'Paulo Prof');
+  await page.selectOption('#edm-p-turma', 'c2');
+  await page.selectOption('#edm-p-usuario', 'u9');
+  await page.evaluate(() => edmSalvarProfessor());
+  await page.waitForSelector('.edm-card:has-text("Paulo Prof")', { timeout: 6000 });
+  assert.match(await page.innerText('.edm-card'), /Adultos · Com acesso/);
+  const p = backend.ss.getSheetByName('Professores')._rows[1];
+  assert.ok(p.includes('u9') && p.includes('c2'));
+  assert.deepEqual(erros, []);
+});
