@@ -121,6 +121,7 @@
 
 /* ── PERFIL COLORS ── */
 .perfil-admin      { background:rgba(255,94,122,.12); color:var(--danger); border:1px solid rgba(255,94,122,.25); }
+.perfil-professor { background:rgba(54,211,153,0.12); color:var(--success); border:1px solid rgba(54,211,153,.25); }
 .perfil-secretaria { background:rgba(155,124,255,0.12); color:var(--purple); border:1px solid rgba(155,124,255,.25); }
 
 /* ── MATRIZ DE PERMISSÕES ── */
@@ -200,7 +201,7 @@ function renderUsuarios() {
   var perfil = App.session.perfil || '';
   var isAdmin = perfil === 'admin';
   var isSec   = perfil === 'secretaria'; // secretaria pura (sem admin)
-  var perfilLabel = { admin: 'Admin', secretaria: 'Secretaria' }[perfil] || perfil;
+  var perfilLabel = { admin: 'Admin', secretaria: 'Secretaria', professor: 'Professor' }[perfil] || perfil;
   var _thIcon = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark' ? 'moon' : 'sun';
 
   // Ícone SVG inline por perfil — não depende de lucide.createIcons() para renderizar
@@ -239,6 +240,7 @@ function renderUsuarios() {
         '<button class="usr-filter-btn active" id="ufbtn-todos"      onclick="usrSetFiltro(\'todos\')">Todos</button>'+
         '<button class="usr-filter-btn"        id="ufbtn-admin"      onclick="usrSetFiltro(\'admin\')">Admin</button>'+
         '<button class="usr-filter-btn"        id="ufbtn-secretaria" onclick="usrSetFiltro(\'secretaria\')">Secretaria</button>'+
+        '<button class="usr-filter-btn"        id="ufbtn-professor"  onclick="usrSetFiltro(\'professor\')">Professor</button>'+
         '<button class="usr-filter-btn"        id="ufbtn-inativos"   onclick="usrSetFiltro(\'inativos\')">Inativos</button>'+
       '</div>'+
 
@@ -335,7 +337,8 @@ function _usrRenderLista() {
 
   var colors = {
     admin:      { bg:'rgba(255,94,122,.16)',    fg:'var(--usr-admin-fg)' },
-    secretaria: { bg:'rgba(155,124,255,.16)',   fg:'var(--usr-sec-fg)' }
+    secretaria: { bg:'rgba(155,124,255,.16)',   fg:'var(--usr-sec-fg)' },
+    professor:  { bg:'rgba(54,211,153,.16)',    fg:'var(--success)' }
   };
 
   var html = '';
@@ -343,7 +346,7 @@ function _usrRenderLista() {
     var ativo = u.Ativo === true || u.Ativo === 'TRUE' || u.Ativo === true;
     var cor   = colors[u.Perfil] || colors['secretaria'];
     var ini   = getInitials(u.Nome || '');
-    var perfilLabel = { admin:'Admin', secretaria:'Secretaria' }[u.Perfil] || u.Perfil;
+    var perfilLabel = { admin:'Admin', secretaria:'Secretaria', professor:'Professor' }[u.Perfil] || u.Perfil;
     var perfilClass = 'perfil-'+(u.Perfil||'secretaria');
 
     var isSelf = (u.Email || '').toLowerCase() === (App.session.email || '').toLowerCase();
@@ -415,6 +418,7 @@ function _modalNovoUsuario() {
           '<select id="nusr-perfil">'+
             '<option value="">Selecione o perfil</option>'+
             '<option value="secretaria">Secretaria</option>'+
+            '<option value="professor">Professor</option>'+
             '<option value="admin">Admin</option>'+
           '</select>'+
         '</div>'+
@@ -488,6 +492,7 @@ function _modalEditarUsuario() {
         '<div class="field"><label>Perfil *</label>'+
           '<select id="eusr-perfil">'+
             '<option value="secretaria">Secretaria</option>'+
+            '<option value="professor">Professor</option>'+
             '<option value="admin">Admin</option>'+
           '</select>'+
         '</div>'+
@@ -663,7 +668,7 @@ function usrSetTab(tab) {
         '<input type="text" class="usr-search" id="usr-busca" placeholder="Buscar por nome ou e-mail…" oninput="usrSetBusca(this.value)" value="'+_usrEsc(UsrState.busca||'')+'">'+
       '</div>'+
       '<div class="usr-filter-row">'+
-        ['todos','admin','secretaria','inativos'].map(function(f){
+        ['todos','admin','secretaria','professor','inativos'].map(function(f){
           var a = UsrState.filtro===f?' active':'';
           return '<button class="usr-filter-btn'+a+'" id="ufbtn-'+f+'" onclick="usrSetFiltro(\''+f+'\')">'+f.charAt(0).toUpperCase()+f.slice(1)+'</button>';
         }).join('')+

@@ -151,7 +151,7 @@ test('tema: sem rgba/hex do teal original solto fora da definição de variávei
 test('recorte: núcleo não referencia Escola Dominical nem Pré-cadastro', () => {
   const re = /EscolaDominical|escola-dominical|Escola Dominical|\bed_[a-z]|precadastro|pré-cadastro|Solicitac|'(?:Alunos|Classes|Professores|Aulas|Chamadas|PontosExtras)'|\bEBD\b|CPAD/i;
   // EscolaDominical.js é o módulo em migração (autocontido); o resto do núcleo não pode citá-lo.
-  const hits = findings(re).filter((h) => !/data:image/.test(h) && !/^EscolaDominical\.js:/.test(h));
+  const hits = findings(re).filter((h) => !/data:image/.test(h) && !/^(EscolaDominical\.js|_escola-dominical\.html):/.test(h));
   assert.deepEqual(hits, [], 'Referências a módulos fora do MVP:\n' + hits.join('\n'));
 });
 
@@ -166,7 +166,7 @@ test('recorte: módulos pendentes ficam em modulos-pendentes/, fora da raiz de d
     'pre-cadastro/membros-painel-solicitacoes.js',
   ];
   esperados.forEach((f) => assert.ok(fs.existsSync(path.join(ROOT, 'modulos-pendentes', f)), 'faltando modulos-pendentes/' + f));
-  ['_escola-dominical.html', '_precadastro.html', 'PreCadastro.js'].forEach((f) =>
+  ['_precadastro.html', 'PreCadastro.js'].forEach((f) =>
     assert.ok(!fs.existsSync(path.join(ROOT, f)), f + ' não pode estar na raiz'));
 });
 
@@ -217,10 +217,10 @@ test('rotas: o núcleo não cita módulo pelo nome (nada de rota "membros" fixa 
 });
 
 test('recorte: núcleo sem perfil professor e sem funcionalidades "Em breve"', () => {
+  // perfil professor foi reativado (EBD); continua proibido deixar "Em breve" no núcleo
   const hits = [
-    ...findings(/professor/i),
     ...findings(/Em breve|notif-dot/),
-  ].filter((h) => !/data:image/.test(h) && !/^EscolaDominical\.js:/.test(h));
+  ].filter((h) => !/data:image/.test(h));
   assert.deepEqual(hits, [], 'Itens fora do MVP encontrados:\n' + hits.join('\n'));
 });
 

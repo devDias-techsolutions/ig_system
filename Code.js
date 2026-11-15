@@ -12,7 +12,8 @@ var SHEETS = {
 
 var PERFIS = {
   ADMIN:      'admin',
-  SECRETARIA: 'secretaria'
+  SECRETARIA: 'secretaria',
+  PROFESSOR:  'professor'
 };
 var MEMBROS_FOTO_FOLDER_ID = ''; // fallback: usa/cria na raiz do Drive a pasta da aba Config (chave PASTA_FOTOS)
 

@@ -74,7 +74,7 @@ async function irPara(page, rota, esperada) {
   const telas = [
     { nome: 'login', rota: null, sessao: false },
     { nome: 'home', rota: 'home', sessao: true },
-    ...(process.env.SEM_MODULOS ? [] : [{ nome: 'membros', rota: 'membros', sessao: true }]),
+    ...(process.env.SEM_MODULOS ? [] : [{ nome: 'membros', rota: 'membros', sessao: true }, { nome: 'escola-dominical', rota: 'escola-dominical', sessao: true }]),
     { nome: 'usuarios', rota: 'usuarios', sessao: true },
   ];
   const tamanhos = { mobile: { width: 390, height: 844 }, desktop: { width: 1280, height: 800 } };

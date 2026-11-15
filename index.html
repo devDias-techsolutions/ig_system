@@ -1427,7 +1427,7 @@ var MODULOS = <?!= modulosJson ?>;
 // ── IDENTIDADE DA IGREJA (vem da aba Config, injetada pelo servidor) ──
 // { nome, nomeCurto, lema, corPrimaria, logoUrl }
 var IDENTIDADE = <?!= identidadeJson ?>;
-var PERFIL_LABEL = { admin: 'Administrador', secretaria: 'Secretaria' };
+var PERFIL_LABEL = { admin: 'Administrador', secretaria: 'Secretaria', professor: 'Professor' };
 
 // ── ROTEAMENTO ───────────────────────────────────────────
 // Rotas fixas do núcleo + uma rota por módulo ativo.
@@ -1746,7 +1746,7 @@ function updateTopnav(sessao) {
   var nome   = sessao.nome   || '';
   var email  = sessao.email  || '';
   var perfil = sessao.perfil || '';
-  var labels = { admin: 'Administrador', secretaria: 'Secretaria' };
+  var labels = { admin: 'Administrador', secretaria: 'Secretaria', professor: 'Professor' };
   var isSec  = perfil === 'admin' || perfil === 'secretaria';
 
   var el = function(id) { return document.getElementById(id); };

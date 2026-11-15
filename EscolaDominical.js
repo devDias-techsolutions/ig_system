@@ -510,7 +510,9 @@ var EscolaDominical = (function () {
         histMap[aid][aulaIdsTrim[c.AulaID]] = c.Presente === true || c.Presente === 'TRUE';
       });
 
-      return Util.ok({ alunos: resultado, extras: extras, jaLancada: chamadas.length > 0, turmaInfo: turmaInfo, historicoPresenca: histMap, totalLicoes: aulasTrimestre.length, trimestre: trimAtual });
+      var cfgPts = _getConfig();
+      var pontos = { presenca: Number(cfgPts.PONTOS_PRESENCA) || 1, biblia: Number(cfgPts.PONTOS_BIBLIA) || 2, revista: Number(cfgPts.PONTOS_REVISTA) || 2 };
+      return Util.ok({ alunos: resultado, extras: extras, pontos: pontos, jaLancada: chamadas.length > 0, turmaInfo: turmaInfo, historicoPresenca: histMap, totalLicoes: aulasTrimestre.length, trimestre: trimAtual });
     });
   }
 
@@ -1465,8 +1467,7 @@ function ed_setupAlertaTriggers(token) {
 }
 
 // ── MANIFESTO DO MÓDULO ──
-// ETAPA 1 (backend): definido mas AINDA NÃO REGISTRADO — a tela entra na etapa 2.
-// Para ligar: trocar a linha final por  __MANIFESTOS__.push(EscolaDominicalManifesto);
+// Registrado na etapa 2 (tela Chamada). Telas seguintes entram em _escola-dominical.html.
 var __MANIFESTOS__ = (typeof __MANIFESTOS__ === 'undefined') ? [] : __MANIFESTOS__;
 var EscolaDominicalManifesto = {
   id: 'escola-dominical',
@@ -1509,3 +1510,4 @@ var EscolaDominicalManifesto = {
     ];
   }
 };
+__MANIFESTOS__.push(EscolaDominicalManifesto);
