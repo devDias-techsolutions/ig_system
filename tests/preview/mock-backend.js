@@ -62,7 +62,7 @@ function serializar(perfil) {
       professores: [{ ID: 'p1', Nome: 'Paulo Prof', ClasseID: 'c1', UsuarioID: 'u9' }],
       aulas: [{ ID: 'a7', Data: '15/11/2026', Trimestre: '4', NumLicao: '7', Titulo: '' }, { ID: 'a6', Data: '08/11/2026', Trimestre: '4', NumLicao: '6', Titulo: '' }],
     }),
-    ed_getChamada: () => ok({
+    ed_getChamada: () => ok({ modo: 'completa',
       alunos: [
         ['Ana Beatriz Souza', 1, 1, 1], ['Bruno Henrique Lima', 1, 1, 0], ['Camila Ferreira', 1, 0, 0], ['Davi Nogueira', 0, 0, 0],
         ['Eduarda Martins', 1, 1, 1], ['Felipe Araújo', 1, 0, 1], ['Gabriela Rocha', 1, 1, 0],
@@ -71,6 +71,23 @@ function serializar(perfil) {
       jaLancada: false, turmaInfo: { numVisitantes: 3, totalOferta: 45, observacoes: '' },
     }),
     ed_salvarChamada: () => ok({ mensagem: 'Chamada salva com sucesso.' }),
+    ed_getConfigEbd: () => ok({ modoChamada: 'completa', modoRanking: 'presenca', pontos: { presenca: 1, biblia: 2, revista: 2 } }),
+    ed_salvarConfigEbd: () => ok({ mensagem: 'ok' }),
+    ed_getRanking: () => ok({ modo: 'presenca', ano: '2026', lista: [
+      { alunoId: 'al1', nome: 'Ana Beatriz Souza', classeId: 'c1', classeNome: 'Jovens', presencas: 14, totalAulas: 16, percentual: 88, pontos: 312 },
+      { alunoId: 'al2', nome: 'Bruno Henrique Lima', classeId: 'c1', classeNome: 'Jovens', presencas: 13, totalAulas: 16, percentual: 81, pontos: 281 },
+      { alunoId: 'al3', nome: 'Carla Dias', classeId: 'c2', classeNome: 'Adultos', presencas: 11, totalAulas: 16, percentual: 69, pontos: 190 },
+    ] }),
+    ed_getVisaoGeral: () => ok({
+      totais: { alunos: 86, turmas: 6, professores: 9 }, ultimaAula: { id: 'a7', numLicao: '7', data: '15/11/2026' },
+      semChamada: [{ id: 'c3', nome: 'Adolescentes' }, { id: 'c4', nome: 'Crianças' }],
+      presenca: { media: 82, recentes: [60, 72, 66, 80, 74, 88, 70, 82].map((p, i) => ({ aulaId: 'a' + i, numLicao: String(i + 1), data: '', percentual: p })) },
+      turmas: [{ id: 'c1', nome: 'Jovens', percentual: 86, alunos: 18 }, { id: 'c2', nome: 'Adultos', percentual: 74, alunos: 30 }, { id: 'c3', nome: 'Adolescentes', percentual: 68, alunos: 14 }],
+      ranking: { modo: 'presenca', top: [
+        { alunoId: 'al1', nome: 'Ana Beatriz Souza', classeId: 'c1', classeNome: 'Jovens', presencas: 14, percentual: 88, pontos: 312 },
+        { alunoId: 'al2', nome: 'Bruno Henrique Lima', classeId: 'c1', classeNome: 'Jovens', presencas: 13, percentual: 81, pontos: 281 },
+        { alunoId: 'al3', nome: 'Carla Dias', classeId: 'c2', classeNome: 'Adultos', presencas: 11, percentual: 69, pontos: 190 }] },
+    }),
     ed_criarAula: () => ok({ id: 'a8' }),
   };
   const atividade = [

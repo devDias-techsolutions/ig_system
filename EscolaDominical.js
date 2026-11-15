@@ -513,7 +513,7 @@ var EscolaDominical = (function () {
 
       var cfgPts = _getConfig();
       var pontos = { presenca: Number(cfgPts.PONTOS_PRESENCA) || 1, biblia: Number(cfgPts.PONTOS_BIBLIA) || 2, revista: Number(cfgPts.PONTOS_REVISTA) || 2 };
-      return Util.ok({ alunos: resultado, extras: extras, pontos: pontos, jaLancada: chamadas.length > 0, turmaInfo: turmaInfo, historicoPresenca: histMap, totalLicoes: aulasTrimestre.length, trimestre: trimAtual });
+      return Util.ok({ modo: _modoChamada(cfgPts), alunos: resultado, extras: extras, pontos: pontos, jaLancada: chamadas.length > 0, turmaInfo: turmaInfo, historicoPresenca: histMap, totalLicoes: aulasTrimestre.length, trimestre: trimAtual });
     });
   }
 
@@ -537,11 +537,21 @@ var EscolaDominical = (function () {
         }
       });
 
+      var modoSimples = _modoChamada(config) === 'presenca';
+
       registros.forEach(function (reg) {
         var presente = reg.presente === true;
         var biblia   = presente && (reg.biblia   === true);
         var revista  = presente && (reg.revista  === true);
         var extras   = presente ? (reg.pontosExtras || []) : [];
+        if (modoSimples) {
+          // Modo "somente presença": não mexe em bíblia/revista/extras já lançados antes (modo completo).
+          var antes = chamadaMap[reg.alunoId];
+          biblia  = !!(presente && antes && (antes.Biblia  === true || antes.Biblia  === 'TRUE'));
+          revista = !!(presente && antes && (antes.Revista === true || antes.Revista === 'TRUE'));
+          extras  = [];
+          if (presente && antes && antes.PontosExtrasJSON) { try { extras = JSON.parse(antes.PontosExtrasJSON) || []; } catch (e) { extras = []; } }
+        }
         var ptExtras = 0;
         extras.forEach(function (e) { ptExtras += Number(e.pontos) || 0; });
         var total = (presente ? ptPresenca : 0) + (biblia ? ptBiblia : 0) + (revista ? ptRevista : 0) + ptExtras;
@@ -690,6 +700,187 @@ var EscolaDominical = (function () {
         return EXCLUIR_EXATOS.indexOf(nome) === -1;
       });
       return Util.ok(rows);
+    });
+  }
+
+
+  // ══════════════════════════════════════════
+  //  CONFIGURAÇÃO DO MÓDULO (modos de chamada e ranking)
+  // ══════════════════════════════════════════
+
+  // EBD_MODO_CHAMADA: 'presenca' (padrão) | 'completa' (bíblia, revista e pontos extras por aluno)
+  // EBD_MODO_RANKING: 'presenca' (padrão) | 'pontos'   (soma de presença + bíblia + revista + extras)
+  function _modoChamada(cfg) { return String((cfg || _getConfig()).EBD_MODO_CHAMADA || '').trim().toLowerCase() === 'completa' ? 'completa' : 'presenca'; }
+  function _modoRanking(cfg) { return String((cfg || _getConfig()).EBD_MODO_RANKING || '').trim().toLowerCase() === 'pontos' ? 'pontos' : 'presenca'; }
+
+  function _setConfig(chave, valor) {
+    var ultima = null;
+    _safeSheetObjects('Config').forEach(function (r) { if (String(r.Chave).trim() === chave) ultima = r; });
+    if (ultima) {
+      Util.updateRow('Config', ultima._rowIndex, { Chave: ultima.Chave, Valor: valor, Descricao: ultima.Descricao, AtualizadoEm: Util.now() });
+    } else {
+      Util.insertRow('Config', { Chave: chave, Valor: valor, Descricao: '', AtualizadoEm: Util.now() });
+    }
+  }
+
+  function getConfigEbd(token) {
+    return withAuth(token, function (sess) {
+      var c = _getConfig();
+      return Util.ok({
+        modoChamada: _modoChamada(c),
+        modoRanking: _modoRanking(c),
+        pontos: { presenca: Number(c.PONTOS_PRESENCA) || 1, biblia: Number(c.PONTOS_BIBLIA) || 2, revista: Number(c.PONTOS_REVISTA) || 2 }
+      });
+    });
+  }
+
+  function salvarConfigEbd(token, dados) {
+    return withAuth(token, function (sess) {
+      if (sess.perfil === 'professor') return Util.err('Sem permissão.');
+      dados = dados || {};
+      if (dados.modoChamada !== undefined) {
+        if (['presenca', 'completa'].indexOf(dados.modoChamada) === -1) return Util.err('Modo de chamada inválido.');
+        _setConfig('EBD_MODO_CHAMADA', dados.modoChamada);
+      }
+      if (dados.modoRanking !== undefined) {
+        if (['presenca', 'pontos'].indexOf(dados.modoRanking) === -1) return Util.err('Modo de ranking inválido.');
+        _setConfig('EBD_MODO_RANKING', dados.modoRanking);
+      }
+      if (dados.pontos) {
+        var mapa = { presenca: 'PONTOS_PRESENCA', biblia: 'PONTOS_BIBLIA', revista: 'PONTOS_REVISTA' };
+        for (var k in mapa) {
+          if (dados.pontos[k] === undefined) continue;
+          var n = Number(dados.pontos[k]);
+          if (isNaN(n) || n < 0 || n > 100) return Util.err('Pontuação inválida (use de 0 a 100).');
+          _setConfig(mapa[k], n);
+        }
+      }
+      return Util.ok({ mensagem: 'Configurações salvas.' });
+    });
+  }
+
+  // ══════════════════════════════════════════
+  //  RANKING E VISÃO GERAL
+  // ══════════════════════════════════════════
+
+  function _dataAula(a) {
+    var d = _parseDateBR(a.Data);
+    if (!d || isNaN(d.getTime()) || d.getTime() === 0) d = _parseDateBR(a.CriadoEm);
+    return d;
+  }
+  function _presente(c) { return c.Presente === true || c.Presente === 'TRUE' || c.Presente === 1; }
+
+  // filtros: { classeId, trimestre, ano, modo }  → alunos ordenados com presenças, % e pontos
+  function _calcularRanking(sess, filtros) {
+    filtros = filtros || {};
+    var cfg  = _getConfig();
+    var modo = filtros.modo === 'pontos' || filtros.modo === 'presenca' ? filtros.modo : _modoRanking(cfg);
+    var ok   = _classesDoProfessor(sess);
+    var ano  = String(filtros.ano || new Date().getFullYear());
+
+    var aulasOk = {};
+    _safeSheetObjects('Aulas').forEach(function (a) {
+      if (String(a.Ano || _dataAula(a).getFullYear()) !== ano) return;
+      if (filtros.trimestre && String(a.Trimestre) !== String(filtros.trimestre)) return;
+      aulasOk[a.ID] = true;
+    });
+
+    var alunos = _safeSheetObjects('Alunos').filter(function (r) {
+      if (!_isAtivo(r.Ativo)) return false;
+      if (filtros.classeId && r.ClasseID !== filtros.classeId) return false;
+      if (ok !== null && !ok[String(r.ClasseID)]) return false;
+      return true;
+    });
+    var porAluno = {}, aulasDaTurma = {};
+    _safeSheetObjects('Chamadas').forEach(function (c) {
+      if (!aulasOk[c.AulaID]) return;
+      (aulasDaTurma[c.ClasseID] = aulasDaTurma[c.ClasseID] || {})[c.AulaID] = true;
+      var x = porAluno[c.AlunoID] = porAluno[c.AlunoID] || { presencas: 0, pontos: 0 };
+      if (_presente(c)) x.presencas++;
+      x.pontos += Number(c.TotalPontos) || 0;
+    });
+    var nomesTurma = {};
+    _safeSheetObjects('Classes').forEach(function (c) { nomesTurma[c.ID] = c.Nome; });
+    var lista = alunos.map(function (a) {
+      var x = porAluno[a.ID] || { presencas: 0, pontos: 0 };
+      var totalAulas = Object.keys(aulasDaTurma[a.ClasseID] || {}).length;
+      return {
+        alunoId: a.ID, nome: a.Nome, classeId: a.ClasseID, classeNome: nomesTurma[a.ClasseID] || '',
+        presencas: x.presencas, totalAulas: totalAulas,
+        percentual: totalAulas ? Math.round((x.presencas / totalAulas) * 100) : 0,
+        pontos: x.pontos
+      };
+    });
+    lista.sort(function (a, b) {
+      var d = modo === 'pontos'
+        ? (b.pontos - a.pontos) || (b.presencas - a.presencas)
+        : (b.presencas - a.presencas) || (b.percentual - a.percentual) || (b.pontos - a.pontos);
+      return d || String(a.nome).localeCompare(String(b.nome));
+    });
+    return { modo: modo, ano: ano, lista: lista };
+  }
+
+  function getRanking(token, filtros) {
+    return withAuth(token, function (sess) {
+      return Util.ok(_calcularRanking(sess, filtros));
+    });
+  }
+
+  function getVisaoGeral(token) {
+    return withAuth(token, function (sess) {
+      var ok = _classesDoProfessor(sess);
+      var classes = _safeSheetObjects('Classes').filter(function (r) { return _isAtivo(r.Ativo) && (ok === null || ok[String(r.ID)]); });
+      var alunos  = _safeSheetObjects('Alunos').filter(function (r) { return _isAtivo(r.Ativo) && (ok === null || ok[String(r.ClasseID)]); });
+      var profs   = _safeSheetObjects('Professores').filter(function (r) { return _isAtivo(r.Ativo); });
+      var aulas   = _safeSheetObjects('Aulas');
+      aulas.forEach(function (a) { a._t = _dataAula(a).getTime(); });
+      aulas.sort(function (x, y) { return y._t - x._t; });
+
+      var chamadas = _safeSheetObjects('Chamadas').filter(function (c) { return ok === null || ok[String(c.ClasseID)]; });
+      var porAula = {};
+      chamadas.forEach(function (c) {
+        var x = porAula[c.AulaID] = porAula[c.AulaID] || { total: 0, pres: 0, turmas: {} };
+        x.total++; if (_presente(c)) x.pres++; x.turmas[c.ClasseID] = true;
+      });
+      // últimas 8 aulas que já tiveram chamada, da mais antiga para a mais recente
+      var recentes = aulas.filter(function (a) { return porAula[a.ID]; }).slice(0, 8).reverse().map(function (a) {
+        var x = porAula[a.ID];
+        return { aulaId: a.ID, numLicao: a.NumLicao, data: a.Data, percentual: x.total ? Math.round((x.pres / x.total) * 100) : 0 };
+      });
+      var media = recentes.length ? Math.round(recentes.reduce(function (s2, x) { return s2 + x.percentual; }, 0) / recentes.length) : 0;
+
+      // aula mais recente (até hoje) e turmas que ainda não lançaram chamada nela
+      var hoje = new Date().getTime() + 86400000;
+      var ultima = null;
+      for (var i = 0; i < aulas.length; i++) { if (aulas[i]._t <= hoje) { ultima = aulas[i]; break; } }
+      var semChamada = [];
+      if (ultima) {
+        var feitas = (porAula[ultima.ID] && porAula[ultima.ID].turmas) || {};
+        semChamada = classes.filter(function (c) { return !feitas[c.ID]; }).map(function (c) { return { id: c.ID, nome: c.Nome }; });
+      }
+
+      // presença por turma (últimas 8 aulas com chamada)
+      var idsRecentes = {}; recentes.forEach(function (x) { idsRecentes[x.aulaId] = true; });
+      var porTurma = {};
+      chamadas.forEach(function (c) {
+        if (!idsRecentes[c.AulaID]) return;
+        var t = porTurma[c.ClasseID] = porTurma[c.ClasseID] || { total: 0, pres: 0 };
+        t.total++; if (_presente(c)) t.pres++;
+      });
+      var turmas = classes.map(function (c) {
+        var t = porTurma[c.ID] || { total: 0, pres: 0 };
+        return { id: c.ID, nome: c.Nome, percentual: t.total ? Math.round((t.pres / t.total) * 100) : 0, alunos: alunos.filter(function (a) { return a.ClasseID === c.ID; }).length };
+      });
+
+      var rk = _calcularRanking(sess, {});
+      return Util.ok({
+        totais: { alunos: alunos.length, turmas: classes.length, professores: profs.length },
+        ultimaAula: ultima ? { id: ultima.ID, numLicao: ultima.NumLicao, data: ultima.Data } : null,
+        semChamada: semChamada,
+        presenca: { media: media, recentes: recentes },
+        turmas: turmas,
+        ranking: { modo: rk.modo, top: rk.lista.slice(0, 3) }
+      });
     });
   }
 
@@ -1379,6 +1570,10 @@ var EscolaDominical = (function () {
     salvarChamada:          salvarChamada,
     listarChamadasPorAula:  listarChamadasPorAula,
     getRankingAlunos:       getRankingAlunos,
+    getRanking:             getRanking,
+    getVisaoGeral:          getVisaoGeral,
+    getConfigEbd:           getConfigEbd,
+    salvarConfigEbd:        salvarConfigEbd,
     getEstatisticasGerais:  getEstatisticasGerais,
     getPontosExtras:        getPontosExtras,
     getResumoClasses:       getResumoClasses,
@@ -1434,6 +1629,10 @@ function ed_getChamada(token, aulaId, classeId)        { return _safe_ed(functio
 function ed_salvarChamada(token, aulaId, classeId, r, ti) { return _safe_ed(function(){ return EscolaDominical.salvarChamada(token, aulaId, classeId, r, ti); }, []); }
 function ed_listarChamadasPorAula(token, aulaId)       { return _safe_ed(function(){ return EscolaDominical.listarChamadasPorAula(token, aulaId); }, []); }
 function ed_getRankingAlunos(token, classeId)          { return _safe_ed(function(){ return EscolaDominical.getRankingAlunos(token, classeId); }, []); }
+function ed_getRanking(token, filtros)                  { return _safe_ed(function(){ return EscolaDominical.getRanking(token, filtros); }, []); }
+function ed_getVisaoGeral(token)                        { return _safe_ed(function(){ return EscolaDominical.getVisaoGeral(token); }, []); }
+function ed_getConfigEbd(token)                         { return _safe_ed(function(){ return EscolaDominical.getConfigEbd(token); }, []); }
+function ed_salvarConfigEbd(token, dados)               { return _safe_ed(function(){ return EscolaDominical.salvarConfigEbd(token, dados); }, []); }
 function ed_getEstatisticasGerais(token)               { return _safe_ed(function(){ return EscolaDominical.getEstatisticasGerais(token); }, []); }
 function ed_getPontosExtras(token)                     { return _safe_ed(function(){ return EscolaDominical.getPontosExtras(token); }, []); }
 function ed_getResumoClasses(token)                    { return _safe_ed(function(){ return EscolaDominical.getResumoClasses(token); }, []); }
