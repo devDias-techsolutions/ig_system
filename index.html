@@ -467,30 +467,18 @@ body::after {
 }
 
 /* ── CONFIRM MODAL (substitui window.confirm) ── */
-.confirm-box {
-  max-width: 380px; text-align: center;
-  padding: 32px 28px 28px;
-}
+.confirm-box { max-width: 380px; text-align: center; padding: var(--sp-5); }
 .confirm-icon {
-  width: 52px; height: 52px; border-radius: 50%;
+  width: 48px; height: 48px; border-radius: 50%; margin: 0 auto var(--sp-3);
   display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 16px;
   background: var(--teal-dim); color: var(--teal);
 }
 .confirm-icon.danger { background: var(--danger-dim); color: var(--danger); }
-.confirm-icon i { width: 24px; height: 24px; }
-.confirm-title {
-  font-size: 17px; font-weight: 800; color: var(--text);
-  margin-bottom: 8px;
-}
-.confirm-message {
-  font-size: 13.5px; color: var(--text-muted); line-height: 1.5;
-  margin-bottom: 24px;
-}
-.confirm-actions {
-  display: flex; gap: 10px;
-}
-.confirm-actions button { flex: 1; }
+.confirm-icon i { width: 22px; height: 22px; }
+.confirm-title { font-size: var(--fs-md); font-weight: 800; color: var(--text); margin-bottom: var(--sp-2); }
+.confirm-message { font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.5; margin-bottom: var(--sp-4); }
+.confirm-actions { display: flex; gap: var(--sp-2); }
+.confirm-actions .btn { flex: 1; }
 
 /* ══ KPI — componente compartilhado (Início, Membros, módulos) ══ */
 .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-3); }
@@ -1866,8 +1854,8 @@ function showConfirm(message, opts) {
         '<div class="confirm-title">' + (opts.title || 'Confirmar ação') + '</div>' +
         '<div class="confirm-message">' + message + '</div>' +
         '<div class="confirm-actions">' +
-          '<button class="btn-secondary" id="confirm-cancel-btn">' + (opts.cancelLabel || 'Cancelar') + '</button>' +
-          '<button class="' + (danger ? 'btn-danger' : 'btn-primary') + '" id="confirm-ok-btn">' + (opts.confirmLabel || 'Confirmar') + '</button>' +
+          '<button class="btn btn-secondary" id="confirm-cancel-btn">' + (opts.cancelLabel || 'Cancelar') + '</button>' +
+          '<button class="btn ' + (danger ? 'btn-danger' : 'btn-primary') + '" id="confirm-ok-btn">' + (opts.confirmLabel || 'Confirmar') + '</button>' +
         '</div>' +
       '</div>';
 

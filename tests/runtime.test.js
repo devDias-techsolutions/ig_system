@@ -992,3 +992,36 @@ test('EBD relatório da aula: bloco por turma + consolidado (matriculados = alun
   assert.deepEqual([r.data.geral.matriculados, r.data.geral.presentes, r.data.geral.oferta, r.data.geral.turmasLancadas], [3, 2, 30.5, 1]);
   assert.equal(env.run("ed_getRelatorioAula('tok', 'zz')").success, false);
 });
+
+test('EBD demo: só admin; popular exige base vazia; limpar zera; 5 turmas, 4–15 alunos, professores 2/2/2/1/1 e aula de hoje sem chamada', () => {
+  const sec = envComPerfil('secretaria', ABAS_EBD());
+  assert.equal(sec.run("ed_popularDemo('tok')").success, false);
+  assert.equal(sec.run("ed_limparBase('tok')").success, false);
+  const env = envComPerfil('admin', ABAS_EBD());
+  assert.equal(env.run("ed_popularDemo('tok')").success, false, 'base com dados não é sobrescrita');
+  assert.equal(env.run("ed_limparBase('tok')").success, true);
+  for (const aba of ['Classes', 'Alunos', 'Professores', 'Aulas', 'Chamadas', 'ChamadasInfo']) {
+    assert.equal(env.run(`Util.sheetToObjects('${aba}').length`), 0, aba);
+  }
+  const r = env.run("ed_popularDemo('tok')");
+  assert.equal(r.success, true, JSON.stringify(r));
+  const classes = JSON.parse(env.run("JSON.stringify(Util.sheetToObjects('Classes'))"));
+  const alunos = JSON.parse(env.run("JSON.stringify(Util.sheetToObjects('Alunos'))"));
+  const profs = JSON.parse(env.run("JSON.stringify(Util.sheetToObjects('Professores'))"));
+  const aulas = JSON.parse(env.run("JSON.stringify(Util.sheetToObjects('Aulas'))"));
+  const chamadas = JSON.parse(env.run("JSON.stringify(Util.sheetToObjects('Chamadas'))"));
+  assert.equal(classes.length, 5);
+  classes.forEach((c) => {
+    const n = alunos.filter((a) => a.ClasseID === c.ID).length;
+    assert.ok(n >= 4 && n <= 15, `${c.Nome}: ${n} alunos`);
+  });
+  const porTurma = classes.map((c) => profs.filter((p) => p.ClasseID === c.ID).length).sort();
+  assert.deepEqual(porTurma, [1, 1, 2, 2, 2]);
+  assert.equal(aulas.length, 13);
+  const idsComChamada = new Set(chamadas.map((c) => c.AulaID));
+  assert.equal(aulas.filter((a) => !idsComChamada.has(a.ID)).length, 1, 'só a aula de hoje fica sem chamada');
+  assert.equal(new Set(aulas.map((a) => a.Trimestre + '-' + a.NumLicao + '-' + a.Ano)).size, 13, 'sem lição duplicada');
+  assert.equal(env.run("ed_popularDemo('tok')").success, false, 'segunda vez recusa');
+  assert.equal(env.run("ed_limparBase('tok')").success, true);
+  assert.equal(env.run("Util.sheetToObjects('Alunos').length"), 0);
+});
