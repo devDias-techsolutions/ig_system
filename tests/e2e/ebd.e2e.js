@@ -11,8 +11,8 @@ after(async () => { await browser.close(); });
 // Chamada: histórico do trimestre → turmas da aula → chamada da turma
 async function abrirChamada(page, turma) {
   await page.click('.edm-atalhos .hm-mod[data-tela="chamada"]');
-  await page.waitForSelector('.edm-card:has-text("Lição 7")', { timeout: 6000 });
-  await page.click('.edm-card:has-text("Lição 7")');
+  await page.waitForSelector('.edm-aulabtn:has-text("Lição 7")', { timeout: 6000 });
+  await page.click('.edm-aulabtn:has-text("Lição 7")');
   await page.waitForSelector(`.edm-card:has-text("${turma}")`, { timeout: 6000 });
   await page.click(`.edm-card:has-text("${turma}")`);
   await page.waitForSelector('#edm-lista .edm-row', { timeout: 6000 });
@@ -80,9 +80,9 @@ test('EBD: professor entra direto na Escola Dominical e só vê a turma vinculad
   env.run("Util.insertRow('Professores', __p)");
   const { page, erros } = await abrir(browser, backend);
   await entrar(page, 'prof@igreja.test', 'Prof#Teste1', 'escola-dominical');
-  await page.waitForSelector('.edm-card:has-text("Lição 7")', { timeout: 6000 });
+  await page.waitForSelector('.edm-aulabtn:has-text("Lição 7")', { timeout: 6000 });
   assert.equal(await page.locator('.edm-nova').count(), 0, 'professor não cadastra aula');
-  await page.click('.edm-card:has-text("Lição 7")');
+  await page.click('.edm-aulabtn:has-text("Lição 7")');
   await page.waitForSelector('.edm-card:has-text("Adultos")', { timeout: 6000 });
   assert.equal(await page.locator('.edm-card:has-text("Jovens")').count(), 0);
   assert.deepEqual(await page.$$eval('.edm-atalhos .hm-mod', (b) => b.map((x) => x.getAttribute('data-tela'))), ['visao', 'chamada', 'alunos', 'relatorios', 'ranking']);
@@ -130,14 +130,21 @@ test('EBD: secretaria cadastra aula e professor vinculado a usuário e turma', a
   await page.evaluate(() => navigateTo('escola-dominical'));
   await esperarTela(page, 'escola-dominical');
   await page.waitForSelector('.edm-atalhos');
-  await page.click('.edm-atalhos .hm-mod[data-tela="aulas"]');
-  await page.waitForSelector('.edm-fab');
-  await page.evaluate(() => edmFormAula());
+  await page.click('.edm-atalhos .hm-mod[data-tela="chamada"]');
+  await page.waitForSelector('.edm-nova', { timeout: 6000 });
+  assert.equal(await page.locator('.edm-atalhos .hm-mod[data-tela="aulas"]').count(), 0, 'Aulas e Chamada são uma aba só');
+  await page.click('.edm-nova');
   await page.fill('#edm-u-num', '8');
   await page.fill('#edm-u-data', '2026-11-22');
   await page.evaluate(() => edmSalvarAula2());
-  await page.waitForSelector('.edm-card:has-text("Lição 8")', { timeout: 6000 });
+  await page.waitForSelector('.edm-aulabtn:has-text("Lição 8")', { timeout: 6000 });
   assert.equal(backend.ss.getSheetByName('Aulas')._rows.length, 3);
+  // menu ⋮: editar e excluir a aula
+  await page.click('.edm-aulacard:has-text("Lição 8") .edm-kebab');
+  await page.click('#modal-edm-form button:has-text("Editar aula")');
+  await page.fill('#edm-u-titulo', 'Fé em ação');
+  await page.evaluate(() => edmSalvarAula2());
+  await page.waitForSelector('.edm-aulabtn:has-text("Fé em ação")', { timeout: 6000 });
 
   await page.click('.edm-atalhos .hm-mod[data-tela="professores"]');
   await page.waitForSelector('.edm-fab');
@@ -226,9 +233,9 @@ test('EBD: histórico do trimestre mostra OK/! por aula; aula lista turmas; lan�
   await page.waitForSelector('.edm-atalhos');
   await page.click('.edm-atalhos .hm-mod[data-tela="chamada"]');
   await page.waitForSelector('.edm-nova', { timeout: 6000 }); // cadastro de aula no topo
-  assert.match(await page.innerText('.edm-card:has-text("Lição 7")'), /OK/);
-  assert.match(await page.innerText('.edm-card:has-text("Lição 6")'), /!/);
-  await page.click('.edm-card:has-text("Lição 7")');
+  assert.match(await page.innerText('.edm-aulacard:has-text("Lição 7")'), /OK/);
+  assert.match(await page.innerText('.edm-aulacard:has-text("Lição 6")'), /!/);
+  await page.click('.edm-aulabtn:has-text("Lição 7")');
   await page.waitForSelector('.edm-card:has-text("Adultos")', { timeout: 6000 });
   assert.equal(await page.locator('.edm-st-ok').count(), 2);
   await page.click('.edm-card:has-text("Jovens")');
@@ -238,5 +245,26 @@ test('EBD: histórico do trimestre mostra OK/! por aula; aula lista turmas; lan�
   await page.click('.edm-leit button');
   await page.waitForSelector('#edm-salvar');
   assert.equal(await page.locator('.edm-tg:not([disabled])').count() > 0, true);
+  assert.deepEqual(erros, []);
+});
+
+test('EBD: aba Alunos mostra a linha de frequência do trimestre de cada aluno', async () => {
+  const backend = criarBackend(); semear(backend);
+  const { env } = backend;
+  const ins = (aba, obj) => { env.ctx.__o = obj; env.run(`Util.insertRow(${JSON.stringify(aba)}, __o)`); };
+  ins('Chamadas', { ID: 'x1', AulaID: 'a1', ClasseID: 'c1', AlunoID: 'al1', Presente: true, PontosExtrasJSON: '[]', TotalPontos: 1 });
+  ins('Chamadas', { ID: 'x2', AulaID: 'a1', ClasseID: 'c1', AlunoID: 'al2', Presente: false, PontosExtrasJSON: '[]', TotalPontos: 0 });
+  const { page, erros } = await abrir(browser, backend);
+  await entrar(page, 'sec@igreja.test', 'Sec#Teste1', 'home');
+  await page.evaluate(() => navigateTo('escola-dominical'));
+  await esperarTela(page, 'escola-dominical');
+  await page.waitForSelector('.edm-atalhos');
+  await page.click('.edm-atalhos .hm-mod[data-tela="alunos"]');
+  await page.waitForSelector('.edm-tl', { timeout: 6000 });
+  const ana = await page.innerText('.edm-card:has-text("Ana Souza")');
+  assert.match(ana, /1\/1\s*·\s*100%/);
+  assert.equal(await page.locator('.edm-card:has-text("Ana Souza") .edm-tl-dot.p').count(), 1);
+  assert.equal(await page.locator('.edm-card:has-text("Bruno Lima") .edm-tl-dot.a').count(), 1);
+  assert.equal(await page.locator('.edm-card:has-text("Carla Dias") .edm-tl-dot.p, .edm-card:has-text("Carla Dias") .edm-tl-dot.a').count(), 0, 'sem registro = bolinha tracejada');
   assert.deepEqual(erros, []);
 });

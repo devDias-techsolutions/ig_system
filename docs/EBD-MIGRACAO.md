@@ -63,3 +63,7 @@ Origem: `modulos-pendentes/escola-dominical/` (legado, mantido como referência)
 ## Frequência do aluno no trimestre (Chamada)
 - Abaixo de cada aluno/professor na chamada há uma linha com uma bolinha por lição do trimestre (✓ presente, ✕ ausente, tracejada = sem registro) e o resumo `presentes/lançadas · %` (percentual sobre as lições já registradas). A lição aberta é destacada e acompanha a marcação feita na hora.
 - Dados: `ed_getChamada` devolve `historicoPresenca` (por aluno e nº da lição), `licoes` (nºs das aulas do trimestre) e `totalLicoes`. Render em `_edmTimeline` (`_escola-dominical.html`).
+
+## Aulas e Chamada: uma aba só (como no original)
+- Não existe mais a aba "Aulas": o cadastro de aulas está na própria aba **Aulas e Chamada** — botão "Nova aula" no topo e menu ⋮ em cada aula (editar/excluir, só admin/secretaria).
+- A linha de frequência do trimestre (bolinhas por lição + resumo + barra) aparece na **Chamada** (a lição aberta acompanha a marcação) e na aba **Alunos** (`ed_getFrequenciaTrimestre`, `_edmLinhaFreq`).

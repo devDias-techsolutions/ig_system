@@ -760,6 +760,31 @@ var EscolaDominical = (function () {
     });
   }
 
+  // Frequência de todos os alunos no trimestre em curso (para a linha de frequência da tela Alunos).
+  function getFrequenciaTrimestre(token) {
+    return withAuth(token, function (sess) {
+      var ok = _classesDoProfessor(sess);
+      var aulas = _safeSheetObjects('Aulas');
+      aulas.forEach(function (a) { a._t = _dataAula(a).getTime(); });
+      aulas.sort(function (x, y) { return y._t - x._t; });
+      if (!aulas.length) return Util.ok({ trimestre: '', ano: '', licoes: [], hist: {} });
+      var tri = String(aulas[0].Trimestre), ano = String(aulas[0].Ano || _dataAula(aulas[0]).getFullYear());
+      var porId = {}, licoes = [];
+      aulas.forEach(function (a) {
+        if (String(a.Trimestre) !== tri || String(a.Ano || _dataAula(a).getFullYear()) !== ano) return;
+        var n = Number(a.NumLicao) || 0; porId[a.ID] = n; licoes.push(n);
+      });
+      licoes.sort(function (x, y) { return x - y; });
+      var hist = {};
+      _safeSheetObjects('Chamadas').forEach(function (c) {
+        if (porId[c.AulaID] === undefined) return;
+        if (ok !== null && !ok[String(c.ClasseID)]) return;
+        (hist[c.AlunoID] = hist[c.AlunoID] || {})[porId[c.AulaID]] = _presente(c);
+      });
+      return Util.ok({ trimestre: tri, ano: ano, licoes: licoes, hist: hist });
+    });
+  }
+
   function listarChamadasPorAula(token, aulaId) {
     return withAuth(token, function(sess) {
       var ok = _classesDoProfessor(sess);
@@ -1898,6 +1923,7 @@ var EscolaDominical = (function () {
     salvarChamada:          salvarChamada,
     listarChamadasPorAula:  listarChamadasPorAula,
     getHistoricoChamadas:   getHistoricoChamadas,
+    getFrequenciaTrimestre: getFrequenciaTrimestre,
     getRankingAlunos:       getRankingAlunos,
     getRanking:             getRanking,
     getVisaoGeral:          getVisaoGeral,
@@ -1961,6 +1987,7 @@ function ed_editarAula(token, id, dados)               { return _safe_ed(functio
 function ed_excluirAula(token, id)                     { return _safe_ed(function(){ return EscolaDominical.excluirAula(token, id); }, []); }
 function ed_getChamada(token, aulaId, classeId)        { return _safe_ed(function(){ return EscolaDominical.getChamada(token, aulaId, classeId); }, []); }
 function ed_salvarChamada(token, aulaId, classeId, r, ti) { return _safe_ed(function(){ return EscolaDominical.salvarChamada(token, aulaId, classeId, r, ti); }, []); }
+function ed_getFrequenciaTrimestre(token)             { return _safe_ed(function(){ return EscolaDominical.getFrequenciaTrimestre(token); }, []); }
 function ed_getHistoricoChamadas(token, filtros)       { return _safe_ed(function(){ return EscolaDominical.getHistoricoChamadas(token, filtros); }, []); }
 function ed_listarChamadasPorAula(token, aulaId)       { return _safe_ed(function(){ return EscolaDominical.listarChamadasPorAula(token, aulaId); }, []); }
 function ed_getRankingAlunos(token, classeId)          { return _safe_ed(function(){ return EscolaDominical.getRankingAlunos(token, classeId); }, []); }
