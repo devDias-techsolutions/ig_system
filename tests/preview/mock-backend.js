@@ -52,6 +52,20 @@ function serializar(perfil) {
     mb_getFotoMembro: () => ({ success: false, error: 'sem foto' }),
     usr_listar: () => ok(USUARIOS),
     usr_listarPermissoes: () => ({ success: false, error: 'sem matriz salva' }),
+    ed_getDadosIniciais: () => ok({
+      classes: [{ ID: 'c1', Nome: 'Jovens' }, { ID: 'c2', Nome: 'Adultos' }],
+      aulas: [{ ID: 'a7', Data: '15/11/2026', Trimestre: '4', NumLicao: '7', Titulo: '' }, { ID: 'a6', Data: '08/11/2026', Trimestre: '4', NumLicao: '6', Titulo: '' }],
+    }),
+    ed_getChamada: () => ok({
+      alunos: [
+        ['Ana Beatriz Souza', 1, 1, 1], ['Bruno Henrique Lima', 1, 1, 0], ['Camila Ferreira', 1, 0, 0], ['Davi Nogueira', 0, 0, 0],
+        ['Eduarda Martins', 1, 1, 1], ['Felipe Araújo', 1, 0, 1], ['Gabriela Rocha', 1, 1, 0],
+      ].map(function (x, i) { return { alunoId: 'al' + i, nome: x[0], isProfessor: false, presente: !!x[1], biblia: !!x[2], revista: !!x[3], pontosExtras: [] }; }),
+      extras: [{ ID: 'e1', Nome: 'Memorizou o versículo', Pontos: 3 }], pontos: { presenca: 1, biblia: 2, revista: 2 },
+      jaLancada: false, turmaInfo: { numVisitantes: 3, totalOferta: 45, observacoes: '' },
+    }),
+    ed_salvarChamada: () => ok({ mensagem: 'Chamada salva com sucesso.' }),
+    ed_criarAula: () => ok({ id: 'a8' }),
   };
   const atividade = [
     { icon: 'user-plus', texto: 'Usuário adicionado: Carlos Lima', tempo: '1d atrás', ts: 2 },

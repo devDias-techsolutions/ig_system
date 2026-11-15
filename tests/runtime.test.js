@@ -168,8 +168,9 @@ test('config: doGet injeta a identidade e usa o nome da igreja no título', () =
 });
 
 test('módulos: MODULOS_ATIVOS da aba Config escolhe os módulos (vazio = todos; outro id = nenhum)', () => {
-  assert.deepEqual(ESQ(envComConfig({ MODULOS_ATIVOS: '' })), ['membros']);
+  assert.deepEqual(ESQ(envComConfig({ MODULOS_ATIVOS: '' })), ['membros', 'escola-dominical']);
   assert.deepEqual(ESQ(envComConfig({ MODULOS_ATIVOS: ' membros , financeiro' })), ['membros']);
+  assert.deepEqual(ESQ(envComConfig({ MODULOS_ATIVOS: 'escola-dominical' })), ['escola-dominical']);
   assert.deepEqual(ESQ(envComConfig({ MODULOS_ATIVOS: 'financeiro' })), []);
 });
 
@@ -384,7 +385,7 @@ function envComSessao(abas) {
 
 test('núcleo: perfis do MVP são apenas admin e secretaria', () => {
   const env = freshEnv();
-  assert.deepEqual(Object.keys(JSON.parse(env.run('JSON.stringify(PERFIS)'))).sort(), ['ADMIN', 'SECRETARIA']);
+  assert.deepEqual(Object.keys(JSON.parse(env.run('JSON.stringify(PERFIS)'))).sort(), ['ADMIN', 'PROFESSOR', 'SECRETARIA']);
 });
 
 test('núcleo: KPIs da home funcionam sem nenhuma aba da Escola Dominical', () => {
@@ -409,15 +410,14 @@ test('núcleo: atividade recente funciona sem nenhuma aba da Escola Dominical', 
   assert.match(res.data[0].texto, /Ana/);
 });
 
-test('núcleo: perfil professor não pode mais ser criado', () => {
+test('núcleo: perfil professor pode ser criado (reativado para a Escola Dominical)', () => {
   const env = envComSessao({
     Usuarios: [COLS_USUARIOS, ['u1', 'Ana', 'ana@igreja.test', 'h', 'admin', false, true, '', '', '01/11/2026 10:00:00', '']],
     Membros: [['id', 'nome', 'foto', 'ativo']],
   });
   env.ctx.__dados = { Nome: 'Prof', Email: 'prof@igreja.test', Perfil: 'professor' };
   const res = env.run("usr_criar('tok', __dados)");
-  assert.equal(res.success, false, JSON.stringify(res));
-  assert.match(res.error, /Perfil inválido/);
+  assert.equal(res.success, true, JSON.stringify(res));
 });
 
 // ═══ Registro de módulos (Etapa 3) ══════════════════════════
@@ -426,7 +426,11 @@ const ESQ = (env) => JSON.parse(env.run('JSON.stringify(Modulos.ativos().map(fun
 test('módulos: Membros se registra e aparece como módulo ativo com rota, perfis e ícone', () => {
   const env = freshEnv();
   const mods = JSON.parse(env.run('JSON.stringify(Modulos.paraCliente())'));
-  assert.equal(mods.length, 1);
+  assert.equal(mods.length, 2);
+  mods.sort((a, b) => a.id.localeCompare(b.id));
+  const mb = mods.filter((m) => m.id === 'membros');
+  assert.equal(mb.length, 1);
+  mods.splice(0, mods.length, mb[0]);
   assert.deepEqual([mods[0].id, mods[0].rota, mods[0].render], ['membros', 'membros', 'renderMembros']);
   assert.deepEqual(mods[0].perfis, ['admin', 'secretaria']);
   assert.ok(mods[0].permissoes && mods[0].permissoes.acoes.length);
@@ -436,7 +440,7 @@ test('módulos: o registro não depende da ordem de carga dos arquivos', () => {
   const { listFiles } = require('./helpers/gas');
   const env = createEnv();
   env.load(listFiles('.js').reverse());
-  assert.deepEqual(ESQ(env), ['membros']);
+  assert.deepEqual(ESQ(env), ['membros', 'escola-dominical']);
 });
 
 test('módulos: manifesto é serializável (sem funções) e o JSON do HTML é seguro', () => {
@@ -449,7 +453,7 @@ test('módulos: manifesto é serializável (sem funções) e o JSON do HTML é s
 test('módulos: o esquema da planilha inclui as abas do núcleo e as declaradas pelos módulos ativos', () => {
   const env = freshEnv();
   const esq = JSON.parse(env.run('JSON.stringify(SetupSheets.schema())'));
-  assert.deepEqual(Object.keys(esq).sort(), ['Cartas', 'Config', 'Credenciais', 'Imagens', 'Membros', 'Sessoes', 'Usuarios']);
+  assert.deepEqual(Object.keys(esq).sort(), ['Alunos', 'Aulas', 'Cartas', 'Chamadas', 'ChamadasInfo', 'Classes', 'Config', 'Credenciais', 'Imagens', 'Membros', 'PontosExtras', 'Professores', 'Sessoes', 'Usuarios']);
   assert.equal(esq.Membros[0], 'id');
   assert.ok(esq.Membros.includes('ativo'));
 });
@@ -478,7 +482,7 @@ test('módulos: doGet injeta a lista de módulos no template', () => {
   const env = freshEnv();
   const out = env.run('doGet({parameter:{}})');
   const mods = JSON.parse(out._tpl.modulosJson);
-  assert.deepEqual(mods.map((m) => m.id), ['membros']);
+  assert.deepEqual(mods.map((m) => m.id), ['membros', 'escola-dominical']);
 });
 
 test('módulos: getModulos exige sessão', () => {
@@ -897,11 +901,11 @@ test('Home: aniversariantes do mês só trazem nome e dia/mês, só de ativos, e
 });
 
 // ═══ Escola Dominical (migração, etapa 1: backend sem tela) ═══
-test('EBD: carrega, expõe wrappers ed_* e o manifesto ainda não está registrado', () => {
+test('EBD: carrega, expõe wrappers ed_* e registra o manifesto', () => {
   const env = freshEnv();
   assert.equal(env.run("typeof ed_listarClasses"), 'function');
   assert.equal(env.run("typeof EscolaDominicalManifesto"), 'object');
-  assert.equal(env.run("Modulos.ativos().some(function(m){return m.id==='escola-dominical';})"), false);
+  assert.equal(env.run("Modulos.ativos().some(function(m){return m.id==='escola-dominical';})"), true);
   assert.equal(env.run("EscolaDominicalManifesto.abas.length"), 7);
   assert.equal(env.run("EscolaDominicalManifesto.perfis.indexOf('professor')>-1"), true);
 });

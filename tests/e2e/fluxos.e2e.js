@@ -152,7 +152,7 @@ test('desktop: sidebar com Início, módulos, Usuários e Identidade; o item ati
   assert.equal(await page.locator('#app-bnav, .app-bnav').count(), 0, 'não existe mais menu inferior');
   assert.ok(!(await page.isVisible('#main-topnav .nav-burger')));
   const itens = await page.$$eval('#app-sidebar .sb-item', (els) => els.map((e) => e.innerText.trim()));
-  assert.deepEqual(itens, ['Início', 'Membros', 'Usuários', 'Identidade']);
+  assert.deepEqual(itens, ['Início', 'Membros', 'Escola Dominical', 'Usuários', 'Identidade']);
   assert.equal(await page.$eval('#app-sidebar .sb-item.active', (e) => e.innerText.trim()), 'Início');
   await page.click('#app-sidebar .sb-item:has-text("Membros")');
   await esperarTela(page, 'membros');
@@ -167,7 +167,7 @@ test('celular: sem menu inferior; sanduíche abre a gaveta e navega', async () =
   assert.equal(await page.locator('.app-bnav').count(), 0);
   assert.ok(!(await page.isVisible('#app-sidebar')), 'gaveta fechada');
   const atalhos = await page.$$eval('.hm-mods .hm-mod', (els) => els.map((e) => e.innerText.trim()));
-  assert.deepEqual(atalhos, ['Membros', 'Usuários', 'Identidade']);
+  assert.deepEqual(atalhos, ['Membros', 'Escola Dominical', 'Usuários', 'Identidade']);
   await page.click('.hm-burger');
   await page.waitForSelector('#app-sidebar', { state: 'visible' });
   await page.click('#app-sidebar .sb-item:has-text("Membros")');
@@ -175,7 +175,7 @@ test('celular: sem menu inferior; sanduíche abre a gaveta e navega', async () =
   await page.waitForSelector('#app-sidebar', { state: 'hidden' }); // gaveta fecha ao navegar
   await page.click('#main-topnav .nav-burger');
   await page.waitForSelector('#app-sidebar', { state: 'visible' });
-  assert.deepEqual(await page.$$eval('#app-sidebar .sb-item', (els) => els.map((e) => e.innerText.trim())), ['Início', 'Membros', 'Usuários', 'Identidade']);
+  assert.deepEqual(await page.$$eval('#app-sidebar .sb-item', (els) => els.map((e) => e.innerText.trim())), ['Início', 'Membros', 'Escola Dominical', 'Usuários', 'Identidade']);
   await page.click('#nav-scrim', { position: { x: 380, y: 400 } });
   await page.waitForSelector('#app-sidebar', { state: 'hidden' });
   assert.deepEqual(erros, []);

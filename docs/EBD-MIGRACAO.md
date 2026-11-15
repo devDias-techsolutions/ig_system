@@ -12,8 +12,8 @@ Origem: `modulos-pendentes/escola-dominical/` (legado, mantido como referência)
 | Etapa | Conteúdo | Status |
 |---|---|---|
 | E1 | Backend na raiz: `EscolaDominical.js` (wrappers `ed_*`, `_safe_ed`), manifesto **definido mas não registrado**, abas/colunas iguais ao legado, neutralidade (nome da igreja via Config, chave `ALERTAS_CONFIG`), testes | feito |
-| E1b | Imagem wireframe→design (Chamada, Visão geral) → aprovação | mocks prontos, **aguardando aprovação do usuário** |
-| E2 | Registrar manifesto (`__MANIFESTOS__.push(EscolaDominicalManifesto)`), reativar `professor` no núcleo (Code.js PERFIS, Usuarios.js, `_usuarios.html`, `PERFIL_LABEL`/`ROUTE_PERMISSIONS`/home por perfil), tela **Chamada** | pendente |
+| E1b | Imagem wireframe→design (Chamada, Visão geral) → aprovação | aprovado |
+| E2 | Manifesto registrado, `professor` reativado (Code.js, Usuarios.js, `_usuarios.html`, `PERFIL_LABEL`), novo `_escola-dominical.html` com a tela **Chamada** (prefixo `edm-`/`EDM`), mini-modal "Nova aula" (provisório até a tela Aulas), pontos extras ao tocar no nome do aluno, e2e `tests/e2e/ebd.e2e.js` | feito |
 | E3 | Visão geral, Turmas, Alunos, Professores, Aulas, Ranking, Relatórios | pendente |
 | E4 | Integração: Membros ("Importar da EBD"), KPIs da Home, atividade | pendente |
 | E5 | Alertas automáticos + importador 5 passos | pendente |
@@ -26,3 +26,9 @@ Origem: `modulos-pendentes/escola-dominical/` (legado, mantido como referência)
 ## Mocks (seguir ao implementar)
 - `docs/img/ebd-chamada-wireframe-design.png` — Chamada: hero compacto, atalhos circulares do módulo (Visão geral, Chamada, Turmas, Alunos, Professores, Aulas, Ranking, Relatórios), filtros Turma/Aula, chips (Presentes/Ausentes/Bíblias/Revistas), lista com 3 toggles redondos por aluno (Presente/Bíblia/Revista; Bíblia e Revista só com presença), barra flutuante (Visitantes, Oferta, pontos extras, Salvar chamada).
 - `docs/img/ebd-visao-geral-wireframe-design.png` — Visão geral: bento (Alunos/Turmas/Professores), banner "turmas sem chamada", presença (anel + barras das últimas aulas), ranking top 3, presença por turma.
+
+## Como adicionar a próxima tela (E3)
+1. Acrescente `['id','icone-lucide','Rótulo']` em `EDM_TELAS` (`_escola-dominical.html`); o carrossel de atalhos aparece quando há mais de uma tela.
+2. Implemente `renderEscolaDominical` por tela (hoje só Chamada) usando os mesmos blocos: `.edm-hero`, `.edm-atalhos` (`.hm-mod`), `.edm-chips`, `.edm-row`, `.edm-bar`.
+3. Professor: o servidor já restringe turmas (`_classesDoProfessor`); sem permissão de criar aula/turma/aluno.
+4. Mock de preview: `tests/preview/mock-backend.js` (funções `ed_*`).
