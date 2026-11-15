@@ -19,14 +19,19 @@ function semear(backend) {
   ins('Aulas', { ID: 'a1', Data: '15/11/2026', Trimestre: '4', NumLicao: '7', Titulo: '', Ano: '2026' });
 }
 
-test('EBD: admin abre a Chamada, marca presença/bíblia, salva e a planilha recebe os pontos', async () => {
+test('EBD: modo completo — admin marca presença/bíblia, salva e a planilha recebe os pontos', async () => {
   const backend = criarBackend(); semear(backend);
+  backend.env.ctx.__c = { Chave: 'EBD_MODO_CHAMADA', Valor: 'completa', Descricao: '', AtualizadoEm: '' };
+  backend.env.run("Util.insertRow('Config', __c)");
   const { page, erros } = await abrir(browser, backend);
   await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   await page.evaluate(() => navigateTo('escola-dominical'));
   await esperarTela(page, 'escola-dominical');
+  await page.waitForSelector('#edm-panel .edm-bento', { timeout: 6000 }); // admin abre na Visão geral
+  await page.click('.edm-atalhos .hm-mod[data-tela="chamada"]');
   await page.waitForSelector('.edm-row', { timeout: 6000 });
   assert.equal(await page.locator('.edm-row').count(), 2);
+  assert.equal(await page.locator('.edm-row:first-child .edm-tg').count(), 3);
   await page.evaluate(() => { edmTog(0, 'presente'); edmTog(0, 'biblia'); });
   assert.match(await page.innerText('#edm-chips'), /1\s*Presentes/);
   assert.match(await page.innerText('.edm-row'), /\+3 pts/);
@@ -52,7 +57,7 @@ test('EBD: professor entra direto na Escola Dominical e só vê a turma vinculad
   const turmas = await page.$$eval('#edm-sel-turma option', (o) => o.map((x) => x.textContent.trim()));
   assert.deepEqual(turmas, ['Adultos']);
   assert.equal(await page.locator('button[aria-label="Nova aula"]').count(), 0);
-  assert.deepEqual(await page.$$eval('.edm-atalhos .hm-mod', (b) => b.map((x) => x.getAttribute('data-tela'))), ['chamada', 'alunos']);
+  assert.deepEqual(await page.$$eval('.edm-atalhos .hm-mod', (b) => b.map((x) => x.getAttribute('data-tela'))), ['visao', 'chamada', 'alunos', 'ranking']);
   assert.deepEqual(erros, []);
 });
 
@@ -117,5 +122,36 @@ test('EBD: secretaria cadastra aula e professor vinculado a usuário e turma', a
   assert.match(await page.innerText('.edm-card'), /Adultos · Com acesso/);
   const p = backend.ss.getSheetByName('Professores')._rows[1];
   assert.ok(p.includes('u9') && p.includes('c2'));
+  assert.deepEqual(erros, []);
+});
+
+test('EBD: padrão é só presença (1 toggle, chip de %) e o ranking começa por presença; ajustes trocam os modos', async () => {
+  const backend = criarBackend(); semear(backend);
+  const { page, erros } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  await page.evaluate(() => navigateTo('escola-dominical'));
+  await esperarTela(page, 'escola-dominical');
+  await page.waitForSelector('.edm-atalhos');
+  await page.click('.edm-atalhos .hm-mod[data-tela="chamada"]');
+  await page.waitForSelector('.edm-row', { timeout: 6000 });
+  assert.equal(await page.locator('.edm-row:first-child .edm-tg').count(), 1);
+  assert.match(await page.innerText('#edm-chips'), /Presença/);
+  await page.evaluate(() => edmTog(0, 'presente'));
+  await page.evaluate(() => edmSalvar());
+  await page.waitForFunction(() => document.getElementById('edm-salvar').innerText.includes('Atualizar'), null, { timeout: 6000 });
+  const totais = backend.ss.getSheetByName('Chamadas')._rows.slice(1).map((r) => Number(r[8])).sort();
+  assert.deepEqual(totais, [0, 1]);
+
+  await page.click('.edm-atalhos .hm-mod[data-tela="ranking"]');
+  await page.waitForSelector('.edm-seg button.on');
+  assert.equal(await page.innerText('.edm-seg button.on'), 'Presença');
+  assert.match(await page.innerText('.edm-row'), /1 presença/);
+  await page.evaluate(() => edmAjustes());
+  await page.waitForSelector('#edm-cfg-chamada');
+  await page.selectOption('#edm-cfg-chamada', 'completa');
+  await page.selectOption('#edm-cfg-ranking', 'pontos');
+  await page.evaluate(() => edmSalvarAjustes());
+  await page.waitForFunction(() => document.querySelector('.edm-seg button.on') && document.querySelector('.edm-seg button.on').innerText === 'Pontos totais', null, { timeout: 6000 });
+  assert.match(await page.innerText('.edm-row'), /1 pts/);
   assert.deepEqual(erros, []);
 });

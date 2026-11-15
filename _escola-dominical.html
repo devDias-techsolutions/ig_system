@@ -24,6 +24,7 @@
 .edm-aula-row { display: flex; gap: var(--sp-2); align-items: flex-end; }
 .edm-aula-row .field { flex: 1; min-width: 0; }
 .edm-chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-2); margin-bottom: var(--sp-4); }
+.edm-chips-3 { grid-template-columns: repeat(3, 1fr); }
 .edm-chip { border-radius: var(--r-2); padding: var(--sp-2) var(--sp-1); text-align: center; background: var(--c-dim); color: var(--c); }
 .edm-chip b { display: block; font-size: var(--fs-lg); font-weight: 800; font-variant-numeric: tabular-nums; }
 .edm-chip span { font-size: var(--fs-xs); font-weight: 700; }
@@ -75,21 +76,59 @@
 .edm-count small { display: block; font-size: var(--fs-xs); font-weight: 600; color: var(--text-muted); }
 .edm-form-btns { display: flex; gap: var(--sp-2); width: 100%; }
 .edm-form-btns .btn-danger { margin-right: auto; }
+
+.edm-gear { position: absolute; top: var(--sp-3); right: var(--gutter); width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.14); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.edm-gear i, .edm-gear svg { width: 20px; height: 20px; }
+.edm-sec { display: flex; align-items: baseline; justify-content: space-between; margin: var(--sp-4) 0 var(--sp-2); font-size: var(--fs-md); font-weight: 800; }
+.edm-sec a, .edm-sec button { font-size: var(--fs-sm); font-weight: 700; color: var(--teal); background: none; border: 0; cursor: pointer; font-family: inherit; padding: 0; }
+.edm-bento { display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--sp-2); }
+.edm-feat { position: relative; overflow: hidden; border-radius: var(--r-3); padding: var(--sp-4); color: #fff; background: linear-gradient(135deg, var(--hero-b), var(--hero-a)); box-shadow: var(--shadow-md); }
+.edm-feat i, .edm-feat svg.edm-ghost { position: absolute; right: -10px; bottom: -12px; width: 84px; height: 84px; opacity: .16; transform: rotate(-12deg); }
+.edm-feat small { font-size: var(--fs-xs); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--hero-gold, #E8C27A); }
+.edm-feat b { display: block; font-size: var(--fs-2xl); font-weight: 800; line-height: 1.1; margin-top: var(--sp-2); font-variant-numeric: tabular-nums; }
+.edm-feat span { font-size: var(--fs-sm); opacity: .85; }
+.edm-mini-col { display: grid; gap: var(--sp-2); }
+.edm-mini { border-radius: var(--r-3); padding: var(--sp-2) var(--sp-3); background: var(--bg-glass-strong); border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
+.edm-mini span { font-size: var(--fs-xs); font-weight: 700; color: var(--text-muted); }
+.edm-mini b { font-size: var(--fs-lg); font-weight: 800; font-variant-numeric: tabular-nums; }
+.edm-alerta { display: flex; align-items: center; gap: var(--sp-3); margin-top: var(--sp-3); padding: var(--sp-3); border-radius: var(--r-3); background: var(--gold-dim); border: 1px solid var(--gold); }
+.edm-alerta > div { flex: 1; min-width: 0; font-size: var(--fs-sm); font-weight: 700; }
+.edm-alerta small { display: block; font-size: var(--fs-xs); font-weight: 600; color: var(--text-muted); }
+.edm-panelc { border-radius: var(--r-3); padding: var(--sp-3); background: var(--bg-glass-strong); border: 1px solid var(--border); }
+.edm-pres { display: flex; align-items: center; gap: var(--sp-4); }
+.edm-ring { position: relative; width: 92px; height: 92px; flex-shrink: 0; }
+.edm-ring svg { width: 92px; height: 92px; transform: rotate(-90deg); }
+.edm-ring b { position: absolute; inset: 0; display: grid; place-items: center; font-size: var(--fs-lg); font-weight: 800; }
+.edm-bars { flex: 1; display: flex; align-items: flex-end; gap: var(--sp-1); height: 92px; }
+.edm-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: var(--sp-1); }
+.edm-bar-col i { display: block; width: 100%; max-width: 20px; border-radius: var(--r-1); background: var(--teal-dim); min-height: 4px; }
+.edm-bar-col:last-child i { background: var(--teal); }
+.edm-bar-col span { font-size: var(--fs-xs); color: var(--text-muted); }
+.edm-medal { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; font-weight: 800; color: #fff; background: var(--text-dim); }
+.edm-medal.m1 { background: var(--gold); } .edm-medal.m2 { background: #94A3B8; } .edm-medal.m3 { background: #C2865A; }
+.edm-valor { font-size: var(--fs-sm); font-weight: 800; padding: var(--sp-1) var(--sp-2); border-radius: var(--r-pill); background: var(--teal-dim); color: var(--teal); white-space: nowrap; }
+.edm-prog { flex: 1; height: 8px; border-radius: var(--r-pill); background: var(--teal-dim); overflow: hidden; }
+.edm-prog i { display: block; height: 100%; background: var(--teal); border-radius: var(--r-pill); }
+.edm-seg { display: grid; grid-template-columns: 1fr 1fr; padding: var(--sp-1); gap: var(--sp-1); border-radius: var(--r-pill); background: var(--bg-glass-strong); border: 1px solid var(--border); margin-bottom: var(--sp-3); }
+.edm-seg button { height: 36px; border: 0; border-radius: var(--r-pill); background: none; color: var(--text-muted); font-family: inherit; font-size: var(--fs-sm); font-weight: 700; cursor: pointer; }
+.edm-seg button.on { background: var(--teal); color: var(--on-teal, #fff); }
+.edm-pts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2); }
 @media (prefers-reduced-motion: reduce) { .edm-tg, .edm-fab { transition: none; } }
 </style>
 
 <script>
 // ══ Escola Dominical — estado e telas ═══════════════════
-var EDM_TELAS = [['chamada', 'clipboard-check', 'Chamada'], ['turmas', 'users-round', 'Turmas'], ['alunos', 'graduation-cap', 'Alunos'], ['professores', 'book-user', 'Professores'], ['aulas', 'calendar-days', 'Aulas']];
+var EDM_TELAS = [['visao', 'layout-grid', 'Visão geral'], ['chamada', 'clipboard-check', 'Chamada'], ['turmas', 'users-round', 'Turmas'], ['alunos', 'graduation-cap', 'Alunos'], ['professores', 'book-user', 'Professores'], ['aulas', 'calendar-days', 'Aulas'], ['ranking', 'trophy', 'Ranking']];
+var EDM_TITULOS = { visao: 'Visão geral', chamada: 'Chamada', turmas: 'Turmas', alunos: 'Alunos', professores: 'Professores', aulas: 'Aulas', ranking: 'Ranking' };
 // Professor só lança chamada e consulta alunos; o resto é da secretaria/admin.
 function edmTelasDoPerfil() {
   var prof = App.session && App.session.perfil === 'professor';
-  return EDM_TELAS.filter(function (t) { return !prof || ['chamada', 'alunos'].indexOf(t[0]) !== -1; });
+  return EDM_TELAS.filter(function (t) { return !prof || ['visao', 'chamada', 'alunos', 'ranking'].indexOf(t[0]) !== -1; });
 }
 function edmPodeEditar() { return !!App.session && App.session.perfil !== 'professor'; }
 var EDM = {
   tela: 'chamada', classes: [], aulas: [], classeId: '', aulaId: '',
-  alunos: [], todosAlunos: [], professores: [], filtroTurma: '', busca: '', extras: [], pontos: { presenca: 1, biblia: 2, revista: 2 },
+  modo: 'presenca', modoRanking: 'presenca', vg: null, rk: { modo: '', turma: '', tri: '', lista: [] }, alunos: [], todosAlunos: [], professores: [], filtroTurma: '', busca: '', extras: [], pontos: { presenca: 1, biblia: 2, revista: 2 },
   visitantes: 0, oferta: '', obs: '', jaLancada: false, salvando: false, extraAluno: null
 };
 
@@ -133,7 +172,7 @@ function _edmNum(v) { var n = parseFloat(String(v || '').replace(/\./g, '').repl
 
 function renderEscolaDominical() {
   if (!App.session) { navigateTo('login'); return; }
-  EDM.tela = 'chamada';
+  EDM.tela = edmPodeEditar() ? 'visao' : 'chamada';
   var telas = edmTelasDoPerfil();
   var atalhos = telas.length > 1 ? '<nav class="edm-atalhos no-print" aria-label="Seções da Escola Dominical">' + telas.map(function (t) {
     return '<button type="button" class="hm-mod' + (EDM.tela === t[0] ? ' active' : '') + '" data-tela="' + t[0] + '" onclick="edmIr(\'' + t[0] + '\')">' +
@@ -143,7 +182,8 @@ function renderEscolaDominical() {
     '<div class="edm-hero">' +
       '<svg class="edm-hero-art" viewBox="0 0 100 100" aria-hidden="true"><rect x="42" y="4" width="16" height="92" rx="6" fill="#fff"/><rect x="18" y="30" width="64" height="16" rx="6" fill="#fff"/></svg>' +
       '<div class="edm-hero-kicker">Escola Dominical</div>' +
-      '<div class="edm-hero-title" id="edm-titulo">Chamada</div>' +
+      '<button type="button" class="edm-gear" id="edm-gear" onclick="edmAjustes()" aria-label="Ajustes" title="Ajustes" style="display:none"><i data-lucide="settings-2"></i></button>' +
+      '<div class="edm-hero-title" id="edm-titulo">' + EDM_TITULOS[EDM.tela] + '</div>' +
       '<div class="edm-hero-sub" id="edm-sub">Carregando…</div>' +
     '</div>' + atalhos +
     '<div id="edm-panel" class="page"><div class="edm-vazio"><div class="loader-spinner" style="margin:0 auto"></div></div></div>' +
@@ -167,7 +207,7 @@ function renderEscolaDominical() {
       '<div class="modal-footer"><button class="btn btn-primary btn-full" onclick="edmFecharModal(\'modal-edm-extras\')">Concluir</button></div>' +
     '</div></div>'
   );
-  setTimeout(function () { if (window.lucide) lucide.createIcons(); edmCarregar(); }, 0);
+  setTimeout(function () { if (window.lucide) lucide.createIcons(); edmIr(EDM.tela); }, 0);
 }
 function edmIr(t) {
   EDM.tela = t;
@@ -178,10 +218,11 @@ function edmIr(t) {
     if (on && bs[i].scrollIntoView) { try { bs[i].scrollIntoView({ inline: 'center', block: 'nearest' }); } catch (e) {} }
   }
   var ti = document.getElementById('edm-titulo');
-  if (ti) ti.textContent = { chamada: 'Chamada', turmas: 'Turmas', alunos: 'Alunos', professores: 'Professores', aulas: 'Aulas' }[t] || '';
+  if (ti) ti.textContent = EDM_TITULOS[t] || '';
+  var gear = document.getElementById('edm-gear'); if (gear) gear.style.display = (edmPodeEditar() && (t === 'chamada' || t === 'ranking')) ? '' : 'none';
   var painel = document.getElementById('edm-panel');
   if (painel) painel.innerHTML = '<div class="edm-vazio"><div class="loader-spinner" style="margin:0 auto"></div></div>';
-  if (t === 'chamada') edmCarregar(); else edmCarregarCadastros();
+  if (t === 'chamada') edmCarregar(); else if (t === 'visao') edmCarregarVisao(); else if (t === 'ranking') edmCarregarRanking(); else edmCarregarCadastros();
 }
 function edmAbrirModal(id) { var m = document.getElementById(id); if (m) m.classList.add('open'); }
 function edmFecharModal(id) { var m = document.getElementById(id); if (m) m.classList.remove('open'); }
@@ -211,6 +252,7 @@ function edmCarregarChamada() {
       var d = r.data || {};
       EDM.alunos = d.alunos || []; EDM.extras = d.extras || []; EDM.jaLancada = !!d.jaLancada;
       EDM.pontos = d.pontos || EDM.pontos;
+      EDM.modo = d.modo || 'presenca';
       var ti = d.turmaInfo || {};
       EDM.visitantes = Number(ti.numVisitantes) || 0;
       EDM.oferta = ti.totalOferta ? String(ti.totalOferta).replace('.', ',') : '';
@@ -242,7 +284,7 @@ function edmRender() {
     h += '<div class="edm-vazio">Esta turma ainda não tem alunos.</div>';
   } else {
     h += '<div class="edm-chips" id="edm-chips"></div>' +
-      '<div class="edm-lista-head"><span id="edm-total"></span><span class="edm-dica">Presença · Bíblia · Revista</span></div>' +
+      '<div class="edm-lista-head"><span id="edm-total"></span><span class="edm-dica" id="edm-dica"></span></div>' +
       '<div id="edm-lista"></div>' +
       '<div class="edm-bar"><div class="edm-bar-top">' +
         '<div class="field"><label>Visitantes</label><div class="edm-step"><button onclick="edmVisit(-1)" aria-label="Menos visitantes">−</button><b id="edm-vis">' + EDM.visitantes + '</b><button onclick="edmVisit(1)" aria-label="Mais visitantes">+</button></div></div>' +
@@ -257,22 +299,28 @@ function edmPintar() {
   var lista = document.getElementById('edm-lista'); if (!lista) return;
   var p = 0, b = 0, r = 0;
   EDM.alunos.forEach(function (a) { if (a.presente) p++; if (a.biblia) b++; if (a.revista) r++; });
+  var completa = EDM.modo === 'completa';
   var ch = document.getElementById('edm-chips');
-  if (ch) ch.innerHTML =
-    '<div class="edm-chip edm-c-ok"><b>' + p + '</b><span>Presentes</span></div>' +
-    '<div class="edm-chip edm-c-no"><b>' + (EDM.alunos.length - p) + '</b><span>Ausentes</span></div>' +
-    '<div class="edm-chip edm-c-bib"><b>' + b + '</b><span>Bíblias</span></div>' +
-    '<div class="edm-chip edm-c-rev"><b>' + r + '</b><span>Revistas</span></div>';
+  if (ch) {
+    ch.className = 'edm-chips' + (completa ? '' : ' edm-chips-3');
+    ch.innerHTML =
+      '<div class="edm-chip edm-c-ok"><b>' + p + '</b><span>Presentes</span></div>' +
+      '<div class="edm-chip edm-c-no"><b>' + (EDM.alunos.length - p) + '</b><span>Ausentes</span></div>' +
+      (completa
+        ? '<div class="edm-chip edm-c-bib"><b>' + b + '</b><span>Bíblias</span></div><div class="edm-chip edm-c-rev"><b>' + r + '</b><span>Revistas</span></div>'
+        : '<div class="edm-chip edm-c-bib"><b>' + (EDM.alunos.length ? Math.round(p * 100 / EDM.alunos.length) : 0) + '%</b><span>Presença</span></div>');
+  }
+  var dica = document.getElementById('edm-dica'); if (dica) dica.textContent = completa ? 'Presença · Bíblia · Revista' : 'Toque para marcar presença';
   var tot = document.getElementById('edm-total'); if (tot) tot.textContent = 'Alunos · ' + EDM.alunos.length;
   lista.innerHTML = EDM.alunos.map(function (a, i) {
     var pts = _edmPts(a);
     return '<div class="edm-row"><div class="edm-av">' + _edmEsc(_edmIni(a.nome)) + '</div>' +
       '<button type="button" class="edm-info" onclick="edmExtras(' + i + ')"><span class="edm-nome">' + _edmEsc(a.nome) + (a.isProfessor ? ' <span class="edm-tag">Professor</span>' : '') + '</span>' +
-      '<span class="edm-pts' + (a.presente ? '' : ' off') + '">' + (a.presente ? '+' + pts + ' pts' : 'Ausente') + '</span></button>' +
+      '<span class="edm-pts' + (a.presente ? '' : ' off') + '">' + (a.presente ? (completa ? '+' + pts + ' pts' : 'Presente') : 'Ausente') + '</span></button>' +
       '<div class="edm-tgs">' +
         '<button class="edm-tg t-pres' + (a.presente ? ' on' : '') + '" onclick="edmTog(' + i + ',\'presente\')" aria-label="Presente" aria-pressed="' + !!a.presente + '"><i data-lucide="check"></i></button>' +
-        '<button class="edm-tg t-bib' + (a.biblia ? ' on' : '') + '"' + (a.presente ? '' : ' disabled') + ' onclick="edmTog(' + i + ',\'biblia\')" aria-label="Bíblia" aria-pressed="' + !!a.biblia + '"><i data-lucide="book-open"></i></button>' +
-        '<button class="edm-tg t-rev' + (a.revista ? ' on' : '') + '"' + (a.presente ? '' : ' disabled') + ' onclick="edmTog(' + i + ',\'revista\')" aria-label="Revista" aria-pressed="' + !!a.revista + '"><i data-lucide="graduation-cap"></i></button>' +
+        (completa ? '<button class="edm-tg t-bib' + (a.biblia ? ' on' : '') + '"' + (a.presente ? '' : ' disabled') + ' onclick="edmTog(' + i + ',\'biblia\')" aria-label="Bíblia" aria-pressed="' + !!a.biblia + '"><i data-lucide="book-open"></i></button>' +
+        '<button class="edm-tg t-rev' + (a.revista ? ' on' : '') + '"' + (a.presente ? '' : ' disabled') + ' onclick="edmTog(' + i + ',\'revista\')" aria-label="Revista" aria-pressed="' + !!a.revista + '"><i data-lucide="graduation-cap"></i></button>' : '') +
       '</div></div>';
   }).join('');
   if (window.lucide) lucide.createIcons();
@@ -289,7 +337,7 @@ function edmTrocarAula(v) { EDM.aulaId = v; EDM.alunos = []; edmCarregarChamada(
 
 // ── Pontos extras por aluno ─────────────────────────────
 function edmExtras(i) {
-  var a = EDM.alunos[i]; if (!a) return;
+  var a = EDM.alunos[i]; if (!a || EDM.modo !== 'completa') return;
   if (!EDM.extras.length) { showToast('Nenhum ponto extra configurado.', 'info'); return; }
   if (!a.presente) { showToast('Marque a presença antes de dar pontos extras.', 'info'); return; }
   EDM.extraAluno = i;
@@ -611,5 +659,116 @@ function edmExcluirAula() {
   var a = _edmPorId(EDM.aulas, EDM.editId); if (!a) return;
   showConfirm('Excluir a Lição ' + _edmEsc(a.NumLicao) + '? As chamadas já lançadas nela deixam de aparecer.', { title: 'Excluir aula', confirmLabel: 'Excluir' })
     .then(function (ok) { if (ok) _edmEnviar('ed_excluirAula', [a.ID], 'Aula excluída.'); });
+}
+
+// ── Visão geral ─────────────────────────────────────────
+function edmCarregarVisao() {
+  google.script.run
+    .withFailureHandler(function (e) { showToast((e && e.message) || 'Erro ao carregar a visão geral.', 'error'); })
+    .withSuccessHandler(function (r) { if (!_edmResp(r, 'visao')) return; EDM.vg = r.data; edmRenderVisao(); })
+    .ed_getVisaoGeral(App.session.token);
+}
+function _edmAnel(pct) {
+  var c = 2 * Math.PI * 36, d = c * pct / 100;
+  return '<div class="edm-ring"><svg viewBox="0 0 92 92" aria-hidden="true"><circle cx="46" cy="46" r="36" fill="none" stroke="var(--teal-dim)" stroke-width="9"/><circle cx="46" cy="46" r="36" fill="none" stroke="var(--teal)" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + d.toFixed(1) + ' ' + c.toFixed(1) + '"/></svg><b>' + pct + '%</b></div>';
+}
+function _edmValorRank(x, modo) { return modo === 'pontos' ? x.pontos + ' pts' : x.presencas + (x.presencas === 1 ? ' presença' : ' presenças'); }
+function _edmLinhaRank(x, i, modo) {
+  return '<div class="edm-row"><div class="edm-medal m' + (i < 3 ? i + 1 : 0) + '">' + (i + 1) + '</div>' +
+    '<div class="edm-info" style="cursor:inherit"><span class="edm-nome">' + _edmEsc(x.nome) + '</span><span class="edm-meta">' + _edmEsc(x.classeNome || _edmClasseNome(x.classeId)) + ' · ' + x.percentual + '% de presença</span></div>' +
+    '<span class="edm-valor">' + _edmEsc(_edmValorRank(x, modo)) + '</span></div>';
+}
+function edmRenderVisao() {
+  var painel = document.getElementById('edm-panel'), v = EDM.vg; if (!painel || !v || EDM.tela !== 'visao') return;
+  var sub = document.getElementById('edm-sub'); if (sub) sub.textContent = 'Ano letivo ' + new Date().getFullYear() + ' · ' + v.totais.turmas + (v.totais.turmas === 1 ? ' turma' : ' turmas');
+  var h = '<div class="edm-bento"><div class="edm-feat"><i data-lucide="graduation-cap" class="edm-ghost"></i><small>Alunos</small><b>' + v.totais.alunos + '</b><span>alunos ativos</span></div>' +
+    '<div class="edm-mini-col"><div class="edm-mini"><span>Turmas</span><b>' + v.totais.turmas + '</b></div><div class="edm-mini"><span>Professores</span><b>' + v.totais.professores + '</b></div></div></div>';
+  if (v.ultimaAula && v.semChamada.length) {
+    var n = v.semChamada.length;
+    h += '<div class="edm-alerta"><i data-lucide="clipboard-list" class="ic-16"></i><div>' + n + (n === 1 ? ' turma sem chamada' : ' turmas sem chamada') + '<small>Lição ' + _edmEsc(v.ultimaAula.numLicao) + (v.ultimaAula.data ? ' · ' + _edmEsc(_edmDataCurta(v.ultimaAula.data)) : '') + '</small></div><button class="btn btn-primary btn-sm" onclick="edmIr(\'chamada\')">Lançar</button></div>';
+  }
+  if (v.presenca.recentes.length) {
+    h += '<div class="edm-sec"><span>Presença nas últimas aulas</span></div><div class="edm-panelc edm-pres">' + _edmAnel(v.presenca.media) + '<div class="edm-bars">' +
+      v.presenca.recentes.map(function (x) { return '<div class="edm-bar-col"><i style="height:' + Math.max(4, x.percentual * 0.7) + 'px" title="' + x.percentual + '%"></i><span>L' + _edmEsc(x.numLicao) + '</span></div>'; }).join('') + '</div></div>';
+  }
+  if (v.ranking.top.length) {
+    h += '<div class="edm-sec"><span>Ranking de alunos</span><button onclick="edmIr(\'ranking\')">Ver tudo</button></div>' + v.ranking.top.map(function (x, i) { return _edmLinhaRank(x, i, v.ranking.modo); }).join('');
+  }
+  if (v.turmas.length) {
+    h += '<div class="edm-sec"><span>Presença por turma</span></div>' + v.turmas.map(function (t) {
+      return '<div class="edm-row"><div class="edm-info" style="cursor:inherit;flex:0 0 38%"><span class="edm-nome">' + _edmEsc(t.nome) + '</span><span class="edm-meta">' + t.alunos + (t.alunos === 1 ? ' aluno' : ' alunos') + '</span></div><div class="edm-prog"><i style="width:' + t.percentual + '%"></i></div><b style="font-size:var(--fs-sm)">' + t.percentual + '%</b></div>';
+    }).join('');
+  }
+  if (!v.totais.alunos && !v.totais.turmas) h = '<div class="edm-vazio">Comece criando uma turma na aba Turmas e cadastrando os alunos.</div>';
+  painel.innerHTML = h;
+  if (window.lucide) lucide.createIcons();
+}
+
+// ── Ranking ─────────────────────────────────────────────
+function edmCarregarRanking() {
+  var f = { classeId: EDM.rk.turma, trimestre: EDM.rk.tri };
+  if (EDM.rk.modo) f.modo = EDM.rk.modo;
+  google.script.run
+    .withFailureHandler(function (e) { showToast((e && e.message) || 'Erro ao carregar o ranking.', 'error'); })
+    .withSuccessHandler(function (r) {
+      if (!_edmResp(r, 'ranking')) return;
+      EDM.rk.modo = r.data.modo; EDM.rk.lista = r.data.lista || [];
+      if (!EDM.classes.length) {
+        google.script.run.withSuccessHandler(function (d) { if (d && d.success) EDM.classes = d.data.classes || []; edmRenderRanking(); }).withFailureHandler(function () { edmRenderRanking(); }).ed_getDadosIniciais(App.session.token, []);
+      } else edmRenderRanking();
+    })
+    .ed_getRanking(App.session.token, f);
+}
+function edmRenderRanking() {
+  var painel = document.getElementById('edm-panel'); if (!painel || EDM.tela !== 'ranking') return;
+  var sub = document.getElementById('edm-sub'); if (sub) sub.textContent = (EDM.rk.modo === 'pontos' ? 'Por pontos totais' : 'Por presença') + ' · ' + new Date().getFullYear();
+  var optT = '<option value="">Todas as turmas</option>' + EDM.classes.map(function (c) { return '<option value="' + _edmEsc(c.ID) + '"' + (c.ID === EDM.rk.turma ? ' selected' : '') + '>' + _edmEsc(c.Nome) + '</option>'; }).join('');
+  var optQ = '<option value="">O ano todo</option>' + [1, 2, 3, 4].map(function (n) { return '<option value="' + n + '"' + (String(n) === String(EDM.rk.tri) ? ' selected' : '') + '>' + n + 'º trimestre</option>'; }).join('');
+  painel.innerHTML =
+    '<div class="edm-seg" role="group" aria-label="Critério do ranking"><button class="' + (EDM.rk.modo === 'presenca' ? 'on' : '') + '" onclick="edmRkModo(\'presenca\')">Presença</button><button class="' + (EDM.rk.modo === 'pontos' ? 'on' : '') + '" onclick="edmRkModo(\'pontos\')">Pontos totais</button></div>' +
+    '<div class="edm-toolbar" style="grid-template-columns:1fr 1fr"><div class="field"><label for="edm-rk-turma">Turma</label><select id="edm-rk-turma" onchange="edmRkFiltro(\'turma\',this.value)">' + optT + '</select></div>' +
+    '<div class="field"><label for="edm-rk-tri">Período</label><select id="edm-rk-tri" onchange="edmRkFiltro(\'tri\',this.value)">' + optQ + '</select></div></div>' +
+    (EDM.rk.lista.length ? EDM.rk.lista.map(function (x, i) { return _edmLinhaRank(x, i, EDM.rk.modo); }).join('') : '<div class="edm-vazio">Ainda não há chamadas lançadas neste período.</div>');
+}
+function edmRkModo(m) { EDM.rk.modo = m; edmCarregarRanking(); }
+function edmRkFiltro(k, v) { EDM.rk[k] = v; edmCarregarRanking(); }
+
+// ── Ajustes do módulo (admin/secretaria) ────────────────
+function edmAjustes() {
+  if (!edmPodeEditar()) return;
+  google.script.run
+    .withFailureHandler(function (e) { showToast((e && e.message) || 'Erro ao carregar os ajustes.', 'error'); })
+    .withSuccessHandler(function (r) {
+      if (!_edmResp(r, 'config')) return;
+      var c = r.data;
+      document.getElementById('edm-form-titulo').textContent = 'Ajustes da Escola Dominical';
+      document.getElementById('edm-form-corpo').innerHTML =
+        '<div class="field"><label for="edm-cfg-chamada">Chamada</label><select id="edm-cfg-chamada">' +
+          '<option value="presenca"' + (c.modoChamada === 'presenca' ? ' selected' : '') + '>Somente presença (padrão)</option>' +
+          '<option value="completa"' + (c.modoChamada === 'completa' ? ' selected' : '') + '>Completa: bíblia, revista e pontos extras</option></select></div>' +
+        '<div class="field"><label for="edm-cfg-ranking">Ranking</label><select id="edm-cfg-ranking">' +
+          '<option value="presenca"' + (c.modoRanking === 'presenca' ? ' selected' : '') + '>Por presença (padrão)</option>' +
+          '<option value="pontos"' + (c.modoRanking === 'pontos' ? ' selected' : '') + '>Por pontos totais (presença + bíblia + revista + extras)</option></select></div>' +
+        '<div class="edm-pts-grid"><div class="field"><label for="edm-cfg-p1">Pts presença</label><input type="number" min="0" max="100" id="edm-cfg-p1" value="' + c.pontos.presenca + '"></div>' +
+        '<div class="field"><label for="edm-cfg-p2">Pts bíblia</label><input type="number" min="0" max="100" id="edm-cfg-p2" value="' + c.pontos.biblia + '"></div>' +
+        '<div class="field"><label for="edm-cfg-p3">Pts revista</label><input type="number" min="0" max="100" id="edm-cfg-p3" value="' + c.pontos.revista + '"></div></div>';
+      document.getElementById('edm-form-rodape').innerHTML = '<div class="edm-form-btns"><button class="btn btn-secondary" onclick="edmFecharModal(\'modal-edm-form\')">Cancelar</button><button class="btn btn-primary" id="edm-form-salvar" onclick="edmSalvarAjustes()">Salvar</button></div>';
+      edmAbrirModal('modal-edm-form');
+    })
+    .ed_getConfigEbd(App.session.token);
+}
+function edmSalvarAjustes() {
+  var dados = { modoChamada: _edmV('edm-cfg-chamada'), modoRanking: _edmV('edm-cfg-ranking'), pontos: { presenca: _edmV('edm-cfg-p1'), biblia: _edmV('edm-cfg-p2'), revista: _edmV('edm-cfg-p3') } };
+  var btn = document.getElementById('edm-form-salvar'); if (btn) btn.disabled = true;
+  google.script.run
+    .withFailureHandler(function (e) { if (btn) btn.disabled = false; showToast((e && e.message) || 'Erro ao salvar os ajustes.', 'error'); })
+    .withSuccessHandler(function (r) {
+      if (btn) btn.disabled = false;
+      if (!_edmResp(r, 'salvarConfig')) return;
+      edmFecharModal('modal-edm-form');
+      showToast('Ajustes salvos.', 'success');
+      EDM.alunos = []; EDM.rk.modo = ''; edmIr(EDM.tela);
+    })
+    .ed_salvarConfigEbd(App.session.token, dados);
 }
 </script>

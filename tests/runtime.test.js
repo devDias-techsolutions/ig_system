@@ -920,3 +920,61 @@ test('EBD: professor não pode editar nem excluir aulas, turmas, alunos ou profe
   ['ed_editarAula(\'tok\',\'a1\',{})', 'ed_excluirAula(\'tok\',\'a1\')', 'ed_criarClasse(\'tok\',{Nome:\'X\'})', 'ed_criarProfessor(\'tok\',{Nome:\'X\'})', 'ed_excluirAluno(\'tok\',\'z\')']
     .forEach((c) => assert.equal(env.run(c).success, false, c));
 });
+
+// ═══ EBD: ranking, visão geral e modos de chamada/ranking ═══
+const ABAS_EBD = (cfg) => ({
+  Config: [['Chave', 'Valor', 'Descricao', 'AtualizadoEm']].concat(cfg || []),
+  Classes: [['ID', 'Nome', 'FaixaEtaria', 'LicaoCPAD', 'Ativo', 'CriadoEm'], ['c1', 'Jovens', '', '', true, '']],
+  Alunos: [['ID', 'Nome', 'DataNasc', 'ClasseID', 'Telefone', 'Endereco', 'Email', 'TotalPontos', 'Ativo', 'CriadoEm'],
+    ['al1', 'Ana', '', 'c1', '', '', '', 0, true, ''], ['al2', 'Bruno', '', 'c1', '', '', '', 0, true, '']],
+  Aulas: [['ID', 'Data', 'Trimestre', 'NumLicao', 'Titulo', 'Ano', 'CriadoPor', 'CriadoEm'],
+    ['a1', '01/11/2026', '4', '1', '', String(new Date().getFullYear()), '', '01/11/2026 10:00:00'],
+    ['a2', '08/11/2026', '4', '2', '', String(new Date().getFullYear()), '', '08/11/2026 10:00:00']],
+  Chamadas: [['ID', 'AulaID', 'ClasseID', 'AlunoID', 'Presente', 'Biblia', 'Revista', 'PontosExtrasJSON', 'TotalPontos', 'TotalOfertas', 'LancadoPor', 'CriadoEm'],
+    ['1', 'a1', 'c1', 'al1', true, false, false, '[]', 1, 0, '', ''], ['2', 'a2', 'c1', 'al1', true, false, false, '[]', 1, 0, '', ''],
+    ['3', 'a1', 'c1', 'al2', true, true, true, '[]', 5, 0, '', ''], ['4', 'a2', 'c1', 'al2', false, false, false, '[]', 0, 0, '', '']],
+  ChamadasInfo: [['ID', 'AulaID', 'ClasseID', 'NumVisitantes', 'TotalOferta', 'Observacoes', 'LancadoPor', 'CriadoEm']],
+  PontosExtras: [['ID', 'Nome', 'Pontos', 'Ativo']],
+  Professores: [['ID', 'AlunoOrigemID', 'UsuarioID', 'Nome', 'ClasseID', 'Telefone', 'DataNasc', 'Endereco', 'Email', 'Cursos', 'Ativo', 'CriadoEm']],
+  Usuarios: [COLS_USUARIOS],
+});
+
+test('EBD ranking: padrão é por presença; modo pontos soma bíblia, revista e extras', () => {
+  const env = envComPerfil('admin', ABAS_EBD());
+  const pres = env.run("ed_getRanking('tok', {})");
+  assert.equal(pres.success, true, JSON.stringify(pres));
+  assert.equal(pres.data.modo, 'presenca');
+  assert.deepEqual(pres.data.lista.map((x) => [x.nome, x.presencas, x.percentual]), [['Ana', 2, 100], ['Bruno', 1, 50]]);
+  const pts = env.run("ed_getRanking('tok', { modo: 'pontos' })");
+  assert.deepEqual(pts.data.lista.map((x) => [x.nome, x.pontos]), [['Bruno', 5], ['Ana', 2]]);
+});
+
+test('EBD config: modos começam em presença; só admin/secretaria salvam; valores inválidos são recusados', () => {
+  const env = envComPerfil('admin', ABAS_EBD());
+  assert.deepEqual(env.run("ed_getConfigEbd('tok')").data.modoChamada, 'presenca');
+  assert.equal(env.run("ed_salvarConfigEbd('tok', { modoChamada: 'xx' })").success, false);
+  assert.equal(env.run("ed_salvarConfigEbd('tok', { modoChamada: 'completa', modoRanking: 'pontos', pontos: { biblia: 3 } })").success, true);
+  const c = env.run("ed_getConfigEbd('tok')").data;
+  assert.deepEqual([c.modoChamada, c.modoRanking, c.pontos.biblia], ['completa', 'pontos', 3]);
+  assert.equal(env.run("ed_getRanking('tok', {})").data.modo, 'pontos');
+  assert.equal(envComPerfil('professor', ABAS_EBD()).run("ed_salvarConfigEbd('tok', { modoChamada: 'completa' })").success, false);
+});
+
+test('EBD chamada: no modo presença, salvar não apaga bíblia/revista já lançadas', () => {
+  const env = envComPerfil('admin', ABAS_EBD());
+  assert.equal(env.run("ed_getChamada('tok', 'a1', 'c1')").data.modo, 'presenca');
+  const r = env.run("ed_salvarChamada('tok', 'a1', 'c1', [{ alunoId: 'al2', presente: true, biblia: false, revista: false, pontosExtras: [] }], {})");
+  assert.equal(r.success, true, JSON.stringify(r));
+  const al2 = env.run("ed_getChamada('tok', 'a1', 'c1')").data.alunos.filter((a) => a.alunoId === 'al2')[0];
+  assert.equal(al2.biblia, true);
+  assert.equal(al2.revista, true);
+});
+
+test('EBD visão geral: totais, turmas sem chamada e top do ranking', () => {
+  const env = envComPerfil('admin', ABAS_EBD());
+  const v = env.run("ed_getVisaoGeral('tok')");
+  assert.equal(v.success, true, JSON.stringify(v));
+  assert.deepEqual([v.data.totais.alunos, v.data.totais.turmas], [2, 1]);
+  assert.equal(v.data.ranking.top[0].nome, 'Ana');
+  assert.equal(v.data.presenca.recentes.length, 2);
+});

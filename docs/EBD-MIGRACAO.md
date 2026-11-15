@@ -16,7 +16,8 @@ Origem: `modulos-pendentes/escola-dominical/` (legado, mantido como referência)
 | E2 | Manifesto registrado, `professor` reativado (Code.js, Usuarios.js, `_usuarios.html`, `PERFIL_LABEL`), novo `_escola-dominical.html` com a tela **Chamada** (prefixo `edm-`/`EDM`), mini-modal "Nova aula" (provisório até a tela Aulas), pontos extras ao tocar no nome do aluno, e2e `tests/e2e/ebd.e2e.js` | feito |
 | E3a | Turmas e Alunos (lista + FAB + modal; professor só vê Chamada e Alunos) | feito |
 | E3b | Professores (vínculo usuário↔turma) e Aulas | feito |
-| E3c | Ranking, Relatórios, Visão geral (mock aprovado) | pendente |
+| E3c | Visão geral (mock aprovado), Ranking, modos configuráveis (ícone de ajustes no cabeçalho de Chamada/Ranking) | feito |
+| E3d | Relatórios | pendente |
 | E4 | Integração: Membros ("Importar da EBD"), KPIs da Home, atividade | pendente |
 | E5 | Alertas automáticos + importador 5 passos | pendente |
 
@@ -34,3 +35,9 @@ Origem: `modulos-pendentes/escola-dominical/` (legado, mantido como referência)
 2. Implemente `renderEscolaDominical` por tela (hoje só Chamada) usando os mesmos blocos: `.edm-hero`, `.edm-atalhos` (`.hm-mod`), `.edm-chips`, `.edm-row`, `.edm-bar`.
 3. Professor: o servidor já restringe turmas (`_classesDoProfessor`); sem permissão de criar aula/turma/aluno.
 4. Mock de preview: `tests/preview/mock-backend.js` (funções `ed_*`).
+
+## Modos configuráveis (Config: `EBD_MODO_CHAMADA`, `EBD_MODO_RANKING`, `PONTOS_*`)
+- **Chamada**: `presenca` (padrão: só o toggle de presença) ou `completa` (bíblia, revista e pontos extras por aluno). No modo presença o servidor **preserva** bíblia/revista/extras já lançados antes.
+- **Ranking**: `presenca` (padrão: nº de presenças, desempate por %) ou `pontos` (soma de `TotalPontos` das chamadas: presença + bíblia + revista + extras). O ranking tem seletor local Presença/Pontos, turma e trimestre; o padrão vem da config.
+- Ajustes salvos por `ed_salvarConfigEbd` (admin/secretaria). Admin/secretaria abrem na Visão geral; professor, na Chamada.
+- Endpoints novos: `ed_getRanking`, `ed_getVisaoGeral`, `ed_getConfigEbd`, `ed_salvarConfigEbd`.
