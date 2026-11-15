@@ -59,3 +59,7 @@ Origem: `modulos-pendentes/escola-dominical/` (legado, mantido como referência)
 - No **primeiro salvamento** da chamada de uma turma/aula, `ChamadasInfo` ganha `Matriculados` e `RetratoJSON` (quem estava na turma: alunos + professores, com nome). Colunas são acrescentadas automaticamente em planilhas antigas (`_garantirColunas`).
 - `getRelatorioAula` usa `Matriculados` do retrato (aula lançada) → excluir/incluir/transferir aluno **não altera** percentuais antigos. `getChamada` de aula lançada lista o retrato; regravar ignora quem não estava nele. Aulas lançadas antes desta versão (sem retrato) continuam calculando pela turma atual.
 - **Transferência de turma travada** durante o trimestre em curso (`editarAluno` recusa mudar `ClasseID`). Trimestre em curso = o da aula mais recente, se ela for futura ou tiver até 28 dias; depois disso a transferência é liberada (virada do trimestre).
+
+## Frequência do aluno no trimestre (Chamada)
+- Abaixo de cada aluno/professor na chamada há uma linha com uma bolinha por lição do trimestre (✓ presente, ✕ ausente, tracejada = sem registro) e o resumo `presentes/lançadas · %` (percentual sobre as lições já registradas). A lição aberta é destacada e acompanha a marcação feita na hora.
+- Dados: `ed_getChamada` devolve `historicoPresenca` (por aluno e nº da lição), `licoes` (nºs das aulas do trimestre) e `totalLicoes`. Render em `_edmTimeline` (`_escola-dominical.html`).

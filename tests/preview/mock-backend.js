@@ -68,7 +68,7 @@ function serializar(perfil) {
         ['Eduarda Martins', 1, 1, 1], ['Felipe Araújo', 1, 0, 1], ['Gabriela Rocha', 1, 1, 0],
       ].map(function (x, i) { return { alunoId: 'al' + i, nome: x[0], isProfessor: false, presente: !!x[1], biblia: !!x[2], revista: !!x[3], pontosExtras: [] }; }),
       extras: [{ ID: 'e1', Nome: 'Memorizou o versículo', Pontos: 3 }], pontos: { presenca: 1, biblia: 2, revista: 2 },
-      jaLancada: true, podeEditar: true, turmaNome: 'Jovens', aula: { numLicao: '7', data: '15/11/2026' }, turmaInfo: { numVisitantes: 3, totalOferta: 45, observacoes: '' },
+      licoes: [1,2,3,4,5,6,7,8,9,10,11,12,13], historicoPresenca: { al0: {1:true,2:true,3:false,4:true,5:true,6:true,7:true}, al1: {1:true,2:false,3:false,4:true,5:true,6:false,7:true}, al2: {1:true,2:true,3:true,4:true,5:true,6:true,7:true}, al3: {1:false,2:false,3:true,4:false,5:false,6:true,7:false} }, jaLancada: true, podeEditar: true, turmaNome: 'Jovens', aula: { numLicao: '7', data: '15/11/2026' }, turmaInfo: { numVisitantes: 3, totalOferta: 45, observacoes: '' },
     }),
     ed_getHistoricoChamadas: () => ok({ trimestre: '4', ano: '2026', pendentes: 2, podeCriarAula: true, aulas: [
       { id: 'a7', numLicao: '7', data: '15/11/2026', turmas: 5, lancadas: 3, status: 'pendente', hoje: true, futura: false },

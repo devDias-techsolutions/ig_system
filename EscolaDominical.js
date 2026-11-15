@@ -596,6 +596,7 @@ var EscolaDominical = (function () {
       return Util.ok({
         modo: _modoChamada(cfgPts), alunos: resultado, extras: extras, pontos: pontos, jaLancada: chamadas.length > 0,
         turmaInfo: turmaInfo, historicoPresenca: histMap, totalLicoes: aulasTrimestre.length, trimestre: trimAtual,
+        licoes: aulasTrimestre.map(function (a) { return Number(a.NumLicao) || 0; }),
         podeEditar: _podeEditarChamada(sess, aulaAtual), retratoFixo: !!retrato,
         aula: { id: aulaId, numLicao: aulaAtual.NumLicao, titulo: aulaAtual.Titulo, data: aulaAtual.Data, trimestre: trimAtual },
         turmaNome: classeRow.Nome || ''

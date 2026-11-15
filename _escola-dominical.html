@@ -45,6 +45,18 @@
 .edm-lista-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-2); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
 .edm-lista-head .edm-dica { text-transform: none; letter-spacing: 0; font-weight: 600; }
 .edm-row { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-2) var(--sp-3); margin-bottom: var(--sp-2); border-radius: var(--r-3); background: var(--bg-glass-strong); border: 1px solid var(--border); }
+.edm-row:has(.edm-tl) { flex-wrap: wrap; }
+.edm-tl { flex: 0 0 100%; display: flex; align-items: flex-end; gap: var(--sp-3); padding-top: var(--sp-2); border-top: 1px dashed var(--border); }
+.edm-tl-track { flex: 1; min-width: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; }
+.edm-tl-seg { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.edm-tl-seg small { font-size: var(--fs-xs); font-weight: 700; line-height: 1; color: var(--text-dim); }
+.edm-tl-seg.cur small { color: var(--teal); }
+.edm-tl-dot { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: var(--fs-xs); font-weight: 800; line-height: 1; border: 1.5px dashed var(--border-strong); color: transparent; }
+.edm-tl-dot.p { color: var(--success); background: var(--success-dim); border: 1.5px solid var(--success); }
+.edm-tl-dot.a { color: var(--danger); background: var(--danger-dim); border: 1.5px solid var(--danger); }
+.edm-tl-seg.cur .edm-tl-dot { box-shadow: 0 0 0 2px var(--teal-dim); }
+.edm-tl-stat { flex-shrink: 0; font-size: var(--fs-xs); font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+.edm-tl-stat b { color: var(--text); font-weight: 800; }
 .edm-av { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; font-size: var(--fs-xs); font-weight: 800; background: var(--teal-dim); color: var(--teal); }
 .edm-info { flex: 1; min-width: 0; text-align: left; background: none; border: 0; padding: 0; color: inherit; font-family: inherit; cursor: pointer; }
 .edm-nome { display: block; font-size: var(--fs-sm); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -334,6 +346,7 @@ function edmCarregarChamada() {
       EDM.alunos = d.alunos || []; EDM.extras = d.extras || []; EDM.jaLancada = !!d.jaLancada;
       EDM.pontos = d.pontos || EDM.pontos;
       EDM.modo = d.modo || 'presenca';
+      EDM.histPres = d.historicoPresenca || {}; EDM.licoes = d.licoes || [];
       EDM.podeEditarCh = !!d.podeEditar; EDM.turmaNome = d.turmaNome || ''; EDM.aulaInfo = d.aula || {};
       var ti = d.turmaInfo || {};
       EDM.visitantes = Number(ti.numVisitantes) || 0;
@@ -437,6 +450,22 @@ function edmRender() {
 }
 function edmEditar() { EDM.editando = true; edmRender(); }
 
+// Frequência do aluno no trimestre: uma bolinha por lição (✓ presente, ✕ ausente, vazio = sem registro). A lição aberta segue o que está marcado agora.
+function _edmTimeline(a) {
+  var lic = EDM.licoes || []; if (!lic.length) return '';
+  var hist = (EDM.histPres || {})[String(a.alunoId)] || {};
+  var atual = Number((EDM.aulaInfo || {}).numLicao), pres = 0, tot = 0;
+  var segs = lic.map(function (n) {
+    var est = Object.prototype.hasOwnProperty.call(hist, n) ? (hist[n] ? 'p' : 'a') : 'v';
+    if (n === atual) est = a.presente ? 'p' : (EDM.jaLancada ? 'a' : 'v');
+    if (est !== 'v') tot++;
+    if (est === 'p') pres++;
+    var tip = 'Lição ' + n + ' — ' + (est === 'p' ? 'Presente' : est === 'a' ? 'Ausente' : 'Sem registro');
+    return '<span class="edm-tl-seg' + (n === atual ? ' cur' : '') + '" title="' + tip + '"><small>' + n + '</small><i class="edm-tl-dot ' + est + '">' + (est === 'p' ? '✓' : est === 'a' ? '✕' : '') + '</i></span>';
+  }).join('');
+  var pct = tot ? Math.round(pres * 100 / tot) : 0; // % sobre as lições já registradas, não sobre as futuras
+  return '<div class="edm-tl"><div class="edm-tl-track">' + segs + '</div><div class="edm-tl-stat"><b>' + pres + '</b>/' + tot + ' · <b>' + pct + '%</b></div></div>';
+}
 function edmPintar() {
   var lista = document.getElementById('edm-lista'); if (!lista) return;
   var p = 0, b = 0, r = 0;
@@ -464,7 +493,7 @@ function edmPintar() {
         '<button class="edm-tg t-pres' + (a.presente ? ' on' : '') + '"' + (ed ? '' : ' disabled') + ' onclick="edmTog(' + i + ',\'presente\')" aria-label="Presente" aria-pressed="' + !!a.presente + '"><i data-lucide="check"></i></button>' +
         (completa ? '<button class="edm-tg t-bib' + (a.biblia ? ' on' : '') + '"' + (a.presente && ed ? '' : ' disabled') + ' onclick="edmTog(' + i + ',\'biblia\')" aria-label="Bíblia" aria-pressed="' + !!a.biblia + '"><i data-lucide="book-open"></i></button>' +
         '<button class="edm-tg t-rev' + (a.revista ? ' on' : '') + '"' + (a.presente && ed ? '' : ' disabled') + ' onclick="edmTog(' + i + ',\'revista\')" aria-label="Revista" aria-pressed="' + !!a.revista + '"><i data-lucide="graduation-cap"></i></button>' : '') +
-      '</div></div>';
+      '</div>' + _edmTimeline(a) + '</div>';
   }).join('');
   if (window.lucide) lucide.createIcons();
 }

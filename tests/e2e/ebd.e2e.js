@@ -40,10 +40,13 @@ test('EBD: modo completo — admin marca presença/bíblia, salva e a planilha r
   await page.waitForSelector('#edm-panel .edm-bento', { timeout: 6000 }); // admin abre na Visão geral
   await abrirChamada(page, 'Jovens');
   assert.equal(await page.locator('#edm-lista .edm-row').count(), 2);
+  assert.equal(await page.locator('#edm-lista .edm-row:first-child .edm-tl-dot').count(), 1, 'linha de frequência do trimestre (1 lição cadastrada)');
+  assert.equal(await page.locator('#edm-lista .edm-row:first-child .edm-tl-dot.p').count(), 0);
   assert.equal(await page.locator('#edm-lista .edm-row:first-child .edm-tg').count(), 3);
   await page.evaluate(() => { edmTog(0, 'presente'); edmTog(0, 'biblia'); });
   assert.match(await page.innerText('#edm-chips'), /1\s*Presentes/);
   assert.match(await page.innerText('#edm-lista .edm-row'), /\+3 pts/);
+  assert.equal(await page.locator('#edm-lista .edm-row:first-child .edm-tl-dot.p').count(), 1, 'lição atual marcada vira ✓ ao vivo');
   // oferta em padrão bancário: dígitos entram pela direita
   await page.click('#edm-oferta');
   await page.keyboard.type('1000');
