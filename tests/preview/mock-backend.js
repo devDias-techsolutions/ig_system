@@ -76,6 +76,8 @@ function serializar(perfil) {
       { id: 'a5', numLicao: '5', data: '01/11/2026', turmas: 5, lancadas: 4, status: 'pendente', hoje: false, futura: false },
       { id: 'a4', numLicao: '4', data: '25/10/2026', turmas: 5, lancadas: 5, status: 'ok', hoje: false, futura: false },
     ] }),
+    ed_getFrequenciaTrimestre: () => ok({ trimestre: '4', ano: '2026', licoes: [1,2,3,4,5,6,7,8,9,10,11,12,13], hist: {
+      al1: {1:true,2:true,3:false,4:true,5:true,6:true,7:true}, al2: {1:true,2:false,3:false,4:true,5:true,6:false,7:true}, al3: {1:false,2:true,3:true,4:true,5:false,6:true,7:true} } }),
     ed_salvarChamada: () => ok({ mensagem: 'Chamada salva com sucesso.' }),
     ed_getRelatorioAula: () => ok({
       modo: 'completa', aula: { id: 'a7', numLicao: '7', trimestre: '4', data: '15/11/2026', titulo: '' }, totalTurmas: 2,

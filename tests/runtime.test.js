@@ -1069,6 +1069,20 @@ test('EBD histórico: aulas do trimestre em curso com status OK/pendente por tur
   assert.equal(h.podeCriarAula, true);
 });
 
+test('EBD frequência do trimestre: presença por aluno e lição; professor só vê as próprias turmas', () => {
+  const abas = ABAS_EBD_HOJE(-7);
+  abas.Aulas.push(['a0', dBR(-14), '4', '0', '', String(new Date().getFullYear()), '', dBR(-14) + ' 10:00:00']);
+  abas.Chamadas.push(['1', 'a1', 'c1', 'al1', true, false, false, '[]', 1, 0, '', ''], ['2', 'a0', 'c1', 'al1', false, false, false, '[]', 0, 0, '', ''], ['3', 'a1', 'c2', 'al9', true, false, false, '[]', 1, 0, '', '']);
+  const f = envComPerfil('admin', abas).run("ed_getFrequenciaTrimestre('tok')");
+  assert.equal(f.success, true, JSON.stringify(f));
+  assert.deepEqual(f.data.licoes, [0, 1]);
+  assert.deepEqual(f.data.hist.al1, { 1: true, 0: false });
+  abas.Professores.push(['p1', '', 'u9', 'Paulo', 'c1', '', '', '', '', '', true, '']);
+  const fp = envComPerfil('professor', abas).run("ed_getFrequenciaTrimestre('tok')").data;
+  assert.equal(fp.hist.al9, undefined);
+  assert.ok(fp.hist.al1);
+});
+
 test('EBD demo: só admin; popular exige base vazia; limpar zera; 5 turmas, 4–15 alunos, professores 2/2/2/1/1 e aula de hoje sem chamada', () => {
   const sec = envComPerfil('secretaria', ABAS_EBD());
   assert.equal(sec.run("ed_popularDemo('tok')").success, false);

@@ -45,7 +45,13 @@
 .edm-lista-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-2); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
 .edm-lista-head .edm-dica { text-transform: none; letter-spacing: 0; font-weight: 600; }
 .edm-row { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-2) var(--sp-3); margin-bottom: var(--sp-2); border-radius: var(--r-3); background: var(--bg-glass-strong); border: 1px solid var(--border); }
+.edm-aulacard { padding: 0; gap: 0; }
+.edm-aulabtn { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-2) var(--sp-3); border: 0; background: none; text-align: left; font-family: inherit; color: inherit; cursor: pointer; }
+.edm-kebab { width: 44px; align-self: stretch; border: 0; border-left: 1px solid var(--border); background: none; color: var(--text-muted); cursor: pointer; display: grid; place-items: center; }
+.edm-kebab i, .edm-kebab svg { width: 20px; height: 20px; }
 .edm-row:has(.edm-tl) { flex-wrap: wrap; }
+.edm-tl-bar { flex: 0 0 100%; height: 4px; border-radius: var(--r-pill); background: var(--teal-dim); overflow: hidden; }
+.edm-tl-bar i { display: block; height: 100%; border-radius: var(--r-pill); }
 .edm-tl { flex: 0 0 100%; display: flex; align-items: flex-end; gap: var(--sp-3); padding-top: var(--sp-2); border-top: 1px dashed var(--border); }
 .edm-tl-track { flex: 1; min-width: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; }
 .edm-tl-seg { display: flex; flex-direction: column; align-items: center; gap: 2px; }
@@ -182,8 +188,8 @@
 
 <script>
 // ══ Escola Dominical — estado e telas ═══════════════════
-var EDM_TELAS = [['visao', 'layout-grid', 'Visão geral'], ['chamada', 'clipboard-check', 'Chamada'], ['turmas', 'users-round', 'Turmas'], ['alunos', 'graduation-cap', 'Alunos'], ['professores', 'book-user', 'Professores'], ['aulas', 'calendar-days', 'Aulas'], ['relatorios', 'bar-chart-3', 'Relatórios'], ['ranking', 'trophy', 'Ranking']];
-var EDM_TITULOS = { visao: 'Visão geral', chamada: 'Chamada', turmas: 'Turmas', alunos: 'Alunos', professores: 'Professores', aulas: 'Aulas', relatorios: 'Relatórios', ranking: 'Ranking' };
+var EDM_TELAS = [['visao', 'layout-grid', 'Visão geral'], ['chamada', 'clipboard-check', 'Aulas e Chamada'], ['turmas', 'users-round', 'Turmas'], ['alunos', 'graduation-cap', 'Alunos'], ['professores', 'book-user', 'Professores'], ['relatorios', 'bar-chart-3', 'Relatórios'], ['ranking', 'trophy', 'Ranking']];
+var EDM_TITULOS = { visao: 'Visão geral', chamada: 'Aulas e Chamada', turmas: 'Turmas', alunos: 'Alunos', professores: 'Professores', relatorios: 'Relatórios', ranking: 'Ranking' };
 // Professor só lança chamada e consulta alunos; o resto é da secretaria/admin.
 function edmTelasDoPerfil() {
   var prof = App.session && App.session.perfil === 'professor';
@@ -194,7 +200,7 @@ var EDM = {
   tela: 'chamada', classes: [], aulas: [], classeId: '', aulaId: '',
   modo: 'presenca', modoRanking: 'presenca', vg: null, relAulaId: '', rel: null, rk: { modo: '', turma: '', tri: '', lista: [] }, alunos: [], todosAlunos: [], professores: [], filtroTurma: '', busca: '', extras: [], pontos: { presenca: 1, biblia: 2, revista: 2 },
   visitantes: 0, ofertaC: 0, obs: '', jaLancada: false, salvando: false, extraAluno: null,
-  nivel: 'hist', hist: null, relAula: null, editando: false, podeEditarCh: false, turmaNome: '', aulaInfo: {}
+  nivel: 'hist', hist: null, freq: null, relAula: null, editando: false, podeEditarCh: false, turmaNome: '', aulaInfo: {}
 };
 
 function _edmEsc(s) { return escHtml(s == null ? '' : String(s)); }
@@ -252,15 +258,6 @@ function renderEscolaDominical() {
       '<div class="edm-hero-sub" id="edm-sub">Carregando…</div>' +
     '</div>' + atalhos +
     '<div id="edm-panel" class="page"><div class="edm-vazio"><div class="loader-spinner" style="margin:0 auto"></div></div></div>' +
-    '<div class="modal-overlay" id="modal-edm-aula" onclick="if(event.target===this)edmFecharModal(\'modal-edm-aula\')"><div class="modal-box">' +
-      '<div class="modal-header"><div><h3>Nova aula</h3><div class="modal-sub">Registre a lição do domingo</div></div></div>' +
-      '<div class="modal-body">' +
-        '<div class="field"><label for="edm-aula-data">Data</label><input type="date" id="edm-aula-data"></div>' +
-        '<div class="field"><label for="edm-aula-tri">Trimestre</label><select id="edm-aula-tri"><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></div>' +
-        '<div class="field"><label for="edm-aula-num">Número da lição</label><input type="number" id="edm-aula-num" min="1" inputmode="numeric" placeholder="Ex.: 7"></div>' +
-      '</div>' +
-      '<div class="modal-footer"><button class="btn btn-secondary" onclick="edmFecharModal(\'modal-edm-aula\')">Cancelar</button><button class="btn btn-primary" id="edm-aula-salvar" onclick="edmSalvarAula()">Salvar aula</button></div>' +
-    '</div></div>' +
     '<div class="modal-overlay" id="modal-edm-form" onclick="if(event.target===this)edmFecharModal(\'modal-edm-form\')"><div class="modal-box">' +
       '<div class="modal-header"><div><h3 id="edm-form-titulo"></h3></div></div>' +
       '<div class="modal-body" id="edm-form-corpo"></div>' +
@@ -384,19 +381,20 @@ function edmRender() {
   var h = '';
   if (EDM.nivel === 'hist') {
     var hs = EDM.hist || { aulas: [] };
-    if (ti) ti.textContent = 'Chamada';
+    if (ti) ti.textContent = 'Aulas e Chamada';
     if (sub) sub.textContent = hs.trimestre ? hs.trimestre + 'º trimestre ' + hs.ano + (hs.pendentes ? ' · ' + hs.pendentes + (hs.pendentes === 1 ? ' aula com pendência' : ' aulas com pendências') : ' · tudo em dia') : 'Nenhuma aula cadastrada';
-    if (hs.podeCriarAula) h += '<button type="button" class="edm-nova" onclick="edmNovaAula()"><span><i data-lucide="plus"></i></span><div><b>Nova aula</b><small>Cadastre a lição do domingo</small></div></button>';
+    if (hs.podeCriarAula) h += '<button type="button" class="edm-nova" onclick="edmFormAula()"><span><i data-lucide="plus"></i></span><div><b>Nova aula</b><small>Cadastre a lição do domingo</small></div></button>';
     if (!hs.aulas.length) {
       h += '<div class="edm-vazio">' + (hs.podeCriarAula ? 'Nenhuma aula neste trimestre. Toque em “Nova aula” para começar.' : 'Nenhuma aula cadastrada ainda. Peça à secretaria.') + '</div>';
     } else {
       h += '<div class="edm-lista-head"><span>Aulas do trimestre · ' + hs.aulas.length + '</span><span class="edm-dica">Toque para ver as turmas</span></div>';
       h += hs.aulas.map(function (a) {
         var st = a.status === 'ok' ? _edmStatus('ok', 'OK') : a.futura ? _edmStatus('fut', 'Agendada') : _edmStatus('pend', '!');
-        return '<button type="button" class="edm-row edm-card" onclick="edmAbrirAula(\'' + _edmEsc(a.id) + '\')">' +
+        return '<div class="edm-row edm-aulacard"><button type="button" class="edm-aulabtn" onclick="edmAbrirAula(\'' + _edmEsc(a.id) + '\')">' +
           '<div class="edm-av edm-av-lic">L' + _edmEsc(a.numLicao) + '</div>' +
-          '<div class="edm-info"><span class="edm-nome">Lição ' + _edmEsc(a.numLicao) + (a.hoje ? ' <span class="edm-tag">Hoje</span>' : '') + '</span>' +
-          '<span class="edm-meta">' + _edmEsc(_edmData(a.data) ? _edmData(a.data).toLocaleDateString('pt-BR') : '') + ' · ' + a.lancadas + '/' + a.turmas + ' turmas</span></div>' + st + '</button>';
+          '<div class="edm-info"><span class="edm-nome">' + _edmEsc(hs.trimestre + 'º Trim. — Lição ' + a.numLicao) + (a.hoje ? ' <span class="edm-tag">Hoje</span>' : '') + '</span>' +
+          '<span class="edm-meta">' + _edmEsc(_edmData(a.data) ? _edmData(a.data).toLocaleDateString('pt-BR') : '') + (a.titulo ? ' · ' + _edmEsc(a.titulo) : '') + ' · ' + a.lancadas + '/' + a.turmas + ' turmas</span></div>' + st + '</button>' +
+          (hs.podeCriarAula ? '<button type="button" class="edm-kebab" onclick="edmMenuAula(\'' + _edmEsc(a.id) + '\')" aria-label="Opções da aula"><i data-lucide="more-vertical"></i></button>' : '') + '</div>';
       }).join('');
     }
   } else if (EDM.nivel === 'aula') {
@@ -449,22 +447,39 @@ function edmRender() {
   if (window.lucide) lucide.createIcons();
 }
 function edmEditar() { EDM.editando = true; edmRender(); }
+function edmMenuAula(id) {
+  var a = _edmAulaPorId(id); if (!a) return;
+  document.getElementById('edm-form-titulo').textContent = 'Lição ' + a.NumLicao;
+  document.getElementById('edm-form-corpo').innerHTML =
+    '<button type="button" class="edm-extra" onclick="edmFormAula(\'' + _edmEsc(id) + '\')"><span><i data-lucide="pencil" class="ic-16"></i> Editar aula</span></button>' +
+    '<button type="button" class="edm-extra" onclick="EDM.editId=\'' + _edmEsc(id) + '\';edmFecharModal(\'modal-edm-form\');edmExcluirAula()"><span style="color:var(--danger)"><i data-lucide="trash-2" class="ic-16"></i> Excluir aula</span></button>';
+  document.getElementById('edm-form-rodape').innerHTML = '<button class="btn btn-secondary btn-full" onclick="edmFecharModal(\'modal-edm-form\')">Fechar</button>';
+  edmAbrirModal('modal-edm-form');
+  if (window.lucide) lucide.createIcons();
+}
 
-// Frequência do aluno no trimestre: uma bolinha por lição (✓ presente, ✕ ausente, vazio = sem registro). A lição aberta segue o que está marcado agora.
-function _edmTimeline(a) {
-  var lic = EDM.licoes || []; if (!lic.length) return '';
-  var hist = (EDM.histPres || {})[String(a.alunoId)] || {};
-  var atual = Number((EDM.aulaInfo || {}).numLicao), pres = 0, tot = 0;
-  var segs = lic.map(function (n) {
+// Frequência do aluno no trimestre: uma bolinha por lição (✓ presente, ✕ ausente, tracejada = sem registro) + resumo e barra.
+// vivo (opcional): { licao, presente, lancada } — a lição aberta na chamada acompanha a marcação feita agora.
+function _edmLinhaFreq(alunoId, hist, licoes, vivo) {
+  if (!licoes || !licoes.length) return '';
+  hist = hist || {};
+  var pres = 0, tot = 0;
+  var segs = licoes.map(function (n) {
     var est = Object.prototype.hasOwnProperty.call(hist, n) ? (hist[n] ? 'p' : 'a') : 'v';
-    if (n === atual) est = a.presente ? 'p' : (EDM.jaLancada ? 'a' : 'v');
+    var atual = vivo && n === vivo.licao;
+    if (atual) est = vivo.presente ? 'p' : (vivo.lancada ? 'a' : 'v');
     if (est !== 'v') tot++;
     if (est === 'p') pres++;
     var tip = 'Lição ' + n + ' — ' + (est === 'p' ? 'Presente' : est === 'a' ? 'Ausente' : 'Sem registro');
-    return '<span class="edm-tl-seg' + (n === atual ? ' cur' : '') + '" title="' + tip + '"><small>' + n + '</small><i class="edm-tl-dot ' + est + '">' + (est === 'p' ? '✓' : est === 'a' ? '✕' : '') + '</i></span>';
+    return '<span class="edm-tl-seg' + (atual ? ' cur' : '') + '" title="' + tip + '"><small>' + n + '</small><i class="edm-tl-dot ' + est + '">' + (est === 'p' ? '✓' : est === 'a' ? '✕' : '') + '</i></span>';
   }).join('');
   var pct = tot ? Math.round(pres * 100 / tot) : 0; // % sobre as lições já registradas, não sobre as futuras
-  return '<div class="edm-tl"><div class="edm-tl-track">' + segs + '</div><div class="edm-tl-stat"><b>' + pres + '</b>/' + tot + ' · <b>' + pct + '%</b></div></div>';
+  var cor = pct >= 75 ? 'var(--success)' : pct >= 50 ? 'var(--gold)' : 'var(--danger)';
+  return '<div class="edm-tl"><div class="edm-tl-track">' + segs + '</div><div class="edm-tl-stat"><b>' + pres + '</b>/' + tot + ' · <b>' + pct + '%</b></div></div>' +
+    '<div class="edm-tl-bar"><i style="width:' + pct + '%;background:' + cor + '"></i></div>';
+}
+function _edmTimeline(a) {
+  return _edmLinhaFreq(a.alunoId, (EDM.histPres || {})[String(a.alunoId)], EDM.licoes, { licao: Number((EDM.aulaInfo || {}).numLicao), presente: !!a.presente, lancada: EDM.jaLancada });
 }
 function edmPintar() {
   var lista = document.getElementById('edm-lista'); if (!lista) return;
@@ -531,32 +546,6 @@ function edmTogExtra(k) {
   edmPintarExtras(); edmPintar();
 }
 
-// ── Nova aula ───────────────────────────────────────────
-function edmNovaAula() {
-  var d = new Date(), z = function (n) { return (n < 10 ? '0' : '') + n; };
-  document.getElementById('edm-aula-data').value = d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate());
-  document.getElementById('edm-aula-tri').value = String(Math.floor(d.getMonth() / 3) + 1);
-  document.getElementById('edm-aula-num').value = '';
-  edmAbrirModal('modal-edm-aula');
-}
-function edmSalvarAula() {
-  var num = (document.getElementById('edm-aula-num').value || '').trim();
-  if (!num) { showToast('Informe o número da lição.', 'error'); return; }
-  var iso = document.getElementById('edm-aula-data').value || '', pp = iso.split('-');
-  var dados = { NumLicao: num, Trimestre: document.getElementById('edm-aula-tri').value, Data: pp.length === 3 ? pp[2] + '/' + pp[1] + '/' + pp[0] : '', Titulo: '' };
-  var btn = document.getElementById('edm-aula-salvar'); btn.disabled = true;
-  google.script.run
-    .withFailureHandler(function (e) { btn.disabled = false; showToast((e && e.message) || 'Erro ao salvar a aula.', 'error'); })
-    .withSuccessHandler(function (r) {
-      btn.disabled = false;
-      if (!_edmResp(r, 'criarAula')) return;
-      edmFecharModal('modal-edm-aula');
-      showToast('Aula registrada.', 'success');
-      EDM.hist = null; edmCarregar();
-    })
-    .ed_criarAula(App.session.token, dados);
-}
-
 // ── Salvar chamada ──────────────────────────────────────
 function edmSalvar() {
   if (EDM.salvando) return;
@@ -604,10 +593,16 @@ function edmCarregarCadastros() {
         .usr_listar(App.session.token);
     })
     .ed_getDadosIniciais(App.session.token, ['alunos', 'professores', 'aulas']);
+  if (EDM.tela === 'alunos') {
+    google.script.run.withFailureHandler(function () {}).withSuccessHandler(function (f) {
+      if (!f || !f.success) return;
+      EDM.freq = f.data; if (EDM.tela === 'alunos' && document.getElementById('edm-alunos-lista')) edmPintarAlunos();
+    }).ed_getFrequenciaTrimestre(App.session.token);
+  }
 }
 function edmRenderCadastros() {
   if (EDM.tela === 'turmas') edmRenderTurmas(); else if (EDM.tela === 'alunos') edmRenderAlunos();
-  else if (EDM.tela === 'professores') edmRenderProfessores(); else if (EDM.tela === 'aulas') edmRenderAulas();
+  else if (EDM.tela === 'professores') edmRenderProfessores();
 }
 function _edmFab(fn, rotulo) {
   return edmPodeEditar() ? '<button class="edm-fab" onclick="' + fn + '" aria-label="' + rotulo + '" title="' + rotulo + '"><i data-lucide="plus"></i></button>' : '';
@@ -665,7 +660,8 @@ function edmPintarAlunos() {
   el.innerHTML = lista.map(function (a) {
     var meta = [_edmClasseNome(a.ClasseID), _edmIdade(a.DataNasc)].filter(Boolean).join(' · ');
     var corpo = '<div class="edm-av">' + _edmEsc(_edmIni(a.Nome)) + '</div><div class="edm-info" style="cursor:inherit"><span class="edm-nome">' + _edmEsc(a.Nome) + '</span><span class="edm-meta">' + _edmEsc(meta) + '</span></div>' +
-      '<div class="edm-count">' + (Number(a.TotalPontos) || 0) + '<small>pts</small></div>';
+      '<div class="edm-count">' + (Number(a.TotalPontos) || 0) + '<small>pts</small></div>' +
+      (EDM.freq ? _edmLinhaFreq(a.ID, EDM.freq.hist[a.ID], EDM.freq.licoes, null) : '');
     return pode ? '<button type="button" class="edm-row edm-card" onclick="edmFormAluno(\'' + _edmEsc(a.ID) + '\')">' + corpo + '</button>' : '<div class="edm-row">' + corpo + '</div>';
   }).join('');
 }
@@ -722,7 +718,7 @@ function _edmEnviar(fn, args, msgOk) {
       if (!_edmResp(r, fn)) return;
       edmFecharModal('modal-edm-form');
       showToast(msgOk, 'success');
-      EDM.alunos = []; edmCarregarCadastros();
+      if (EDM.tela === 'chamada') { EDM.hist = null; edmCarregar(); } else { EDM.alunos = []; edmCarregarCadastros(); }
     });
   run[fn].apply(run, [App.session.token].concat(args));
 }
@@ -797,20 +793,13 @@ function edmExcluirProfessor() {
     .then(function (ok) { if (ok) _edmEnviar('ed_excluirProfessor', [p.ID], 'Professor excluído.'); });
 }
 
-function edmRenderAulas() {
-  var painel = document.getElementById('edm-panel'); if (!painel) return;
-  var sub = document.getElementById('edm-sub');
-  if (sub) sub.textContent = EDM.aulas.length + (EDM.aulas.length === 1 ? ' aula registrada' : ' aulas registradas');
-  var h = EDM.aulas.length ? EDM.aulas.map(function (a) {
-    return '<button type="button" class="edm-row edm-card" onclick="edmFormAula(\'' + _edmEsc(a.ID) + '\')">' +
-      '<div class="edm-av"><i data-lucide="calendar-days" class="ic-16"></i></div>' +
-      '<div class="edm-info" style="cursor:inherit"><span class="edm-nome">Lição ' + _edmEsc(a.NumLicao) + (a.Titulo ? ' · ' + _edmEsc(a.Titulo) : '') + '</span><span class="edm-meta">' + _edmEsc((_edmDataCurta(a.Data) || 'Sem data') + ' · ' + a.Trimestre + 'º trimestre ' + (a.Ano || '')) + '</span></div></button>';
-  }).join('') : '<div class="edm-vazio">Nenhuma aula ainda. Toque no + para registrar a primeira.</div>';
-  painel.innerHTML = h + _edmFab('edmFormAula()', 'Nova aula');
-  if (window.lucide) lucide.createIcons();
+function _edmAulaPorId(id) {
+  var l = (EDM.hist && EDM.hist.aulas) || [];
+  for (var i = 0; i < l.length; i++) if (l[i].id === id) return { ID: l[i].id, NumLicao: l[i].numLicao, Titulo: l[i].titulo, Data: l[i].data, Trimestre: l[i].trimestre };
+  return null;
 }
 function edmFormAula(id) {
-  var a = id ? _edmPorId(EDM.aulas, id) : null;
+  var a = id ? _edmAulaPorId(id) : null;
   EDM.editId = a ? a.ID : '';
   var d = a ? _edmData(a.Data) : new Date(), z = function (n) { return (n < 10 ? '0' : '') + n; };
   var iso = d ? d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) : '';
@@ -833,7 +822,7 @@ function edmSalvarAula2() {
   else _edmEnviar('ed_criarAula', [dados], 'Aula registrada.');
 }
 function edmExcluirAula() {
-  var a = _edmPorId(EDM.aulas, EDM.editId); if (!a) return;
+  var a = _edmAulaPorId(EDM.editId); if (!a) return;
   showConfirm('Excluir a Lição ' + _edmEsc(a.NumLicao) + '? As chamadas já lançadas nela deixam de aparecer.', { title: 'Excluir aula', confirmLabel: 'Excluir' })
     .then(function (ok) { if (ok) _edmEnviar('ed_excluirAula', [a.ID], 'Aula excluída.'); });
 }
