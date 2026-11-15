@@ -80,11 +80,11 @@
 
 <script>
 // ══ Escola Dominical — estado e telas ═══════════════════
-var EDM_TELAS = [['chamada', 'clipboard-check', 'Chamada'], ['turmas', 'users-round', 'Turmas'], ['alunos', 'graduation-cap', 'Alunos']];
+var EDM_TELAS = [['chamada', 'clipboard-check', 'Chamada'], ['turmas', 'users-round', 'Turmas'], ['alunos', 'graduation-cap', 'Alunos'], ['professores', 'book-user', 'Professores'], ['aulas', 'calendar-days', 'Aulas']];
 // Professor só lança chamada e consulta alunos; o resto é da secretaria/admin.
 function edmTelasDoPerfil() {
   var prof = App.session && App.session.perfil === 'professor';
-  return EDM_TELAS.filter(function (t) { return !prof || t[0] !== 'turmas'; });
+  return EDM_TELAS.filter(function (t) { return !prof || ['chamada', 'alunos'].indexOf(t[0]) !== -1; });
 }
 function edmPodeEditar() { return !!App.session && App.session.perfil !== 'professor'; }
 var EDM = {
@@ -122,6 +122,12 @@ function _edmPts(a) {
   var t = EDM.pontos.presenca + (a.biblia ? EDM.pontos.biblia : 0) + (a.revista ? EDM.pontos.revista : 0);
   (a.pontosExtras || []).forEach(function (e) { t += Number(e.pontos) || 0; });
   return t;
+}
+function _edmOrdenarAulas(lista) {
+  return lista.slice().sort(function (a, b) {
+    var da = _edmData(a.Data), db = _edmData(b.Data);
+    return (db ? db.getTime() : 0) - (da ? da.getTime() : 0) || (Number(b.NumLicao) || 0) - (Number(a.NumLicao) || 0);
+  });
 }
 function _edmNum(v) { var n = parseFloat(String(v || '').replace(/\./g, '').replace(',', '.')); return isNaN(n) ? 0 : n; }
 
@@ -166,9 +172,13 @@ function renderEscolaDominical() {
 function edmIr(t) {
   EDM.tela = t;
   var bs = document.querySelectorAll('.edm-atalhos .hm-mod');
-  for (var i = 0; i < bs.length; i++) bs[i].classList.toggle('active', bs[i].getAttribute('data-tela') === t);
+  for (var i = 0; i < bs.length; i++) {
+    var on = bs[i].getAttribute('data-tela') === t;
+    bs[i].classList.toggle('active', on);
+    if (on && bs[i].scrollIntoView) { try { bs[i].scrollIntoView({ inline: 'center', block: 'nearest' }); } catch (e) {} }
+  }
   var ti = document.getElementById('edm-titulo');
-  if (ti) ti.textContent = { chamada: 'Chamada', turmas: 'Turmas', alunos: 'Alunos' }[t] || '';
+  if (ti) ti.textContent = { chamada: 'Chamada', turmas: 'Turmas', alunos: 'Alunos', professores: 'Professores', aulas: 'Aulas' }[t] || '';
   var painel = document.getElementById('edm-panel');
   if (painel) painel.innerHTML = '<div class="edm-vazio"><div class="loader-spinner" style="margin:0 auto"></div></div>';
   if (t === 'chamada') edmCarregar(); else edmCarregarCadastros();
@@ -183,10 +193,7 @@ function edmCarregar() {
     .withSuccessHandler(function (r) {
       if (!_edmResp(r, 'dados')) return;
       EDM.classes = (r.data && r.data.classes) || [];
-      EDM.aulas = ((r.data && r.data.aulas) || []).slice().sort(function (a, b) {
-        var da = _edmData(a.Data), db = _edmData(b.Data);
-        return (db ? db.getTime() : 0) - (da ? da.getTime() : 0) || (Number(b.NumLicao) || 0) - (Number(a.NumLicao) || 0);
-      });
+      EDM.aulas = _edmOrdenarAulas((r.data && r.data.aulas) || []);
       if (!EDM.classeId || !EDM.classes.some(function (c) { return c.ID === EDM.classeId; })) EDM.classeId = EDM.classes.length ? EDM.classes[0].ID : '';
       if (!EDM.aulaId || !EDM.aulas.some(function (a) { return a.ID === EDM.aulaId; })) EDM.aulaId = EDM.aulas.length ? EDM.aulas[0].ID : '';
       edmCarregarChamada();
@@ -360,12 +367,22 @@ function edmCarregarCadastros() {
       if (!_edmResp(r, 'cadastros')) return;
       var d = r.data || {};
       EDM.classes = d.classes || []; EDM.todosAlunos = d.alunos || []; EDM.professores = d.professores || [];
-      edmRenderCadastros();
+      EDM.aulas = _edmOrdenarAulas(d.aulas || []);
+      if (EDM.tela !== 'professores' || !edmPodeEditar()) { edmRenderCadastros(); return; }
+      // a tela de professores também precisa dos usuários com perfil professor (vínculo de acesso)
+      google.script.run
+        .withFailureHandler(function () { EDM.usuarios = []; edmRenderCadastros(); })
+        .withSuccessHandler(function (u) {
+          EDM.usuarios = (u && u.success ? u.data : []).filter(function (x) { return x.Perfil === 'professor' && x.Ativo !== false; });
+          edmRenderCadastros();
+        })
+        .usr_listar(App.session.token);
     })
-    .ed_getDadosIniciais(App.session.token, ['alunos', 'professores']);
+    .ed_getDadosIniciais(App.session.token, ['alunos', 'professores', 'aulas']);
 }
 function edmRenderCadastros() {
   if (EDM.tela === 'turmas') edmRenderTurmas(); else if (EDM.tela === 'alunos') edmRenderAlunos();
+  else if (EDM.tela === 'professores') edmRenderProfessores(); else if (EDM.tela === 'aulas') edmRenderAulas();
 }
 function _edmFab(fn, rotulo) {
   return edmPodeEditar() ? '<button class="edm-fab" onclick="' + fn + '" aria-label="' + rotulo + '" title="' + rotulo + '"><i data-lucide="plus"></i></button>' : '';
@@ -508,5 +525,91 @@ function edmExcluirAluno() {
   var a = _edmPorId(EDM.todosAlunos, EDM.editId); if (!a) return;
   showConfirm('Excluir o aluno "' + _edmEsc(a.Nome) + '"? Ele sai das listas e das próximas chamadas; o histórico de pontos é mantido.', { title: 'Excluir aluno', confirmLabel: 'Excluir' })
     .then(function (ok) { if (ok) _edmEnviar('ed_excluirAluno', [a.ID], 'Aluno excluído.'); });
+}
+
+// ── Professores e Aulas ─────────────────────────────────
+function _edmUsuarioNome(id) { var u = EDM.usuarios || []; for (var i = 0; i < u.length; i++) if (u[i].ID === id) return u[i].Nome; return ''; }
+function edmRenderProfessores() {
+  var painel = document.getElementById('edm-panel'); if (!painel) return;
+  var sub = document.getElementById('edm-sub');
+  if (sub) sub.textContent = EDM.professores.length + (EDM.professores.length === 1 ? ' professor' : ' professores');
+  var h = EDM.professores.length ? EDM.professores.slice().sort(function (a, b) { return String(a.Nome).localeCompare(String(b.Nome)); }).map(function (p) {
+    var acesso = p.UsuarioID ? 'Com acesso ao sistema' : 'Sem acesso ao sistema';
+    return '<button type="button" class="edm-row edm-card" onclick="edmFormProfessor(\'' + _edmEsc(p.ID) + '\')">' +
+      '<div class="edm-av">' + _edmEsc(_edmIni(p.Nome)) + '</div>' +
+      '<div class="edm-info" style="cursor:inherit"><span class="edm-nome">' + _edmEsc(p.Nome) + '</span><span class="edm-meta">' + _edmEsc((p.ClasseID ? _edmClasseNome(p.ClasseID) : 'Sem turma') + ' · ' + acesso) + '</span></div></button>';
+  }).join('') : '<div class="edm-vazio">Nenhum professor ainda. Toque no + para cadastrar.</div>';
+  painel.innerHTML = h + _edmFab('edmFormProfessor()', 'Novo professor');
+  if (window.lucide) lucide.createIcons();
+}
+function edmFormProfessor(id) {
+  var p = id ? _edmPorId(EDM.professores, id) : null;
+  EDM.editId = p ? p.ID : '';
+  var optT = '<option value="">Sem turma</option>' + EDM.classes.map(function (c) { return '<option value="' + _edmEsc(c.ID) + '"' + (p && c.ID === p.ClasseID ? ' selected' : '') + '>' + _edmEsc(c.Nome) + '</option>'; }).join('');
+  var optU = '<option value="">Sem acesso ao sistema</option>' + (EDM.usuarios || []).map(function (u) { return '<option value="' + _edmEsc(u.ID) + '"' + (p && u.ID === p.UsuarioID ? ' selected' : '') + '>' + _edmEsc(u.Nome + ' (' + u.Email + ')') + '</option>'; }).join('');
+  document.getElementById('edm-form-titulo').textContent = p ? 'Editar professor' : 'Novo professor';
+  document.getElementById('edm-form-corpo').innerHTML =
+    _edmCampo('edm-p-nome', 'Nome completo *', p && p.Nome, 'text', 'maxlength="80"') +
+    '<div class="field"><label for="edm-p-turma">Turma</label><select id="edm-p-turma">' + optT + '</select></div>' +
+    '<div class="field"><label for="edm-p-usuario">Usuário de acesso</label><select id="edm-p-usuario">' + optU + '</select>' +
+      '<div class="edm-meta" style="margin-top:var(--sp-1);white-space:normal">Crie o usuário com perfil Professor na tela Usuários para ele poder lançar chamada.</div></div>' +
+    _edmCampo('edm-p-tel', 'Telefone', p && p.Telefone, 'tel', 'inputmode="tel" maxlength="20"') +
+    _edmCampo('edm-p-email', 'E-mail', p && p.Email, 'email', 'maxlength="80"') +
+    _edmCampo('edm-p-cursos', 'Cursos / formação', p && p.Cursos, 'text', 'maxlength="120"');
+  _edmRodape('edmSalvarProfessor()', p ? 'edmExcluirProfessor()' : '');
+  edmAbrirModal('modal-edm-form');
+}
+function edmSalvarProfessor() {
+  var nome = _edmV('edm-p-nome');
+  if (!nome) { showToast('Informe o nome do professor.', 'error'); return; }
+  var dados = { Nome: nome, ClasseID: _edmV('edm-p-turma'), UsuarioID: _edmV('edm-p-usuario'), Telefone: _edmV('edm-p-tel'), Email: _edmV('edm-p-email'), Cursos: _edmV('edm-p-cursos') };
+  if (EDM.editId) _edmEnviar('ed_editarProfessor', [EDM.editId, dados], 'Professor atualizado.');
+  else _edmEnviar('ed_criarProfessor', [dados], 'Professor cadastrado.');
+}
+function edmExcluirProfessor() {
+  var p = _edmPorId(EDM.professores, EDM.editId); if (!p) return;
+  showConfirm('Excluir o professor "' + _edmEsc(p.Nome) + '"? Ele deixa de aparecer na turma e perde o acesso à chamada.', { title: 'Excluir professor', confirmLabel: 'Excluir' })
+    .then(function (ok) { if (ok) _edmEnviar('ed_excluirProfessor', [p.ID], 'Professor excluído.'); });
+}
+
+function edmRenderAulas() {
+  var painel = document.getElementById('edm-panel'); if (!painel) return;
+  var sub = document.getElementById('edm-sub');
+  if (sub) sub.textContent = EDM.aulas.length + (EDM.aulas.length === 1 ? ' aula registrada' : ' aulas registradas');
+  var h = EDM.aulas.length ? EDM.aulas.map(function (a) {
+    return '<button type="button" class="edm-row edm-card" onclick="edmFormAula(\'' + _edmEsc(a.ID) + '\')">' +
+      '<div class="edm-av"><i data-lucide="calendar-days" class="ic-16"></i></div>' +
+      '<div class="edm-info" style="cursor:inherit"><span class="edm-nome">Lição ' + _edmEsc(a.NumLicao) + (a.Titulo ? ' · ' + _edmEsc(a.Titulo) : '') + '</span><span class="edm-meta">' + _edmEsc((_edmDataCurta(a.Data) || 'Sem data') + ' · ' + a.Trimestre + 'º trimestre ' + (a.Ano || '')) + '</span></div></button>';
+  }).join('') : '<div class="edm-vazio">Nenhuma aula ainda. Toque no + para registrar a primeira.</div>';
+  painel.innerHTML = h + _edmFab('edmFormAula()', 'Nova aula');
+  if (window.lucide) lucide.createIcons();
+}
+function edmFormAula(id) {
+  var a = id ? _edmPorId(EDM.aulas, id) : null;
+  EDM.editId = a ? a.ID : '';
+  var d = a ? _edmData(a.Data) : new Date(), z = function (n) { return (n < 10 ? '0' : '') + n; };
+  var iso = d ? d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) : '';
+  var tri = a ? String(a.Trimestre) : String(Math.floor(new Date().getMonth() / 3) + 1);
+  document.getElementById('edm-form-titulo').textContent = a ? 'Editar aula' : 'Nova aula';
+  document.getElementById('edm-form-corpo').innerHTML =
+    _edmCampo('edm-u-data', 'Data', iso, 'date') +
+    '<div class="field"><label for="edm-u-tri">Trimestre</label><select id="edm-u-tri">' + [1, 2, 3, 4].map(function (n) { return '<option value="' + n + '"' + (String(n) === tri ? ' selected' : '') + '>' + n + 'º trimestre</option>'; }).join('') + '</select></div>' +
+    _edmCampo('edm-u-num', 'Número da lição *', a && a.NumLicao, 'number', 'min="1" inputmode="numeric"') +
+    _edmCampo('edm-u-titulo', 'Título (opcional)', a && a.Titulo, 'text', 'maxlength="100"');
+  _edmRodape('edmSalvarAula2()', a ? 'edmExcluirAula()' : '');
+  edmAbrirModal('modal-edm-form');
+}
+function edmSalvarAula2() {
+  var num = _edmV('edm-u-num');
+  if (!num) { showToast('Informe o número da lição.', 'error'); return; }
+  var pp = _edmV('edm-u-data').split('-');
+  var dados = { NumLicao: num, Trimestre: _edmV('edm-u-tri'), Titulo: _edmV('edm-u-titulo'), Data: pp.length === 3 ? pp[2] + '/' + pp[1] + '/' + pp[0] : '' };
+  if (EDM.editId) _edmEnviar('ed_editarAula', [EDM.editId, dados], 'Aula atualizada.');
+  else _edmEnviar('ed_criarAula', [dados], 'Aula registrada.');
+}
+function edmExcluirAula() {
+  var a = _edmPorId(EDM.aulas, EDM.editId); if (!a) return;
+  showConfirm('Excluir a Lição ' + _edmEsc(a.NumLicao) + '? As chamadas já lançadas nela deixam de aparecer.', { title: 'Excluir aula', confirmLabel: 'Excluir' })
+    .then(function (ok) { if (ok) _edmEnviar('ed_excluirAula', [a.ID], 'Aula excluída.'); });
 }
 </script>

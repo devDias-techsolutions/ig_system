@@ -59,7 +59,7 @@ function serializar(perfil) {
         { ID: 'al2', Nome: 'Bruno Henrique Lima', ClasseID: 'c1', DataNasc: '02/09/2006', TotalPontos: 281 },
         { ID: 'al3', Nome: 'Carla Dias', ClasseID: 'c2', DataNasc: '25/01/1985', TotalPontos: 190 },
       ],
-      professores: [{ ID: 'p1', Nome: 'Paulo Prof', ClasseID: 'c1' }],
+      professores: [{ ID: 'p1', Nome: 'Paulo Prof', ClasseID: 'c1', UsuarioID: 'u9' }],
       aulas: [{ ID: 'a7', Data: '15/11/2026', Trimestre: '4', NumLicao: '7', Titulo: '' }, { ID: 'a6', Data: '08/11/2026', Trimestre: '4', NumLicao: '6', Titulo: '' }],
     }),
     ed_getChamada: () => ok({

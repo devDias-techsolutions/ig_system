@@ -377,6 +377,7 @@ var EscolaDominical = (function () {
 
   function editarAula(token, id, dados) {
     return withAuth(token, function(sess) {
+      if (sess.perfil === 'professor') return Util.err('Professores não podem editar aulas.');
       var row = Util.findById('Aulas', id);
       if (!row) return Util.err('Aula não encontrada.');
       Util.updateRow('Aulas', row._rowIndex, {
