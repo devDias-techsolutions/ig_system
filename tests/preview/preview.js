@@ -93,6 +93,16 @@ async function irPara(page, rota, esperada) {
         await page.waitForTimeout(700);
         await page.screenshot({ path: path.join(OUT, `membros-form-${tam}.png`) });
       }
+      if (t.nome === 'escola-dominical') {
+        for (const sub of ['turmas', 'alunos']) {
+          await page.evaluate((x) => edmIr(x), sub);
+          await page.waitForTimeout(600);
+          await page.screenshot({ path: path.join(OUT, `ebd-${sub}-${tam}.png`) });
+        }
+        await page.evaluate(() => edmFormAluno('al1'));
+        await page.waitForTimeout(500);
+        await page.screenshot({ path: path.join(OUT, `ebd-aluno-form-${tam}.png`) });
+      }
       if (t.nome === 'usuarios') {
         await page.evaluate(() => { if (typeof usrRenderPermissoes === 'function') usrRenderPermissoes(); });
         await page.waitForTimeout(500);

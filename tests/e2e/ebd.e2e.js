@@ -52,5 +52,37 @@ test('EBD: professor entra direto na Escola Dominical e só vê a turma vinculad
   const turmas = await page.$$eval('#edm-sel-turma option', (o) => o.map((x) => x.textContent.trim()));
   assert.deepEqual(turmas, ['Adultos']);
   assert.equal(await page.locator('button[aria-label="Nova aula"]').count(), 0);
+  assert.deepEqual(await page.$$eval('.edm-atalhos .hm-mod', (b) => b.map((x) => x.getAttribute('data-tela'))), ['chamada', 'alunos']);
+  assert.deepEqual(erros, []);
+});
+
+test('EBD: secretaria cria turma e aluno pela tela e a busca filtra a lista', async () => {
+  const backend = criarBackend();
+  const { page, erros } = await abrir(browser, backend);
+  await entrar(page, 'sec@igreja.test', 'Sec#Teste1', 'home');
+  await page.evaluate(() => navigateTo('escola-dominical'));
+  await esperarTela(page, 'escola-dominical');
+  await page.waitForSelector('.edm-atalhos .hm-mod[data-tela="turmas"]');
+  await page.click('.edm-atalhos .hm-mod[data-tela="turmas"]');
+  await page.waitForSelector('.edm-fab');
+  await page.evaluate(() => edmFormTurma());
+  await page.fill('#edm-t-nome', 'Jovens');
+  await page.fill('#edm-t-faixa', '15 a 25 anos');
+  await page.evaluate(() => edmSalvarTurma());
+  await page.waitForSelector('.edm-card:has-text("Jovens")', { timeout: 6000 });
+  assert.equal(backend.ss.getSheetByName('Classes')._rows.length, 2);
+
+  await page.click('.edm-atalhos .hm-mod[data-tela="alunos"]');
+  await page.waitForSelector('#edm-busca');
+  await page.evaluate(() => edmFormAluno());
+  await page.fill('#edm-a-nome', 'Ana Souza');
+  await page.fill('#edm-a-nasc', '2005-03-12');
+  await page.evaluate(() => edmSalvarAluno());
+  await page.waitForSelector('.edm-card:has-text("Ana Souza")', { timeout: 6000 });
+  const linha = backend.ss.getSheetByName('Alunos')._rows[1];
+  assert.equal(linha[1], 'Ana Souza');
+  assert.equal(linha[2], '12/03/2005');
+  await page.fill('#edm-busca', 'zzz');
+  assert.match(await page.innerText('#edm-alunos-lista'), /Nenhum aluno encontrado/);
   assert.deepEqual(erros, []);
 });

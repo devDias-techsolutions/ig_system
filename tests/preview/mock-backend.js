@@ -53,7 +53,13 @@ function serializar(perfil) {
     usr_listar: () => ok(USUARIOS),
     usr_listarPermissoes: () => ({ success: false, error: 'sem matriz salva' }),
     ed_getDadosIniciais: () => ok({
-      classes: [{ ID: 'c1', Nome: 'Jovens' }, { ID: 'c2', Nome: 'Adultos' }],
+      classes: [{ ID: 'c1', Nome: 'Jovens', FaixaEtaria: '15 a 25 anos' }, { ID: 'c2', Nome: 'Adultos', FaixaEtaria: 'Acima de 26' }],
+      alunos: [
+        { ID: 'al1', Nome: 'Ana Beatriz Souza', ClasseID: 'c1', DataNasc: '12/03/2005', TotalPontos: 312 },
+        { ID: 'al2', Nome: 'Bruno Henrique Lima', ClasseID: 'c1', DataNasc: '02/09/2006', TotalPontos: 281 },
+        { ID: 'al3', Nome: 'Carla Dias', ClasseID: 'c2', DataNasc: '25/01/1985', TotalPontos: 190 },
+      ],
+      professores: [{ ID: 'p1', Nome: 'Paulo Prof', ClasseID: 'c1' }],
       aulas: [{ ID: 'a7', Data: '15/11/2026', Trimestre: '4', NumLicao: '7', Titulo: '' }, { ID: 'a6', Data: '08/11/2026', Trimestre: '4', NumLicao: '6', Titulo: '' }],
     }),
     ed_getChamada: () => ok({

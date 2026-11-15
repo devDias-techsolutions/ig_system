@@ -14,7 +14,8 @@ Origem: `modulos-pendentes/escola-dominical/` (legado, mantido como referência)
 | E1 | Backend na raiz: `EscolaDominical.js` (wrappers `ed_*`, `_safe_ed`), manifesto **definido mas não registrado**, abas/colunas iguais ao legado, neutralidade (nome da igreja via Config, chave `ALERTAS_CONFIG`), testes | feito |
 | E1b | Imagem wireframe→design (Chamada, Visão geral) → aprovação | aprovado |
 | E2 | Manifesto registrado, `professor` reativado (Code.js, Usuarios.js, `_usuarios.html`, `PERFIL_LABEL`), novo `_escola-dominical.html` com a tela **Chamada** (prefixo `edm-`/`EDM`), mini-modal "Nova aula" (provisório até a tela Aulas), pontos extras ao tocar no nome do aluno, e2e `tests/e2e/ebd.e2e.js` | feito |
-| E3 | Visão geral, Turmas, Alunos, Professores, Aulas, Ranking, Relatórios | pendente |
+| E3a | Turmas e Alunos (lista + FAB + modal; professor só vê Chamada e Alunos) | feito |
+| E3b | Professores (vínculo usuário↔turma), Aulas, Ranking, Relatórios, Visão geral (mock aprovado) | pendente |
 | E4 | Integração: Membros ("Importar da EBD"), KPIs da Home, atividade | pendente |
 | E5 | Alertas automáticos + importador 5 passos | pendente |
 
