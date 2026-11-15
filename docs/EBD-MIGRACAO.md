@@ -17,7 +17,7 @@ Origem: `modulos-pendentes/escola-dominical/` (legado, mantido como referência)
 | E3a | Turmas e Alunos (lista + FAB + modal; professor só vê Chamada e Alunos) | feito |
 | E3b | Professores (vínculo usuário↔turma) e Aulas | feito |
 | E3c | Visão geral (mock aprovado), Ranking, modos configuráveis (ícone de ajustes no cabeçalho de Chamada/Ranking) | feito |
-| E3d | Relatórios | pendente |
+| E3d | Relatórios: por turma + geral da aula (igual ao original), aberto automaticamente após salvar a chamada; compartilhar resumo (WhatsApp/copiar) | feito |
 | E4 | Integração: Membros ("Importar da EBD"), KPIs da Home, atividade | pendente |
 | E5 | Alertas automáticos + importador 5 passos | pendente |
 
@@ -41,3 +41,9 @@ Origem: `modulos-pendentes/escola-dominical/` (legado, mantido como referência)
 - **Ranking**: `presenca` (padrão: nº de presenças, desempate por %) ou `pontos` (soma de `TotalPontos` das chamadas: presença + bíblia + revista + extras). O ranking tem seletor local Presença/Pontos, turma e trimestre; o padrão vem da config.
 - Ajustes salvos por `ed_salvarConfigEbd` (admin/secretaria). Admin/secretaria abrem na Visão geral; professor, na Chamada.
 - Endpoints novos: `ed_getRanking`, `ed_getVisaoGeral`, `ed_getConfigEbd`, `ed_salvarConfigEbd`.
+
+## Relatórios (`ed_getRelatorioAula`)
+- Matriculados = alunos + professores ativos da turma (mesmo universo da chamada). Por turma: presentes, ausentes, visitantes, total (presentes+visitantes), bíblias/revistas (só no modo completo), oferta e % de presença (verde ≥80, dourado ≥50, vermelho abaixo).
+- Geral da aula: soma das turmas + aproveitamento por turma. Professor vê só as suas turmas.
+- Após **Salvar chamada** abre o relatório da turma com atalho para o geral. "Compartilhar" usa `navigator.share` ou copia o texto.
+- A ordem das turmas é a da planilha (o original usava uma lista fixa de nomes da igreja, que não cabe no white-label).

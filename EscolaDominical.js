@@ -826,6 +826,56 @@ var EscolaDominical = (function () {
     });
   }
 
+
+  // Relatório da aula: um bloco por turma + consolidado geral (igual ao relatório original).
+  // Matriculados = alunos + professores ativos da turma (mesmo universo da chamada).
+  function getRelatorioAula(token, aulaId) {
+    return withAuth(token, function (sess) {
+      if (!aulaId) return Util.err('Aula não informada.');
+      var aula = Util.findById('Aulas', aulaId);
+      if (!aula) return Util.err('Aula não encontrada.');
+      var ok = _classesDoProfessor(sess);
+      var classes = _safeSheetObjects('Classes').filter(function (c) { return _isAtivo(c.Ativo) && (ok === null || ok[String(c.ID)]); });
+      var alunos  = _safeSheetObjects('Alunos').filter(function (a) { return _isAtivo(a.Ativo); });
+      var profs   = _safeSheetObjects('Professores').filter(function (p) { return _isAtivo(p.Ativo); });
+      var chamadas = _safeSheetObjects('Chamadas').filter(function (c) { return c.AulaID === aulaId; });
+      var infos = {};
+      _safeSheetObjects('ChamadasInfo').forEach(function (i) { if (i.AulaID === aulaId) infos[i.ClasseID] = i; });
+
+      var geral = { matriculados: 0, presentes: 0, ausentes: 0, visitantes: 0, biblias: 0, revistas: 0, oferta: 0, turmasLancadas: 0 };
+      var turmas = classes.map(function (c) {
+        var mat = alunos.filter(function (a) { return a.ClasseID === c.ID; }).length + profs.filter(function (p) { return p.ClasseID === c.ID; }).length;
+        var regs = chamadas.filter(function (x) { return x.ClasseID === c.ID; });
+        var pres = 0, bib = 0, rev = 0;
+        regs.forEach(function (x) {
+          if (_presente(x)) pres++;
+          if (x.Biblia === true || x.Biblia === 'TRUE') bib++;
+          if (x.Revista === true || x.Revista === 'TRUE') rev++;
+        });
+        var info = infos[c.ID] || {};
+        var visit = Number(info.NumVisitantes) || 0, oferta = Number(info.TotalOferta) || 0;
+        var t = {
+          classeId: c.ID, nome: c.Nome, faixa: c.FaixaEtaria || '', lancada: regs.length > 0,
+          matriculados: mat, presentes: pres, ausentes: Math.max(0, mat - pres), visitantes: visit,
+          total: pres + visit, biblias: bib, revistas: rev, oferta: oferta,
+          percentual: mat ? Math.round((pres / mat) * 100) : 0
+        };
+        geral.matriculados += mat; geral.presentes += pres; geral.ausentes += t.ausentes; geral.visitantes += visit;
+        geral.biblias += bib; geral.revistas += rev; geral.oferta += oferta;
+        if (t.lancada) geral.turmasLancadas++;
+        return t;
+      });
+      geral.total = geral.presentes + geral.visitantes;
+      geral.percentual = geral.matriculados ? Math.round((geral.presentes / geral.matriculados) * 100) : 0;
+      geral.oferta = Math.round(geral.oferta * 100) / 100;
+      return Util.ok({
+        modo: _modoChamada(),
+        aula: { id: aula.ID, numLicao: aula.NumLicao, trimestre: aula.Trimestre, data: aula.Data, titulo: aula.Titulo },
+        turmas: turmas, geral: geral, totalTurmas: turmas.length
+      });
+    });
+  }
+
   function getVisaoGeral(token) {
     return withAuth(token, function (sess) {
       var ok = _classesDoProfessor(sess);
@@ -1572,6 +1622,7 @@ var EscolaDominical = (function () {
     getRankingAlunos:       getRankingAlunos,
     getRanking:             getRanking,
     getVisaoGeral:          getVisaoGeral,
+    getRelatorioAula:       getRelatorioAula,
     getConfigEbd:           getConfigEbd,
     salvarConfigEbd:        salvarConfigEbd,
     getEstatisticasGerais:  getEstatisticasGerais,
@@ -1631,6 +1682,7 @@ function ed_listarChamadasPorAula(token, aulaId)       { return _safe_ed(functio
 function ed_getRankingAlunos(token, classeId)          { return _safe_ed(function(){ return EscolaDominical.getRankingAlunos(token, classeId); }, []); }
 function ed_getRanking(token, filtros)                  { return _safe_ed(function(){ return EscolaDominical.getRanking(token, filtros); }, []); }
 function ed_getVisaoGeral(token)                        { return _safe_ed(function(){ return EscolaDominical.getVisaoGeral(token); }, []); }
+function ed_getRelatorioAula(token, aulaId)           { return _safe_ed(function(){ return EscolaDominical.getRelatorioAula(token, aulaId); }, []); }
 function ed_getConfigEbd(token)                         { return _safe_ed(function(){ return EscolaDominical.getConfigEbd(token); }, []); }
 function ed_salvarConfigEbd(token, dados)               { return _safe_ed(function(){ return EscolaDominical.salvarConfigEbd(token, dados); }, []); }
 function ed_getEstatisticasGerais(token)               { return _safe_ed(function(){ return EscolaDominical.getEstatisticasGerais(token); }, []); }

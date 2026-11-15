@@ -71,6 +71,14 @@ function serializar(perfil) {
       jaLancada: false, turmaInfo: { numVisitantes: 3, totalOferta: 45, observacoes: '' },
     }),
     ed_salvarChamada: () => ok({ mensagem: 'Chamada salva com sucesso.' }),
+    ed_getRelatorioAula: () => ok({
+      modo: 'completa', aula: { id: 'a7', numLicao: '7', trimestre: '4', data: '15/11/2026', titulo: '' }, totalTurmas: 2,
+      turmas: [
+        { classeId: 'c1', nome: 'Jovens', faixa: '15 a 25 anos', lancada: true, matriculados: 18, presentes: 15, ausentes: 3, visitantes: 2, total: 17, biblias: 11, revistas: 12, oferta: 45, percentual: 83 },
+        { classeId: 'c2', nome: 'Adultos', faixa: '', lancada: false, matriculados: 30, presentes: 0, ausentes: 30, visitantes: 0, total: 0, biblias: 0, revistas: 0, oferta: 0, percentual: 0 },
+      ],
+      geral: { matriculados: 48, presentes: 15, ausentes: 33, visitantes: 2, total: 17, biblias: 11, revistas: 12, oferta: 45, percentual: 31, turmasLancadas: 1 },
+    }),
     ed_getConfigEbd: () => ok({ modoChamada: 'completa', modoRanking: 'presenca', pontos: { presenca: 1, biblia: 2, revista: 2 } }),
     ed_salvarConfigEbd: () => ok({ mensagem: 'ok' }),
     ed_getRanking: () => ok({ modo: 'presenca', ano: '2026', lista: [

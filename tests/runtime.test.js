@@ -978,3 +978,17 @@ test('EBD visão geral: totais, turmas sem chamada e top do ranking', () => {
   assert.equal(v.data.ranking.top[0].nome, 'Ana');
   assert.equal(v.data.presenca.recentes.length, 2);
 });
+
+test('EBD relatório da aula: bloco por turma + consolidado (matriculados = alunos + professores)', () => {
+  const abas = ABAS_EBD();
+  abas.Professores.push(['p1', '', '', 'Paulo', 'c1', '', '', '', '', '', true, '']);
+  abas.ChamadasInfo.push(['i1', 'a1', 'c1', 2, 30.5, '', '', '']);
+  const env = envComPerfil('admin', abas);
+  const r = env.run("ed_getRelatorioAula('tok', 'a1')");
+  assert.equal(r.success, true, JSON.stringify(r));
+  const t = r.data.turmas[0];
+  assert.deepEqual([t.matriculados, t.presentes, t.ausentes, t.visitantes, t.total, t.biblias, t.revistas, t.oferta, t.percentual],
+    [3, 2, 1, 2, 4, 1, 1, 30.5, 67]);
+  assert.deepEqual([r.data.geral.matriculados, r.data.geral.presentes, r.data.geral.oferta, r.data.geral.turmasLancadas], [3, 2, 30.5, 1]);
+  assert.equal(env.run("ed_getRelatorioAula('tok', 'zz')").success, false);
+});
