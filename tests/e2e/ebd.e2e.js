@@ -57,7 +57,7 @@ test('EBD: professor entra direto na Escola Dominical e só vê a turma vinculad
   const turmas = await page.$$eval('#edm-sel-turma option', (o) => o.map((x) => x.textContent.trim()));
   assert.deepEqual(turmas, ['Adultos']);
   assert.equal(await page.locator('button[aria-label="Nova aula"]').count(), 0);
-  assert.deepEqual(await page.$$eval('.edm-atalhos .hm-mod', (b) => b.map((x) => x.getAttribute('data-tela'))), ['visao', 'chamada', 'alunos', 'ranking']);
+  assert.deepEqual(await page.$$eval('.edm-atalhos .hm-mod', (b) => b.map((x) => x.getAttribute('data-tela'))), ['visao', 'chamada', 'alunos', 'relatorios', 'ranking']);
   assert.deepEqual(erros, []);
 });
 
@@ -141,6 +141,11 @@ test('EBD: padrão é só presença (1 toggle, chip de %) e o ranking começa po
   await page.waitForFunction(() => document.getElementById('edm-salvar').innerText.includes('Atualizar'), null, { timeout: 6000 });
   const totais = backend.ss.getSheetByName('Chamadas')._rows.slice(1).map((r) => Number(r[8])).sort();
   assert.deepEqual(totais, [0, 1]);
+  // após salvar abre o relatório individual da turma
+  await page.waitForSelector('#modal-edm-form.open .edm-rel-grid', { timeout: 6000 });
+  assert.match(await page.innerText('#edm-form-titulo'), /Chamada salva · Jovens/);
+  assert.match(await page.innerText('#edm-form-corpo'), /Matriculados\s*2/);
+  await page.evaluate(() => edmFecharModal('modal-edm-form'));
 
   await page.click('.edm-atalhos .hm-mod[data-tela="ranking"]');
   await page.waitForSelector('.edm-seg button.on');
@@ -153,5 +158,29 @@ test('EBD: padrão é só presença (1 toggle, chip de %) e o ranking começa po
   await page.evaluate(() => edmSalvarAjustes());
   await page.waitForFunction(() => document.querySelector('.edm-seg button.on') && document.querySelector('.edm-seg button.on').innerText === 'Pontos totais', null, { timeout: 6000 });
   assert.match(await page.innerText('.edm-row'), /1 pts/);
+  assert.deepEqual(erros, []);
+});
+
+test('EBD: relatórios da aula — cartão por turma e consolidado geral somando as turmas', async () => {
+  const backend = criarBackend(); semear(backend);
+  const { env } = backend;
+  const ins = (aba, obj) => { env.ctx.__o = obj; env.run(`Util.insertRow(${JSON.stringify(aba)}, __o)`); };
+  ins('Chamadas', { ID: 'x1', AulaID: 'a1', ClasseID: 'c1', AlunoID: 'al1', Presente: true, Biblia: true, Revista: false, PontosExtrasJSON: '[]', TotalPontos: 3 });
+  ins('Chamadas', { ID: 'x2', AulaID: 'a1', ClasseID: 'c2', AlunoID: 'al3', Presente: true, Biblia: false, Revista: false, PontosExtrasJSON: '[]', TotalPontos: 1 });
+  ins('ChamadasInfo', { ID: 'i1', AulaID: 'a1', ClasseID: 'c1', NumVisitantes: 1, TotalOferta: 20 });
+  ins('ChamadasInfo', { ID: 'i2', AulaID: 'a1', ClasseID: 'c2', NumVisitantes: 2, TotalOferta: 15.5 });
+  const { page, erros } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  await page.evaluate(() => navigateTo('escola-dominical'));
+  await esperarTela(page, 'escola-dominical');
+  await page.waitForSelector('.edm-atalhos');
+  await page.click('.edm-atalhos .hm-mod[data-tela="relatorios"]');
+  await page.waitForSelector('.edm-rel-geral', { timeout: 6000 });
+  assert.equal(await page.locator('.edm-rel:not(.edm-rel-geral)').count(), 2);
+  const geral = await page.innerText('.edm-rel-geral');
+  assert.match(geral, /2 de 2 turmas/);
+  assert.match(geral, /Matriculados\s*3/);
+  assert.match(geral, /Visitantes\s*3/);
+  assert.match(geral, /R\$ 35,50/);
   assert.deepEqual(erros, []);
 });
