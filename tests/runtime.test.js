@@ -993,6 +993,82 @@ test('EBD relatório da aula: bloco por turma + consolidado (matriculados = alun
   assert.equal(env.run("ed_getRelatorioAula('tok', 'zz')").success, false);
 });
 
+const dBR = (dias) => { const d = new Date(Date.now() + dias * 86400000); const z = (n) => String(n).padStart(2, '0'); return `${z(d.getDate())}/${z(d.getMonth() + 1)}/${d.getFullYear()}`; };
+const ABAS_EBD_HOJE = (diasAula) => {
+  const abas = ABAS_EBD();
+  const ano = String(new Date().getFullYear());
+  abas.Aulas = [abas.Aulas[0], ['a1', dBR(diasAula), '4', '1', '', ano, '', dBR(diasAula) + ' 10:00:00']];
+  abas.Chamadas = [abas.Chamadas[0]];
+  abas.Classes.push(['c2', 'Adultos', '', '', true, '']);
+  return abas;
+};
+
+test('EBD retrato: aula lançada guarda quem estava na turma; excluir/incluir aluno não muda matriculados nem a lista', () => {
+  const abas = ABAS_EBD_HOJE(0);
+  abas.Professores.push(['p1', '', '', 'Paulo', 'c1', '', '', '', '', '', true, '']);
+  const env = envComPerfil('admin', abas);
+  const reg = "[{alunoId:'al1',presente:true},{alunoId:'al2',presente:false},{alunoId:'p1',presente:true}]";
+  assert.equal(env.run(`ed_salvarChamada('tok', 'a1', 'c1', ${reg}, {numVisitantes:1,totalOferta:10})`).success, true);
+  // depois: Bruno é desativado e entra uma aluna nova
+  assert.equal(env.run("ed_excluirAluno('tok', 'al2')").success, true);
+  assert.equal(env.run("ed_criarAluno('tok', { Nome: 'Zélia', ClasseID: 'c1' })").success, true);
+  const t = env.run("ed_getRelatorioAula('tok', 'a1')").data.turmas.filter((x) => x.classeId === 'c1')[0];
+  assert.deepEqual([t.matriculados, t.presentes, t.percentual], [3, 2, 67]);
+  const lista = env.run("ed_getChamada('tok', 'a1', 'c1')").data;
+  assert.equal(lista.retratoFixo, true);
+  assert.deepEqual(lista.alunos.map((a) => a.nome).sort(), ['Ana', 'Bruno', 'Paulo']);
+  // regravar a chamada (secretaria/admin) mantém o mesmo grupo e ignora quem não estava no retrato
+  const r = env.run("ed_salvarChamada('tok', 'a1', 'c1', [{alunoId:'al1',presente:true},{alunoId:'novo',presente:true}], {numVisitantes:0,totalOferta:0})");
+  assert.equal(r.success, true);
+  assert.equal(env.run("ed_getRelatorioAula('tok', 'a1')").data.turmas.filter((x) => x.classeId === 'c1')[0].matriculados, 3);
+  // colunas do retrato foram acrescentadas à planilha antiga
+  const cab = JSON.parse(env.run("JSON.stringify(Util.getSheet('ChamadasInfo').getRange(1,1,1,10).getValues()[0])"));
+  assert.ok(cab.indexOf('RetratoJSON') > -1 && cab.indexOf('Matriculados') > -1);
+});
+
+test('EBD trava: aluno não troca de turma durante o trimestre em curso; liberado quando o trimestre acabou', () => {
+  const emCurso = envComPerfil('admin', ABAS_EBD_HOJE(-7));
+  const r = emCurso.run("ed_editarAluno('tok', 'al1', { ClasseID: 'c2' })");
+  assert.equal(r.success, false);
+  assert.match(r.error, /travada/i);
+  assert.equal(emCurso.run("ed_editarAluno('tok', 'al1', { Nome: 'Ana Maria' })").success, true, 'editar outros dados continua liberado');
+  const encerrado = envComPerfil('admin', ABAS_EBD_HOJE(-60));
+  assert.equal(encerrado.run("ed_editarAluno('tok', 'al1', { ClasseID: 'c2' })").success, true);
+});
+
+test('EBD professor: só lança/edita a chamada no dia da aula; admin/secretaria a qualquer momento', () => {
+  const montar = (perfil, dias) => {
+    const abas = ABAS_EBD_HOJE(dias);
+    abas.Professores.push(['p1', '', 'u9', 'Paulo', 'c1', '', '', '', '', '', true, '']);
+    return envComPerfil(perfil, abas);
+  };
+  const reg = "[{alunoId:'al1',presente:true}]";
+  const hoje = montar('professor', 0);
+  assert.equal(hoje.run("ed_getChamada('tok', 'a1', 'c1')").data.podeEditar, true);
+  assert.equal(hoje.run(`ed_salvarChamada('tok', 'a1', 'c1', ${reg}, {})`).success, true);
+  const ontem = montar('professor', -3);
+  assert.equal(ontem.run("ed_getChamada('tok', 'a1', 'c1')").data.podeEditar, false);
+  const bloq = ontem.run(`ed_salvarChamada('tok', 'a1', 'c1', ${reg}, {})`);
+  assert.equal(bloq.success, false);
+  assert.match(bloq.error, /no dia da aula/);
+  assert.equal(montar('secretaria', -3).run(`ed_salvarChamada('tok', 'a1', 'c1', ${reg}, {})`).success, true);
+  assert.equal(montar('admin', -3).run("ed_getChamada('tok', 'a1', 'c1')").data.podeEditar, true);
+});
+
+test('EBD histórico: aulas do trimestre em curso com status OK/pendente por turmas lançadas', () => {
+  const abas = ABAS_EBD_HOJE(-7);
+  abas.Aulas.push(['a0', dBR(-14), '4', '0', '', String(new Date().getFullYear()), '', dBR(-14) + ' 10:00:00']);
+  abas.Aulas.push(['a9', dBR(-300), '1', '9', '', String(new Date().getFullYear()), '', '']);
+  abas.Chamadas.push(['1', 'a1', 'c1', 'al1', true, false, false, '[]', 1, 0, '', ''], ['2', 'a1', 'c2', 'al9', true, false, false, '[]', 1, 0, '', '']);
+  const env = envComPerfil('admin', abas);
+  const h = env.run("ed_getHistoricoChamadas('tok', {})").data;
+  assert.deepEqual([h.trimestre, h.aulas.length, h.pendentes], ['4', 2, 1]);
+  const por = {}; h.aulas.forEach((a) => { por[a.id] = a; });
+  assert.deepEqual([por.a1.status, por.a1.lancadas, por.a1.turmas], ['ok', 2, 2]);
+  assert.equal(por.a0.status, 'pendente');
+  assert.equal(h.podeCriarAula, true);
+});
+
 test('EBD demo: só admin; popular exige base vazia; limpar zera; 5 turmas, 4–15 alunos, professores 2/2/2/1/1 e aula de hoje sem chamada', () => {
   const sec = envComPerfil('secretaria', ABAS_EBD());
   assert.equal(sec.run("ed_popularDemo('tok')").success, false);

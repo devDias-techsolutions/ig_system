@@ -99,6 +99,14 @@ async function irPara(page, rota, esperada) {
           await page.waitForTimeout(600);
           await page.screenshot({ path: path.join(OUT, `ebd-${sub}-${tam}.png`) });
         }
+        await page.evaluate(() => edmIr('chamada')); await page.waitForTimeout(500);
+        await page.evaluate(() => edmAbrirAula('a7')); await page.waitForTimeout(600);
+        await page.screenshot({ path: path.join(OUT, `ebd-chamada-aula-${tam}.png`) });
+        await page.evaluate(() => edmAbrirTurma('c1')); await page.waitForTimeout(600);
+        await page.screenshot({ path: path.join(OUT, `ebd-chamada-turma-leitura-${tam}.png`) });
+        await page.evaluate(() => edmEditar()); await page.waitForTimeout(400);
+        await page.screenshot({ path: path.join(OUT, `ebd-chamada-turma-edicao-${tam}.png`) });
+        await page.evaluate(() => edmIr('chamada')); await page.waitForTimeout(500);
         await page.evaluate(() => edmFormAluno('al1'));
         await page.waitForTimeout(500);
         await page.screenshot({ path: path.join(OUT, `ebd-aluno-form-${tam}.png`) });
