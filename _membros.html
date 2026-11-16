@@ -1130,13 +1130,14 @@ function mbFotoChange(e) {
 // Carrega a foto sem copiá-la várias vezes na memória (URL do arquivo → canvas reduzido) e abre o
 // editor de enquadramento 3×4. A foto do celular (12 MP+) nunca é mantida inteira.
 var MB_FOTO_MIN_W = 400, MB_FOTO_MIN_H = 530, MB_FOTO_LADO_MAX = 1600;
+var MB_FOTO_SAIDA_W = 1080, MB_FOTO_SAIDA_H = 1440; // foto guardada: 3×4, ~2,9× o slot impresso (372×504 px)
 
 function _mbFotoDeArquivo(file) {
   var url = URL.createObjectURL(file);
   var img = new Image();
   img.onload = function() {
     var w = img.naturalWidth, h = img.naturalHeight;
-    // Qualidade mínima para impressão: slot da carteirinha 68×90 px × escala 6 = 408×540 px
+    // Qualidade mínima para impressão: slot da carteirinha ≈ 62×84 px × escala 6 = 372×504 px
     if (w < MB_FOTO_MIN_W || h < MB_FOTO_MIN_H) {
       URL.revokeObjectURL(url);
       showToast('Foto rejeitada: ' + w + '×' + h + ' px. Use uma foto com pelo menos ' + MB_FOTO_MIN_W + '×' + MB_FOTO_MIN_H + ' pixels.', 'error');
@@ -1145,7 +1146,8 @@ function _mbFotoDeArquivo(file) {
     var r = Math.min(1, MB_FOTO_LADO_MAX / Math.max(w, h));
     var c = document.createElement('canvas');
     c.width = Math.round(w * r); c.height = Math.round(h * r);
-    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    var cc = c.getContext('2d'); cc.imageSmoothingEnabled = true; cc.imageSmoothingQuality = 'high';
+    cc.drawImage(img, 0, 0, c.width, c.height);
     img.src = ''; URL.revokeObjectURL(url);
     _mbAbrirEditorFoto(c, (file.name || 'foto').replace(/\.[^.]+$/, '') + '.jpg', w / c.width);
   };
@@ -1158,7 +1160,7 @@ function _mbFotoDeArquivo(file) {
 
 // Grava a foto final (já recortada em 3×4) no formulário
 function _mbAplicarFoto(canvas, nome) {
-  MB.fotoData     = canvas.toDataURL('image/jpeg', 0.9);
+  MB.fotoData     = canvas.toDataURL('image/jpeg', 0.95);
   MB.fotoMimeType = 'image/jpeg';
   MB.fotoNome     = nome || 'foto.jpg';
   MB.fotoNova     = true; MB.fotoRemovida = false;
@@ -1170,7 +1172,7 @@ function _mbAplicarFoto(canvas, nome) {
 
 /* ── Editor de enquadramento 3×4 ──
    Tela cheia com moldura 3×4: arrastar com o dedo/mouse move a foto; pinça, roda ou controle ajustam o zoom.
-   "Usar foto" recorta exatamente o que está dentro da moldura (720×960). */
+   "Usar foto" recorta exatamente o que está dentro da moldura (1080×1440). */
 var MB_CROP = null;
 
 function _mbAbrirEditorFoto(canvas, nome, fatorOriginal) {
@@ -1279,8 +1281,9 @@ function mbConfirmarEditorFoto() {
   if (!MB_CROP) return;
   var g = _mbCropGeom(), c = MB_CROP.canvas, s = _mbCropEscala();
   var out = document.createElement('canvas');
-  out.width = 720; out.height = 960;
-  out.getContext('2d').drawImage(c, (g.fl - MB_CROP.tx) / s, (g.ft - MB_CROP.ty) / s, g.fw / s, g.fh / s, 0, 0, 720, 960);
+  out.width = MB_FOTO_SAIDA_W; out.height = MB_FOTO_SAIDA_H;
+  var oc = out.getContext('2d'); oc.imageSmoothingEnabled = true; oc.imageSmoothingQuality = 'high';
+  oc.drawImage(c, (g.fl - MB_CROP.tx) / s, (g.ft - MB_CROP.ty) / s, g.fw / s, g.fh / s, 0, 0, MB_FOTO_SAIDA_W, MB_FOTO_SAIDA_H);
   var nome = MB_CROP.nome;
   mbFecharEditorFoto();
   _mbAplicarFoto(out, nome);
@@ -1363,7 +1366,7 @@ function mbCapturarFoto() {
   var sw = fr.width  / escala;
   var sh = fr.height / escala;
   if (MB_CAM.frente) sx = vw - sx - sw; // a prévia é espelhada; a foto sai no sentido normal
-  var alvoW = Math.min(Math.round(sw), 720);
+  var alvoW = Math.min(Math.round(sw), MB_FOTO_SAIDA_W);
   var alvoH = Math.round(alvoW * 4 / 3);
   var canvas = document.createElement('canvas');
   canvas.width = alvoW; canvas.height = alvoH;
@@ -1875,8 +1878,6 @@ function mbImportarJSON(e) {
   print-color-adjust: exact;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  image-rendering: -webkit-optimize-contrast; /* Chromium/WebKit: nitidez máxima */
-  image-rendering: crisp-edges;
   isolation: isolate;
   flex-shrink: 0;
   /* Paleta do cartão: vem da cor da marca (mbCard_paleta sobrescreve inline). k1 base · k2 escura · k3 mais escura · k4 tom claro · k5 tinta · k6 realce */
@@ -2284,26 +2285,28 @@ function mbCard_prepararFoto(fotoSrc, zoom, posX, posY, destW, destH) {
       var z      = parseFloat(zoom) || 1;
       var px     = parseFloat(posX) || 50;
       var py     = parseFloat(posY) || 50;
-      // Dimensões da fonte escaladas pelo zoom
-      var srcW   = img.naturalWidth  / z;
-      var srcH   = img.naturalHeight / z;
-      // Proporcão destino para cobrir o container (object-fit: cover)
       var scaleC = Math.max(destW / img.naturalWidth, destH / img.naturalHeight);
       var visW   = destW / (scaleC * z);
       var visH   = destH / (scaleC * z);
-      // Offset de acordo com object-position (px%, py%)
-      var maxOX  = img.naturalWidth  - visW;
-      var maxOY  = img.naturalHeight - visH;
-      var ox     = maxOX * (px / 100);
-      var oy     = maxOY * (py / 100);
-      // Renderiza em canvas de destino de alta resolução
+      var ox     = (img.naturalWidth  - visW) * (px / 100);
+      var oy     = (img.naturalHeight - visH) * (py / 100);
+      // Reduz em etapas de no máximo 2× com suavização alta (uma só passada grande serrilha/embaça)
+      var cur = img, sx = ox, sy = oy, sw = visW, sh = visH;
+      while (sw / 2 > destW && sh / 2 > destH) {
+        var tw = Math.max(destW, Math.round(sw / 2)), th = Math.max(destH, Math.round(sh / 2));
+        var t = document.createElement('canvas'); t.width = tw; t.height = th;
+        var tc = t.getContext('2d');
+        tc.imageSmoothingEnabled = true; tc.imageSmoothingQuality = 'high';
+        tc.drawImage(cur, sx, sy, sw, sh, 0, 0, tw, th);
+        cur = t; sx = 0; sy = 0; sw = tw; sh = th;
+      }
       var canvas = document.createElement('canvas');
-      canvas.width  = destW;
-      canvas.height = destH;
+      canvas.width = destW; canvas.height = destH;
       var ctx = canvas.getContext('2d');
-      ctx.drawImage(img, ox, oy, visW, visH, 0, 0, destW, destH);
-      // Qualidade 1.0 na etapa intermediária: a compressão final acontece no dom-to-image (toJpeg)
-      resolve(canvas.toDataURL('image/jpeg', 1.0));
+      ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(cur, sx, sy, sw, sh, 0, 0, destW, destH);
+      // PNG: sem perda entre esta etapa e a captura final
+      resolve(canvas.toDataURL('image/png'));
     };
     img.onerror = function() { resolve(''); };
     img.src = fotoSrc;
@@ -2692,7 +2695,7 @@ function mbCard_toast(label, pct, sub) {
 
 // ── Renderiza cartão num div temporário e captura JPEG alta resolução ────
 // SCALE 6 → 2040×1284 px ≈ 600 dpi no formato 85,6×53,98 mm (impressão profissional)
-function mbCard_capturar(m, showBack, qrSrc) {
+function mbCard_capturar(m, showBack, qrSrc, formato) {
   return new Promise(function(resolve, reject) {
     var SCALE  = 6;   // ← era 4; 6 = ~600 dpi para carteirinha 85,6×53,98mm
     var W      = 340;
@@ -2701,9 +2704,9 @@ function mbCard_capturar(m, showBack, qrSrc) {
 
     // Pré-processa foto da frente via canvas antes de injetar no DOM,
     // eliminando transform:scale() CSS que o dom-to-image não renderiza fielmente.
-    // Dimensões do slot de foto no card: 68×90 px → escaladas pelo SCALE para captura nítida
-    var FOTO_W = 68 * SCALE;
-    var FOTO_H = 90 * SCALE;
+    // O slot da foto muda por modelo; ele é medido no próprio cartão (ver _renderizar) e a foto é
+    // preparada no tamanho exato × SCALE, sem re-amostragem na captura.
+    var PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
     function _renderizar(fotoProcessada, logoProcessado) {
       /* Wrapper externo: tamanho final da imagem — domtoimage captura este elemento */
@@ -2713,7 +2716,7 @@ function mbCard_capturar(m, showBack, qrSrc) {
       /* Wrapper interno: tamanho real do card (340×214) escalado por transform.
          Assim o texto "enxerga" 340px de largura e não sofre reflow. */
       var inner = document.createElement('div');
-      inner.style.cssText = 'width:' + W + 'px;height:' + H + 'px;transform:scale(' + SCALE + ');transform-origin:top left;border-radius:14px;overflow:hidden;font-family:Inter,sans-serif;image-rendering:crisp-edges';
+      inner.style.cssText = 'width:' + W + 'px;height:' + H + 'px;transform:scale(' + SCALE + ');transform-origin:top left;border-radius:14px;overflow:hidden;font-family:Inter,sans-serif';
 
       // Frente recebe foto e logo pré-processados (canvas); verso não tem nenhum dos dois
       inner.innerHTML = showBack
@@ -2722,6 +2725,21 @@ function mbCard_capturar(m, showBack, qrSrc) {
 
       outer.appendChild(inner);
       container.appendChild(outer);
+
+      // Mede o slot real da foto neste modelo e prepara a imagem exatamente nesse tamanho
+      var fotoImg = !showBack && fotoProcessada ? inner.querySelector('.card-photo img') : null;
+      if (fotoImg) {
+        var fs = (m.foto && MB._fotoCache[m.foto]) ? MB._fotoCache[m.foto] : '';
+        var sw = Math.round(fotoImg.offsetWidth * SCALE), sh = Math.round(fotoImg.offsetHeight * SCALE);
+        if (fs && sw > 0 && sh > 0) {
+          return mbCard_prepararFoto(fs, m.fotoZoom||1, m.fotoX||50, m.fotoY||50, sw, sh).then(function(src) {
+            if (src) fotoImg.src = src;
+            _aguardar();
+          }).catch(_aguardar);
+        }
+      }
+      _aguardar();
+      function _aguardar() {
 
       /* Aguarda fontes e imagens carregarem */
       var fontesProntas = (document.fonts && document.fonts.ready)
@@ -2735,13 +2753,9 @@ function mbCard_capturar(m, showBack, qrSrc) {
         // Aguarda fontes + delay mínimo para GPU flush
         fontesProntas.then(function() {
           setTimeout(function() {
-            // JPEG qualidade 1.0: evita dupla compressão lossy (dom-to-image → jsPDF)
-            domtoimage.toJpeg(outer, {
-              width:   W * SCALE,
-              height:  H * SCALE,
-              quality: 1.0,
-              bgcolor: '#ffffff'
-            }).then(function(dataUrl) {
+            // PNG (sem perda) para o arquivo .png e o PDF individual; JPEG q1.0 só no lote (arquivo menor)
+            var opts = { width: W * SCALE, height: H * SCALE, quality: 1.0, bgcolor: '#ffffff' };
+            (formato === 'jpeg' ? domtoimage.toJpeg(outer, opts) : domtoimage.toPng(outer, opts)).then(function(dataUrl) {
               container.removeChild(outer);
               resolve(dataUrl);
             }).catch(function(err) {
@@ -2760,6 +2774,7 @@ function mbCard_capturar(m, showBack, qrSrc) {
           img.onerror = function() { pending--; if (pending === 0) proceed(); };
         }
       });
+      }
     }
 
     // Frente: pré-processa apenas a foto via canvas (nitidez máxima, sem transform CSS)
@@ -2768,15 +2783,8 @@ function mbCard_capturar(m, showBack, qrSrc) {
     // que degradava a qualidade (80px → 228px forçado no canvas = pixelado).
     if (!showBack) {
       var fotoSrc = (m.foto && MB._fotoCache[m.foto]) ? MB._fotoCache[m.foto] : '';
-      var fotoPromise = fotoSrc
-        ? mbCard_prepararFoto(fotoSrc, m.fotoZoom||1, m.fotoX||50, m.fotoY||50, FOTO_W, FOTO_H)
-            .catch(function() { return ''; })
-        : Promise.resolve('');
-
-      fotoPromise.then(function(fotoProcessada) {
-        // logoProcessado = null → mbCard_htmlFrente usa PNG original + filter CSS
-        _renderizar(fotoProcessada, null);
-      });
+      // A foto real é preparada dentro de _renderizar (depois de medir o slot); aqui só marca o lugar
+      _renderizar(fotoSrc ? PIXEL : '', null);
     } else {
       // Verso não tem foto nem logo do membro
       _renderizar('', null);
@@ -2806,9 +2814,9 @@ function mbCard_downloadPDF(id) {
         unit: 'mm',
         format: [85.6, 53.98]
       });
-      pdf.addImage(frontImg, 'JPEG', 0, 0, 85.6, 53.98, undefined, 'FAST');
+      pdf.addImage(frontImg, 'PNG', 0, 0, 85.6, 53.98, undefined, 'FAST');
       pdf.addPage([85.6, 53.98], 'landscape');
-      pdf.addImage(backImg,  'JPEG', 0, 0, 85.6, 53.98, undefined, 'FAST');
+      pdf.addImage(backImg,  'PNG', 0, 0, 85.6, 53.98, undefined, 'FAST');
       pdf.save('Cartao_ROL' + (m.rol||'0000') + '_' + (m.nome||'Membro').split(' ')[0] + '.pdf');
       mbCard_toast(null);
       showToast('PDF gerado com sucesso!', 'success');
@@ -2932,10 +2940,10 @@ function mbCard_gerarLote() {
       m.nome || ''
     );
 
-    mbCard_capturar(m, false).then(function(frontImg) {
+    mbCard_capturar(m, false, null, 'jpeg').then(function(frontImg) {
       // Arte estendida BLEED mm para fora em cada lado — cobre além da linha de corte
       pdf.addImage(frontImg, 'JPEG', MARGIN - BLEED, yPos - BLEED, CW + 2*BLEED, CH + 2*BLEED, undefined, 'FAST');
-      return mbCard_emitirQr(m).then(function(qr) { return mbCard_capturar(m, true, qr); });
+      return mbCard_emitirQr(m).then(function(qr) { return mbCard_capturar(m, true, qr, 'jpeg'); });
     }).then(function(backImg) {
       pdf.addImage(backImg, 'JPEG', xBack - BLEED, yPos - BLEED, CW + 2*BLEED, CH + 2*BLEED, undefined, 'FAST');
       // Linha de corte no limite exato do CR80, com sangria cobrindo além dela

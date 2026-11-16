@@ -95,7 +95,7 @@ test('editor 3×4: foto da galeria/câmera nativa abre o editor, arrasta, dá zo
   await page.click('#mb-crop-ok');
   await page.waitForFunction(() => MB.fotoNova === true && MB.fotoData.startsWith('data:image/jpeg'));
   const dim = await page.evaluate(() => new Promise((ok) => { const i = new Image(); i.onload = () => ok([i.width, i.height]); i.src = MB.fotoData; }));
-  assert.deepEqual(dim, [720, 960]);
+  assert.deepEqual(dim, [1080, 1440]);
   assert.equal(await page.evaluate(() => !!document.getElementById('mb-crop')), false, 'editor devia fechar');
   assert.equal(await page.evaluate(() => [MB.fotoZoom, MB.fotoX, MB.fotoY].join()), '1,50,50');
   assert.deepEqual(erros, []);

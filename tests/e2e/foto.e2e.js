@@ -55,3 +55,35 @@ test('foto: remover e depois escolher outra foto não deixa a remoção valer', 
   await page.evaluate(() => { const c = document.createElement('canvas'); c.width = 720; c.height = 960; _mbAplicarFoto(c, 'nova.jpg'); });
   assert.deepEqual(await page.evaluate(() => [MB.fotoRemovida, MB.fotoNova]), [false, true]);
 });
+
+// ── Qualidade da foto no cartão exportado ──────────────────
+// A foto é preparada no tamanho exato do slot de cada modelo × 6 (sem re-amostragem na captura),
+// em PNG (sem perda), e o arquivo .png é PNG de verdade.
+test('cartão: foto preparada no tamanho exato do slot de cada modelo, em PNG', async () => {
+  const { page, erros } = await abrirEdicaoComFoto();
+  const r = await page.evaluate(async () => {
+    // fonte grande com detalhe (xadrez fino) para o zoom ter o que amostrar
+    const c = document.createElement('canvas'); c.width = 1080; c.height = 1440;
+    const x = c.getContext('2d');
+    for (let i = 0; i < 1440; i += 8) for (let j = 0; j < 1080; j += 8) { x.fillStyle = ((i + j) / 8) % 2 ? '#222' : '#eee'; x.fillRect(j, i, 8, 8); }
+    MB._fotoCache['F1'] = c.toDataURL('image/jpeg', 0.95);
+    const m = { id: 'x', nome: 'Teste Foto', rol: '9', foto: 'F1', fotoZoom: 1.6, fotoX: 40, fotoY: 30, funcao: 'Membro' };
+    const usados = [];
+    window.domtoimage = { toPng: (el) => { const i = el.querySelector('.card-photo img'); usados.push([i.src.slice(0, 21), i.offsetWidth, i.offsetHeight, i.naturalWidth, i.naturalHeight]); return Promise.resolve('data:image/png;base64,AA'); },
+                          toJpeg: (el) => window.domtoimage.toPng(el) };
+    const out = {};
+    for (const modelo of ['classico', 'lateral', 'faixa', 'diagonal']) {
+      IDENTIDADE.cartaoModelo = modelo; usados.length = 0;
+      await mbCard_capturar(m, false);
+      out[modelo] = usados[0];
+    }
+    return out;
+  });
+  for (const [modelo, [pref, w, h, nw, nh]] of Object.entries(r)) {
+    assert.equal(pref, 'data:image/png;base64', modelo + ': foto intermediária deveria ser PNG');
+    assert.equal(nw, w * 6, modelo + ': largura da foto ≠ slot × 6');
+    assert.equal(nh, h * 6, modelo + ': altura da foto ≠ slot × 6');
+  }
+  assert.notEqual(r.faixa[1], r.classico[1], 'o slot do modelo faixa é diferente (redondo)');
+  assert.deepEqual(erros, []);
+});
