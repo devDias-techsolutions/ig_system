@@ -1137,3 +1137,140 @@ test('EBD demo: só admin; popular exige base vazia; limpar zera; 5 turmas, 4–
   assert.equal(env.run("ed_limparBase('tok')").success, true);
   assert.equal(env.run("Util.sheetToObjects('Alunos').length"), 0);
 });
+
+// ═══ Alertas por e-mail ═════════════════════════════════════
+const _dd = (n) => String(n).padStart(2, '0');
+function _hojeBR(anoNasc, deslocaDias) {
+  const d = new Date(); d.setDate(d.getDate() + (deslocaDias || 0));
+  return { br: `${_dd(d.getDate())}/${_dd(d.getMonth() + 1)}/${anoNasc}`, iso: `${anoNasc}-${_dd(d.getMonth() + 1)}-${_dd(d.getDate())}` };
+}
+const COLS_MB = ['id', 'nome', 'nascimento', 'ativo'];
+function envAlertas(abas, cfg) {
+  const env = envComSessao(Object.assign({ Usuarios: [COLS_USUARIOS, ['u1', 'Ana', 'ana@igreja.test', 'h', 'admin', false, true, '', '', '01/11/2026 10:00:00', '']] }, abas));
+  if (cfg) env.scriptProps.setProperty('ALERTAS_CONFIG', JSON.stringify(cfg));
+  return env;
+}
+
+test('alertas: dia e mês do nascimento não dependem de fuso (dd/mm/aaaa, ISO e Date)', () => {
+  const env = freshEnv();
+  const r = JSON.parse(env.run(`JSON.stringify([Alertas._diaMes('05/11/1990'), Alertas._diaMes('1990-11-05'), Alertas._diaMes(new Date(1990, 10, 5)), Alertas._diaMes('5/11'), Alertas._diaMes('31/02x'), Alertas._diaMes(''), Alertas._diaMes('32/01/1990')])`));
+  assert.deepEqual(r, [{ d: 5, m: 11 }, { d: 5, m: 11 }, { d: 5, m: 11 }, { d: 5, m: 11 }, null, null, null]);
+});
+
+test('alertas: configuração antiga é convertida e e-mails inválidos ou repetidos saem', () => {
+  const env = freshEnv();
+  const c = JSON.parse(env.run(`JSON.stringify(Alertas._normalizar({ email_ativo: true, alerta_dia: true, alerta_membros: false, destinatarios: [
+    { nome: 'A', email: 'A@x.com', alertaDia: true, alertaSemana: false }, { nome: 'B', email: 'a@x.com' }, { email: 'sem-arroba' } ] }))`));
+  assert.equal(c.ativo, true);
+  assert.equal(c.responsaveis, true);
+  assert.equal(c.fontes.membros, false);
+  assert.deepEqual(c.destinatarios, [{ nome: 'A', email: 'a@x.com', dia: true, semana: false }]);
+});
+
+test('alertas: só o administrador acessa; secretaria é recusada', () => {
+  const env = envAlertas({});
+  env.scriptCache.put('sess_sec', JSON.stringify({ token: 'sec', id: 'u2', nome: 'Bia', email: 'b@x.com', perfil: 'secretaria', expiraEm: new Date(Date.now() + 3600e3).toISOString(), primeiroAcesso: false }), 3600);
+  assert.equal(env.run("alertas_obter('sec')").success, false);
+  assert.equal(env.run("alertas_salvar('sec', {})").success, false);
+  assert.equal(env.run("alertas_obter('tok')").success, true);
+});
+
+test('alertas: ligar cria os dois agendamentos, desligar remove, e exige destinatário e fonte', () => {
+  const env = envAlertas({ Membros: [COLS_MB, ['1', 'A', '01/01/1990', true]] });
+  env.run(`var __tg = [], __apagados = [];
+    ScriptApp.getProjectTriggers = () => __tg;
+    ScriptApp.deleteTrigger = (t) => { __apagados.push(t.fn); __tg = __tg.filter((x) => x !== t); };
+    ScriptApp.newTrigger = (fn) => { const o = { fn, getHandlerFunction: () => fn, timeBased() { return this; }, everyDays() { return this; }, atHour(h) { this.h = h; return this; }, onWeekDay() { return this; }, create() { __tg.push(this); return this; } }; return o; };`);
+  assert.equal(env.run("alertas_salvar('tok', { ativo: true, fontes: { membros: true }, destinatarios: [] })").success, false, 'sem destinatário não liga');
+  assert.equal(env.run("alertas_salvar('tok', { ativo: true, fontes: { membros: false }, destinatarios: [{ email: 'a@x.com' }] })").success, false, 'sem fonte não liga');
+  assert.equal(env.run("alertas_salvar('tok', { ativo: true, fontes: { membros: true }, destinatarios: [{ email: 'nao-e-email' }] })").success, false);
+  const ok = env.run("alertas_salvar('tok', { ativo: true, fontes: { membros: true }, destinatarios: [{ nome: 'Pr', email: 'pr@x.com' }] })");
+  assert.equal(ok.success, true, JSON.stringify(ok));
+  assert.deepEqual(JSON.parse(env.run('JSON.stringify(__tg.map((t) => t.fn + "@" + t.h))')).sort(), ['alertas_rodarDiario@8', 'alertas_rodarSemanal@7']);
+  assert.deepEqual([ok.data.agendamentos.diario, ok.data.agendamentos.semanal], [true, true]);
+  // salvar de novo não duplica
+  env.run("alertas_salvar('tok', { ativo: true, fontes: { membros: true }, destinatarios: [{ email: 'pr@x.com' }] })");
+  assert.equal(env.run('__tg.length'), 2);
+  const off = env.run("alertas_salvar('tok', { ativo: false, fontes: { membros: true }, destinatarios: [{ email: 'pr@x.com' }] })");
+  assert.equal(off.success, true);
+  assert.equal(env.run('__tg.length'), 0);
+});
+
+test('alertas: sem permissão para criar acionadores, salva desligado e explica', () => {
+  const env = envAlertas({ Membros: [COLS_MB] });
+  env.run("ScriptApp.getProjectTriggers = () => []; ScriptApp.newTrigger = () => { throw new Error('sem permissao'); };");
+  const r = env.run("alertas_salvar('tok', { ativo: true, fontes: { membros: true }, destinatarios: [{ email: 'pr@x.com' }] })");
+  assert.equal(r.success, false);
+  assert.match(r.error, /acionadores/);
+  assert.equal(JSON.parse(env.scriptProps.getProperty('ALERTAS_CONFIG')).ativo, false);
+});
+
+test('alertas: aviso do dia envia só quando há aniversariante, com nomes escapados', () => {
+  const h = _hojeBR(1980), outro = _hojeBR(1980, 3);
+  const env = envAlertas({ Membros: [COLS_MB, ['1', 'Maria <b>Silva</b>', h.br, true], ['2', 'Inativa', h.br, false], ['3', 'João', h.iso, true], ['4', 'Pedro', outro.br, true]] },
+    { ativo: true, fontes: { membros: true }, destinatarios: [{ nome: 'Pr', email: 'pr@x.com', dia: true, semana: false }, { nome: 'Só semana', email: 's@x.com', dia: false, semana: true }] });
+  const r = env.run("alertas_enviarAgora('tok', 'dia')");
+  assert.equal(r.success, true, JSON.stringify(r));
+  assert.equal(r.data.enviados, 1);
+  assert.equal(r.data.aniversariantes, 2);
+  const [para, assunto, plain, op] = env.calls.emails[0];
+  assert.equal(para, 'pr@x.com');
+  assert.match(plain, /João/);
+  assert.doesNotMatch(plain, /Inativa|Pedro/);
+  assert.match(op.htmlBody, /Maria &lt;b&gt;Silva&lt;\/b&gt;/);
+  assert.doesNotMatch(op.htmlBody, /<b>Silva/);
+  // sem aniversariante hoje: aviso e nenhum e-mail
+  const env2 = envAlertas({ Membros: [COLS_MB, ['4', 'Pedro', outro.br, true]] }, { ativo: true, fontes: { membros: true }, destinatarios: [{ email: 'pr@x.com' }] });
+  const r2 = env2.run("alertas_enviarAgora('tok', 'dia')");
+  assert.equal(r2.success, true);
+  assert.match(r2.aviso, /Ninguém faz aniversário hoje/);
+  assert.equal(env2.calls.emails.length, 0);
+});
+
+test('alertas: resumo da semana lista os próximos 7 dias e cobra datas faltantes', () => {
+  const dentro = _hojeBR(1990, 5), fora = _hojeBR(1990, 9);
+  const env = envAlertas({ Membros: [COLS_MB, ['1', 'Dentro', dentro.br, true], ['2', 'Fora', fora.br, true], ['3', 'Sem Data', '', true]] },
+    { ativo: true, fontes: { membros: true }, semNasc: true, destinatarios: [{ email: 'pr@x.com' }] });
+  const r = env.run("alertas_enviarAgora('tok', 'semana')");
+  assert.equal(r.data.enviados, 1);
+  const plain = env.calls.emails[0][2];
+  assert.match(plain, /Dentro/);
+  assert.doesNotMatch(plain, /Fora/);
+  assert.match(plain, /Sem data de nascimento[\s\S]*Sem Data/);
+});
+
+test('alertas: acionador automático respeita o interruptor geral', () => {
+  const h = _hojeBR(1980);
+  const base = { Membros: [COLS_MB, ['1', 'Maria', h.br, true]] };
+  const off = envAlertas(base, { ativo: false, fontes: { membros: true }, destinatarios: [{ email: 'pr@x.com' }] });
+  off.run('alertas_rodarDiario()');
+  assert.equal(off.calls.emails.length, 0);
+  const on = envAlertas(base, { ativo: true, fontes: { membros: true }, destinatarios: [{ email: 'pr@x.com' }] });
+  on.run('alertas_rodarDiario()');
+  assert.equal(on.calls.emails.length, 1);
+});
+
+test('alertas: Escola Dominical entra como fonte e o professor recebe só a própria turma', () => {
+  const h = _hojeBR(2015);
+  const env = envAlertas({
+    Membros: [COLS_MB],
+    Classes: [['ID', 'Nome', 'Ativo'], ['c1', 'Juniores', true], ['c2', 'Maternal', true]],
+    Alunos: [['ID', 'Nome', 'DataNasc', 'ClasseID', 'Ativo'], ['a1', 'Lia', h.br, 'c1', true], ['a2', 'Teo', h.br, 'c2', true]],
+    Professores: [['ID', 'Nome', 'Email', 'ClasseID', 'DataNasc', 'Ativo'], ['p1', 'Rosa Lima', 'rosa@x.com', 'c1', '', true]],
+  }, { ativo: true, fontes: { membros: true, 'escola-dominical': true }, responsaveis: true, destinatarios: [{ email: 'pr@x.com' }] });
+  const info = env.run("alertas_obter('tok')").data;
+  assert.deepEqual(JSON.parse(JSON.stringify(info.fontes.map((f) => [f.id, f.disponivel]))), [['membros', true], ['escola-dominical', true]]);
+  assert.ok(info.responsaveis.rotulo);
+  const r = env.run("alertas_enviarAgora('tok', 'dia')");
+  assert.equal(r.data.enviados, 2);
+  const porDest = Object.fromEntries(env.calls.emails.map((e) => [e[0], e[2]]));
+  assert.match(porDest['pr@x.com'], /Lia[\s\S]*Teo/);
+  assert.match(porDest['rosa@x.com'], /Lia/);
+  assert.doesNotMatch(porDest['rosa@x.com'], /Teo/);
+});
+
+test('alertas: sem as abas da Escola Dominical a fonte aparece indisponível e nada quebra', () => {
+  const env = envAlertas({ Membros: [COLS_MB] });
+  const info = env.run("alertas_obter('tok')").data;
+  assert.equal(info.fontes.find((f) => f.id === 'escola-dominical').disponivel, false);
+});

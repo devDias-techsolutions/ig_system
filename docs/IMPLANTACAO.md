@@ -27,5 +27,7 @@ Em vez de preencher à mão, guarde os dados da igreja num arquivo e gere o paco
 
 - **Remetente dos e-mails:** o Gmail envia pela conta dona da planilha, mas o nome exibido é o da igreja. Ao transferir a propriedade da planilha para a igreja, os e-mails passam a sair da conta dela. Reautorize o envio de e-mails depois da transferência (rode `verificarImplantacao` na conta nova).
 - **Limite de e-mails:** contas Gmail comuns enviam até ~100 e-mails por dia; o relatório mostra a cota restante.
+- **Alertas por e-mail (menu Alertas, só admin):** aniversariantes do dia (por volta das 8h, só envia se houver) e resumo da semana (segunda, por volta das 7h). Ligar o interruptor cria os agendamentos sozinho; desligar remove. Exige a autorização *gerenciar acionadores* (`script.scriptapp`): se o sistema já estava publicado, abra o editor, rode qualquer função (ex.: `verificarImplantacao`) e autorize de novo; sem isso a tela avisa e salva com o envio desligado. A lista de destinatários fica nas propriedades do script (não vai junto ao copiar a planilha).
+- **Novos módulos nos alertas:** um módulo entra como fonte de aniversariantes ao registrar um objeto em `__ALERTAS_FONTES__` (veja o fim de `EscolaDominical.js`).
 - **Depois da entrega:** nome, cor, imagens e dados da carteirinha mudam na tela **Identidade** (somente administrador). Não é preciso mexer na planilha.
 - **Membros já existentes:** a importação é feita caso a caso (cada igreja tem uma planilha diferente) e não faz parte da implantação padrão.

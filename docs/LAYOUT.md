@@ -23,6 +23,6 @@ Regras:
 3. Cores e espaços vêm dos tokens do shell (`--teal*`, `--sp-*`, `--gutter`).
 4. CSS obsoleto é removido, não sobreposto.
 
-Telas já migradas: Home, Membros, Usuários, Identidade. Pendentes: telas de acesso (login, primeiro acesso, recuperar senha).
+Telas já migradas: Home, Membros, Usuários, Identidade, Alertas. Pendentes: telas de acesso (login, primeiro acesso, recuperar senha).
 
 Hierarquia, escalas (texto, raio, movimento) e orçamento de efeitos: `docs/UI-GUIDELINES.md`. Andamento do trabalho de UI: `docs/UI-ROADMAP.md`. **Início: há wireframe aprovado a seguir — `docs/UI-HOME.md`.**
