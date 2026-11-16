@@ -110,9 +110,7 @@
 .mb-atalhos { display: flex; gap: var(--sp-5); padding: var(--sp-4) var(--gutter) var(--sp-2); overflow-x: auto; scrollbar-width: none; }
 .mb-atalhos::-webkit-scrollbar { display: none; }
 .mb-atalhos .hm-mod { width: auto; min-width: 72px; }
-.mb-atalhos .hm-mod:not(.active) .hm-mod-icon { opacity: .6; }
 .mb-atalhos .hm-mod.active .hm-mod-icon { box-shadow: 0 0 0 3px var(--teal-glow-soft), 0 6px 14px -8px var(--teal-glow); }
-.mb-atalhos .hm-mod.active .hm-mod-name { color: var(--teal); }
 .mb-fab {
   position: fixed; z-index: 60; right: var(--gutter); bottom: calc(env(safe-area-inset-bottom, 0px) + var(--sp-4));
   width: 56px; height: 56px; border-radius: 50%; border: 0; cursor: pointer; display: grid; place-items: center;
@@ -518,13 +516,15 @@ function _mbTopnavActions() {
 
 // ── Barra do módulo e abas: componentes padrão do shell ──
 function _mbBuildTopnav() { return moduleBarHtml('Membros', ['CRUD', 'ROL Auto', 'Carteirinha', 'Cartas']); }
+var MB_ATALHOS = [['lista', 'users', 'Membros'], ['carteirinha', 'credit-card', 'Carteirinhas'], ['cartas', 'file-text', 'Cartas']];
 function _mbBuildTabs() {
   /* Mesmos atalhos circulares da Início (.hm-mod); "Novo Membro" virou o botão flutuante (+) da lista */
-  return '<nav class="mb-atalhos no-print" aria-label="Seções de Membros">' +
-    [['lista', 'users', 'Membros'], ['carteirinha', 'credit-card', 'Carteirinhas'], ['cartas', 'file-text', 'Cartas']].map(function (t) {
+  Atalhos.registrar('membros', MB_ATALHOS, ['lista'], function() { var n = document.querySelector('.mb-atalhos'); if (n) { n.outerHTML = _mbBuildTabs(); if (window.lucide) lucide.createIcons(); } });
+  return '<nav class="mb-atalhos atl-nav no-print" aria-label="Seções de Membros">' +
+    Atalhos.filtrar('membros', MB_ATALHOS, ['lista']).map(function (t) {
       return '<button type="button" class="hm-mod' + (MB.tab === t[0] ? ' active' : '') + '" onclick="mbSetTab(\'' + t[0] + '\')">' +
         '<div class="hm-mod-icon"><i data-lucide="' + t[1] + '"></i></div><div class="hm-mod-name">' + t[2] + '</div></button>';
-    }).join('') + '</nav>';
+    }).join('') + Atalhos.botao('membros') + '</nav>';
 }
 
 // ── Render principal ─────────────────────────────────────

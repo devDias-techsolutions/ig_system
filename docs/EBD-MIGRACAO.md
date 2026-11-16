@@ -81,3 +81,8 @@ Origem: `modulos-pendentes/escola-dominical/` (legado, mantido como referência)
 - **Hook `fonteMembros`** no manifesto: o módulo oferece pessoas ao Membros sem o core/Membros citarem a EBD. Botão "Importar da EBD" aparece no novo membro só se o módulo estiver instalado.
 - **Atividades recentes:** hook `atividade(perfil)` → `Modulos.atividades` → Dashboard (E4a). Barra proporcional removida dos KPIs em lista.
 - Não implementado de propósito: "limpar dados" do sistema original.
+
+## Atalhos personalizáveis (padrão único)
+- Helper global `Atalhos` (`index.html`): `registrar`, `filtrar`, `botao`, `abrir`. Cada usuário escolhe quais atalhos do módulo exibir (modal "Personalizar atalhos"); guardado no aparelho (`localStorage`, chave por e-mail + módulo). A tela inicial do módulo é fixa; "Mostrar todos" restaura.
+- Usado em Membros (`'membros'`) e EBD (`'ebd'`). Para um novo módulo: `Atalhos.registrar(chave, itens, fixos, refazerNav)`, `Atalhos.filtrar(...)` e `Atalhos.botao(chave)` no fim da `nav`; classe `atl-nav` na `nav`.
+- Estilo único (`.atl-nav`, em `index.html`): não selecionado = fundo branco + contorno na cor da igreja; selecionado = sólido.
