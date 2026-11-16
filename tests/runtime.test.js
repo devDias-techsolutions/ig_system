@@ -646,7 +646,7 @@ test('identidade: ajustes inválidos são recusados sem gravar nada; secretaria 
   assert.match(tenta({ NOME_IGREJA: 'Boa', COR_PRIMARIA: 'roxo' }).error, /Cor inválida/);
   assert.match(tenta({ NOME_IGREJA: '   ' }).error, /obrigatório/);
   assert.match(tenta({ NOME_IGREJA: 'x'.repeat(81) }).error, /80/);
-  assert.match(tenta({ MODULOS_ATIVOS: 'membros' }).error, /não editável/);
+  assert.match(tenta({ SENHA_MESTRA: 'x' }).error, /não editável/);
   assert.match(tenta({ PASTA_FOTOS: '' }).error, /obrigatório/);
   assert.equal(env.run('Config.identidade().nome'), 'Minha Igreja', 'nada foi gravado');
   const sec = envIdentidade('secretaria');
@@ -659,6 +659,43 @@ test('identidade: texto digitado é guardado como texto (sem caracteres de contr
   const env = envIdentidade();
   env.ctx.__d = { NOME_IGREJA: 'Igreja\u0000 <b>Boa</b>\n' };
   assert.equal(env.run("idt_salvarAjustes('tok', __d)").data.nome, 'Igreja  <b>Boa</b>');
+});
+
+test('identidade: link do sistema só aceita o endereço /exec da implantação e alimenta o QR', () => {
+  const env = envIdentidade();
+  const tenta = (d) => { env.ctx.__d = d; return env.run("idt_salvarAjustes('tok', __d)"); };
+  ['http://script.google.com/macros/s/AKfy/exec', 'https://exemplo.com/exec', 'https://script.google.com/macros/s/AKfy/dev', 'javascript:alert(1)'].forEach((u) =>
+    assert.match(tenta({ URL_APP: u }).error, /endereço da implantação/, u));
+  const ok = tenta({ URL_APP: 'https://script.google.com/macros/s/AKfycbxTESTE/exec' });
+  assert.equal(ok.success, true, JSON.stringify(ok));
+  assert.equal(ok.data.urlApp, 'https://script.google.com/macros/s/AKfycbxTESTE/exec');
+  assert.equal(ok.data.urlAppEmUso, ok.data.urlApp);
+  assert.equal(tenta({ URL_APP: '' }).data.urlApp, '', 'vazio volta ao link da implantação');
+});
+
+test('identidade: admin liga e desliga módulos; precisa de ao menos um e só ids instalados', () => {
+  const env = envIdentidade();
+  env.run("__MANIFESTOS__.push({ id: 'extra', nome: 'Extra', rota: 'extra', render: 'renderExtra', html: [], perfis: ['admin'], ordem: 900 })");
+  const tenta = (d) => { env.ctx.__d = d; return env.run("idt_salvarAjustes('tok', __d)"); };
+  const ids = () => JSON.parse(env.run('JSON.stringify(Modulos.ativos().map((m) => m.id))'));
+  const todos = JSON.parse(env.run('JSON.stringify(Modulos.todos().map((m) => m.id))'));
+  assert.ok(todos.includes('membros') && todos.includes('extra'));
+  assert.match(tenta({ MODULOS_ATIVOS: 'inexistente' }).error, /desconhecido/);
+  assert.match(tenta({ MODULOS_ATIVOS: ' , ' }).error, /pelo menos um/);
+  assert.match(tenta({ MODULOS_ATIVOS: 'Membros;x' }).error, /desconhecido|inválida/);
+  const r = tenta({ MODULOS_ATIVOS: 'membros' });
+  assert.equal(r.success, true, JSON.stringify(r));
+  assert.deepEqual(ids(), ['membros']);
+  assert.equal(r.data.modulosLista.find((m) => m.id === 'extra').ativo, false);
+  assert.equal(r.data.modulosLista.length, todos.length, 'desligado continua na lista para religar');
+  assert.equal(tenta({ MODULOS_ATIVOS: '' }).success, true);
+  assert.deepEqual(ids(), todos, 'vazio = todos');
+});
+
+test('identidade: só o admin recebe a lista de módulos instalados', () => {
+  const sec = envIdentidade('secretaria');
+  assert.equal(sec.run("idt_obter('tok')").data.modulosLista, undefined);
+  assert.ok(envIdentidade().run("idt_obter('tok')").data.modulosLista.length >= 1);
 });
 
 // ═══ Implantação (Etapa 16) ═════════════════════════════════

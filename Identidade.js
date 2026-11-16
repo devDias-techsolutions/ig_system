@@ -78,28 +78,47 @@ function _idtAdmin(token, fn) {
 
 // Qualquer usuário logado: identidade completa (inclui a assinatura, que não vai na página de login)
 function idt_obter(token) {
-  return withAuth(token, function () { return Util.ok(Config.identidadeCompleta()); });
+  return withAuth(token, function (sess) {
+    var id = Config.identidadeCompleta();
+    if (sess.perfil === 'admin') id.modulosLista = Modulos.todos();
+    return Util.ok(id);
+  });
+}
+
+// Identidade completa + (só para o admin) a lista de módulos instalados, para a seção "Sistema"
+function _idtPayload() {
+  var id = Config.identidadeCompleta();
+  id.modulosLista = Modulos.todos();
+  return id;
 }
 
 function idt_enviarImagem(token, tipo, base64) {
   return _idtAdmin(token, function () {
     try { Imagens.salvar(tipo, base64); } catch (e) { return Util.err(e.message); }
-    return Util.ok(Config.identidadeCompleta());
+    return Util.ok(_idtPayload());
   });
 }
 
 function idt_removerImagem(token, tipo) {
   return _idtAdmin(token, function () {
     try { Imagens.remover(tipo); } catch (e) { return Util.err(e.message); }
-    return Util.ok(Config.identidadeCompleta());
+    return Util.ok(_idtPayload());
   });
 }
 
 // Textos e cor da igreja (antes só editáveis direto na aba Config)
 function idt_salvarAjustes(token, dados) {
   return _idtAdmin(token, function () {
+    dados = dados || {};
+    if (dados.MODULOS_ATIVOS !== undefined) {
+      // vazio = todos; senão só ids de módulos instalados, e pelo menos um
+      var ids = String(dados.MODULOS_ATIVOS).split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+      var instalados = Modulos.todos().map(function (m) { return m.id; });
+      if (ids.some(function (x) { return instalados.indexOf(x) === -1; })) return Util.err('Módulo desconhecido na lista.');
+      if (ids.length === 0 && String(dados.MODULOS_ATIVOS).trim() !== '') return Util.err('Mantenha pelo menos um módulo ativo.');
+    }
     var r = Config.salvar(dados);
     if (!r.ok) return Util.err(r.erro);
-    return Util.ok(Config.identidadeCompleta());
+    return Util.ok(_idtPayload());
   });
 }

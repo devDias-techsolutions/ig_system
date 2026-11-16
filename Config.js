@@ -15,6 +15,7 @@ var Config = (function () {
 
   var NOME_PADRAO = 'Minha Igreja';
   var PASTA_FOTOS_PADRAO = 'Fotos de Membros';
+  var URL_APP_RE = /^https:\/\/script\.google\.com\/[\w\/.\-]+\/exec$/;
 
   // Chaves criadas na aba Config (setupSpreadsheet) com a explicação para quem edita a planilha
   var CHAVES = [
@@ -114,7 +115,7 @@ var Config = (function () {
   // Só serve se terminar em /exec: o endereço de teste (/dev) só abre para o dono do projeto.
   function urlApp() {
     var cfg = get('URL_APP', '');
-    if (/^https:\/\/script\.google\.com\/[\w\/.\-]+\/exec$/.test(cfg)) return cfg;
+    if (URL_APP_RE.test(cfg)) return cfg;
     var auto = '';
     try { auto = String(ScriptApp.getService().getUrl() || ''); } catch (e) {}
     return /\/exec$/.test(auto) ? auto : '';
@@ -144,7 +145,9 @@ var Config = (function () {
     CARGO_PASTOR:    ['Cargo do pastor', 60, false],
     ENDERECO_IGREJA: ['Endereço', 160, false],
     CNPJ_IGREJA:     ['CNPJ', 30, false],
-    PASTA_FOTOS:     ['Pasta das fotos', 60, true]
+    PASTA_FOTOS:     ['Pasta das fotos', 60, true],
+    URL_APP:         ['Link do sistema', 200, false],
+    MODULOS_ATIVOS:  ['Módulos ativos', 200, false]
   };
 
   // Valida os campos sem gravar nada. Devolve { ok, erro } ou { ok, limpos } (valores já limpos).
@@ -159,6 +162,8 @@ var Config = (function () {
       if (v.length > def[1]) return { ok: false, erro: def[0] + ' aceita no máximo ' + def[1] + ' caracteres.' };
       if (k === 'COR_PRIMARIA' && v && !/^#[0-9a-fA-F]{6}$/.test(v)) return { ok: false, erro: 'Cor inválida. Use o formato #RRGGBB.' };
       if (k === 'CARTAO_MODELO' && v && MODELOS_CARTAO.indexOf(v) < 0) return { ok: false, erro: 'Modelo de carteirinha inválido.' };
+      if (k === 'URL_APP' && v && !URL_APP_RE.test(v)) return { ok: false, erro: 'O link deve ser o endereço da implantação: https://script.google.com/.../exec' };
+      if (k === 'MODULOS_ATIVOS' && v && !/^[a-z0-9_-]+(,[a-z0-9_-]+)*$/.test(v)) return { ok: false, erro: 'Lista de módulos inválida.' };
       limpos[k] = v;
     }
     return { ok: true, limpos: limpos };
@@ -189,6 +194,8 @@ var Config = (function () {
   function identidadeCompleta() {
     var id = identidade();
     id.pastaFotos = get('PASTA_FOTOS', PASTA_FOTOS_PADRAO);
+    id.urlApp = get('URL_APP', '');        // o que foi digitado
+    id.urlAppEmUso = urlApp();            // o que o QR do cartão realmente usa (pode ser o detectado)
     return id;
   }
   function identidadeJson() {

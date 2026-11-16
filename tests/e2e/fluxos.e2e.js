@@ -706,3 +706,31 @@ test('carteirinha: QR de validação é opcional, aparece no verso sem cobrir a 
   assert.match(cred.data.url, /\?page=validar&codigo=[0-9a-f]{32}$/);
   assert.deepEqual(erros.filter((e) => !/qrcode|cdnjs/i.test(e)), []);
 });
+
+test('identidade: admin define o link do sistema e desliga um módulo; não deixa desligar todos', async () => {
+  const backend = criarBackend();
+  const { page } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  await page.evaluate(() => navigateTo('identidade'));
+  await page.waitForSelector('#idt-urlApp');
+  const mods = await page.$$eval('.idt-mods input[type=checkbox]', (els) => els.map((e) => e.id));
+  assert.ok(mods.length >= 2, 'módulos instalados aparecem como opções');
+  await page.fill('#idt-urlApp', 'https://exemplo.com/exec');
+  await page.click('#idt-salvar');
+  await page.waitForFunction(() => !document.getElementById('idt-salvar').textContent.includes('Salvando'));
+  await page.waitForTimeout(300);
+  assert.equal(JSON.parse(backend.env.run('Config.identidadeJson()')).urlApp, undefined);
+  assert.equal(backend.env.run("Config.get('URL_APP', '')"), '', 'link inválido não é gravado');
+  await page.fill('#idt-urlApp', 'https://script.google.com/macros/s/AKfycbxTESTE/exec');
+  await page.click(`#${mods[mods.length - 1]}`, { force: true });
+  await page.click('#idt-salvar');
+  await page.waitForFunction(() => IDENTIDADE.urlApp === 'https://script.google.com/macros/s/AKfycbxTESTE/exec');
+  assert.equal(backend.env.run("Config.get('URL_APP', '')"), 'https://script.google.com/macros/s/AKfycbxTESTE/exec');
+  assert.notEqual(backend.env.run("Config.get('MODULOS_ATIVOS', '')"), '', 'um módulo desligado restringe a lista');
+  // desligar todos é recusado na tela
+  for (const id of mods) { const marcado = await page.isChecked(`#${id}`); if (marcado) await page.click(`#${id}`, { force: true }); }
+  await page.click('#idt-salvar');
+  await page.waitForFunction(() => !document.getElementById('idt-salvar').textContent.includes('Salvando'));
+  await page.waitForTimeout(300);
+  assert.notEqual(backend.env.run("Config.get('MODULOS_ATIVOS', '')"), '', 'continua com a lista anterior (nada foi gravado)');
+});

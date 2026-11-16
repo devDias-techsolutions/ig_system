@@ -44,6 +44,18 @@ var Modulos = (function () {
       .sort(function (a, b) { return (a.ordem || 100) - (b.ordem || 100); });
   }
 
+  // Todos os módulos instalados (ativos ou não), para a tela Identidade ligar e desligar
+  function todos() {
+    var on = {};
+    ativos().forEach(function (m) { on[m.id] = true; });
+    var vistos = {};
+    return __MANIFESTOS__.filter(function (m) {
+      if (!m || !m.id || vistos[m.id]) return false;
+      vistos[m.id] = true; return true;
+    }).sort(function (a, b) { return (a.ordem || 100) - (b.ordem || 100); })
+      .map(function (m) { return { id: m.id, nome: m.nome, descricao: m.descricao || '', ativo: !!on[m.id] }; });
+  }
+
   // Abas exigidas pelos módulos ativos: [{nome, colunas, cor}]
   function abas() {
     var out = [];
@@ -101,7 +113,7 @@ var Modulos = (function () {
     return out;
   }
 
-  return { ativos: ativos, abas: abas, paraCliente: paraCliente, jsonParaHtml: jsonParaHtml, incluirHtml: incluirHtml, kpis: kpis, atividades: atividades };
+  return { ativos: ativos, todos: todos, abas: abas, paraCliente: paraCliente, jsonParaHtml: jsonParaHtml, incluirHtml: incluirHtml, kpis: kpis, atividades: atividades };
 })();
 
 function incluirModulos() { return Modulos.incluirHtml(); }
