@@ -760,6 +760,105 @@ var EscolaDominical = (function () {
     });
   }
 
+  // ══════════════════════════════════════════
+  //  EXPORTAR / IMPORTAR DADOS DA EBD
+  //  (independente do módulo Membros)
+  // ══════════════════════════════════════════
+
+  function _nomeChave(n) { return String(n || '').toLowerCase().replace(/\s+/g, ' ').trim(); }
+
+  // Tudo da EBD num único pacote (backup JSON). Inclui inativos.
+  function exportarDadosEbd(token) {
+    return withAuth(token, function (sess) {
+      if (sess.perfil !== 'admin' && sess.perfil !== 'secretaria') return Util.err('Sem permissão.');
+      function todas(aba) { return _strip(_safeSheetObjects(aba)); }
+      return Util.ok({
+        sistema: 'gestao-ministerial', modulo: 'escola-dominical', versao: 1, geradoEm: Util.now(),
+        classes: todas('Classes'), alunos: todas('Alunos'), professores: todas('Professores'),
+        aulas: todas('Aulas'), chamadas: todas('Chamadas'), chamadasInfo: todas('ChamadasInfo'), pontosExtras: todas('PontosExtras')
+      });
+    });
+  }
+
+  // Importa alunos e professores em lote (até 200 por chamada).
+  // linhas: [{ tipo:'aluno'|'professor', nome, turma, telefone, email, dataNasc, endereco, ativo, criadoEm }]
+  // mapa:   { 'nome da turma na planilha': classeId | '__new__' | '' }
+  function importarPessoasEbd(token, linhas, mapa) {
+    return withAuth(token, function (sess) {
+      if (sess.perfil !== 'admin' && sess.perfil !== 'secretaria') return Util.err('Sem permissão.');
+      if (!linhas || !linhas.length) return Util.err('Nenhum registro para importar.');
+      if (linhas.length > 200) return Util.err('Envie no máximo 200 registros por vez.');
+      mapa = mapa || {};
+
+      var classes = _safeSheetObjects('Classes');
+      var porNome = {};
+      classes.forEach(function (c) { if (_isAtivo(c.Ativo)) porNome[_nomeChave(c.Nome)] = c.ID; });
+      var vistos = { aluno: {}, professor: {} };
+      _safeSheetObjects('Alunos').forEach(function (a) { vistos.aluno[_nomeChave(a.Nome)] = true; });
+      _safeSheetObjects('Professores').forEach(function (p) { vistos.professor[_nomeChave(p.Nome)] = true; });
+
+      var res = { alunos: 0, professores: 0, turmasCriadas: 0, duplicados: 0, erros: 0, mensagens: [] };
+
+      function resolverTurma(nome) {
+        var alvo = mapa[nome];
+        if (alvo && alvo !== '__new__') return Util.findById('Classes', alvo) ? alvo : '';
+        var k = _nomeChave(nome);
+        if (!k) return '';
+        if (alvo === undefined && porNome[k]) return porNome[k];
+        if (alvo === '__new__' && porNome[k]) return porNome[k];
+        if (alvo === '__new__') {
+          var id = Util.uuid();
+          Util.insertRow('Classes', { ID: id, Nome: String(nome).trim(), FaixaEtaria: '', LicaoCPAD: '', Ativo: true, CriadoEm: Util.now() });
+          porNome[k] = id; res.turmasCriadas++;
+          return id;
+        }
+        return '';
+      }
+
+      linhas.forEach(function (l) {
+        var tipo = l.tipo === 'professor' ? 'professor' : 'aluno';
+        var nome = String(l.nome || '').trim();
+        if (!nome) { res.erros++; return; }
+        var k = _nomeChave(nome);
+        if (vistos[tipo][k]) { res.duplicados++; return; }
+        var classeId = resolverTurma(String(l.turma || '').trim());
+        if (tipo === 'aluno' && !classeId) { res.erros++; res.mensagens.push(nome + ': sem turma'); return; }
+        var ativo = l.ativo === false || l.ativo === 'false' ? false : true;
+        var base = {
+          ID: Util.uuid(), Nome: nome, DataNasc: String(l.dataNasc || ''), ClasseID: classeId,
+          Telefone: String(l.telefone || ''), Endereco: String(l.endereco || ''), Email: String(l.email || ''),
+          Ativo: ativo, CriadoEm: l.criadoEm || Util.now()
+        };
+        try {
+          if (tipo === 'aluno') { base.TotalPontos = 0; Util.insertRow('Alunos', base); res.alunos++; }
+          else { base.AlunoOrigemID = ''; base.UsuarioID = ''; base.Cursos = ''; Util.insertRow('Professores', base); res.professores++; }
+          vistos[tipo][k] = true;
+        } catch (e) { res.erros++; res.mensagens.push(nome + ': ' + e.message); }
+      });
+      return Util.ok(res);
+    });
+  }
+
+  // Alunos e professores ativos que ainda não são membros (por nome) — para "Importar da EBD" no cadastro de membro.
+  function pessoasParaMembros(token) {
+    return withAuth(token, function (sess) {
+      if (sess.perfil !== 'admin' && sess.perfil !== 'secretaria') return Util.err('Sem permissão.');
+      var membros = {};
+      try { Util.sheetToObjects('Membros').forEach(function (m) { membros[_nomeChave(m.nome)] = true; }); } catch (e) {}
+      var classes = {};
+      _safeSheetObjects('Classes').forEach(function (c) { classes[c.ID] = c.Nome; });
+      var out = [];
+      function add(tipo, r) {
+        if (!_isAtivo(r.Ativo) || membros[_nomeChave(r.Nome)]) return;
+        out.push({ id: r.ID, tipo: tipo, nome: r.Nome, turma: classes[r.ClasseID] || '', dataNasc: r.DataNasc, telefone: r.Telefone, email: r.Email, endereco: r.Endereco });
+      }
+      _safeSheetObjects('Alunos').forEach(function (r) { add('aluno', r); });
+      _safeSheetObjects('Professores').forEach(function (r) { add('professor', r); });
+      out.sort(function (a, b) { return String(a.nome).localeCompare(String(b.nome)); });
+      return Util.ok(out);
+    });
+  }
+
   // Frequência de todos os alunos no trimestre em curso (para a linha de frequência da tela Alunos).
   function getFrequenciaTrimestre(token) {
     return withAuth(token, function (sess) {
@@ -1549,6 +1648,9 @@ var EscolaDominical = (function () {
     atividadeRecente:       atividadeRecente,
     chamadasPendentesHoje:  chamadasPendentesHoje,
     getFrequenciaTrimestre: getFrequenciaTrimestre,
+    exportarDadosEbd:       exportarDadosEbd,
+    importarPessoasEbd:     importarPessoasEbd,
+    pessoasParaMembros:     pessoasParaMembros,
     getRankingAlunos:       getRankingAlunos,
     getRanking:             getRanking,
     getVisaoGeral:          getVisaoGeral,
@@ -1607,6 +1709,9 @@ function ed_editarAula(token, id, dados)               { return _safe_ed(functio
 function ed_excluirAula(token, id)                     { return _safe_ed(function(){ return EscolaDominical.excluirAula(token, id); }, []); }
 function ed_getChamada(token, aulaId, classeId)        { return _safe_ed(function(){ return EscolaDominical.getChamada(token, aulaId, classeId); }, []); }
 function ed_salvarChamada(token, aulaId, classeId, r, ti) { return _safe_ed(function(){ return EscolaDominical.salvarChamada(token, aulaId, classeId, r, ti); }, []); }
+function ed_exportarDadosEbd(token)                    { return _safe_ed(function(){ return EscolaDominical.exportarDadosEbd(token); }, []); }
+function ed_importarPessoasEbd(token, linhas, mapa)    { return _safe_ed(function(){ return EscolaDominical.importarPessoasEbd(token, linhas, mapa); }, []); }
+function ed_pessoasParaMembros(token)                  { return _safe_ed(function(){ return EscolaDominical.pessoasParaMembros(token); }, []); }
 function ed_getFrequenciaTrimestre(token)             { return _safe_ed(function(){ return EscolaDominical.getFrequenciaTrimestre(token); }, []); }
 function ed_getHistoricoChamadas(token, filtros)       { return _safe_ed(function(){ return EscolaDominical.getHistoricoChamadas(token, filtros); }, []); }
 function ed_listarChamadasPorAula(token, aulaId)       { return _safe_ed(function(){ return EscolaDominical.listarChamadasPorAula(token, aulaId); }, []); }
@@ -1688,6 +1793,8 @@ var EscolaDominicalManifesto = {
     { nome: 'PontosExtras', colunas: EscolaDominical.HEADERS.PontosExtras, cor: '#1a2a2a' }
   ],
   kpiLayout: 'lista',
+  // Oferece alunos e professores ao cadastro de membros (o Membros só lê este gancho; não conhece a EBD).
+  fonteMembros: { rotulo: 'Importar da EBD', titulo: 'Importar da EBD', icone: 'graduation-cap', fn: 'ed_pessoasParaMembros' },
   // Movimento recente da EBD para a Início: chamadas lançadas, aulas criadas e alunos novos.
   atividade: function (perfil) {
     if (perfil === 'professor') return [];

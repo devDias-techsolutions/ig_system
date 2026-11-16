@@ -260,6 +260,31 @@
   @page { size: A4; margin: 0; }
   .no-print { display: none !important; }
 }
+
+/* ── Importar / exportar membros ── */
+.mb-io-passos { display: flex; gap: var(--sp-1); margin-bottom: var(--sp-4); }
+.mb-io-passo { flex: 1; display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); font-size: var(--fs-xs); font-weight: 700; color: var(--text-dim); }
+.mb-io-passo b { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: var(--fs-xs); background: var(--bg); border: 1.5px solid var(--border-strong); }
+.mb-io-passo.on { color: var(--teal); } .mb-io-passo.on b { background: var(--teal); border-color: var(--teal); color: var(--on-teal, #fff); }
+.mb-io-passo.ok b { background: var(--teal-dim); border-color: var(--teal); color: var(--teal); }
+.mb-io-bloco { margin-bottom: var(--sp-4); padding: var(--sp-3); border-radius: var(--r-3); background: var(--bg-glass-strong); border: 1px solid var(--border); }
+.mb-io-t { font-size: var(--fs-md); font-weight: 800; margin-bottom: var(--sp-1); }
+.mb-io-d { font-size: var(--fs-xs); color: var(--text-muted); margin-bottom: var(--sp-2); }
+.mb-io-drop { position: relative; display: block; padding: var(--sp-5) var(--sp-3); text-align: center; border: 2px dashed var(--border-strong); border-radius: var(--r-3); cursor: pointer; }
+.mb-io-drop input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+.mb-io-drop b { display: block; font-size: var(--fs-md); font-weight: 800; }
+.mb-io-drop small { font-size: var(--fs-xs); color: var(--text-muted); }
+.mb-io-nota { margin: var(--sp-3) 0; padding: var(--sp-3); border-radius: var(--r-2); font-size: var(--fs-sm); background: var(--bg); border: 1px solid var(--border); }
+.mb-io-pills { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.mb-io-pills span { padding: var(--sp-1) var(--sp-3); border-radius: var(--r-pill); font-size: var(--fs-sm); font-weight: 700; background: var(--bg); border: 1px solid var(--border); }
+.mb-io-rolo { max-height: 220px; overflow: auto; border: 1px solid var(--border); border-radius: var(--r-2); }
+.mb-io-tab { width: 100%; border-collapse: collapse; font-size: var(--fs-xs); }
+.mb-io-tab th, .mb-io-tab td { padding: var(--sp-1) var(--sp-2); text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
+.mb-io-prog { height: 8px; border-radius: var(--r-pill); background: var(--teal-dim); overflow: hidden; }
+.mb-io-prog i { display: block; height: 100%; width: 0; background: var(--teal); }
+.mb-io-btns { display: flex; gap: var(--sp-2); width: 100%; justify-content: flex-end; }
+.mb-fonte-item { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); width: 100%; margin-bottom: var(--sp-2); padding: var(--sp-3); text-align: left; border-radius: var(--r-3); border: 1px solid var(--border); background: var(--bg-glass-strong); font-family: inherit; color: inherit; cursor: pointer; }
+.mb-fonte-item b { display: block; font-size: var(--fs-md); } .mb-fonte-item small { font-size: var(--fs-xs); color: var(--text-muted); }
 </style>
 
 <script>
@@ -515,6 +540,17 @@ function renderMembros() {
     _mbBuildTabs()   +
     '<div id="mb-panel" class="page"></div>' +
     _modalTrocarSenha() +
+    '<div class="modal-overlay" id="modal-mb-io" onclick="if(event.target===this)mbIoFechar()"><div class="modal-box">'+
+      '<div class="modal-header"><div><h3>Importar / exportar membros</h3><div class="modal-sub" id="mb-io-sub"></div></div>'+
+      '<button class="btn btn-ghost btn-sm" style="width:36px;padding:0" onclick="mbIoFechar()" aria-label="Fechar"><i data-lucide="x" class="ic-16"></i></button></div>'+
+      '<div class="modal-body" id="mb-io-corpo"></div><div class="modal-footer" id="mb-io-rodape"></div>'+
+    '</div></div>'+
+    '<div class="modal-overlay" id="modal-mb-fonte" onclick="if(event.target===this)mbFonteFechar()"><div class="modal-box">'+
+      '<div class="modal-header"><div><h3 id="mb-fonte-titulo">Importar</h3><div class="modal-sub">Escolha quem ainda não é membro</div></div>'+
+      '<button class="btn btn-ghost btn-sm" style="width:36px;padding:0" onclick="mbFonteFechar()" aria-label="Fechar"><i data-lucide="x" class="ic-16"></i></button></div>'+
+      '<div class="modal-body"><div class="field"><input type="text" id="mb-fonte-busca" placeholder="Buscar nome" oninput="mbFontePintar()"></div><div id="mb-fonte-lista"></div></div>'+
+      '<div class="modal-footer"><button class="btn btn-secondary btn-full" onclick="mbFonteFechar()">Fechar</button></div>'+
+    '</div></div>'+
     '<div class="modal-overlay" id="modal-mb-aniv" onclick="if(event.target===this)mbFecharModalAniv()">'+
       '<div class="modal-box">'+
         '<div class="modal-header">'+
@@ -633,7 +669,10 @@ function _mbBuildLista() {
             '<i data-lucide="more-horizontal" class="ic-15"></i>'+
           '</button>'+
           '<div class="mb-toolbar-more-dd" id="mb-toolbar-more-dd">'+
-            '<div class="dd-label">Backup</div>'+
+            '<button onclick="mbCloseToolbarMore();mbIoAbrir()">'+
+              '<i data-lucide="file-spreadsheet" class="ic-14"></i> Importar / exportar planilha'+
+            '</button>'+
+            '<div class="dd-label">Backup com fotos</div>'+
             '<button onclick="mbCloseToolbarMore();mbExportarJSON()">'+
               '<i data-lucide="download" class="ic-14"></i> Exportar JSON'+
             '</button>'+
@@ -898,6 +937,7 @@ function _mbBuildForm() {
         '<div class="ed-section-sub">'+(MB.editId?'Atualize os dados':'Preencha o cadastro completo')+'</div>'+
       '</div>'+
     '</div>'+
+    (!MB.editId ? _mbBotoesFonte() : '')+
 
     '<div class="mb-form-card">'+
     '<div class="mb-form-grid" id="mb-form">'+
@@ -1847,6 +1887,177 @@ function mbImportarJSON(e) {
     e.target.value = '';
   };
   reader.readAsText(file);
+}
+
+// ════════════════════════════════════════════
+//  IMPORTAR / EXPORTAR PLANILHA (CSV, Excel)
+// ════════════════════════════════════════════
+var MB_IO_CAB = ['ROL','Nome','Sexo','Nascimento','Mae','Pai','EstadoCivil','Batismo','IgrejaOrigem','Funcao','Rua','Numero','Bairro','Cidade','Estado','CEP','Celular','Email','RG','CPF','Ativo'];
+var MB_IO = { passo: 1, linhas: [], res: null, rodando: false };
+function mbIoLinha(m) {
+  return [m.rol, m.nome, m.sexo, m.nascimento, m.nomeMae, m.nomePai, m.estadoCivil, m.batismo, m.Igreja, m.funcao, m.rua, m.numero, m.bairro, m.cidade, m.estado, m.cep, m.celular, m.email, m.rg, m.cpf, m.ativo === false ? 'não' : 'sim'];
+}
+function mbExportarCSV() {
+  if (!MB.membros.length) { showToast('Nenhum membro para exportar.', 'warning'); return; }
+  Arq.baixar('Membros_' + Arq.hoje() + '.csv', Arq.csvGerar(MB_IO_CAB, MB.membros.map(mbIoLinha)), 'text/csv;charset=utf-8');
+  showToast('Planilha exportada.', 'success');
+}
+function mbBaixarModelo() {
+  Arq.baixar('Membros_modelo_importacao.csv', Arq.csvGerar(MB_IO_CAB, [
+    ['', 'Maria da Silva', 'Feminino', '15/03/1985', '', '', 'Casado(a)', '06/2010', '', 'Membro', 'Rua A', '10', 'Centro', 'Betim', 'MG', '32600-000', '(31) 99999-0000', 'maria@email.com', '', '', 'sim']
+  ]), 'text/csv;charset=utf-8');
+}
+function mbIoAbrir() { MB_IO = { passo: 1, linhas: [], res: null, rodando: false }; mbIoPintar(); document.getElementById('modal-mb-io').classList.add('open'); }
+function mbIoFechar() { if (MB_IO.rodando) { showToast('Aguarde a importação terminar.', 'warning'); return; } document.getElementById('modal-mb-io').classList.remove('open'); }
+function mbIoIr(n) { MB_IO.passo = n; mbIoPintar(); }
+function _mbIoNorm(dados) {
+  var lista = Array.isArray(dados) ? dados : [];
+  var vistos = {};
+  var out = lista.filter(function (l) { return l && typeof l === 'object'; }).map(function (l) {
+    var g = function () { return Arq.pegar(l, Array.prototype.slice.call(arguments)); };
+    var st = g('ativo', 'status', 'situacao');
+    var m = {
+      rol: g('rol'), nome: g('nome', 'name'), sexo: g('sexo', 'genero'), nascimento: Arq.dataBR(g('nascimento', 'datanasc', 'datadenascimento', 'birthday')),
+      nomeMae: g('nomeMae', 'mae'), nomePai: g('nomePai', 'pai'), estadoCivil: g('estadoCivil'), batismo: g('batismo'),
+      Igreja: g('Igreja', 'igrejaOrigem', 'IgrejaOrigen'), funcao: g('funcao', 'cargo'), rua: g('rua', 'endereco', 'logradouro'), numero: g('numero'),
+      bairro: g('bairro'), cidade: g('cidade'), estado: g('estado', 'uf'), cep: g('cep'), celular: g('celular', 'telefone', 'phone', 'whatsapp'),
+      email: g('email'), rg: g('rg'), cpf: g('cpf'), ativo: st === '' ? true : Arq.sim(st)
+    };
+    var cpf = String(m.cpf).replace(/\D/g, '');
+    var k = (cpf.length === 11 ? 'c' + cpf : 'n' + m.nome.toLowerCase().replace(/\s+/g, ' ').trim() + '|' + m.nascimento);
+    m._dupArq = !!vistos[k]; vistos[k] = true;
+    m._jaExiste = MB.membros.some(function (x) {
+      var xc = String(x.cpf || '').replace(/\D/g, '');
+      return (cpf.length === 11 && xc === cpf) || (String(x.nome || '').toLowerCase().replace(/\s+/g, ' ').trim() === m.nome.toLowerCase().replace(/\s+/g, ' ').trim() && String(x.nascimento || '') === m.nascimento);
+    });
+    return m;
+  });
+  return out.filter(function (m) { return m.nome; });
+}
+function mbIoArquivo(inp) {
+  var f = inp.files && inp.files[0]; if (!f) return;
+  var dz = document.getElementById('mb-io-dz'); if (dz) dz.textContent = f.name;
+  Arq.ler(f, function (err, dados) {
+    if (err) { showToast(err, 'error'); return; }
+    var l = _mbIoNorm(dados);
+    if (!l.length) { showToast('Nenhum registro com nome foi encontrado no arquivo.', 'error'); return; }
+    MB_IO.linhas = l;
+    var b = document.getElementById('mb-io-prox'); if (b) b.disabled = false;
+    showToast(l.length + ' linhas lidas.', 'success');
+  });
+}
+function mbIoPintar() {
+  var corpo = document.getElementById('mb-io-corpo'), rod = document.getElementById('mb-io-rodape'), sub = document.getElementById('mb-io-sub');
+  var nomes = ['Arquivo', 'Análise', 'Importar', 'Resultado'], p = MB_IO.passo, L = MB_IO.linhas;
+  if (sub) sub.textContent = 'Passo ' + p + ' de 4 · ' + nomes[p - 1];
+  var passos = '<div class="mb-io-passos">' + nomes.map(function (t, i) { var n = i + 1; return '<div class="mb-io-passo' + (n === p ? ' on' : n < p ? ' ok' : '') + '"><b>' + (n < p ? '✓' : n) + '</b>' + t + '</div>'; }).join('') + '</div>';
+  var cancelar = '<button class="btn btn-secondary" onclick="mbIoFechar()">Cancelar</button>';
+  var h = passos;
+  if (p === 1) {
+    h += '<div class="mb-io-bloco"><div class="mb-io-t">Exportar</div><div class="mb-io-d">' + MB.membros.length + ' membros cadastrados. CSV abre no Excel/Planilhas; o JSON (com fotos) fica no menu ⋯ em "Backup com fotos".</div>' +
+      '<button class="btn btn-secondary btn-full" onclick="mbExportarCSV()"><i data-lucide="download" class="ic-16"></i> Exportar CSV</button></div>' +
+      '<div class="mb-io-bloco"><div class="mb-io-t">Importar</div>' +
+      '<label class="mb-io-drop"><input type="file" accept=".csv,.xlsx,.xls,.txt" onchange="mbIoArquivo(this)"><b id="mb-io-dz">Toque para escolher o arquivo</b><small>CSV ou planilha Excel (.xlsx)</small></label>' +
+      '<div class="mb-io-d" style="margin-top:10px">Colunas: <b>Nome</b> (obrigatória), ROL, Sexo, Nascimento, Mae, Pai, EstadoCivil, Batismo, IgrejaOrigem, Funcao, Rua, Numero, Bairro, Cidade, Estado, CEP, Celular, Email, RG, CPF, Ativo. <a href="#" onclick="mbBaixarModelo();return false">Baixar modelo CSV</a></div></div>';
+    corpo.innerHTML = h;
+    rod.innerHTML = '<div class="mb-io-btns">' + cancelar + '<button class="btn btn-primary" id="mb-io-prox" disabled onclick="mbIoIr(2)">Analisar →</button></div>';
+  } else if (p === 2) {
+    var novos = L.filter(function (m) { return !m._dupArq && !m._jaExiste; }), jaEx = L.filter(function (m) { return m._jaExiste && !m._dupArq; }).length, dp = L.filter(function (m) { return m._dupArq; }).length;
+    MB_IO.novos = novos.length;
+    h += '<div class="mb-io-pills"><span>' + novos.length + ' novos</span><span>' + jaEx + ' já cadastrados</span>' + (dp ? '<span>' + dp + ' repetidos no arquivo</span>' : '') + '<span>' + novos.filter(function (m) { return m.ativo; }).length + ' ativos</span></div>' +
+      '<div class="mb-io-nota">Quem já está cadastrado (mesmo CPF, ou mesmo nome e nascimento) é ignorado. Nada existente é alterado.</div>' +
+      '<div class="mb-io-rolo"><table class="mb-io-tab"><thead><tr><th>Nome</th><th>Nasc.</th><th>Celular</th><th>Situação</th></tr></thead><tbody>' +
+      L.slice(0, 40).map(function (m) { return '<tr' + (m._dupArq || m._jaExiste ? ' style="opacity:.5"' : '') + '><td>' + _mbEsc(m.nome) + '</td><td>' + _mbEsc(m.nascimento) + '</td><td>' + _mbEsc(m.celular) + '</td><td>' + (m._dupArq ? 'repetido' : m._jaExiste ? 'já existe' : m.ativo ? 'novo' : 'novo (inativo)') + '</td></tr>'; }).join('') +
+      '</tbody></table></div>' + (L.length > 40 ? '<div class="mb-io-d">Mostrando 40 de ' + L.length + ' linhas.</div>' : '');
+    corpo.innerHTML = h;
+    rod.innerHTML = '<div class="mb-io-btns"><button class="btn btn-secondary" onclick="mbIoIr(1)">← Voltar</button><button class="btn btn-primary" onclick="mbIoExecutar()"' + (novos.length ? '' : ' disabled') + '><i data-lucide="upload" class="ic-16"></i> Importar ' + novos.length + '</button></div>';
+  } else if (p === 3) {
+    h += '<div class="mb-io-nota" id="mb-io-lbl">Preparando…</div><div class="mb-io-prog"><i id="mb-io-bar"></i></div>';
+    corpo.innerHTML = h; rod.innerHTML = '';
+  } else {
+    var r = MB_IO.res || {};
+    h += '<div class="mb-io-nota"><b>' + (r.criados || 0) + ' membros importados.</b>' + (r.duplicados ? ' ' + r.duplicados + ' já existiam e foram ignorados.' : '') + (r.erros ? ' ' + r.erros + ' com erro.' : '') + '</div>' +
+      ((r.mensagens || []).length ? '<div class="mb-io-d">' + r.mensagens.slice(0, 20).map(_mbEsc).join('<br>') + '</div>' : '');
+    corpo.innerHTML = h;
+    rod.innerHTML = '<div class="mb-io-btns"><button class="btn btn-secondary" onclick="mbIoAbrir()">Nova importação</button><button class="btn btn-primary" onclick="mbIoConcluir()">Concluir</button></div>';
+  }
+  if (window.lucide) lucide.createIcons();
+}
+function mbIoConcluir() {
+  document.getElementById('modal-mb-io').classList.remove('open');
+  _mbLoad(function () { mbAtualizarBadgeAniv(); _mbRenderPanel(); });
+}
+function mbIoExecutar() {
+  var lista = MB_IO.linhas.filter(function (m) { return !m._dupArq && !m._jaExiste; });
+  MB_IO.rodando = true; mbIoIr(3);
+  var tot = { criados: 0, duplicados: 0, erros: 0, mensagens: [] }, feitos = 0, TAM = 100;
+  function atualizar() {
+    var l = document.getElementById('mb-io-lbl'), b = document.getElementById('mb-io-bar');
+    if (l) l.textContent = 'Importando ' + Math.min(feitos, lista.length) + ' de ' + lista.length + '…';
+    if (b) b.style.width = Math.round(Math.min(feitos, lista.length) * 100 / Math.max(1, lista.length)) + '%';
+  }
+  function fim() { MB_IO.rodando = false; MB_IO.res = tot; mbIoIr(4); }
+  function lote(ini) {
+    if (ini >= lista.length) { fim(); return; }
+    atualizar();
+    var parte = lista.slice(ini, ini + TAM).map(function (m) { var o = {}; Object.keys(m).forEach(function (k) { if (k.charAt(0) !== '_') o[k] = m[k]; }); return o; });
+    google.script.run
+      .withFailureHandler(function (e) { tot.erros += parte.length; tot.mensagens.push((e && e.message) || 'Falha ao enviar um lote.'); feitos += parte.length; lote(ini + TAM); })
+      .withSuccessHandler(function (r) {
+        if (!r || !r.success) { tot.erros += parte.length; tot.mensagens.push((r && r.error) || 'Lote recusado.'); }
+        else { tot.criados += r.data.criados || 0; tot.duplicados += r.data.duplicados || 0; tot.erros += r.data.erros || 0; }
+        feitos += parte.length; lote(ini + TAM);
+      })
+      .mb_importarLote(App.session.token, parte);
+  }
+  lote(0);
+}
+
+// ════════════════════════════════════════════
+//  FONTES DE MEMBROS: outros módulos instalados podem oferecer pessoas para o cadastro
+//  (manifesto: fonteMembros { rotulo, titulo, icone, fn }). Este módulo não conhece nenhum deles.
+// ════════════════════════════════════════════
+var MB_FONTE = { lista: [], atual: null };
+function _mbFontes() { try { return modulosDoPerfil(App.session.perfil).filter(function (m) { return m.fonteMembros && m.fonteMembros.fn; }); } catch (e) { return []; } }
+function _mbBotoesFonte() {
+  return _mbFontes().map(function (m) {
+    return '<button type="button" class="btn btn-secondary btn-sm" style="margin:0 8px 12px 0" onclick="mbFonteAbrir(\'' + _mbEsc(m.id) + '\')"><i data-lucide="' + _mbEsc(m.fonteMembros.icone || 'users') + '" class="ic-16"></i> ' + _mbEsc(m.fonteMembros.rotulo || 'Importar') + '</button>';
+  }).join('');
+}
+function mbFonteAbrir(modId) {
+  var m = _mbFontes().filter(function (x) { return x.id === modId; })[0]; if (!m) return;
+  MB_FONTE.atual = m;
+  document.getElementById('mb-fonte-titulo').textContent = m.fonteMembros.titulo || m.fonteMembros.rotulo || 'Importar';
+  document.getElementById('modal-mb-fonte').classList.add('open');
+  document.getElementById('mb-fonte-lista').innerHTML = '<div class="mb-empty-sub" style="padding:16px;text-align:center">Carregando…</div>';
+  google.script.run
+    .withFailureHandler(function (e) { showToast((e && e.message) || 'Não foi possível carregar a lista.', 'error'); mbFonteFechar(); })
+    .withSuccessHandler(function (r) {
+      if (!r || !r.success) { showToast((r && r.error) || 'Não foi possível carregar a lista.', 'error'); mbFonteFechar(); return; }
+      MB_FONTE.lista = r.data || []; mbFontePintar();
+    })[m.fonteMembros.fn](App.session.token);
+}
+function mbFonteFechar() { document.getElementById('modal-mb-fonte').classList.remove('open'); }
+function mbFontePintar() {
+  var q = String((document.getElementById('mb-fonte-busca') || {}).value || '').toLowerCase().trim();
+  var l = MB_FONTE.lista.filter(function (x) { return !q || String(x.nome).toLowerCase().indexOf(q) !== -1; });
+  document.getElementById('mb-fonte-lista').innerHTML = l.length ? l.map(function (x) {
+    var meta = [x.tipo === 'professor' ? 'Professor' : x.tipo === 'aluno' ? 'Aluno' : '', x.turma, Arq.dataBR(x.dataNasc)].filter(Boolean).join(' · ');
+    return '<button type="button" class="mb-fonte-item" onclick="mbFonteEscolher(\'' + _mbEsc(x.id) + '\')"><span><b>' + _mbEsc(x.nome) + '</b><small>' + _mbEsc(meta) + '</small></span><i data-lucide="chevron-right" class="ic-16"></i></button>';
+  }).join('') : '<div class="mb-empty-sub" style="padding:16px;text-align:center">' + (MB_FONTE.lista.length ? 'Ninguém encontrado.' : 'Todos já estão cadastrados como membros.') + '</div>';
+  if (window.lucide) lucide.createIcons();
+}
+function mbFonteEscolher(id) {
+  var x = MB_FONTE.lista.filter(function (a) { return String(a.id) === String(id); })[0]; if (!x) return;
+  var campos = { 'mbf-nome': x.nome, 'mbf-nascimento': Arq.dataBR(x.dataNasc), 'mbf-celular': x.telefone, 'mbf-email': x.email };
+  Object.keys(campos).forEach(function (k) {
+    var el = document.getElementById(k); if (!el || !campos[k]) return;
+    el.value = campos[k];
+    var f = el.closest && el.closest('.field'); if (f) f.classList.remove('has-error');
+    var er = document.getElementById(k.replace('mbf-', 'mbfe-')); if (er) er.style.display = 'none';
+  });
+  mbFonteFechar();
+  showToast('Dados trazidos. Complete os campos restantes.', 'success');
 }
 </script>
 

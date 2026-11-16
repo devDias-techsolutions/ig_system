@@ -45,6 +45,30 @@
 .edm-lista-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-2); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
 .edm-lista-head .edm-dica { text-transform: none; letter-spacing: 0; font-weight: 600; }
 .edm-row { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-2) var(--sp-3); margin-bottom: var(--sp-2); border-radius: var(--r-3); background: var(--bg-glass-strong); border: 1px solid var(--border); }
+.edm-dados { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.edm-dados .btn { flex: 1 1 140px; }
+.edm-imp-passos { display: flex; align-items: center; gap: var(--sp-1); margin-bottom: var(--sp-4); }
+.edm-imp-passo { flex: 1; display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); font-size: var(--fs-xs); font-weight: 700; color: var(--text-dim); }
+.edm-imp-passo b { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: var(--fs-xs); background: var(--bg); border: 1.5px solid var(--border-strong); }
+.edm-imp-passo.on { color: var(--teal); } .edm-imp-passo.on b { background: var(--teal); border-color: var(--teal); color: var(--on-teal, #fff); }
+.edm-imp-passo.ok b { background: var(--teal-dim); border-color: var(--teal); color: var(--teal); }
+.edm-drop { position: relative; display: block; padding: var(--sp-5) var(--sp-3); text-align: center; border: 2px dashed var(--border-strong); border-radius: var(--r-3); background: var(--bg-glass-strong); cursor: pointer; }
+.edm-drop input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+.edm-drop b { display: block; font-size: var(--fs-md); font-weight: 800; }
+.edm-drop small { font-size: var(--fs-xs); color: var(--text-muted); }
+.edm-imp-nota { margin: var(--sp-3) 0; padding: var(--sp-3); border-radius: var(--r-2); font-size: var(--fs-sm); background: var(--bg); border: 1px solid var(--border); }
+.edm-imp-nota.warn { background: var(--gold-dim); border-color: var(--gold); }
+.edm-imp-pills { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.edm-imp-pills span { padding: var(--sp-1) var(--sp-3); border-radius: var(--r-pill); font-size: var(--fs-sm); font-weight: 700; background: var(--bg); border: 1px solid var(--border); }
+.edm-imp-tab { width: 100%; border-collapse: collapse; font-size: var(--fs-xs); }
+.edm-imp-tab th, .edm-imp-tab td { padding: var(--sp-1) var(--sp-2); text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
+.edm-imp-rolo { max-height: 220px; overflow: auto; border: 1px solid var(--border); border-radius: var(--r-2); }
+.edm-imp-map { display: grid; grid-template-columns: 1fr auto; gap: var(--sp-2); align-items: center; margin-bottom: var(--sp-2); }
+.edm-imp-map > span { font-weight: 700; font-size: var(--fs-sm); }
+.edm-imp-map select { min-width: 150px; }
+.edm-imp-prog { height: 8px; border-radius: var(--r-pill); background: var(--teal-dim); overflow: hidden; margin: var(--sp-2) 0; }
+.edm-imp-prog i { display: block; height: 100%; width: 0; background: var(--teal); }
+.edm-imp-log { max-height: 140px; overflow: auto; font-size: var(--fs-xs); color: var(--text-muted); }
 .edm-aulacard { padding: 0; gap: 0; }
 .edm-aulabtn { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-2) var(--sp-3); border: 0; background: none; text-align: left; font-family: inherit; color: inherit; cursor: pointer; }
 .edm-kebab { width: 44px; align-self: stretch; border: 0; border-left: 1px solid var(--border); background: none; color: var(--text-muted); cursor: pointer; display: grid; place-items: center; }
@@ -263,6 +287,11 @@ function renderEscolaDominical() {
       '<div class="modal-body" id="edm-form-corpo"></div>' +
       '<div class="modal-footer" id="edm-form-rodape"></div>' +
     '</div></div>' +
+    '<div class="modal-overlay" id="modal-edm-imp" onclick="if(event.target===this)edmImpFechar()"><div class="modal-box">' +
+      '<div class="modal-header"><div><h3>Importar dados da EBD</h3><div class="modal-sub" id="edm-imp-sub"></div></div></div>' +
+      '<div class="modal-body" id="edm-imp-corpo"></div>' +
+      '<div class="modal-footer" id="edm-imp-rodape"></div>' +
+    '</div></div>' +
     '<div class="modal-overlay" id="modal-edm-extras" onclick="if(event.target===this)edmFecharModal(\'modal-edm-extras\')"><div class="modal-box">' +
       '<div class="modal-header"><div><h3>Pontos extras</h3><div class="modal-sub" id="edm-extras-sub"></div></div></div>' +
       '<div class="modal-body" id="edm-extras-body"></div>' +
@@ -288,7 +317,7 @@ function edmIr(t) {
   edmAtalhosDica();
   var ti = document.getElementById('edm-titulo');
   if (ti) ti.textContent = EDM_TITULOS[t] || '';
-  var gear = document.getElementById('edm-gear'); if (gear) gear.style.display = (edmPodeEditar() && (t === 'chamada' || t === 'ranking')) ? '' : 'none';
+  var gear = document.getElementById('edm-gear'); if (gear) gear.style.display = edmPodeEditar() ? '' : 'none';
   var painel = document.getElementById('edm-panel');
   if (painel) painel.innerHTML = '<div class="edm-vazio"><div class="loader-spinner" style="margin:0 auto"></div></div>';
   if (t === 'chamada') edmCarregar(); else if (t === 'visao') edmCarregarVisao(); else if (t === 'ranking') edmCarregarRanking(); else if (t === 'relatorios') edmCarregarRelatorios(); else edmCarregarCadastros();
@@ -918,10 +947,15 @@ function edmAjustes() {
         '<div class="edm-pts-grid"><div class="field"><label for="edm-cfg-p1">Pts presença</label><input type="number" min="0" max="100" id="edm-cfg-p1" value="' + c.pontos.presenca + '"></div>' +
         '<div class="field"><label for="edm-cfg-p2">Pts bíblia</label><input type="number" min="0" max="100" id="edm-cfg-p2" value="' + c.pontos.biblia + '"></div>' +
         '<div class="field"><label for="edm-cfg-p3">Pts revista</label><input type="number" min="0" max="100" id="edm-cfg-p3" value="' + c.pontos.revista + '"></div></div>' +
+        '<div class="edm-demo"><div class="edm-demo-t">Exportar e importar</div><div class="edm-demo-d">Alunos, professores e turmas. CSV abre no Excel/Planilhas; JSON é o backup completo (inclui aulas e chamadas).</div>' +
+          '<div class="edm-dados"><button class="btn btn-secondary" onclick="edmExportar(\'csv\')"><i data-lucide="file-spreadsheet" class="ic-16"></i> Exportar CSV</button>' +
+          '<button class="btn btn-secondary" onclick="edmExportar(\'json\')"><i data-lucide="braces" class="ic-16"></i> Backup JSON</button>' +
+          '<button class="btn btn-primary" onclick="edmImpAbrir()"><i data-lucide="upload" class="ic-16"></i> Importar</button></div></div>' +
         (App.session.perfil === 'admin' ? '<div class="edm-demo"><div class="edm-demo-t">Dados de teste</div><div class="edm-demo-d">Preenche a Escola Dominical como se estivesse em uso há um trimestre, ou zera tudo.</div>' +
           '<div class="edm-form-btns"><button class="btn btn-secondary" onclick="edmDemo(\'popular\')">Popular</button><button class="btn btn-danger" onclick="edmDemo(\'limpar\')">Limpar base</button></div></div>' : '');
       document.getElementById('edm-form-rodape').innerHTML = '<div class="edm-form-btns"><button class="btn btn-secondary" onclick="edmFecharModal(\'modal-edm-form\')">Cancelar</button><button class="btn btn-primary" id="edm-form-salvar" onclick="edmSalvarAjustes()">Salvar</button></div>';
       edmAbrirModal('modal-edm-form');
+      if (window.lucide) lucide.createIcons();
     })
     .ed_getConfigEbd(App.session.token);
 }
@@ -1066,5 +1100,181 @@ function edmRelatorioPosSalvar() {
       if (window.lucide) lucide.createIcons();
     })
     .ed_getRelatorioAula(App.session.token, aulaId);
+}
+
+// ── Exportar / importar dados da EBD (independente do módulo Membros) ──────────
+var EDM_CSV_CAB = ['Tipo', 'Nome', 'Turma', 'Telefone', 'Email', 'DataNasc', 'Endereco', 'Ativo', 'CriadoEm'];
+function _edmPessoasCsv(d) {
+  var cls = {}; (d.classes || []).forEach(function (c) { cls[c.ID] = c.Nome; });
+  function lin(tipo, r) { return [tipo, r.Nome, cls[r.ClasseID] || '', r.Telefone, r.Email, Arq.dataBR(r.DataNasc), r.Endereco, (r.Ativo === true || r.Ativo === 'TRUE') ? 'sim' : 'não', r.CriadoEm]; }
+  return (d.alunos || []).map(function (a) { return lin('aluno', a); }).concat((d.professores || []).map(function (p) { return lin('professor', p); }));
+}
+function edmExportar(formato) {
+  showToast('Preparando exportação…', 'info');
+  google.script.run
+    .withFailureHandler(function (e) { showToast((e && e.message) || 'Erro ao exportar.', 'error'); })
+    .withSuccessHandler(function (r) {
+      if (!_edmResp(r, 'exportar')) return;
+      var d = r.data, dia = Arq.hoje();
+      if (formato === 'json') Arq.baixar('EBD_backup_' + dia + '.json', JSON.stringify(d, null, 2), 'application/json');
+      else Arq.baixar('EBD_alunos_professores_' + dia + '.csv', Arq.csvGerar(EDM_CSV_CAB, _edmPessoasCsv(d)), 'text/csv;charset=utf-8');
+      showToast('Arquivo exportado.', 'success');
+    })
+    .ed_exportarDadosEbd(App.session.token);
+}
+function edmBaixarModelo() {
+  Arq.baixar('EBD_modelo_importacao.csv', Arq.csvGerar(EDM_CSV_CAB, [
+    ['aluno', 'Maria da Silva', 'Jovens', '(31) 99999-0000', 'maria@email.com', '15/03/2008', 'Rua A, 10, Centro', 'sim', ''],
+    ['professor', 'João Pereira', 'Adultos', '(31) 98888-0000', '', '', '', 'sim', '']
+  ]), 'text/csv;charset=utf-8');
+}
+
+var EDMI = { passo: 1, pessoas: [], turmas: {}, classes: [], arquivo: '', res: null, rodando: false };
+var EDMI_PASSOS = ['Arquivo', 'Análise', 'Turmas', 'Importar', 'Resultado'];
+function edmImpAbrir() {
+  EDMI = { passo: 1, pessoas: [], turmas: {}, classes: [], arquivo: '', res: null, rodando: false };
+  edmFecharModal('modal-edm-form');
+  edmImpPintar(); edmAbrirModal('modal-edm-imp');
+}
+function edmImpFechar() { if (EDMI.rodando) { showToast('Aguarde a importação terminar.', 'warning'); return; } edmFecharModal('modal-edm-imp'); }
+function edmImpIr(n) { EDMI.passo = n; edmImpPintar(); }
+function _edmImpCab() {
+  return '<div class="edm-imp-passos">' + EDMI_PASSOS.map(function (t, i) {
+    var n = i + 1; return '<div class="edm-imp-passo' + (n === EDMI.passo ? ' on' : n < EDMI.passo ? ' ok' : '') + '"><b>' + (n < EDMI.passo ? '✓' : n) + '</b>' + t + '</div>';
+  }).join('') + '</div>';
+}
+function _edmImpBotoes(esq, dir) {
+  document.getElementById('edm-imp-rodape').innerHTML = '<div class="edm-form-btns">' + (esq || '') + (dir || '') + '</div>';
+}
+function edmImpPintar() {
+  var corpo = document.getElementById('edm-imp-corpo'), sub = document.getElementById('edm-imp-sub');
+  if (sub) sub.textContent = 'Passo ' + EDMI.passo + ' de 5 · ' + EDMI_PASSOS[EDMI.passo - 1];
+  var P = EDMI.pessoas, h = _edmImpCab();
+  var fechar = '<button class="btn btn-secondary" onclick="edmImpFechar()">Cancelar</button>';
+  if (EDMI.passo === 1) {
+    h += '<label class="edm-drop"><input type="file" accept=".csv,.json,.xlsx,.xls,.txt" onchange="edmImpArquivo(this)"><b id="edm-imp-dz">Toque para escolher o arquivo</b><small>CSV, planilha (.xlsx) ou JSON de backup da EBD</small></label>' +
+      '<div class="edm-imp-nota">Colunas aceitas: <b>Tipo</b> (aluno/professor), <b>Nome</b>, <b>Turma</b>, Telefone, Email, DataNasc, Endereco, Ativo. A planilha do sistema antigo (name, classroom, position, phone, birthday, status…) também é reconhecida. <a href="#" onclick="edmBaixarModelo();return false">Baixar modelo CSV</a></div>';
+    corpo.innerHTML = h;
+    _edmImpBotoes(fechar, '<button class="btn btn-primary" id="edm-imp-prox" disabled onclick="edmImpIr(2)">Analisar →</button>');
+  } else if (EDMI.passo === 2) {
+    var al = P.filter(function (x) { return x.tipo === 'aluno' && !x.dup; }).length, pr = P.filter(function (x) { return x.tipo === 'professor' && !x.dup; }).length;
+    var at = P.filter(function (x) { return x.ativo && !x.dup; }).length, dp = P.filter(function (x) { return x.dup; }).length;
+    h += '<div class="edm-imp-pills"><span>' + al + ' alunos</span><span>' + pr + ' professores</span><span>' + at + ' ativos</span><span>' + (al + pr - at) + ' inativos</span>' + (dp ? '<span>' + dp + ' repetidos no arquivo</span>' : '') + '</div>' +
+      (dp ? '<div class="edm-imp-nota warn">Nomes repetidos no arquivo serão ignorados. Quem já existe na EBD também é ignorado na importação.</div>' : '') +
+      '<div class="edm-imp-rolo"><table class="edm-imp-tab"><thead><tr><th>Tipo</th><th>Nome</th><th>Turma</th><th>Nasc.</th><th>Ativo</th></tr></thead><tbody>' +
+      P.slice(0, 50).map(function (x) { return '<tr' + (x.dup ? ' style="opacity:.5"' : '') + '><td>' + x.tipo + '</td><td>' + _edmEsc(x.nome) + '</td><td>' + _edmEsc(x.turma) + '</td><td>' + _edmEsc(x.dataNasc) + '</td><td>' + (x.ativo ? 'sim' : 'não') + '</td></tr>'; }).join('') +
+      '</tbody></table></div>' + (P.length > 50 ? '<div class="edm-imp-nota">Mostrando 50 de ' + P.length + ' linhas.</div>' : '');
+    corpo.innerHTML = h;
+    _edmImpBotoes('<button class="btn btn-secondary" onclick="edmImpIr(1)">← Voltar</button>', '<button class="btn btn-primary" onclick="edmImpTurmas()">Mapear turmas →</button>');
+  } else if (EDMI.passo === 3) {
+    var nomes = []; P.forEach(function (x) { if (x.turma && nomes.indexOf(x.turma) === -1 && !x.dup) nomes.push(x.turma); });
+    h += '<div class="edm-imp-nota">Para cada turma do arquivo, escolha a turma da EBD ou crie uma nova.' + (P.some(function (x) { return x.tipo === 'aluno' && !x.turma && !x.dup; }) ? ' <b>Alunos sem turma serão ignorados.</b>' : '') + '</div>' +
+      (nomes.length ? nomes.map(function (n, i) {
+        var opts = '<option value="__new__">— Criar nova turma —</option>' + EDMI.classes.map(function (c) { return '<option value="' + _edmEsc(c.ID) + '"' + (EDMI.turmas[n] === c.ID ? ' selected' : '') + '>' + _edmEsc(c.Nome) + '</option>'; }).join('');
+        return '<div class="edm-imp-map"><span>' + _edmEsc(n) + '</span><select data-i="' + i + '">' + opts + '</select></div>';
+      }).join('') : '<div class="edm-vazio">Nenhuma turma no arquivo.</div>');
+    corpo.innerHTML = h;
+    EDMI.nomesTurma = nomes;
+    _edmImpBotoes('<button class="btn btn-secondary" onclick="edmImpIr(2)">← Voltar</button>', '<button class="btn btn-primary" onclick="edmImpExecutar()"><i data-lucide="upload" class="ic-16"></i> Importar</button>');
+  } else if (EDMI.passo === 4) {
+    h += '<div class="edm-imp-nota" id="edm-imp-lbl">Preparando…</div><div class="edm-imp-prog"><i id="edm-imp-bar"></i></div><div class="edm-imp-log" id="edm-imp-log"></div>';
+    corpo.innerHTML = h; _edmImpBotoes('', '');
+  } else {
+    var r = EDMI.res || {};
+    h += '<div class="edm-imp-nota"><b>' + ((r.alunos || 0) + (r.professores || 0)) + ' registros importados.</b>' + (r.duplicados ? ' ' + r.duplicados + ' já existiam e foram ignorados.' : '') + (r.erros ? ' ' + r.erros + ' com erro.' : '') + '</div>' +
+      '<div class="edm-imp-pills"><span>' + (r.alunos || 0) + ' alunos</span><span>' + (r.professores || 0) + ' professores</span><span>' + (r.turmasCriadas || 0) + ' turmas criadas</span></div>' +
+      ((r.mensagens || []).length ? '<div class="edm-imp-log">' + r.mensagens.slice(0, 30).map(_edmEsc).join('<br>') + '</div>' : '');
+    corpo.innerHTML = h;
+    _edmImpBotoes('<button class="btn btn-secondary" onclick="edmImpAbrir()">Nova importação</button>', '<button class="btn btn-primary" onclick="edmImpConcluir()">Concluir</button>');
+  }
+  if (window.lucide) lucide.createIcons();
+}
+function edmImpConcluir() { edmFecharModal('modal-edm-imp'); EDM.alunos = []; EDM.freq = null; edmIr(EDM.tela); }
+
+function _edmImpNormalizar(dados) {
+  var out = [];
+  function ativoDe(v, padrao) { return v === undefined || v === '' ? padrao : (v === true || Arq.sim(v)); }
+  if (dados && !Array.isArray(dados) && (dados.alunos || dados.professores)) {          // backup JSON da EBD
+    var cls = {}; (dados.classes || []).forEach(function (c) { cls[c.ID] = c.Nome; });
+    (dados.alunos || []).forEach(function (a) { out.push({ tipo: 'aluno', nome: a.Nome, turma: cls[a.ClasseID] || '', telefone: a.Telefone, email: a.Email, dataNasc: Arq.dataBR(a.DataNasc), endereco: a.Endereco, ativo: ativoDe(a.Ativo, true), criadoEm: a.CriadoEm }); });
+    (dados.professores || []).forEach(function (a) { out.push({ tipo: 'professor', nome: a.Nome, turma: cls[a.ClasseID] || '', telefone: a.Telefone, email: a.Email, dataNasc: Arq.dataBR(a.DataNasc), endereco: a.Endereco, ativo: ativoDe(a.Ativo, true), criadoEm: a.CriadoEm }); });
+    return out;
+  }
+  (Array.isArray(dados) ? dados : []).forEach(function (l) {
+    if (!l || typeof l !== 'object') return;
+    var pos = Arq.chave(Arq.pegar(l, ['tipo', 'position', 'posicao', 'cargo']));
+    var end = Arq.pegar(l, ['endereco', 'address']);
+    if (!end) end = [Arq.pegar(l, ['streetName']), Arq.pegar(l, ['streetNumber']), Arq.pegar(l, ['neighborhoodName', 'bairro']), Arq.pegar(l, ['city', 'cidade']), Arq.pegar(l, ['state', 'estado'])].filter(Boolean).join(', ');
+    out.push({
+      tipo: /prof|teacher/.test(pos) ? 'professor' : 'aluno',
+      nome: Arq.pegar(l, ['nome', 'name']), turma: Arq.pegar(l, ['turma', 'classe', 'classroom', 'class']),
+      telefone: Arq.pegar(l, ['telefone', 'phone', 'celular', 'whatsapp']), email: Arq.pegar(l, ['email']),
+      dataNasc: Arq.dataBR(Arq.pegar(l, ['datanasc', 'nascimento', 'birthday', 'datadenascimento'])), endereco: end,
+      ativo: ativoDe(Arq.pegar(l, ['ativo', 'status']), true), criadoEm: Arq.dataBR(Arq.pegar(l, ['criadoem', 'date']))
+    });
+  });
+  var vistos = {};
+  out = out.filter(function (x) { return String(x.nome || '').trim(); });
+  out.forEach(function (x) { var k = x.tipo + '|' + String(x.nome).toLowerCase().replace(/\s+/g, ' ').trim(); x.dup = !!vistos[k]; vistos[k] = true; });
+  return out;
+}
+function edmImpArquivo(inp) {
+  var f = inp.files && inp.files[0]; if (!f) return;
+  var dz = document.getElementById('edm-imp-dz'); if (dz) dz.textContent = f.name;
+  Arq.ler(f, function (err, dados) {
+    if (err) { showToast(err, 'error'); return; }
+    var pessoas = _edmImpNormalizar(dados);
+    if (!pessoas.length) { showToast('Nenhum registro com nome foi encontrado no arquivo.', 'error'); return; }
+    EDMI.pessoas = pessoas; EDMI.arquivo = f.name;
+    var b = document.getElementById('edm-imp-prox'); if (b) b.disabled = false;
+    showToast(pessoas.length + ' linhas lidas.', 'success');
+  });
+}
+function edmImpTurmas() {
+  google.script.run
+    .withFailureHandler(function () { EDMI.classes = []; EDMI.turmas = {}; edmImpIr(3); })
+    .withSuccessHandler(function (r) {
+      EDMI.classes = (r && r.success && r.data && r.data.classes) || [];
+      // casa por nome automaticamente
+      EDMI.turmas = {};
+      EDMI.pessoas.forEach(function (x) {
+        if (!x.turma || EDMI.turmas[x.turma]) return;
+        EDMI.classes.forEach(function (c) { if (String(c.Nome).toLowerCase().trim() === x.turma.toLowerCase().trim()) EDMI.turmas[x.turma] = c.ID; });
+      });
+      edmImpIr(3);
+    })
+    .ed_getDadosIniciais(App.session.token, []);
+}
+function edmImpExecutar() {
+  var mapa = {};
+  var sels = document.querySelectorAll('#edm-imp-corpo select[data-i]');
+  for (var i = 0; i < sels.length; i++) mapa[(EDMI.nomesTurma || [])[Number(sels[i].getAttribute('data-i'))]] = sels[i].value;
+  EDMI.mapa = mapa;
+  var lista = EDMI.pessoas.filter(function (x) { return !x.dup; });
+  EDMI.rodando = true; edmImpIr(4);
+  var tot = { alunos: 0, professores: 0, turmasCriadas: 0, duplicados: 0, erros: 0, mensagens: [] }, feitos = 0, TAM = 100;
+  function atualizar() {
+    var l = document.getElementById('edm-imp-lbl'), b = document.getElementById('edm-imp-bar');
+    if (l) l.textContent = 'Importando ' + Math.min(feitos, lista.length) + ' de ' + lista.length + '…';
+    if (b) b.style.width = Math.round(Math.min(feitos, lista.length) * 100 / Math.max(1, lista.length)) + '%';
+  }
+  function fim() { EDMI.rodando = false; EDMI.res = tot; edmImpIr(5); }
+  function lote(ini) {
+    if (ini >= lista.length) { fim(); return; }
+    atualizar();
+    var parte = lista.slice(ini, ini + TAM).map(function (x) { return { tipo: x.tipo, nome: x.nome, turma: x.turma, telefone: x.telefone, email: x.email, dataNasc: x.dataNasc, endereco: x.endereco, ativo: x.ativo, criadoEm: x.criadoEm }; });
+    google.script.run
+      .withFailureHandler(function (e) { tot.erros += parte.length; tot.mensagens.push((e && e.message) || 'Falha ao enviar um lote.'); feitos += parte.length; lote(ini + TAM); })
+      .withSuccessHandler(function (r) {
+        if (!r || !r.success) { tot.erros += parte.length; tot.mensagens.push((r && r.error) || 'Lote recusado.'); }
+        else {
+          ['alunos', 'professores', 'turmasCriadas', 'duplicados', 'erros'].forEach(function (k) { tot[k] += r.data[k] || 0; });
+          tot.mensagens = tot.mensagens.concat(r.data.mensagens || []);
+        }
+        feitos += parte.length; lote(ini + TAM);
+      })
+      .ed_importarPessoasEbd(App.session.token, parte, mapa);
+  }
+  lote(0);
 }
 </script>

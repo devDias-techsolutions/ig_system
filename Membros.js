@@ -205,6 +205,65 @@ var Membros = (function () {
     });
   }
 
+  // ══ IMPORTAR EM LOTE (CSV/planilha/JSON) ═════════════════
+  // Até 200 membros por chamada. Repetido = mesmo CPF (só dígitos) ou mesmo nome + nascimento.
+  // Não mexe em fotos (o backup JSON com fotos continua pelo caminho de salvarMembro).
+  function importarLote(token, linhas) {
+    return withAuth(token, function (sess) {
+      if (sess.perfil !== 'admin' && sess.perfil !== 'secretaria') return Util.err('Sem permissão.');
+      if (!linhas || !linhas.length) return Util.err('Nenhum registro para importar.');
+      if (linhas.length > 200) return Util.err('Envie no máximo 200 registros por vez.');
+
+      var sh = Util.getSheet(SHEET);
+      var data = sh.getDataRange().getValues();
+      if (data.length === 0) { sh.appendRow(HEADERS); data = sh.getDataRange().getValues(); }
+
+      function chaveNome(n, nasc) { return String(n || '').toLowerCase().replace(/\s+/g, ' ').trim() + '|' + _formatarData(nasc); }
+      function digitos(v) { return String(v || '').replace(/\D/g, ''); }
+      var ci = {}; HEADERS.forEach(function (h) { ci[h] = data[0].indexOf(h); });
+      var cpfs = {}, nomes = {}, rolMax = 0, rols = {};
+      for (var i = 1; i < data.length; i++) {
+        var cpf = digitos(ci.cpf >= 0 ? data[i][ci.cpf] : '');
+        if (cpf.length === 11) cpfs[cpf] = true;
+        nomes[chaveNome(data[i][ci.nome], data[i][ci.nascimento])] = true;
+        var n = parseInt(ci.rol >= 0 ? data[i][ci.rol] : '0', 10); if (!isNaN(n) && n > rolMax) rolMax = n;
+        if (ci.rol >= 0 && data[i][ci.rol] !== '') rols[String(data[i][ci.rol])] = true;
+      }
+
+      var res = { criados: 0, duplicados: 0, erros: 0, mensagens: [] };
+      var novas = [];
+      linhas.forEach(function (l) {
+        var nome = String(l.nome || '').trim();
+        if (!nome) { res.erros++; return; }
+        var nasc = _formatarData(l.nascimento), cpf = digitos(l.cpf);
+        var kn = chaveNome(nome, nasc);
+        if ((cpf.length === 11 && cpfs[cpf]) || nomes[kn]) { res.duplicados++; return; }
+        var rol = String(l.rol || '').trim();
+        if (!rol || rols[rol]) {
+          rolMax++; rol = String(rolMax).padStart(4, '0');
+        } else { var nr = parseInt(rol, 10); if (!isNaN(nr) && nr > rolMax) rolMax = nr; }
+        rols[rol] = true;
+        var id = _idSeguro('');
+        var reg = {
+          id: id, rol: rol, nome: nome, sexo: l.sexo || '', nascimento: nasc, nomeMae: l.nomeMae || '', nomePai: l.nomePai || '',
+          estadoCivil: l.estadoCivil || '', batismo: _formatarMesAno(l.batismo), Igreja: l.Igreja || '', funcao: l.funcao || '',
+          rua: l.rua || '', numero: l.numero || '', bairro: l.bairro || '', cidade: l.cidade || '', estado: l.estado || '', cep: l.cep || '',
+          celular: l.celular || '', email: l.email || '', rg: l.rg || '', cpf: l.cpf || '', foto: '', fotoZoom: 1, fotoX: 50, fotoY: 50,
+          ativo: !(l.ativo === false || String(l.ativo).toLowerCase() === 'false')
+        };
+        novas.push(HEADERS.map(function (h) { return reg[h] !== undefined ? reg[h] : ''; }));
+        if (cpf.length === 11) cpfs[cpf] = true;
+        nomes[kn] = true;
+        res.criados++;
+      });
+      if (novas.length) {
+        sh.getRange(sh.getLastRow() + 1, 1, novas.length, HEADERS.length).setValues(novas);
+        Util.invalidarCache(SHEET);
+      }
+      return Util.ok(res);
+    });
+  }
+
   // ══ DELETAR (remove linha) ═══════════════════════════════
   function deletarMembro(token, id) {
     return withAuth(token, function(sess) {
@@ -430,6 +489,7 @@ var Membros = (function () {
     aniversariantesDoMes: aniversariantesDoMes,
     getProximoRol:        getProximoRol,
     salvarMembro:         salvarMembro,
+    importarLote:         importarLote,
     deletarMembro:        deletarMembro,
     salvarFotoMembro:     salvarFotoMembro,
     getFotoMembro:        getFotoMembro,
@@ -509,6 +569,7 @@ function mb_getProximoRol(token)        { return _safe_mb(function(){ return Mem
 function mb_registrarCarta(token, d)    { return _safe_mb(function(){ return Membros.registrarCarta(token, d); }); }
 function mb_listarCartas(token, membroId) { return _safe_mb(function(){ return Membros.listarCartas(token, membroId); }); }
 function mb_salvarMembro(token, membro) { return _safe_mb(function(){ return Membros.salvarMembro(token, membro); }); }
+function mb_importarLote(token, linhas)  { return _safe_mb(function(){ return Membros.importarLote(token, linhas); }); }
 function mb_deletarMembro(token, id)    { return _safe_mb(function(){ return Membros.deletarMembro(token, id); }); }
 function mb_setupMembros(token)         { return _safe_mb(function(){ return Membros.setupMembros(token); }); }
 function mb_salvarFotoMembro(token, membroId, base64Data, mimeType, nomeArquivo) {
