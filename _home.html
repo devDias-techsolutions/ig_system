@@ -93,14 +93,12 @@
 .bn-ghost svg { width: 100%; height: 100%; }
 .kp-tiles { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: var(--sp-2); margin-top: var(--sp-2); }
 .bn-tile { display: flex; flex-direction: column; gap: var(--sp-1); min-height: 64px; padding: var(--sp-2) var(--sp-3); border: 1px solid var(--border); border-radius: var(--r-3); }
-/* lista: linha com ícone, rótulo, barra e número */
+/* lista: linha com ícone, rótulo e número */
 .kp-lista { padding-bottom: var(--sp-1); }
 .bn-row { display: flex; align-items: center; gap: var(--sp-3); min-height: 48px; padding: var(--sp-2) var(--sp-4); border-top: 1px solid var(--border); }
 .bn-row:first-child { border-top: 0; }
 .bn-row > i, .bn-row > svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--teal); }
 .bn-row .bn-lab { flex: 1; font-size: var(--fs-sm); font-weight: 500; color: var(--text); }
-.bn-bar { width: 64px; height: 6px; flex-shrink: 0; border-radius: var(--r-pill); overflow: hidden; background: var(--bg3); }
-.bn-bar i { display: block; height: 100%; border-radius: var(--r-pill); background: var(--teal); }
 .bn-row .bn-num { min-width: 40px; text-align: right; }
 /* trio: três números lado a lado */
 .kp-trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: var(--sp-1) var(--sp-2) var(--sp-3); }
@@ -336,11 +334,9 @@ function _kpiCorpo(layout, stats) {
       }).join('') + '</div>' : '') + '</div>';
   }
   if (layout === 'lista') {
-    var max = stats.reduce(function (m, k) { return Math.max(m, k.valor || 0); }, 0);
     return '<div class="kp-lista">' + stats.map(function (k) {
-      var p = max ? Math.max(4, Math.round((k.valor || 0) * 100 / max)) : 0;
       return '<div class="bn-card bn-row' + _kpiZero(k) + '" data-k="' + escHtml(k.curto || '') + '"><i data-lucide="' + _kpiIcone(k) + '"></i>' +
-        '<span class="bn-lab">' + escHtml(k.curto || k.rotulo || '') + '</span><span class="bn-bar"><i style="width:' + (k.valor ? p : 0) + '%"></i></span>' +
+        '<span class="bn-lab">' + escHtml(k.curto || k.rotulo || '') + '</span>' +
         '<span class="bn-num">' + escHtml(_kpiNum(k)) + '</span></div>';
     }).join('') + '</div>';
   }

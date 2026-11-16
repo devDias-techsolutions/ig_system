@@ -67,3 +67,7 @@ Origem: `modulos-pendentes/escola-dominical/` (legado, mantido como referência)
 ## Aulas e Chamada: uma aba só (como no original)
 - Não existe mais a aba "Aulas": o cadastro de aulas está na própria aba **Aulas e Chamada** — botão "Nova aula" no topo e menu ⋮ em cada aula (editar/excluir, só admin/secretaria).
 - A linha de frequência do trimestre (bolinhas por lição + resumo + barra) aparece na **Chamada** (a lição aberta acompanha a marcação) e na aba **Alunos** (`ed_getFrequenciaTrimestre`, `_edmLinhaFreq`).
+
+## E4a — Início (indicadores sem barra + atividade recente da EBD)
+- Indicadores em lista (`kpiLayout: 'lista'`) não têm mais barra de proporção (comparar Alunos com Turmas não faz sentido).
+- Atividade recente: novo gancho de manifesto `atividade(perfil)` (`Modulos.atividades`), consumido por `Dashboard.getAtividadeRecente`. A EBD devolve chamadas lançadas, aulas cadastradas e alunos novos (`EscolaDominical.atividadeRecente`); professor não recebe. Sem o módulo, nada aparece e o núcleo continua igual.
