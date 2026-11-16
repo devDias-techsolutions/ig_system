@@ -74,6 +74,7 @@ Botão `.btn` 40px (`.btn-sm` 32, `.btn-lg` 44) · campo/select/busca 40px · r�
 
 ## Carteirinha: modelos e cor
 - Quatro modelos de frente (`classico`, `lateral`, `faixa`, `diagonal`), escolhidos na galeria da aba Carteirinhas e gravados em `CARTAO_MODELO` (Config). Só o administrador troca; o verso é igual em todos.
+- Qualidade da foto: a foto guardada é um recorte 3×4 de 1080×1440 (JPEG q0.95); na exportação ela é medida no slot real do modelo e reduzida em etapas (suavização alta) para exatamente slot × 6 px, em PNG sem perda. O `.png` baixado e o PDF individual usam PNG; só o lote usa JPEG q1.0. Não use `image-rendering: crisp-edges` no cartão.
 - A cor vem da cor da marca (`COR_PRIMARIA`, tela Identidade): `mbCard_paleta()` deriva `--k1..--k6` inline no `.mb-card`. Cor muito clara é escurecida para o texto branco continuar legível.
 - Logo e marca d'água enviados são claros: só ficam sobre áreas coloridas do cartão.
 - Na Identidade, "Sugerir cores do logo" lê uma miniatura de 48 px no navegador e oferece até 5 cores; logo branco/cinza não gera sugestão e vale a cor escolhida à mão.
