@@ -19,8 +19,8 @@ Origem: `modulos-pendentes/escola-dominical/` (legado, mantido como referência)
 | E3c | Visão geral (mock aprovado), Ranking, modos configuráveis (ícone de ajustes no cabeçalho de Chamada/Ranking) | feito |
 | E3d | Relatórios: por turma + geral da aula (igual ao original), aberto automaticamente após salvar a chamada; compartilhar resumo (WhatsApp/copiar) | feito |
 | E3e | Aba **Chamada** como no original (histórico do trimestre → turmas da aula → chamada em leitura/edição), oferta em padrão bancário, loading ao salvar, **retrato da aula**, trava de transferência e regra do professor | feito |
-| E4 | Integração: Membros ("Importar da EBD"), KPIs da Home, atividade | pendente |
-| E5 | Alertas automáticos + importador 5 passos | pendente |
+| E4 | Integração: Membros ("Importar da EBD"), KPIs da Home, atividade, importar/exportar | feito |
+| E5 | Alertas automáticos (Alertas.js, PR #101) + importador 5 passos (E4b) | feito |
 
 ## Pontos de atenção
 - Testes estáticos: o núcleo não pode citar o módulo pelo nome (só `EscolaDominical.js` e `_escola-dominical.html` são exceção). Função global nova não pode duplicar nome de outro `.js` (por isso `_safe_ed`).
