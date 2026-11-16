@@ -314,11 +314,16 @@ test('Início: logo grande só no cartão institucional (sem barra superior); KP
   assert.match(read('index.html'), /currentView !== 'home'/);
   assert.match(read('index.html'), /kpi-go/);
   assert.match(read('Membros.js'), /destino: 'membros'/);
-  assert.match(read('Dashboard.js'), /destino: 'usuarios'/);
+  assert.doesNotMatch(read('Dashboard.js').match(/function getKpisHome[\s\S]*?\n  }\n/)[0], /Usuarios|usuarios/, 'administração não entra nos indicadores da Início');
 });
 
-test('indicadores: Início usa mosaico; Membros só chips; servidor marca o alerta', () => {
-  assert.match(read('_home.html'), /hm-bento/);
+test('indicadores: Início tem um cartão por módulo (grade, lista ou trio); Membros só chips; servidor marca o alerta', () => {
+  const h = read('_home.html');
+  assert.match(h, /class="kp"/);
+  for (const l of ['grade', 'lista', 'trio']) assert.match(h, new RegExp("layout === '" + l + "'|return '<div class=\"kp-" + l));
+  assert.doesNotMatch(h, /hm-bento|hm-kg|hm-alert/, 'CSS do mosaico antigo removido');
+  assert.match(read('Membros.js'), /kpiLayout: 'grade'/);
+  assert.match(read('EscolaDominical.js'), /kpiLayout: 'lista'/);
   assert.match(read('index.html'), /function _kpiGroup[\s\S]{0,1800}kpi-go/);
   assert.match(read('Membros.js'), /alerta: true/);
 });

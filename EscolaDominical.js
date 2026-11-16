@@ -940,6 +940,20 @@ var EscolaDominical = (function () {
     if (!d || isNaN(d.getTime()) || d.getTime() === 0) d = _parseDateBR(a.CriadoEm);
     return d;
   }
+  // Turmas ativas que ainda não lançaram a chamada de uma aula de hoje (para o indicador da Início).
+  function chamadasPendentesHoje() {
+    var hoje = _hojeBR(), total = 0;
+    var aulas = _safeSheetObjects('Aulas').filter(function (a) { return _mesmoDia(_dataAula(a), hoje); });
+    if (!aulas.length) return 0;
+    var classes = _safeSheetObjects('Classes').filter(function (c) { return _isAtivo(c.Ativo); });
+    var chamadas = _safeSheetObjects('Chamadas');
+    aulas.forEach(function (a) {
+      var feitas = {};
+      chamadas.forEach(function (c) { if (c.AulaID === a.ID) feitas[c.ClasseID] = true; });
+      classes.forEach(function (c) { if (!feitas[c.ID]) total++; });
+    });
+    return total;
+  }
   function _presente(c) { return c.Presente === true || c.Presente === 'TRUE' || c.Presente === 1; }
 
   // filtros: { classeId, trimestre, ano, modo }  → alunos ordenados com presenças, % e pontos
@@ -1923,6 +1937,7 @@ var EscolaDominical = (function () {
     salvarChamada:          salvarChamada,
     listarChamadasPorAula:  listarChamadasPorAula,
     getHistoricoChamadas:   getHistoricoChamadas,
+    chamadasPendentesHoje:  chamadasPendentesHoje,
     getFrequenciaTrimestre: getFrequenciaTrimestre,
     getRankingAlunos:       getRankingAlunos,
     getRanking:             getRanking,
@@ -2061,15 +2076,18 @@ var EscolaDominicalManifesto = {
     { nome: 'ChamadasInfo', colunas: EscolaDominical.HEADERS.ChamadasInfo, cor: '#1a2a3a' },
     { nome: 'PontosExtras', colunas: EscolaDominical.HEADERS.PontosExtras, cor: '#1a2a2a' }
   ],
+  kpiLayout: 'lista',
   kpis: function () {
     function ativo(v) { return v === true || v === 1 || String(v).trim().toUpperCase() === 'TRUE' || String(v).trim() === '1'; }
     var alunos = Util.sheetToObjects('Alunos').filter(function (a) { return ativo(a.Ativo); }).length;
     var turmas = Util.sheetToObjects('Classes').filter(function (c) { return ativo(c.Ativo); }).length;
     var profs  = Util.sheetToObjects('Professores').filter(function (p) { return ativo(p.Ativo); }).length;
+    var pend = EscolaDominical.chamadasPendentesHoje();
     return [
       { id: 'ed_alunos', rotulo: 'Alunos da EBD', curto: 'Alunos', valor: alunos, icone: 'graduation-cap', cor: 'kc-gold', destino: 'escola-dominical' },
       { id: 'ed_turmas', rotulo: 'Turmas', curto: 'Turmas', valor: turmas, icone: 'users-round', cor: 'kc-blue', destino: 'escola-dominical' },
-      { id: 'ed_profs',  rotulo: 'Professores', curto: 'Professores', valor: profs, icone: 'book-user', cor: 'kc-green', destino: 'escola-dominical' }
+      { id: 'ed_profs',  rotulo: 'Professores', curto: 'Professores', valor: profs, icone: 'book-user', cor: 'kc-green', destino: 'escola-dominical' },
+      { id: 'ed_pend', rotulo: 'chamadas pendentes hoje', curto: 'Chamadas', valor: pend, icone: 'clipboard-list', cor: 'kc-gold', dica: 'Lance a chamada das turmas', acao: 'Lançar', destino: 'escola-dominical', alerta: true }
     ];
   }
 };

@@ -69,77 +69,52 @@
 .hm-mod:focus-visible { outline: 2px solid var(--teal); outline-offset: 4px; border-radius: var(--r-3); }
 .hm-mod-name { font-size: var(--fs-xs); font-weight: 600; letter-spacing: -.01em; color: var(--text); overflow-wrap: anywhere; }
 
-/* ── Indicadores em mosaico: destaque na cor da igreja + cartões coloridos por assunto ── */
-.hm-bento { display: grid; gap: var(--sp-3); }
-.bn-card {
-  --kpi-color: var(--teal);
-  position: relative; overflow: hidden; isolation: isolate; display: flex; align-items: center; gap: var(--sp-3); min-height: 0; text-align: left;
-  padding: var(--sp-3); border: 1px solid var(--border); border-radius: var(--r-3); color: inherit; font-family: inherit;
-  background: var(--bg-glass);
-}
-[data-theme="light"] .bn-card { background: #FFFFFF; box-shadow: var(--shadow-sm); }
-button.bn-card { cursor: pointer; transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
-button.bn-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
-button.bn-card:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
-.bn-ghost { position: absolute; z-index: -1; right: -10px; bottom: -14px; width: 76px; height: 76px; color: var(--kpi-color); opacity: .12; pointer-events: none; }
-.bn-ghost svg { width: 100%; height: 100%; fill: currentColor; fill-opacity: .35; stroke-width: 1.5; }
-.bn-ico { width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; color: var(--on-teal, #fff); background: var(--teal); }
-.bn-ico i, .bn-ico svg { width: 16px; height: 16px; }
-.bn-txt { min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
-.bn-lab { font-size: var(--fs-xs); font-weight: 700; color: var(--text-muted); line-height: 1.25; }
-.bn-num { font-size: var(--fs-lg); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--text); }
-.bn-sub { font-size: var(--fs-xs); color: var(--text-dim); }
-/* destaque: fundo sólido na cor da igreja, número grande, ícone-marca d'água e brilho */
-/* Proporção fixa, qualquer que seja o volume de dados: destaque 1.15fr | coluna 1fr; 2 menores empilhados ao lado (mock).
-   Outras quantidades: destaque em largura total e menores em 2 colunas. Alturas mínimas travadas. */
-.bn-card.feat {
-  grid-column: 1 / -1; min-height: 88px; padding: var(--sp-4); border-color: transparent; color: var(--on-teal, #fff);
-  background: radial-gradient(circle at 85% 15%, rgba(255, 255, 255, .22), transparent 50%), linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
-  box-shadow: 0 10px 22px -14px var(--teal-glow);
-}
-.bn-card.feat.is-loading { flex-direction: column; align-items: flex-start; }
-.bn-card.feat .bn-txt { gap: var(--sp-2); }
-.bn-card.feat .bn-lab { color: inherit; opacity: .85; }
-.bn-card.feat .bn-num { font-size: var(--fs-2xl); color: inherit; font-variant-numeric: tabular-nums; }
-.bn-card.feat .bn-sub { color: inherit; opacity: .8; }
-.bn-card.feat .bn-ghost { color: currentColor; opacity: .18; width: 84px; height: 84px; right: var(--sp-2); top: 56%; bottom: auto; transform: translateY(-50%) rotate(-12deg); }
-.bn-card.feat .bn-ghost svg { fill-opacity: .4; stroke-width: 1.6; }
-
-.hm-bento { grid-template-columns: repeat(20, minmax(0, 1fr)); grid-auto-rows: auto; }
-.hm-bento .bn-card { grid-column: span 10; }
-.hm-bento .bn-card:last-child:nth-child(even) { grid-column: 1 / -1; } /* sem cartão órfão (destaque + 2 menores não entra: 3 filhos) */
-.hm-bento .bn-card.feat { grid-column: 1 / span 11; grid-row: span 2; flex-direction: column; align-items: flex-start; justify-content: center; min-height: 0; }
-.hm-bento .bn-card:nth-child(2), .hm-bento .bn-card:nth-child(3) { grid-column: 12 / span 9; align-items: center; justify-content: center; min-height: 56px; padding: var(--sp-3) var(--sp-4); }
-.hm-bento .bn-card:nth-child(2) .bn-ico, .hm-bento .bn-card:nth-child(3) .bn-ico { display: none; }
-/* menores: rótulo à esquerda e número à direita, na mesma linha (cartão baixo, harmoniza com o destaque) */
-.hm-bento .bn-card:nth-child(2) .bn-txt, .hm-bento .bn-card:nth-child(3) .bn-txt { flex: 1; flex-direction: row; align-items: center; justify-content: space-between; gap: var(--sp-2); }
-.hm-bento .bn-card:nth-child(n+4) { grid-column: span 10; }
-/* só destaque, ou destaque + 1 menor: sem coluna lateral */
-.hm-bento .bn-card.feat:nth-last-child(-n+2) { grid-column: 1 / -1; grid-row: auto; flex-direction: row; align-items: center; min-height: 88px; }
-.hm-bento .bn-card.feat + .bn-card:last-child { grid-column: 1 / -1; flex-direction: row; align-items: center; }
-.hm-bento .bn-card.feat + .bn-card:last-child .bn-ico { display: grid; }
-
-/* ── Grupo de indicadores por módulo ── */
-.hm-kg + .hm-kg { margin-top: var(--sp-5); }
-.hm-kg-t { display: flex; align-items: center; gap: var(--sp-2); margin: 0 0 var(--sp-2); font-size: var(--fs-sm); font-weight: 700; color: var(--text-muted); }
-.hm-kg-t i, .hm-kg-t svg { width: 16px; height: 16px; color: var(--teal); }
-
-/* ── Faixa de atenção ── */
-.hm-alert {
-  display: flex; align-items: center; gap: var(--sp-3); margin-top: var(--sp-3); padding: var(--sp-3) var(--sp-4);
-  border: 1px solid color-mix(in srgb, var(--warning) 40%, transparent); border-radius: var(--r-3);
-  background: color-mix(in srgb, var(--warning) 14%, transparent);
-}
-.hm-alert-ico { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; background: #FFFFFF; color: color-mix(in srgb, var(--warning) 70%, #000); }
-.hm-alert-ico i { width: 18px; height: 18px; }
-.hm-alert-txt { flex: 1; min-width: 0; font-size: var(--fs-sm); line-height: 1.4; color: var(--text); }
-.hm-alert-txt b { display: block; font-weight: 800; }
-.hm-alert-txt span { display: block; font-size: var(--fs-xs); color: var(--text-muted); }
-.hm-alert-go {
-  flex-shrink: 0; min-height: 40px; padding: 0 var(--sp-4); border: 0; border-radius: var(--r-pill); cursor: pointer; font-family: inherit;
-  font-size: var(--fs-sm); font-weight: 800; color: #fff; background: color-mix(in srgb, var(--warning) 62%, #000);
-}
-.hm-alert-go:focus-visible { outline: 2px solid var(--warning); outline-offset: 2px; }
+/* ── Indicadores: um cartão por módulo; o formato (grade, lista ou trio) vem do manifesto do módulo ── */
+.kp { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r-4); box-shadow: var(--shadow-sm); overflow: hidden; }
+.kp + .kp { margin-top: var(--sp-3); }
+.kp-h { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4) var(--sp-2); }
+.kp-ic { width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; color: var(--on-teal, #fff); background: var(--teal); }
+.kp-ic i, .kp-ic svg { width: 16px; height: 16px; }
+.kp-t { flex: 1; min-width: 0; margin: 0; font-size: var(--fs-md); font-weight: 800; color: var(--text); }
+.kp-go { display: inline-flex; align-items: center; gap: var(--sp-1); min-height: 32px; padding: 0 var(--sp-1); border: 0; background: none; cursor: pointer; font-family: inherit; font-size: var(--fs-sm); font-weight: 700; color: var(--teal); }
+.kp-go i, .kp-go svg { width: 14px; height: 14px; }
+.kp-go:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: var(--r-2); }
+.bn-lab { font-size: var(--fs-xs); font-weight: 600; color: var(--text-muted); line-height: 1.25; }
+.bn-num { font-size: var(--fs-lg); font-weight: 800; letter-spacing: -.02em; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--text); }
+.bn-card.is-zero .bn-num { color: var(--text-dim); }
+/* grade: destaque + quadros menores */
+.kp-grade { padding: 0 var(--sp-3) var(--sp-3); }
+.bn-card.feat { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: var(--sp-1); min-height: 112px; padding: var(--sp-4); border-radius: var(--r-3); color: var(--on-teal, #fff);
+  background: radial-gradient(circle at 85% 15%, rgba(255, 255, 255, .22), transparent 50%), linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%); }
+.bn-card.feat .bn-lab, .bn-card.feat .bn-num, .bn-card.feat .bn-sub { color: inherit; }
+.bn-card.feat .bn-num { font-size: var(--fs-2xl); }
+.bn-sub { font-size: var(--fs-xs); opacity: .85; }
+.bn-ghost { position: absolute; right: var(--sp-3); top: 50%; width: 76px; height: 76px; transform: translateY(-50%); opacity: .18; pointer-events: none; }
+.bn-ghost svg { width: 100%; height: 100%; }
+.kp-tiles { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: var(--sp-2); margin-top: var(--sp-2); }
+.bn-tile { display: flex; flex-direction: column; gap: var(--sp-1); min-height: 64px; padding: var(--sp-2) var(--sp-3); border: 1px solid var(--border); border-radius: var(--r-3); }
+/* lista: linha com ícone, rótulo, barra e número */
+.kp-lista { padding-bottom: var(--sp-1); }
+.bn-row { display: flex; align-items: center; gap: var(--sp-3); min-height: 48px; padding: var(--sp-2) var(--sp-4); border-top: 1px solid var(--border); }
+.bn-row:first-child { border-top: 0; }
+.bn-row > i, .bn-row > svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--teal); }
+.bn-row .bn-lab { flex: 1; font-size: var(--fs-sm); font-weight: 500; color: var(--text); }
+.bn-bar { width: 64px; height: 6px; flex-shrink: 0; border-radius: var(--r-pill); overflow: hidden; background: var(--bg3); }
+.bn-bar i { display: block; height: 100%; border-radius: var(--r-pill); background: var(--teal); }
+.bn-row .bn-num { min-width: 40px; text-align: right; }
+/* trio: três números lado a lado */
+.kp-trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: var(--sp-1) var(--sp-2) var(--sp-3); }
+.bn-cell { display: flex; flex-direction: column; gap: var(--sp-1); padding: var(--sp-1) var(--sp-3); border-left: 1px solid var(--border); }
+.bn-cell:first-child { border-left: 0; }
+.bn-cell .bn-num { font-size: var(--fs-xl); }
+/* rodapé de status: sempre presente */
+.kp-f { display: flex; align-items: center; gap: var(--sp-2); min-height: 48px; padding: var(--sp-2) var(--sp-4); border-top: 1px solid var(--border); font-size: var(--fs-sm); color: var(--text-muted); background: var(--bg3); }
+.kp-f i, .kp-f svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--teal); }
+.kp-f span { flex: 1; min-width: 0; }
+.kp-f.warn { color: var(--text); background: color-mix(in srgb, var(--warning) 14%, transparent); }
+.kp-f.warn i, .kp-f.warn svg { color: var(--warning); }
+.kp-f button { min-height: 32px; padding: 0 var(--sp-1); border: 0; background: none; cursor: pointer; font-family: inherit; font-size: var(--fs-sm); font-weight: 800; color: color-mix(in srgb, var(--warning) 62%, #000); }
+.kp-f button:focus-visible { outline: 2px solid var(--warning); outline-offset: 2px; border-radius: var(--r-2); }
 
 /* ── Aniversariantes: 3 cartões lado a lado ── */
 .hm-anivs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
@@ -184,8 +159,8 @@ button.bn-card:focus-visible { outline: 2px solid var(--teal); outline-offset: 2
 
 @media (prefers-reduced-motion: reduce) {
   .hm-rise { animation: none; opacity: 1; transform: none; }
-  .kpi-card, .hm-mod, button.bn-card, .hm-me { transition: none; }
-  .kpi-card:hover, .hm-mod:hover, button.bn-card:hover { transform: none; }
+  .kpi-card, .hm-mod, .hm-me { transition: none; }
+  .kpi-card:hover, .hm-mod:hover { transform: none; }
 }
 </style>
 
@@ -330,63 +305,75 @@ function renderHome() {
 
 /* ── HELPERS ── */
 function _kpiSkeleton() {
-  return '<div class="hm-bento">' +
-    '<div class="bn-card feat is-loading"><div class="skeleton" style="width:110px;height:12px;border-radius:var(--r-1)"></div><div class="skeleton" style="width:84px;height:32px;border-radius:var(--r-1)"></div></div>' +
-    '<div class="bn-card is-loading"><div class="skeleton" style="width:38px;height:38px;border-radius:var(--r-2)"></div><div class="skeleton" style="width:70px;height:28px;border-radius:var(--r-1)"></div></div>' +
-  '</div>';
+  var linha = '<div class="bn-card bn-row is-loading"><div class="skeleton" style="width:18px;height:18px;border-radius:var(--r-1)"></div><div class="skeleton" style="flex:1;height:12px;border-radius:var(--r-1)"></div><div class="skeleton" style="width:36px;height:20px;border-radius:var(--r-1)"></div></div>';
+  return '<div class="kp"><div class="kp-h"><div class="skeleton" style="width:32px;height:32px;border-radius:50%"></div><div class="skeleton" style="width:120px;height:14px;border-radius:var(--r-1)"></div></div>' +
+    '<div class="kp-lista">' + linha + linha + linha + '</div></div>';
 }
 
-/* Mosaico: 1 destaque (Ativos, ou o primeiro número) + cartões menores; indicadores de atenção viram faixa âmbar. */
-function _bnCard(k, feat, sub) {
-  var dest = k.destino ? escHtml(k.destino) : '';
-  var abre = dest ? 'button type="button" onclick="navigateTo(\'' + dest + '\')"' : 'div';
-  var ic = k.icone ? escHtml(k.icone) : 'activity';
-  return '<' + abre + ' class="bn-card' + (feat ? ' feat' : '') + '" data-k="' + escHtml(k.curto || '') + '">' +
-    (feat ? '<span class="bn-ghost" aria-hidden="true"><i data-lucide="' + ic + '"></i></span>' : '') +
-    (feat ? '' : '<span class="bn-ico"><i data-lucide="' + ic + '"></i></span>') +
-    '<span class="bn-txt"><span class="bn-lab">' + escHtml(feat ? (k.rotulo || k.curto || '') : (k.curto || k.rotulo || '')) + '</span>' +
-    '<span class="bn-num">' + escHtml(k.valor || 0) + '</span>' +
-    (sub ? '<span class="bn-sub">' + escHtml(sub) + '</span>' : '') + '</span>' +
-  '</' + (dest ? 'button' : 'div') + '>';
-}
-function _kpiBloco(d) {
-  var stats = d.filter(function (k) { return !k.alerta; });
-  var alertas = d.filter(function (k) { return k.alerta && (k.valor || 0) > 0; });
-  var iF = 0;
-  stats.forEach(function (k, n) { if (k.curto === 'Ativos' && iF === 0 && n >= 0) iF = n; });
-  var html = '';
-  if (stats.length) {
-    var f = stats[iF];
-    // "de N cadastrados" só faz sentido para ativos + inativos (mesmo assunto), não para contagens de assuntos diferentes
-    var irmaos = f.curto === 'Ativos' ? stats.filter(function (k) { return k.destino && k.destino === f.destino; }) : [];
-    var total = irmaos.reduce(function (t, k) { return t + (k.valor || 0); }, 0);
-    html += '<div class="hm-bento">' + _bnCard(f, true, irmaos.length > 1 ? 'de ' + total + ' cadastrados' : '') +
-      stats.filter(function (k, n) { return n !== iF; }).map(function (k) { return _bnCard(k, false, ''); }).join('') + '</div>';
+/* Cada módulo vira um cartão: cabeçalho, corpo no formato que o módulo declara e rodapé de status (sempre presente). */
+function _kpiNum(k) { return (k.valor === undefined || k.valor === null) ? '—' : String(k.valor); }
+function _kpiZero(k) { return (k.valor === undefined || k.valor === null || k.valor === 0) ? ' is-zero' : ''; }
+function _kpiIcone(k) { return escHtml(k.icone || 'bar-chart-3'); }
+
+function _kpiCorpo(layout, stats) {
+  if (!stats.length) return '';
+  if (layout === 'grade') {
+    var iF = 0;
+    stats.forEach(function (k, n) { if (k.curto === 'Ativos') iF = n; });
+    var f = stats[iF], resto = stats.filter(function (k, n) { return n !== iF; });
+    var sub = f.valor ? '' : (f.vazio || '');
+    var irmao = stats.filter(function (k) { return k.curto === 'Inativos'; })[0];
+    if (f.valor && f.curto === 'Ativos' && irmao) {
+      var tot = f.valor + (irmao.valor || 0);
+      sub = 'de ' + tot + ' cadastrados · ' + Math.round(f.valor * 100 / tot) + '%';
+    }
+    return '<div class="kp-grade"><div class="bn-card feat' + _kpiZero(f) + '" data-k="' + escHtml(f.curto || '') + '">' +
+      '<span class="bn-ghost" aria-hidden="true"><i data-lucide="' + _kpiIcone(f) + '"></i></span>' +
+      '<span class="bn-lab">' + escHtml(f.curto || f.rotulo || '') + '</span><span class="bn-num">' + escHtml(_kpiNum(f)) + '</span>' +
+      '<span class="bn-sub">' + escHtml(sub || ' ') + '</span></div>' +
+      (resto.length ? '<div class="kp-tiles" style="--n:' + Math.min(resto.length, 3) + '">' + resto.map(function (k) {
+        return '<div class="bn-card bn-tile' + _kpiZero(k) + '" data-k="' + escHtml(k.curto || '') + '"><span class="bn-lab">' + escHtml(k.curto || k.rotulo || '') + '</span><span class="bn-num">' + escHtml(_kpiNum(k)) + '</span></div>';
+      }).join('') + '</div>' : '') + '</div>';
   }
-  html += alertas.map(function (k) {
-    var ic = k.icone === 'camera' ? 'image-off' : (k.icone || 'alert-triangle');
-    var rot = String(k.rotulo || k.curto || '').toLowerCase();
-    if (k.valor === 1) rot = rot.replace(/^membros\b/, 'membro');
-    return '<div class="hm-alert" data-k="' + escHtml(k.curto || '') + '">' +
-      '<span class="hm-alert-ico"><i data-lucide="' + escHtml(ic) + '"></i></span>' +
-      '<div class="hm-alert-txt"><b>' + escHtml(k.valor) + ' ' + escHtml(rot) + '</b>' + (k.dica ? '<span>' + escHtml(k.dica) + '</span>' : '') + '</div>' +
-      (k.destino ? '<button type="button" class="hm-alert-go" onclick="navigateTo(\'' + escHtml(k.destino) + '\')">Resolver</button>' : '') +
-    '</div>';
-  }).join('');
-  return html;
+  if (layout === 'lista') {
+    var max = stats.reduce(function (m, k) { return Math.max(m, k.valor || 0); }, 0);
+    return '<div class="kp-lista">' + stats.map(function (k) {
+      var p = max ? Math.max(4, Math.round((k.valor || 0) * 100 / max)) : 0;
+      return '<div class="bn-card bn-row' + _kpiZero(k) + '" data-k="' + escHtml(k.curto || '') + '"><i data-lucide="' + _kpiIcone(k) + '"></i>' +
+        '<span class="bn-lab">' + escHtml(k.curto || k.rotulo || '') + '</span><span class="bn-bar"><i style="width:' + (k.valor ? p : 0) + '%"></i></span>' +
+        '<span class="bn-num">' + escHtml(_kpiNum(k)) + '</span></div>';
+    }).join('') + '</div>';
+  }
+  return '<div class="kp-trio">' + stats.slice(0, 3).map(function (k) {
+    return '<div class="bn-card bn-cell' + _kpiZero(k) + '" data-k="' + escHtml(k.curto || '') + '"><span class="bn-num">' + escHtml(_kpiNum(k)) + '</span><span class="bn-lab">' + escHtml(k.curto || k.rotulo || '') + '</span></div>';
+  }).join('') + '</div>';
 }
-/* Um grupo por módulo, com o nome do módulo como título: fica claro de qual módulo vem cada número. */
+
+function _kpiRodape(alertas, rota) {
+  if (!alertas.length) return '<div class="kp-f ok"><i data-lucide="check-circle-2"></i><span>Nada pendente</span></div>';
+  return alertas.map(function (k) {
+    var rot = String(k.rotulo || k.curto || '').toLowerCase();
+    if (k.valor === 1) rot = rot.replace(/^membros\b/, 'membro').replace(/^chamadas\b/, 'chamada');
+    var dest = k.destino || rota;
+    return '<div class="kp-f warn" data-k="' + escHtml(k.curto || '') + '"><i data-lucide="alert-triangle"></i><span><b>' + escHtml(k.valor) + '</b> ' + escHtml(rot) + '</span>' +
+      (dest ? '<button type="button" onclick="navigateTo(\'' + escHtml(dest) + '\')">' + escHtml(k.acao || 'Resolver') + '</button>' : '') + '</div>';
+  }).join('');
+}
+
 function _kpiHtml(d) {
   var grupos = [], idx = {};
   d.forEach(function (k) {
     var id = k.modulo || 'geral';
-    if (idx[id] === undefined) { idx[id] = grupos.length; grupos.push({ id: id, nome: k.moduloNome || '', icone: k.moduloIcone || 'layout-grid', kpis: [] }); }
+    if (idx[id] === undefined) { idx[id] = grupos.length; grupos.push({ id: id, nome: k.moduloNome || '', icone: k.moduloIcone || 'layout-grid', rota: k.moduloRota || '', layout: k.layout || 'trio', kpis: [] }); }
     grupos[idx[id]].kpis.push(k);
   });
   return grupos.map(function (g) {
-    return '<div class="hm-kg" data-modulo="' + escHtml(g.id) + '">' +
-      (g.nome ? '<h3 class="hm-kg-t"><i data-lucide="' + escHtml(g.icone) + '"></i>' + escHtml(g.nome) + '</h3>' : '') +
-      _kpiBloco(g.kpis) + '</div>';
+    var stats = g.kpis.filter(function (k) { return !k.alerta; });
+    var alertas = g.kpis.filter(function (k) { return k.alerta && (k.valor || 0) > 0; });
+    return '<section class="kp" data-modulo="' + escHtml(g.id) + '"><div class="kp-h"><span class="kp-ic"><i data-lucide="' + escHtml(g.icone) + '"></i></span>' +
+      '<h3 class="kp-t">' + escHtml(g.nome) + '</h3>' +
+      (g.rota ? '<button type="button" class="kp-go" onclick="navigateTo(\'' + escHtml(g.rota) + '\')">Abrir<i data-lucide="chevron-right"></i></button>' : '') + '</div>' +
+      _kpiCorpo(g.layout, stats) + _kpiRodape(alertas, g.rota) + '</section>';
   }).join('');
 }
 

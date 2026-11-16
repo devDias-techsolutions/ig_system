@@ -10,17 +10,12 @@ var Dashboard = (function () {
   }
 
   // ── KPIs DA HOME ─────────────────────────────────────────
-  // Núcleo (usuários) + KPIs que cada módulo ativo declara no seu manifesto.
+  // KPIs que cada módulo ativo declara no seu manifesto (kpiLayout: 'grade' | 'lista' | 'trio').
   function getKpisHome(token) {
     return withAuth(token, function(sess) {
       // Cada perfil vê só os indicadores dos módulos que pode abrir
-      var kpis = Modulos.kpis(sess.perfil);
-      // Indicador de administração: só para quem administra o sistema
-      if (sess.perfil === PERFIS.ADMIN) {
-        var usuarios = Util.sheetToObjects('Usuarios').filter(function(r) { return _ativo(r.Ativo); });
-        kpis.push({ icone: 'shield-check', cor: 'kc-green', valor: usuarios.length, rotulo: 'Usuários do sistema', curto: 'Usuários', dentro: 'com acesso', destino: 'usuarios', modulo: 'sistema', moduloNome: 'Administração', moduloIcone: 'shield-check' });
-      }
-      return Util.ok(kpis);
+      // Administração (usuários, identidade) fica só no menu: aqui entram apenas módulos com indicadores.
+      return Util.ok(Modulos.kpis(sess.perfil));
     });
   }
 

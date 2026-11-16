@@ -448,6 +448,7 @@ __MANIFESTOS__.push({
   id: 'membros',
   nome: 'Membros',
   descricao: 'Cadastro de membros',
+  kpiLayout: 'grade',
   icone: 'contact',
   rota: 'membros',
   render: 'renderMembros',
@@ -469,9 +470,16 @@ __MANIFESTOS__.push({
     function ativo(v) { return v === true || v === 1 || String(v).trim().toUpperCase() === 'TRUE'; }
     var todos = Util.sheetToObjects('Membros');
     var ativos = todos.filter(function (r) { return ativo(r.ativo); });
+    var mes = new Date().getMonth() + 1;
+    var aniv = ativos.filter(function (r) {
+      if (r.nascimento instanceof Date) return r.nascimento.getMonth() + 1 === mes;
+      var m = String(r.nascimento || '').match(/^(\d{2})\/(\d{2})\/\d{4}/);
+      return m && Number(m[2]) === mes;
+    }).length;
     return [
-      { icone: 'users',  cor: 'kc-teal', valor: ativos.length, rotulo: 'Membros ativos',   curto: 'Ativos', destino: 'membros' },
+      { icone: 'users',  cor: 'kc-teal', valor: ativos.length, rotulo: 'Membros ativos',   curto: 'Ativos', vazio: 'Cadastre o primeiro membro', destino: 'membros' },
       { icone: 'user-x', cor: 'kc-gold', valor: todos.length - ativos.length, rotulo: 'Membros inativos', curto: 'Inativos', destino: 'membros' },
+      { icone: 'cake', cor: 'kc-gold', valor: aniv, rotulo: 'Aniversariantes do mês', curto: 'Aniversários', destino: 'membros' },
       { icone: 'camera', cor: 'kc-blue', valor: ativos.filter(function (r) { return !String(r.foto || '').trim(); }).length, rotulo: 'Membros sem foto', curto: 'Sem foto', dica: 'Complete os cadastros', destino: 'membros', alerta: true }
     ];
   }

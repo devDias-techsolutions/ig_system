@@ -61,3 +61,8 @@ Mosaico: com exatamente 3 indicadores, destaque à esquerda e 2 menores empilhad
 ## Indicadores agrupados por módulo
 - Cada indicador sai do servidor com `modulo`, `moduloNome` e `moduloIcone` (`Modulos.kpis` preenche; o de Usuários vem como "Administração"). A Home monta **um grupo por módulo**, com o nome do módulo como título (`.hm-kg`, `.hm-kg-t`), e cada grupo tem o seu mosaico e as suas faixas de atenção.
 - "de N cadastrados" só aparece no destaque "Ativos" (ativos + inativos do mesmo assunto).
+
+## Indicadores: um cartão por módulo, no formato do módulo (substitui o agrupamento acima)
+- Só entram módulos que declaram `kpis`; Administração (usuários, identidade) fica apenas na barra lateral e no menu sanduíche.
+- O manifesto declara `kpiLayout`: `grade` (destaque + quadros, Membros), `lista` (linhas com barra relativa ao maior valor, Escola Dominical) ou `trio` (três números lado a lado, padrão).
+- Estrutura fixa, com ou sem dados: cabeçalho (ícone, nome, "Abrir"), corpo e rodapé de status ("Nada pendente" ou a faixa âmbar do indicador `alerta`, com `acao` opcional no botão).

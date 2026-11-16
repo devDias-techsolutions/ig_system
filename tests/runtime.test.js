@@ -188,15 +188,16 @@ const ABAS_HOME = () => ({
   Membros: [['id', 'nome', 'foto', 'ativo'], ['1', 'A', 'x.png', true], ['2', 'B', '', false]],
 });
 
-test('home por perfil: secretaria vê os indicadores dos seus módulos, sem o de usuários', () => {
+test('home por perfil: secretaria vê os indicadores dos seus módulos', () => {
   const res = envComPerfil('secretaria', ABAS_HOME()).run("getKpisHome('tok')");
   assert.equal(res.success, true, JSON.stringify(res));
-  assert.deepEqual(res.data.map((k) => k.curto), ['Ativos', 'Inativos', 'Sem foto']);
+  assert.deepEqual(res.data.map((k) => k.curto), ['Ativos', 'Inativos', 'Aniversários', 'Sem foto']);
+  assert.ok(res.data.every((k) => k.modulo === 'membros' && k.layout === 'grade' && k.moduloRota === 'membros'));
 });
 
-test('home por perfil: administrador vê também o indicador de usuários', () => {
+test('home por perfil: administração (usuários) não entra nos indicadores, nem para o administrador', () => {
   const res = envComPerfil('admin', ABAS_HOME()).run("getKpisHome('tok')");
-  assert.deepEqual(res.data.map((k) => k.curto), ['Ativos', 'Inativos', 'Sem foto', 'Usuários']);
+  assert.deepEqual(res.data.map((k) => k.curto), ['Ativos', 'Inativos', 'Aniversários', 'Sem foto']);
 });
 
 test('home por perfil: movimento de administração (usuários criados) só aparece para o administrador', () => {
@@ -396,7 +397,7 @@ test('núcleo: KPIs da home funcionam sem nenhuma aba da Escola Dominical', () =
   const res = env.run("getKpisHome('tok')");
   assert.equal(res.success, true, JSON.stringify(res));
   const v = Object.fromEntries(res.data.map((k) => [k.curto, k.valor]));
-  assert.deepEqual(v, { Ativos: 2, Inativos: 1, 'Sem foto': 1, 'Usuários': 1 });
+  assert.deepEqual(v, { Ativos: 2, Inativos: 1, 'Aniversários': 0, 'Sem foto': 1 });
 });
 
 test('núcleo: atividade recente funciona sem nenhuma aba da Escola Dominical', () => {
@@ -469,13 +470,13 @@ test('módulos: módulo desativado some do registro, das abas, dos KPIs e do HTM
   assert.deepEqual(Object.keys(esq).sort(), ['Config', 'Imagens', 'Sessoes', 'Usuarios']);
 });
 
-test('módulos: núcleo sem nenhum módulo — KPIs mostram só usuários', () => {
+test('módulos: núcleo sem nenhum módulo — sem indicadores', () => {
   const env = createEnv({ spreadsheet: ssComAbas({ Usuarios: [COLS_USUARIOS, ['u1', 'Ana', 'a@i.test', 'h', 'admin', false, true, '', '', '01/11/2026 10:00:00', '']] }), scriptProperties: { MODULOS_ATIVOS: 'nenhum' } });
   env.load();
   env.scriptCache.put('sess_tok', JSON.stringify({ token: 'tok', id: 'u1', nome: 'Ana', email: 'a@i.test', perfil: 'admin', expiraEm: new Date(Date.now() + 3600e3).toISOString(), primeiroAcesso: false }), 3600);
   const res = env.run("getKpisHome('tok')");
   assert.equal(res.success, true, JSON.stringify(res));
-  assert.deepEqual(res.data.map((k) => k.curto), ['Usuários']);
+  assert.deepEqual(res.data, []);
 });
 
 test('módulos: doGet injeta a lista de módulos no template', () => {

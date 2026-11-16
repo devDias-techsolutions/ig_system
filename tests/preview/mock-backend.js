@@ -36,16 +36,20 @@ function usuarios() {
 // Devolve o código JS (string) com as funções simuladas, para ser injetado na página.
 function serializar(perfil) {
   const sessao = { token: 'tok', id: 'u1', nome: 'Ana Souza', email: 'ana@igreja.test', perfil, primeiroAcesso: false };
-  const M = { modulo: 'membros', moduloNome: 'Membros', moduloIcone: 'users' };
-  const E = { modulo: 'escola-dominical', moduloNome: 'Escola Dominical', moduloIcone: 'book-open', destino: 'escola-dominical' };
-  const kpis = (process.env.SEM_MODULOS ? [] : [
-    { icone: 'users', cor: 'kc-teal', valor: 128, rotulo: 'Membros ativos', curto: 'Ativos', destino: 'membros', ...M },
-    { icone: 'user-x', cor: 'kc-gold', valor: 14, rotulo: 'Membros inativos', curto: 'Inativos', destino: 'membros', ...M },
-    { icone: 'camera', cor: 'kc-blue', valor: 37, rotulo: 'Membros sem foto', curto: 'Sem foto', dica: 'Complete os cadastros', destino: 'membros', alerta: true, ...M },
-    { icone: 'graduation-cap', cor: 'kc-gold', valor: 58, rotulo: 'Alunos da EBD', curto: 'Alunos', ...E },
-    { icone: 'users-round', cor: 'kc-blue', valor: 5, rotulo: 'Turmas', curto: 'Turmas', ...E },
-    { icone: 'book-user', cor: 'kc-green', valor: 8, rotulo: 'Professores', curto: 'Professores', ...E },
-  ]).concat([{ icone: 'shield-check', cor: 'kc-green', valor: 3, rotulo: 'Usuários do sistema', curto: 'Usuários', modulo: 'sistema', moduloNome: 'Administração', moduloIcone: 'shield-check' }]);
+  const M = { modulo: 'membros', moduloNome: 'Membros', moduloIcone: 'users', moduloRota: 'membros', layout: 'grade', destino: 'membros' };
+  const E = { modulo: 'escola-dominical', moduloNome: 'Escola Dominical', moduloIcone: 'graduation-cap', moduloRota: 'escola-dominical', layout: 'lista', destino: 'escola-dominical' };
+  const vazio = !!process.env.KPIS_VAZIOS;
+  const v = (n) => (vazio ? 0 : n);
+  const kpis = process.env.SEM_MODULOS ? [] : [
+    { icone: 'users', valor: v(128), rotulo: 'Membros ativos', curto: 'Ativos', vazio: 'Cadastre o primeiro membro', ...M },
+    { icone: 'user-x', valor: v(14), rotulo: 'Membros inativos', curto: 'Inativos', ...M },
+    { icone: 'cake', valor: v(6), rotulo: 'Aniversariantes do mês', curto: 'Aniversários', ...M },
+    { icone: 'camera', valor: v(37), rotulo: 'Membros sem foto', curto: 'Sem foto', alerta: true, ...M },
+    { icone: 'graduation-cap', valor: v(58), rotulo: 'Alunos da EBD', curto: 'Alunos', ...E },
+    { icone: 'users-round', valor: v(5), rotulo: 'Turmas', curto: 'Turmas', ...E },
+    { icone: 'book-user', valor: v(8), rotulo: 'Professores', curto: 'Professores', ...E },
+    { icone: 'clipboard-list', valor: v(2), rotulo: 'chamadas pendentes hoje', curto: 'Chamadas', acao: 'Lançar', alerta: true, ...E },
+  ];
   const fns = {
     getSession: () => ok(SESSAO),
     login: () => ok(SESSAO),
