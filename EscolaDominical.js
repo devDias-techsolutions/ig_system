@@ -940,6 +940,29 @@ var EscolaDominical = (function () {
     if (!d || isNaN(d.getTime()) || d.getTime() === 0) d = _parseDateBR(a.CriadoEm);
     return d;
   }
+  // Últimos movimentos da EBD (até 5 de cada tipo; a Início mistura e corta).
+  function atividadeRecente() {
+    var out = [];
+    var classes = {}, aulas = {};
+    _safeSheetObjects('Classes').forEach(function (c) { classes[c.ID] = c.Nome; });
+    _safeSheetObjects('Aulas').forEach(function (a) { aulas[a.ID] = a; });
+    function ult(lista) {
+      return lista.filter(function (r) { return r.CriadoEm; })
+        .map(function (r) { var d = _parseDateBR(r.CriadoEm); r._t = d ? d.getTime() : 0; return r; })
+        .sort(function (a, b) { return b._t - a._t; }).slice(0, 5);
+    }
+    ult(_safeSheetObjects('ChamadasInfo')).forEach(function (i) {
+      var a = aulas[i.AulaID] || {};
+      out.push({ icon: 'clipboard-check', texto: 'Chamada lançada: ' + (classes[i.ClasseID] || 'turma') + (a.NumLicao ? ' · Lição ' + a.NumLicao : ''), data: i.CriadoEm });
+    });
+    ult(_safeSheetObjects('Aulas')).forEach(function (a) {
+      out.push({ icon: 'calendar-plus', texto: 'Aula cadastrada: Lição ' + a.NumLicao, data: a.CriadoEm });
+    });
+    ult(_safeSheetObjects('Alunos').filter(function (a) { return _isAtivo(a.Ativo); })).forEach(function (a) {
+      out.push({ icon: 'user-plus', texto: 'Aluno adicionado à EBD: ' + a.Nome, data: a.CriadoEm });
+    });
+    return out;
+  }
   // Turmas ativas que ainda não lançaram a chamada de uma aula de hoje (para o indicador da Início).
   function chamadasPendentesHoje() {
     var hoje = _hojeBR(), total = 0;
@@ -1937,6 +1960,7 @@ var EscolaDominical = (function () {
     salvarChamada:          salvarChamada,
     listarChamadasPorAula:  listarChamadasPorAula,
     getHistoricoChamadas:   getHistoricoChamadas,
+    atividadeRecente:       atividadeRecente,
     chamadasPendentesHoje:  chamadasPendentesHoje,
     getFrequenciaTrimestre: getFrequenciaTrimestre,
     getRankingAlunos:       getRankingAlunos,
@@ -2077,6 +2101,11 @@ var EscolaDominicalManifesto = {
     { nome: 'PontosExtras', colunas: EscolaDominical.HEADERS.PontosExtras, cor: '#1a2a2a' }
   ],
   kpiLayout: 'lista',
+  // Movimento recente da EBD para a Início: chamadas lançadas, aulas criadas e alunos novos.
+  atividade: function (perfil) {
+    if (perfil === 'professor') return [];
+    return EscolaDominical.atividadeRecente();
+  },
   kpis: function () {
     function ativo(v) { return v === true || v === 1 || String(v).trim().toUpperCase() === 'TRUE' || String(v).trim() === '1'; }
     var alunos = Util.sheetToObjects('Alunos').filter(function (a) { return ativo(a.Ativo); }).length;

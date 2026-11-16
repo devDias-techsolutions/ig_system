@@ -1084,6 +1084,19 @@ test('EBD frequência do trimestre: presença por aluno e lição; professor só
   assert.ok(fp.hist.al1);
 });
 
+test('EBD: atividade recente da Início traz chamadas lançadas, aulas e alunos novos; professor não vê', () => {
+  const abas = ABAS_EBD_HOJE(0);
+  abas.Aulas[1][7] = dBR(0) + ' 08:00:00';
+  abas.Alunos[1][9] = dBR(0) + ' 09:00:00';
+  const env = envComPerfil('admin', abas);
+  env.run("ed_salvarChamada('tok', 'a1', 'c1', [{alunoId:'al1',presente:true}], {})");
+  const textos = env.run("getAtividadeRecente('tok')").data.map((a) => a.texto).join(' | ');
+  assert.match(textos, /Chamada lançada: .* · Lição 1/);
+  assert.match(textos, /Aula cadastrada|Aluno adicionado à EBD/);
+  const prof = envComPerfil('professor', abas).run("getAtividadeRecente('tok')");
+  assert.equal(prof.data.filter((a) => /EBD|Chamada|Aula/.test(a.texto)).length, 0);
+});
+
 test('EBD demo: só admin; popular exige base vazia; limpar zera; 5 turmas, 4–15 alunos, professores 2/2/2/1/1 e aula de hoje sem chamada', () => {
   const sec = envComPerfil('secretaria', ABAS_EBD());
   assert.equal(sec.run("ed_popularDemo('tok')").success, false);

@@ -6,7 +6,7 @@
 //
 //    var __MANIFESTOS__ = (typeof __MANIFESTOS__ === 'undefined') ? [] : __MANIFESTOS__;
 //    __MANIFESTOS__.push({ id, nome, descricao, icone, rota, render, html,
-//                          perfis, ordem, abas:[{nome,colunas,cor}], kpis:function(){...} });
+//                          perfis, ordem, abas:[{nome,colunas,cor}], kpis:function(){...}, atividade:function(perfil){...} });
 //
 //  O padrão acima NÃO depende da ordem de carga dos arquivos (o Apps Script
 //  não garante ordem). O núcleo nunca cita um módulo pelo nome: ele só lê
@@ -89,7 +89,19 @@ var Modulos = (function () {
     return out;
   }
 
-  return { ativos: ativos, abas: abas, paraCliente: paraCliente, jsonParaHtml: jsonParaHtml, incluirHtml: incluirHtml, kpis: kpis };
+  // Atividade recente dos módulos ativos: cada um devolve [{ icon, texto, data }] (data no formato da planilha).
+  function atividades(perfil) {
+    var out = [];
+    ativos().forEach(function (m) {
+      if (typeof m.atividade !== 'function') return;
+      if (perfil && (m.perfis || ['admin']).indexOf(perfil) === -1) return;
+      try { (m.atividade(perfil) || []).forEach(function (a) { a.modulo = m.id; out.push(a); }); }
+      catch (e) { Logger.log('[Modulos.atividades ' + m.id + '] ' + e.message); }
+    });
+    return out;
+  }
+
+  return { ativos: ativos, abas: abas, paraCliente: paraCliente, jsonParaHtml: jsonParaHtml, incluirHtml: incluirHtml, kpis: kpis, atividades: atividades };
 })();
 
 function incluirModulos() { return Modulos.incluirHtml(); }
