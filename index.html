@@ -1224,6 +1224,12 @@ textarea { height: auto; min-height: 88px; padding: var(--sp-3); resize: vertica
 }
 /* "Usuários" já está na sidebar / gaveta */
 body.nav-on #topnav-usuarios-btn { display: none !important; }
+/* Atalhos circulares dos módulos (padrão único): não selecionado = fundo branco + contorno na cor da igreja; selecionado = sólido */
+.atl-nav .hm-mod:not(.active) .hm-mod-icon { background:#fff; color:var(--teal); border:1.5px solid var(--teal); box-shadow:none; }
+[data-theme="dark"] .atl-nav .hm-mod:not(.active) .hm-mod-icon { background:var(--bg2); }
+.atl-nav .hm-mod.active .hm-mod-name { color:var(--teal); font-weight:800; }
+.atl-nav .atl-cfg .hm-mod-icon { border-style:dashed; }
+.atl-lista { display:flex; flex-direction:column; gap:var(--sp-2); }
 .sw { display:flex; align-items:center; gap:12px; min-height:44px; padding:0 var(--sp-3); border-radius:var(--radius-sm); cursor:pointer; user-select:none;
   background:var(--bg-glass); border:1px solid var(--border); transition:border-color .2s, background .2s; }
 .sw:hover { border-color:var(--teal-border); }
@@ -1586,6 +1592,66 @@ function renderView(html) {
 function escHtml(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+
+// ── ATALHOS: cada usuário escolhe quais atalhos de um módulo exibir (guardado neste aparelho) ──
+var Atalhos = (function () {
+  var reg = {};
+  function _k(chave) {
+    var u = (App.session && App.session.email) || 'anon'; // e-mail existe no login e na sessão restaurada (o id, só na restaurada)
+    return 'atalhos:' + u + ':' + chave;
+  }
+  function _ocultos(chave) {
+    try { var v = JSON.parse(localStorage.getItem(_k(chave)) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; }
+  }
+  function _gravar(chave, lista) {
+    try { if (lista.length) localStorage.setItem(_k(chave), JSON.stringify(lista)); else localStorage.removeItem(_k(chave)); } catch (e) {}
+  }
+  // itens: [[id, icone, rotulo]]; fixos: ids que nunca somem (tela inicial do módulo)
+  function filtrar(chave, itens, fixos) {
+    var o = _ocultos(chave);
+    return itens.filter(function (t) { return o.indexOf(t[0]) === -1 || (fixos || []).indexOf(t[0]) !== -1; });
+  }
+  function registrar(chave, itens, fixos, aoSalvar) { reg[chave] = { itens: itens, fixos: fixos || [], aoSalvar: aoSalvar }; }
+  function botao(chave) {
+    return '<button type="button" class="hm-mod atl-cfg" onclick="Atalhos.abrir(\'' + chave + '\')" aria-label="Personalizar atalhos">' +
+      '<div class="hm-mod-icon"><i data-lucide="sliders-horizontal"></i></div><div class="hm-mod-name">Atalhos</div></button>';
+  }
+  function abrir(chave) {
+    var r = reg[chave]; if (!r) return;
+    var o = _ocultos(chave);
+    var ov = document.getElementById('atl-overlay');
+    if (!ov) { ov = document.createElement('div'); ov.id = 'atl-overlay'; ov.className = 'modal-overlay'; document.body.appendChild(ov); }
+    ov.onclick = function (e) { if (e.target === ov) fechar(); };
+    ov.setAttribute('data-chave', chave);
+    ov.innerHTML = '<div class="modal-box"><div class="modal-header"><div><h3>Personalizar atalhos</h3>' +
+      '<div class="modal-sub">Escolha o que aparece na barra. Fica salvo neste aparelho, só para você.</div></div></div>' +
+      '<div class="modal-body"><div class="atl-lista">' + r.itens.map(function (t) {
+        var fixo = r.fixos.indexOf(t[0]) !== -1;
+        return '<label class="sw sw-row"><input type="checkbox" data-id="' + escHtml(t[0]) + '"' + (fixo || o.indexOf(t[0]) === -1 ? ' checked' : '') + (fixo ? ' disabled' : '') + '>' +
+          '<span class="sw-track"></span><span class="sw-info"><span class="sw-txt">' + escHtml(t[2]) + '</span>' +
+          (fixo ? '<span class="sw-sub">Tela inicial, sempre visível</span>' : '') + '</span></label>';
+      }).join('') + '</div></div>' +
+      '<div class="modal-footer"><button class="btn btn-secondary" onclick="Atalhos.restaurar()">Mostrar todos</button>' +
+      '<button class="btn btn-primary" onclick="Atalhos.salvar()">Salvar</button></div></div>';
+    requestAnimationFrame(function () { ov.classList.add('open'); });
+  }
+  function fechar() { var ov = document.getElementById('atl-overlay'); if (ov) ov.classList.remove('open'); }
+  function _aplicar(chave, ocultos) {
+    _gravar(chave, ocultos); fechar();
+    var r = reg[chave]; if (r && r.aoSalvar) r.aoSalvar();
+  }
+  function salvar() {
+    var ov = document.getElementById('atl-overlay'); if (!ov) return;
+    var chave = ov.getAttribute('data-chave'), ocultos = [];
+    ov.querySelectorAll('input[data-id]').forEach(function (i) { if (!i.checked && !i.disabled) ocultos.push(i.getAttribute('data-id')); });
+    _aplicar(chave, ocultos);
+  }
+  function restaurar() {
+    var ov = document.getElementById('atl-overlay'); if (!ov) return;
+    _aplicar(ov.getAttribute('data-chave'), []);
+  }
+  return { filtrar: filtrar, registrar: registrar, botao: botao, abrir: abrir, fechar: fechar, salvar: salvar, restaurar: restaurar };
+})();
 
 // ── ARQUIVOS: leitura/escrita de CSV, JSON e planilhas (comum a qualquer módulo) ──
 var Arq = (function () {

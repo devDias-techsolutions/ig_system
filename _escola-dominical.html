@@ -21,14 +21,10 @@
 .edm-atalhos.mais-esq { -webkit-mask-image: linear-gradient(270deg, #000 calc(100% - 48px), transparent); mask-image: linear-gradient(270deg, #000 calc(100% - 48px), transparent); }
 .edm-atalhos.mais-esq.mais-dir { -webkit-mask-image: linear-gradient(90deg, transparent, #000 48px, #000 calc(100% - 48px), transparent); mask-image: linear-gradient(90deg, transparent, #000 48px, #000 calc(100% - 48px), transparent); }
 .edm-atalhos .hm-mod { flex: 0 0 auto; width: 72px; }
-/* não selecionado: fundo branco + contorno na cor da igreja; selecionado: sólido */
-.edm-atalhos .hm-mod:not(.active) .hm-mod-icon { background: #fff; color: var(--teal); border: 1.5px solid var(--teal); box-shadow: none; }
-[data-theme="dark"] .edm-atalhos .hm-mod:not(.active) .hm-mod-icon { background: var(--bg2); }
 /* demo */
 .edm-demo { margin-top: var(--sp-4); padding-top: var(--sp-4); border-top: 1px solid var(--border); }
 .edm-demo-t { font-size: var(--fs-sm); font-weight: 800; color: var(--text); }
 .edm-demo-d { margin: var(--sp-1) 0 var(--sp-3); font-size: var(--fs-xs); color: var(--text-muted); }
-.edm-atalhos .hm-mod.active .hm-mod-name { color: var(--teal); font-weight: 800; }
 .edm-filtros { display: grid; grid-template-columns: 1fr 1.2fr; gap: var(--sp-2); margin-bottom: var(--sp-3); }
 .edm-filtros .field { margin: 0; }
 .edm-aula-row { display: flex; gap: var(--sp-2); align-items: flex-end; }
@@ -265,14 +261,23 @@ function _edmOrdenarAulas(lista) {
 }
 function _edmNum(v) { var n = parseFloat(String(v || '').replace(/\./g, '').replace(',', '.')); return isNaN(n) ? 0 : n; }
 
+function _edmAtalhosHtml() {
+  var todas = edmTelasDoPerfil(), inicial = edmPodeEditar() ? 'visao' : 'chamada';
+  Atalhos.registrar('ebd', todas, [inicial], function () {
+    var n = document.querySelector('.edm-atalhos'); if (!n) return;
+    n.outerHTML = _edmAtalhosHtml(); if (window.lucide) lucide.createIcons();
+    var x = document.querySelector('.edm-atalhos'); if (x) { x.addEventListener('scroll', edmAtalhosDica, { passive: true }); edmAtalhosDica(); }
+  });
+  return '<nav class="edm-atalhos atl-nav no-print" aria-label="Seções da Escola Dominical">' + Atalhos.filtrar('ebd', todas, [inicial]).map(function (t) {
+    return '<button type="button" class="hm-mod' + (EDM.tela === t[0] ? ' active' : '') + '" data-tela="' + t[0] + '" onclick="edmIr(\'' + t[0] + '\')">' +
+      '<div class="hm-mod-icon"><i data-lucide="' + t[1] + '"></i></div><div class="hm-mod-name">' + t[2] + '</div></button>';
+  }).join('') + Atalhos.botao('ebd') + '</nav>';
+}
 function renderEscolaDominical() {
   if (!App.session) { navigateTo('login'); return; }
   EDM.tela = edmPodeEditar() ? 'visao' : 'chamada';
   var telas = edmTelasDoPerfil();
-  var atalhos = telas.length > 1 ? '<nav class="edm-atalhos no-print" aria-label="Seções da Escola Dominical">' + telas.map(function (t) {
-    return '<button type="button" class="hm-mod' + (EDM.tela === t[0] ? ' active' : '') + '" data-tela="' + t[0] + '" onclick="edmIr(\'' + t[0] + '\')">' +
-      '<div class="hm-mod-icon"><i data-lucide="' + t[1] + '"></i></div><div class="hm-mod-name">' + t[2] + '</div></button>';
-  }).join('') + '</nav>' : '';
+  var atalhos = telas.length > 1 ? _edmAtalhosHtml() : '';
   renderView(
     '<div class="edm-hero">' +
       '<svg class="edm-hero-art" viewBox="0 0 100 100" aria-hidden="true"><rect x="42" y="4" width="16" height="92" rx="6" fill="#fff"/><rect x="18" y="30" width="64" height="16" rx="6" fill="#fff"/></svg>' +
