@@ -92,6 +92,23 @@ async function irPara(page, rota, esperada) {
         await page.evaluate(() => { if (typeof mbNovoMembro === 'function') mbNovoMembro(); });
         await page.waitForTimeout(700);
         await page.screenshot({ path: path.join(OUT, `membros-form-${tam}.png`) });
+        for (const mod of ['classico', 'lateral', 'faixa', 'diagonal']) {
+          await page.evaluate((m) => { IDENTIDADE.cartaoModelo = m; if (!IDENTIDADE.corPrimaria) IDENTIDADE.corPrimaria = '#0F766E'; mbSetTab('carteirinha'); }, mod);
+          await page.waitForTimeout(500);
+          await page.screenshot({ path: path.join(OUT, `cartao-${mod}-${tam}.png`) });
+        }
+        await page.evaluate(() => mbCard_abrirGaleria()); await page.waitForTimeout(600);
+        await page.screenshot({ path: path.join(OUT, `cartao-galeria-${tam}.png`) });
+        await page.evaluate(() => mbCard_fecharGaleria());
+        if (tam === 'desktop') {
+          // Vitrine: cada modelo em 3 cores de marca (frente) + verso
+          for (const cor of ['#0F766E', '#6D28D9', '#B45309']) for (const mod of ['classico', 'lateral', 'faixa', 'diagonal']) {
+            await page.evaluate((x) => { IDENTIDADE.cartaoModelo = x[0]; IDENTIDADE.corPrimaria = x[1]; mbSetTab('carteirinha'); }, [mod, cor]);
+            await page.waitForTimeout(250);
+            await page.locator('.mb-card').first().screenshot({ path: path.join(OUT, `vitrine-${mod}-${cor.slice(1)}.png`) });
+          }
+          await page.locator('.mb-card').nth(1).screenshot({ path: path.join(OUT, 'vitrine-verso.png') });
+        }
       }
       if (t.nome === 'escola-dominical') {
         for (const sub of ['visao', 'chamada', 'ranking', 'turmas', 'alunos', 'professores', 'relatorios']) {
