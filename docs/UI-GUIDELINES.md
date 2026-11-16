@@ -71,3 +71,9 @@ A navegação principal **nunca** é mais forte que o conteúdo.
 ## Escala compacta de controles (todas as telas, sem exceção por largura)
 
 Botão `.btn` 40px (`.btn-sm` 32, `.btn-lg` 44) · campo/select/busca 40px · rótulo de campo 12px/700 sem caixa alta · espaço entre campos `--sp-3` · aba 44px · `.icon-btn` 40px (36px dentro de cabeçalhos de cartão) · barra superior 56px. Ações secundárias em cabeçalhos de cartão são ícones (com `aria-label`/`title`), não botões com texto. Telas de detalhe não usam subtítulos de seção: só respiro (`--sp-4`) entre os blocos.
+
+## Carteirinha: modelos e cor
+- Quatro modelos de frente (`classico`, `lateral`, `faixa`, `diagonal`), escolhidos na galeria da aba Carteirinhas e gravados em `CARTAO_MODELO` (Config). Só o administrador troca; o verso é igual em todos.
+- A cor vem da cor da marca (`COR_PRIMARIA`, tela Identidade): `mbCard_paleta()` deriva `--k1..--k6` inline no `.mb-card`. Cor muito clara é escurecida para o texto branco continuar legível.
+- Logo e marca d'água enviados são claros: só ficam sobre áreas coloridas do cartão.
+- Na Identidade, "Sugerir cores do logo" lê uma miniatura de 48 px no navegador e oferece até 5 cores; logo branco/cinza não gera sugestão e vale a cor escolhida à mão.

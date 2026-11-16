@@ -19,6 +19,8 @@
 .idt-cor-texto { flex: 1; font-size: var(--fs-md); font-weight: 700; color: var(--text); }
 .idt-cor-botao svg { flex-shrink: 0; color: var(--text-muted); }
 .idt-cor-hex { text-transform: uppercase; }
+.idt-cor-acoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.idt-sug-msg { margin: 0; font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.5; }
 .idt-recentes-rotulo { font-size: 12px; font-weight: 700; color: var(--text-muted); margin: 0 0 8px; }
 .idt-recentes { display: flex; flex-wrap: wrap; gap: 10px; }
 .idt-recente { width: 40px; height: 40px; border-radius: 50%; border: 2px solid transparent; padding: 0; cursor: pointer; box-shadow: 0 0 0 1px var(--border); }
@@ -85,7 +87,7 @@ function renderIdentidade() {
 
       _idtSecao('Dados da igreja', 'Aparecem no login, no menu, no topo e nos e-mails do sistema.', _idtCampo('nome', true) + _idtCampo('nomeCurto') + _idtCampo('lema', true)) +
 
-      _idtSecao('Cor da marca', 'Muda botões, destaques e menus em todo o sistema. Veja o resultado na hora e salve quando gostar.',
+      _idtSecao('Cor da marca', 'Muda botões, destaques, menus e a cor da carteirinha. Veja o resultado na hora e salve quando gostar.',
         '<div class="idt-cor-bloco">' +
           '<label class="idt-cor-botao" id="idt-cor-botao"><span class="idt-cor-amostra" id="idt-cor-amostra"></span>' +
             '<span class="idt-cor-texto">Escolher cor</span>' +
@@ -93,7 +95,9 @@ function renderIdentidade() {
             '<input type="color" id="idt-cor-picker" oninput="idtCor(this.value)" aria-label="Escolher cor da marca"></label>' +
           '<div class="field" style="margin:0"><label for="idt-cor-hex">Ou digite o código da cor</label>' +
             '<input type="text" class="idt-cor-hex" id="idt-cor-hex" maxlength="7" placeholder="#RRGGBB" autocomplete="off" oninput="idtCorTexto(this.value)"></div>' +
-          '<div><button type="button" class="btn btn-ghost btn-sm" id="idt-cor-padrao" onclick="idtCor(\'\')">Usar cor padrão</button></div>' +
+          '<div class="idt-cor-acoes"><button type="button" class="btn btn-secondary btn-sm" id="idt-cor-sugerir" onclick="idtSugerirCores()">Sugerir cores do logo</button>' +
+            '<button type="button" class="btn btn-ghost btn-sm" id="idt-cor-padrao" onclick="idtCor(\'\')">Usar cor padrão</button></div>' +
+          '<div id="idt-sugestoes" aria-live="polite"></div>' +
           _idtRecentesHtml() +
         '</div>') +
 
@@ -158,6 +162,53 @@ function _idtRecentesHtml() {
   return '<div><p class="idt-recentes-rotulo">Cores recentes</p><div class="idt-recentes">' +
     r.map(function (c) { return '<button type="button" class="idt-recente" data-cor="' + c + '" style="background:' + c + '" aria-label="Cor ' + c + '" onclick="idtCor(\'' + c + '\')"></button>'; }).join('') +
     '</div></div>';
+}
+
+// ── Sugestão de cores a partir do logo ─────────────────────
+// Lê uma miniatura de 48 px no próprio navegador (sem servidor, sem biblioteca): agrupa os pixels coloridos
+// por tom e devolve até 5 cores distintas, da mais frequente para a menos. Branco, preto e cinza são ignorados.
+function _idtCoresDoLogo(img) {
+  var N = 48, c = document.createElement('canvas'); c.width = N; c.height = N;
+  var ctx = c.getContext('2d'), esc = Math.min(N / img.naturalWidth, N / img.naturalHeight);
+  var w = Math.max(1, Math.round(img.naturalWidth * esc)), h = Math.max(1, Math.round(img.naturalHeight * esc));
+  ctx.drawImage(img, (N - w) / 2, (N - h) / 2, w, h);
+  var px = ctx.getImageData(0, 0, N, N).data, grupos = {};
+  for (var i = 0; i < px.length; i += 4) {
+    if (px[i + 3] < 160) continue;
+    var r = px[i], g = px[i + 1], b = px[i + 2], mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 510;
+    var sat = mx === mn ? 0 : (mx - mn) / (255 - Math.abs(mx + mn - 255));
+    if (sat < 0.25 || l < 0.12 || l > 0.88) continue;
+    var k = (r >> 5) + ',' + (g >> 5) + ',' + (b >> 5), o = grupos[k] || (grupos[k] = { n: 0, r: 0, g: 0, b: 0 });
+    o.n++; o.r += r; o.g += g; o.b += b;
+  }
+  var lista = Object.keys(grupos).map(function (k) { var o = grupos[k]; return { n: o.n, c: [o.r / o.n, o.g / o.n, o.b / o.n] }; })
+    .sort(function (a, b) { return b.n - a.n; });
+  var saida = [];
+  lista.forEach(function (x) {
+    if (saida.length >= 5 || x.n < 4) return;
+    var longe = saida.every(function (y) { var d = Math.sqrt(Math.pow(x.c[0] - y[0], 2) + Math.pow(x.c[1] - y[1], 2) + Math.pow(x.c[2] - y[2], 2)); return d > 70; });
+    if (longe) saida.push(x.c);
+  });
+  return saida.map(function (c) { return _rgbHex(c).toUpperCase(); });
+}
+
+function idtSugerirCores() {
+  var box = document.getElementById('idt-sugestoes');
+  if (!box) return;
+  function msg(t) { box.innerHTML = '<p class="idt-sug-msg">' + t + '</p>'; }
+  if (!IDENTIDADE.logoUrl) { msg('Envie o logo na seção Imagens para receber sugestões de cor.'); return; }
+  var img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function () {
+    var cores;
+    try { cores = _idtCoresDoLogo(img); } catch (e) { msg('Não foi possível ler as cores deste logo. Escolha a cor manualmente.'); return; }
+    if (!cores.length) { msg('O logo não tem cores marcantes (é branco, preto ou cinza). Escolha a cor da marca manualmente.'); return; }
+    box.innerHTML = '<p class="idt-recentes-rotulo">Cores do logo</p><div class="idt-recentes">' +
+      cores.map(function (c) { return '<button type="button" class="idt-recente" data-cor="' + c + '" style="background:' + c + '" aria-label="Usar a cor ' + c + '" onclick="idtCor(\'' + c + '\')"></button>'; }).join('') + '</div>';
+    _idtAtualizarTela();
+  };
+  img.onerror = function () { msg('Não foi possível ler o logo para sugerir cores.'); };
+  img.src = IDENTIDADE.logoUrl;
 }
 
 // ── Edição de textos e cor ─────────────────────────────────

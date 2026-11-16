@@ -1879,7 +1879,11 @@ function mbImportarJSON(e) {
   image-rendering: crisp-edges;
   isolation: isolate;
   flex-shrink: 0;
+  /* Paleta do cartão: vem da cor da marca (mbCard_paleta sobrescreve inline). k1 base · k2 escura · k3 mais escura · k4 tom claro · k5 tinta · k6 realce */
+  text-align: left;
+  --k1: #1b3a8a; --k2: #11255a; --k3: #0a1636; --k4: #e8ecf6; --k5: #070e22; --k6: #a4b2d9;
 }
+.mb-card:not(.for-print) { box-shadow: 0 0 0 1px rgba(15, 23, 42, .1), 0 6px 18px -8px rgba(15, 23, 42, .35); }
 .mb-card.for-print {
   width: 85.6mm; height: 53.98mm;
   border-radius: 14px;
@@ -1887,7 +1891,7 @@ function mbImportarJSON(e) {
 
 /* ── FRENTE ── */
 .mb-card-front {
-  background: linear-gradient(135deg, #001040 0%, #1a2850 100%);
+  background: linear-gradient(135deg, var(--k3) 0%, var(--k2) 100%);
   color: #fff;
   width: 100%; height: 100%;
   position: relative;
@@ -1967,17 +1971,59 @@ function mbImportarJSON(e) {
   bottom: 5px; left: 20px; right: 20px;
   background: transparent;
   border-radius: 6px;  
-  color: #001040;
+  color: var(--k3);
   z-index: 2;
   text-align: center;
 }
-.mb-card-front .card-footer .f1 { font-size: 7px; font-weight: 700; margin-bottom: 1.5px; }
-.mb-card-front .card-footer .f2 { font-size: 6.5px; font-weight: 500; line-height: 1.3; }
-.mb-card-front .card-footer .f3 { font-size: 6.5px; font-weight: 600; margin-top: 1px; }
+.mb-card-front .f1 { font-size: 7px; font-weight: 700; margin-bottom: 1.5px; }
+.mb-card-front .f2 { font-size: 6.5px; font-weight: 500; line-height: 1.3; }
+.mb-card-front .f3 { font-size: 6.5px; font-weight: 600; margin-top: 1px; }
+
+/* ── Modelos da frente (a galeria escolhe; a cor sempre vem da paleta) ──
+   Logo e marca d'água enviados são claros: ficam só sobre áreas coloridas. */
+/* Lateral: coluna colorida com logo e foto, dados em fundo branco */
+.mb-card-front.f-lateral { background: #fff; color: var(--k5); flex-direction: row; }
+.f-lateral .lt-side { width: 38%; height: 100%; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 14px 0; background: linear-gradient(165deg, var(--k1), var(--k3)); color: #fff; }
+.f-lateral .card-logo { width: 40px; height: 40px; }
+.f-lateral .card-logo-ini { width: 38px; height: 38px; font-size: 13px; }
+.f-lateral .lt-main { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 16px 16px 9px; }
+.f-lateral .lt-igreja { padding-bottom: 5px; border-bottom: 2px solid var(--k6); font-size: 8.5px; font-weight: 800; letter-spacing: .5px; line-height: 1.2; text-transform: uppercase; color: var(--k1); }
+.f-lateral .lt-nome { margin-top: 14px; font-size: 15px; font-weight: 800; line-height: 1.15; text-transform: uppercase; }
+.f-lateral .lt-rol { align-self: flex-start; margin-top: 9px; padding: 3px 10px; border-radius: 99px; background: var(--k1); color: #fff; font-size: 9.5px; font-weight: 700; letter-spacing: .4px; }
+.f-lateral .lt-funcao { margin-top: 7px; font-size: 10px; font-weight: 600; color: var(--k1); }
+.f-lateral .lt-foot { margin-top: auto; opacity: .75; }
+/* Faixa: faixa colorida no topo com logo, foto redonda sobre a divisa */
+.mb-card-front.f-faixa { background: #fff; color: var(--k5); }
+.f-faixa .fx-band { height: 66px; flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 0 18px; background: linear-gradient(120deg, var(--k1), var(--k3)); color: #fff; }
+.f-faixa .card-logo { width: 40px; height: 40px; }
+.f-faixa .card-logo-ini { width: 38px; height: 38px; font-size: 13px; }
+.f-faixa .fx-igreja { font-size: 11px; font-weight: 800; letter-spacing: .4px; line-height: 1.2; }
+.f-faixa .fx-corpo { display: flex; flex-direction: row-reverse; justify-content: space-between; gap: 14px; margin-top: -26px; padding: 0 18px; align-items: flex-start; }
+.f-faixa .card-photo { width: 76px; height: 76px; border-radius: 50%; }
+.f-faixa .fx-info { flex: 1; min-width: 0; padding-top: 38px; }
+.f-faixa .fx-nome { font-size: 13px; font-weight: 800; line-height: 1.15; text-transform: uppercase; }
+.f-faixa .fx-rol { margin-top: 5px; font-size: 10px; font-weight: 700; letter-spacing: .4px; color: var(--k1); }
+.f-faixa .fx-funcao { margin-top: 2px; font-size: 9.5px; font-weight: 600; opacity: .7; }
+.f-faixa .fx-foot { position: absolute; left: 18px; right: 18px; bottom: 6px; padding-top: 3px; border-top: 1px solid var(--k4); text-align: center; color: var(--k5); opacity: .85; }
+/* Diagonal: fundo colorido cheio, faixa translúcida em diagonal, foto à direita */
+.mb-card-front.f-diagonal { background: linear-gradient(135deg, var(--k1) 0%, var(--k3) 100%); }
+.f-diagonal .dg-shape { position: absolute; inset: 0; z-index: 0; background: linear-gradient(115deg, transparent 54%, rgba(255, 255, 255, .09) 54%, rgba(255, 255, 255, .09) 72%, transparent 72%); }
+.f-diagonal .dg-main { position: relative; z-index: 1; height: 100%; padding: 16px 20px; box-sizing: border-box; }
+.f-diagonal .dg-head { display: flex; align-items: center; gap: 10px; }
+.f-diagonal .card-logo { width: 40px; height: 40px; }
+.f-diagonal .card-logo-ini { width: 38px; height: 38px; font-size: 13px; }
+.f-diagonal .dg-igreja { max-width: 200px; font-size: 11px; font-weight: 800; letter-spacing: .5px; line-height: 1.15; }
+.f-diagonal .card-photo { position: absolute; right: 20px; top: 54px; }
+.f-diagonal .dg-info { position: absolute; left: 20px; top: 74px; width: 54%; }
+.f-diagonal .dg-nome { font-size: 16px; font-weight: 800; line-height: 1.15; text-transform: uppercase; }
+.f-diagonal .dg-rol { margin-top: 8px; font-size: 10.5px; font-weight: 700; letter-spacing: .5px; color: var(--k6); }
+.f-diagonal .dg-funcao { margin-top: 3px; font-size: 10px; font-weight: 600; opacity: .85; }
+.f-diagonal .dg-foot { position: absolute; left: 20px; right: 20px; bottom: 7px; padding-top: 3px; border-top: 1px solid rgba(255, 255, 255, .25); text-align: left; opacity: .85; }
 
 /* ── VERSO ── */
 .mb-card-back {
-  background: linear-gradient(135deg, #001040 0%, #1a2850 100%);
+  text-align: center;
+  background: linear-gradient(135deg, var(--k3) 0%, var(--k2) 100%);
   color: #fff;
   width: 100%; height: 100%;
   position: relative;
@@ -2063,6 +2109,19 @@ function mbImportarJSON(e) {
 .mb-card-back .back-address .ba1 { font-weight: 700; }
 .mb-card-back .back-address .ba2 { font-weight: 500; }
 .mb-card-back .back-address .ba3 { font-weight: 600; }
+
+/* ── Galeria de modelos ── */
+#modal-mb-galeria .modal-box { max-width: 760px; }
+.mb-gal-grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(156px, 1fr)); gap: var(--sp-3); }
+.mb-gal-item { display: flex; flex-direction: column; gap: var(--sp-1); padding: var(--sp-2); text-align: left; cursor: pointer; font-family: inherit; color: var(--text); background: var(--bg2); border: 1.5px solid var(--border); border-radius: var(--r-3); }
+.mb-gal-item.sel { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-dim); }
+.mb-gal-item:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.mb-gal-card { display: block; width: 100%; height: 92px; overflow: hidden; pointer-events: none; }
+.mb-gal-card .mb-card { transform: scale(.42); transform-origin: top left; }
+.mb-gal-nome { font-size: var(--fs-sm); font-weight: 800; }
+.mb-gal-nome small { margin-left: var(--sp-1); font-size: var(--fs-xs); font-weight: 600; color: var(--teal); }
+.mb-gal-desc { font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.35; }
+.mb-gal-aviso { margin: var(--sp-3) 0 0; font-size: var(--fs-sm); color: var(--text-muted); }
 
 /* ── Preview grid na UI ── */
 .mb-card-preview-wrap {
@@ -2289,50 +2348,112 @@ function mbCard_htmlFrente(m, forPrint, fotoPreProcessada, logoProcessado) {
 
   var nomeTratado = _mbAbreviarNome(m.nome || 'Nome do Membro');
   var d = mbCard_dados();
+  var modelo = mbCard_modelo();
+  var P = {
+    foto: '<div class="card-photo">'+foto+'</div>',
+    logo: '<div class="card-logo">'+(d.logo ? _mbCardImg(d.logo) : '<span class="card-logo-ini">'+_mbEsc(iniciaisIgreja(IDENTIDADE.nomeCurto || IDENTIDADE.nome))+'</span>')+'</div>',
+    igreja: _mbEsc(d.igreja), nome: nomeTratado, rol: 'ROL Nº '+(m.rol||'0000'), funcao: (m.funcao||'Membro'),
+    rodape: _mbCardRodape(d, 'Sede - ', ['f1','f2','f3']),
+    marca: '<div class="card-watermark">'+_mbCardImg(d.marcaDagua)+'</div>'
+  };
+  return '<div class="mb-card m-'+modelo+(forPrint?' for-print':'')+'" style="'+mbCard_paleta()+'">'+
+    MB_CARD_FRENTES[modelo](P)+'</div>';
+}
 
-  return (
-    '<div class="mb-card'+(forPrint?' for-print':'')+'">'+
-    '<div class="mb-card-front">'+
-
-      /* Marca d'água */
-      '<div class="card-watermark">'+
-        _mbCardImg(d.marcaDagua)+
-      '</div>'+
-
-      /* Onda branca SVG (path idêntico ao Index3) */
-      '<svg class="card-wave" viewBox="0 0 340 75" preserveAspectRatio="none" fill="none">'+
-        '<path d="M0 25 Q85 8, 170 25 T340 25 L340 75 L0 75 Z" fill="#ffffff"/>'+
-      '</svg>'+
-
+// ── Modelos da frente: cada um monta o miolo de .mb-card-front ──
+var MB_CARD_MODELOS = [
+  { id: 'classico', nome: 'Clássico', desc: 'Fundo escuro com marca d\'água e onda branca.' },
+  { id: 'lateral',  nome: 'Lateral',  desc: 'Coluna colorida com foto e dados em fundo branco.' },
+  { id: 'faixa',    nome: 'Faixa',    desc: 'Faixa colorida no topo e foto redonda.' },
+  { id: 'diagonal', nome: 'Diagonal', desc: 'Cor cheia com detalhe em diagonal.' }
+];
+var MB_CARD_FRENTES = {
+  classico: function (P) {
+    return '<div class="mb-card-front f-classico">'+P.marca+
+      '<svg class="card-wave" viewBox="0 0 340 75" preserveAspectRatio="none" fill="none"><path d="M0 25 Q85 8, 170 25 T340 25 L340 75 L0 75 Z" fill="#ffffff"/></svg>'+
       '<div class="card-body">'+
+        '<div class="card-header">'+P.logo+'<div class="card-church-name"><div class="line2">'+P.igreja+'</div></div></div>'+
+        '<div class="card-member-row">'+P.foto+'<div class="card-member-info"><div class="m-nome">'+P.nome+'</div><div class="m-rol">'+P.rol+'</div><div class="m-funcao">'+P.funcao+'</div></div></div>'+
+        '<div class="card-footer">'+P.rodape+'</div>'+
+      '</div></div>';
+  },
+  lateral: function (P) {
+    return '<div class="mb-card-front f-lateral"><div class="lt-side">'+P.logo+P.foto+'<span></span></div>'+
+      '<div class="lt-main"><div class="lt-igreja">'+P.igreja+'</div><div class="lt-nome">'+P.nome+'</div>'+
+      '<div class="lt-rol">'+P.rol+'</div><div class="lt-funcao">'+P.funcao+'</div><div class="lt-foot">'+P.rodape+'</div></div></div>';
+  },
+  faixa: function (P) {
+    return '<div class="mb-card-front f-faixa"><div class="fx-band">'+P.logo+'<div class="fx-igreja">'+P.igreja+'</div></div>'+
+      '<div class="fx-corpo">'+P.foto+'<div class="fx-info"><div class="fx-nome">'+P.nome+'</div><div class="fx-rol">'+P.rol+'</div><div class="fx-funcao">'+P.funcao+'</div></div></div>'+
+      '<div class="fx-foot">'+P.rodape+'</div></div>';
+  },
+  diagonal: function (P) {
+    return '<div class="mb-card-front f-diagonal">'+P.marca+'<div class="dg-shape"></div><div class="dg-main">'+
+      '<div class="dg-head">'+P.logo+'<div class="dg-igreja">'+P.igreja+'</div></div>'+P.foto+
+      '<div class="dg-info"><div class="dg-nome">'+P.nome+'</div><div class="dg-rol">'+P.rol+'</div><div class="dg-funcao">'+P.funcao+'</div></div>'+
+      '<div class="dg-foot">'+P.rodape+'</div></div></div>';
+  }
+};
 
-        /* Header: logo + nome da igreja */
-        '<div class="card-header">'+
-          '<div class="card-logo">'+(d.logo ? _mbCardImg(d.logo) : '<span class="card-logo-ini">'+_mbEsc(iniciaisIgreja(IDENTIDADE.nomeCurto || IDENTIDADE.nome))+'</span>')+'</div>'+
-          '<div class="card-church-name">'+
-            '<div class="line2">'+_mbEsc(d.igreja)+'</div>'+
-          '</div>'+
-        '</div>'+
+// Modelo em uso: o da Identidade (ou o que está sendo testado na galeria)
+function mbCard_modelo() {
+  var id = MB.modeloTeste || (IDENTIDADE && IDENTIDADE.cartaoModelo) || 'classico';
+  return MB_CARD_FRENTES[id] ? id : 'classico';
+}
 
-        /* Foto + dados do membro */
-        '<div class="card-member-row">'+
-          '<div class="card-photo">'+foto+'</div>'+
-          '<div class="card-member-info">'+
-            '<div class="m-nome">'+nomeTratado+'</div>'+
-            '<div class="m-rol">ROL Nº '+(m.rol||'0000')+'</div>'+
-            '<div class="m-funcao">'+(m.funcao||'Membro')+'</div>'+
-          '</div>'+
-        '</div>'+
+// Paleta do cartão a partir da cor da marca (Identidade). Cor muito clara é escurecida: o texto do cartão é branco.
+function mbCard_paleta() {
+  var hex = IDENTIDADE && IDENTIDADE.corPrimaria;
+  var c = _hexRgb(/^#[0-9a-fA-F]{6}$/.test(hex || '') ? hex : '#1b3a8a');
+  for (var i = 0; i < 10 && _lum(c) > 0.2; i++) c = _mix(c, [0, 0, 0], 0.12);
+  var K = [c, _mix(c, [0, 0, 0], .38), _mix(c, [0, 0, 0], .62), _mix(c, [255, 255, 255], .9), _mix(c, [0, 0, 0], .7), _mix(c, [255, 255, 255], .55)];
+  return K.map(function (v, n) { return '--k' + (n + 1) + ':' + _rgbHex(v); }).join(';');
+}
 
-        /* Rodapé branco */
-        '<div class="card-footer">'+
-          _mbCardRodape(d, 'Sede - ', ['f1','f2','f3'])+
-        '</div>'+
-
-      '</div>'+/* card-body */
-    '</div>'+/* mb-card-front */
-    '</div>' /* mb-card */
-  );
+// ── Galeria de modelos ───────────────────────────────────
+function mbCard_abrirGaleria() {
+  var ativos = MB.membros.filter(function (m) { return m.ativo !== false; });
+  var m = MB.membros.filter(function (x) { return String(x.id) === String(MB.cardSelected); })[0] || ativos[0];
+  if (!m) return;
+  var atual = (IDENTIDADE && IDENTIDADE.cartaoModelo) || 'classico';
+  MB.modeloEscolhido = atual;
+  var admin = App.session && App.session.perfil === 'admin';
+  var ov = document.getElementById('modal-mb-galeria');
+  if (!ov) { ov = document.createElement('div'); ov.className = 'modal-overlay'; ov.id = 'modal-mb-galeria'; ov.onclick = function (e) { if (e.target === ov) mbCard_fecharGaleria(); }; document.body.appendChild(ov); }
+  var itens = MB_CARD_MODELOS.map(function (o) {
+    MB.modeloTeste = o.id;
+    var card = mbCard_htmlFrente(m, false);
+    MB.modeloTeste = null;
+    return '<button type="button" class="mb-gal-item'+(o.id === atual ? ' sel' : '')+'" data-modelo="'+o.id+'" onclick="mbCard_escolherModelo(\''+o.id+'\')">'+
+      '<span class="mb-gal-card">'+card+'</span>'+
+      '<span class="mb-gal-nome">'+o.nome+(o.id === atual ? ' <small>em uso</small>' : '')+'</span><span class="mb-gal-desc">'+o.desc+'</span></button>';
+  }).join('');
+  ov.innerHTML = '<div class="modal-box"><div class="modal-header"><div><h3>Modelo da carteirinha</h3>'+
+    '<div class="modal-sub">A cor acompanha a cor da marca definida em Identidade.</div></div>'+
+    '<button class="btn btn-ghost btn-sm" style="width:36px;padding:0" onclick="mbCard_fecharGaleria()" aria-label="Fechar"><i data-lucide="x" class="ic-16"></i></button></div>'+
+    '<div class="modal-body"><div class="mb-gal-grade">'+itens+'</div>'+
+    (admin ? '' : '<p class="mb-gal-aviso">Só o administrador pode trocar o modelo.</p>')+'</div>'+
+    '<div class="modal-footer"><button class="btn btn-secondary" onclick="mbCard_fecharGaleria()">Cancelar</button>'+
+    '<button class="btn btn-primary" id="mb-gal-usar" onclick="mbCard_usarModelo()"'+(admin ? '' : ' disabled')+'>Usar este modelo</button></div></div>';
+  if (window.lucide) lucide.createIcons();
+  requestAnimationFrame(function () { ov.classList.add('open'); });
+}
+function mbCard_fecharGaleria() { var ov = document.getElementById('modal-mb-galeria'); if (ov) ov.classList.remove('open'); }
+function mbCard_escolherModelo(id) {
+  MB.modeloEscolhido = id;
+  document.querySelectorAll('#modal-mb-galeria .mb-gal-item').forEach(function (b) { b.classList.toggle('sel', b.getAttribute('data-modelo') === id); });
+}
+function mbCard_usarModelo() {
+  var id = MB.modeloEscolhido, btn = document.getElementById('mb-gal-usar');
+  if (!id || id === ((IDENTIDADE && IDENTIDADE.cartaoModelo) || 'classico')) { mbCard_fecharGaleria(); return; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+  google.script.run
+    .withFailureHandler(function () { if (btn) { btn.disabled = false; btn.textContent = 'Usar este modelo'; } showToast('Falha de conexão. Tente novamente.', 'error'); })
+    .withSuccessHandler(function (res) {
+      if (res && res.success) { IDENTIDADE.cartaoModelo = res.data.cartaoModelo || id; mbCard_fecharGaleria(); _mbRenderPanel(); showToast('Modelo da carteirinha atualizado.', 'success'); }
+      else { if (btn) { btn.disabled = false; btn.textContent = 'Usar este modelo'; } showToast((res && res.error) || 'Não foi possível salvar o modelo.', 'error'); }
+    })
+    .idt_salvarAjustes(App.session.token, { CARTAO_MODELO: id });
 }
 
 // ── Monta HTML do VERSO do cartão ───────────────────────
@@ -2355,7 +2476,7 @@ function mbCard_htmlVerso(m, forPrint, qrSrc) {
   }).join('');
 
   return (
-    '<div class="mb-card'+(forPrint?' for-print':'')+'">'+
+    '<div class="mb-card m-'+mbCard_modelo()+(forPrint?' for-print':'')+'" style="'+mbCard_paleta()+'">'+
     '<div class="mb-card-back">'+
 
       '<div class="card-watermark">'+
@@ -2457,6 +2578,7 @@ function _mbBuildCarteirinha() {
         mbCard_htmlVerso(selected, false, MB.qrOn ? 'preview' : null)+
       '</div>'+
       '<div class="mb-card-panel-actions">'+
+        '<button class="btn btn-secondary btn-sm" id="mb-gal-abrir" onclick="mbCard_abrirGaleria()"><i data-lucide="layout-template" class="ic-14"></i> Modelo: '+_mbEsc((MB_CARD_MODELOS.filter(function(o){return o.id===mbCard_modelo();})[0]||MB_CARD_MODELOS[0]).nome)+'</button>'+
         '<label class="mb-qr-opt"><input type="checkbox" id="mb-qr-opt"'+(MB.qrOn?' checked':'')+' onchange="mbCard_toggleQr(this.checked);_mbRenderPanel()">'+
           '<span><b>Incluir QR Code de validação</b><small>Quem ler o QR vê nome, função e situação. Gera um código novo e cancela o QR de cartões anteriores deste membro.</small></span></label>'+
         '<button class="btn btn-primary btn-sm" onclick="mbCard_downloadPDF(\''+selected.id+'\')">'+

@@ -99,11 +99,19 @@ function envComConfig(cfg, abas) {
   return env;
 }
 
+test('config: modelo da carteirinha — padrão clássico, só valores conhecidos, grava pela tela Identidade', () => {
+  const env = envComConfig({ CARTAO_MODELO: 'diagonal' });
+  assert.equal(JSON.parse(env.run('Config.identidadeJson()')).cartaoModelo, 'diagonal');
+  assert.equal(JSON.parse(envComConfig({ CARTAO_MODELO: 'xyz' }).run('Config.identidadeJson()')).cartaoModelo, 'classico', 'valor desconhecido cai no clássico');
+  assert.equal(env.run("Config.validar({ CARTAO_MODELO: 'faixa' })").ok, true);
+  assert.match(env.run("Config.validar({ CARTAO_MODELO: 'neon' })").erro, /Modelo/);
+});
+
 test('config: sem a aba Config a identidade tem valores neutros (nunca derruba a tela)', () => {
   const env = freshEnv();
   const id = JSON.parse(env.run('Config.identidadeJson()'));
   assert.deepEqual(id, {
-    nome: 'Minha Igreja', nomeCurto: 'Minha Igreja', lema: '', corPrimaria: '', logoUrl: '',
+    nome: 'Minha Igreja', nomeCurto: 'Minha Igreja', lema: '', corPrimaria: '', cartaoModelo: 'classico', logoUrl: '',
     pastor: '', cargoPastor: 'Pastor Presidente', endereco: '', cnpj: '', marcaDagua: '', assinatura: '',
   });
 });
