@@ -1401,420 +1401,6 @@ var EscolaDominical = (function () {
   }
 
   // ══════════════════════════════════════════
-  //  EXPORTAÇÃO
-  // ══════════════════════════════════════════
-
-  // ═══════════════════════════════════════════════════════════
-  //  ANIVERSÁRIOS & ALERTAS WHATSAPP
-  // ═══════════════════════════════════════════════════════════
-
-  function _parseDataNasc(val) {
-    if (!val) return null;
-    try {
-      if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
-      var s = String(val).trim();
-      var d;
-      if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
-        d = new Date(s.substring(0, 10));
-      } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
-        var p = s.split('/'); d = new Date(p[2] + '-' + p[1] + '-' + p[0]);
-      } else { d = new Date(s); }
-      return isNaN(d.getTime()) ? null : d;
-    } catch(e) { return null; }
-  }
-
-  function _isBirthdayOn(dateVal, refDate) {
-    var d = _parseDataNasc(dateVal);
-    if (!d) return false;
-    var ref = refDate || new Date();
-    return d.getDate() === ref.getDate() && d.getMonth() === ref.getMonth();
-  }
-
-  function _anivSemana(dateVal) {
-    var d = _parseDataNasc(dateVal);
-    if (!d) return null;
-    var today = new Date();
-    var dow = today.getDay();
-    for (var i = 0; i < 7; i++) {
-      var ref = new Date(today.getFullYear(), today.getMonth(), today.getDate() - dow + i);
-      if (d.getDate() === ref.getDate() && d.getMonth() === ref.getMonth()) {
-        var days = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-        return { diaLabel: days[i]+' '+('0'+ref.getDate()).slice(-2)+'/'+('0'+(ref.getMonth()+1)).slice(-2), diaIndex: i, isHoje: (i === dow) };
-      }
-    }
-    return null;
-  }
-
-  function _nomeIgreja() {
-    try { return String(Config.identidade().nome || 'Igreja'); } catch (e) { return 'Igreja'; }
-  }
-  function _htmlEsc(t) {
-    return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  }
-
-  // Chave unificada ALERTAS_CONFIG — compartilhada com módulo Membros.
-  // Migração automática: se existir a chave antiga ED_ALERTAS_CONFIG, importa e apaga.
-  function _getConfigAlertas() {
-    try {
-      var props = PropertiesService.getScriptProperties();
-      var raw = props.getProperty('ALERTAS_CONFIG');
-      if (!raw) {
-        // Migração one-shot da chave antiga
-        var old = props.getProperty('ED_ALERTAS_CONFIG');
-        if (old) {
-          props.setProperty('ALERTAS_CONFIG', old);
-          props.deleteProperty('ED_ALERTAS_CONFIG');
-          return JSON.parse(old);
-        }
-        return {};
-      }
-      return JSON.parse(raw);
-    } catch(e) { return {}; }
-  }
-
-  function _setConfigAlertas(config) {
-    try { PropertiesService.getScriptProperties().setProperty('ALERTAS_CONFIG', JSON.stringify(config)); } catch(e) {}
-  }
-
-  // (WhatsApp removido — alertas agora via GmailApp)
-
-  function _enviarEmail(emailDest, assunto, corpo) {
-    // corpo deve ser plaintext puro sem emojis fora do BMP (U+FFFF+)
-    // htmlBody gerado aqui via escape seguro
-    if (!emailDest || !/\S+@\S+\.\S+/.test(emailDest)) return { ok: false, erro: 'Email invalido: ' + emailDest };
-    try {
-      var htmlBody = '<meta charset="UTF-8">' +
-        corpo
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/\n/g, '<br>')
-          .replace(/\*(.*?)\*/g, '<strong>$1</strong>');
-      GmailApp.sendEmail(emailDest, assunto, corpo, { htmlBody: htmlBody });
-      return { ok: true };
-    } catch(e) { return { ok: false, erro: e.message }; }
-  }
-
-  function _enviarEmailHtml(emailDest, assunto, corpoPlain, htmlBody) {
-    // Use este quando quiser emojis: passe-os apenas no htmlBody como entidades &#x...
-    // corpoPlain deve ser ASCII puro (fallback para clientes sem HTML)
-    if (!emailDest || !/\S+@\S+\.\S+/.test(emailDest)) return { ok: false, erro: 'Email invalido: ' + emailDest };
-    try {
-      GmailApp.sendEmail(emailDest, assunto, corpoPlain, { htmlBody: htmlBody });
-      return { ok: true };
-    } catch(e) { return { ok: false, erro: e.message }; }
-  }
-
-  // ── Helper: normaliza campo nascimento do módulo Membros (dd/mm/aaaa → Date) ──
-  function _parseMembrosNasc(val) {
-    if (!val) return null;
-    var s = String(val).trim();
-    // dd/mm/aaaa
-    var m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-    if (m) return new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
-    // fallback ao parser padrão da ED
-    return _parseDataNasc(val);
-  }
-
-  // ── Helper: monta bloco HTML + plain de aniversariantes por seção ──
-  function _blocoAniv(titulo, lista, campoNome) {
-    if (!lista.length) return { plain: '', html: '' };
-    var cn = campoNome || 'Nome';
-    var plain = '\n\n--- ' + titulo.toUpperCase() + ' ---\n' +
-      lista.map(function(p){ return '* ' + p[cn] + ' *'; }).join('\n');
-    var html = '<hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0">' +
-      '<p style="font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px">' + titulo + '</p><ul>' +
-      lista.map(function(p){ return '<li><strong>' + p[cn] + '</strong> &#x1F973;</li>'; }).join('') +
-      '</ul>';
-    return { plain: plain, html: html };
-  }
-
-  function _alertaDiarioFn() {
-    var cfg = _getConfigAlertas();
-    if (!cfg.email_ativo) return { enviados: 0, motivo: 'email_inativo' };
-    var today = new Date();
-
-    // ── EBD: alunos e professores aniversariantes ──
-    var alunos  = _safeSheetObjects('Alunos').filter(function(a){ return _isAtivo(a.Ativo) && _isBirthdayOn(a.DataNasc, today); });
-    var profs   = _safeSheetObjects('Professores').filter(function(p){ return _isAtivo(p.Ativo) && _isBirthdayOn(p.DataNasc, today); });
-    var classes = _safeSheetObjects('Classes');
-
-    // ── Membros: aniversariantes (nascimento em dd/mm/aaaa, ativo=true) ──
-    var membrosAniv = [];
-    if (cfg.alerta_membros !== false) { // ativo por default
-      try {
-        membrosAniv = Util.sheetToObjects('Membros').filter(function(m) {
-          return _isAtivo(m.ativo) && _isBirthdayOn(_parseMembrosNasc(m.nascimento), today);
-        });
-      } catch(e) { Logger.log('[AlertaDiario] Erro ao ler Membros: ' + e); }
-    }
-
-    if (!alunos.length && !profs.length && !membrosAniv.length) {
-      return { enviados: 0, motivo: 'sem_aniversariantes' };
-    }
-
-    var assunto = _nomeIgreja() + ' - Aniversario(s) Hoje!';
-    var enviados = 0;
-
-    // ── Avisar professor da turma sobre alunos aniversariantes (ED) ──
-    if (cfg.alerta_dia) {
-      var todosProfs = _safeSheetObjects('Professores').filter(function(p){ return _isAtivo(p.Ativo) && p.Email; });
-      todosProfs.forEach(function(prof) {
-        var anivTurma = alunos.filter(function(a){ return a.ClasseID === prof.ClasseID; });
-        if (!anivTurma.length) return;
-        var cl = (classes.filter(function(c){ return c.ID === prof.ClasseID; })[0] || {}).Nome || 'sua turma';
-        var plain = 'Escola Dominical - Aniversario Hoje!\n\n' +
-          'Ola, ' + prof.Nome.split(' ')[0] + '! Hoje e aniversario de:\n\n' +
-          anivTurma.map(function(a){ return '* ' + a.Nome + ' *'; }).join('\n') +
-          '\n\nNao esqueca de parabenizar!';
-        var html = '<meta charset="UTF-8">' +
-          '<p><strong>&#x1F382; Escola Dominical &#x2013; Anivers&#xe1;rio Hoje!</strong></p>' +
-          '<p>Ol&#xe1;, ' + prof.Nome.split(' ')[0] + '! Hoje &#xe9; anivers&#xe1;rio de:</p><ul>' +
-          anivTurma.map(function(a){ return '<li><strong>' + a.Nome + '</strong> &#x1F973;</li>'; }).join('') +
-          '</ul><p>N&#xe3;o esque&#xe7;a de parabenizar! &#x2764;&#xfe0f;</p>';
-        var r = _enviarEmailHtml(prof.Email, assunto, plain, html);
-        if (r.ok) enviados++;
-      });
-    }
-
-    // ── Destinatários globais: email unificado EBD + Membros ──
-    var dest = cfg.destinatarios || [];
-    dest.forEach(function(r) {
-      if (!r.email || !r.alertaDia) return;
-
-      var todosEBD = alunos.concat(profs);
-      var blocoED  = _blocoAniv('Escola Dominical', todosEBD, 'Nome');
-      var blocoMb  = _blocoAniv('Membros', membrosAniv, 'nome');
-
-      var plain2 = _nomeIgreja() + ' - Aniversario(s) Hoje!' +
-        blocoED.plain + blocoMb.plain;
-      var html2 = '<meta charset="UTF-8">' +
-        '<p><strong>&#x1F382; ' + _htmlEsc(_nomeIgreja()) + ' &#x2013; Anivers&#xe1;rio(s) Hoje!</strong></p>' +
-        blocoED.html + blocoMb.html;
-
-      var res = _enviarEmailHtml(r.email, assunto, plain2, html2);
-      if (res.ok) enviados++;
-    });
-
-    return { enviados: enviados };
-  }
-
-  // ── Helper: monta lista semanal de aniversariantes com diaLabel ──
-  function _listaAnivSemana(pessoas, campoNasc, campoNome, today, dow, days) {
-    var lista = [];
-    for (var i = 0; i < 7; i++) {
-      var ref = new Date(today.getFullYear(), today.getMonth(), today.getDate() - dow + i);
-      pessoas.forEach(function(p) {
-        var nasc = campoNasc === 'nascimento' ? _parseMembrosNasc(p[campoNasc]) : p[campoNasc];
-        if (_isBirthdayOn(nasc, ref))
-          lista.push({ nome: p[campoNome], diaLabel: days[i]+' '+('0'+ref.getDate()).slice(-2)+'/'+('0'+(ref.getMonth()+1)).slice(-2) });
-      });
-    }
-    return lista;
-  }
-
-  function _alertaSegundaFeiraFn() {
-    var cfg = _getConfigAlertas();
-    if (!cfg.email_ativo || !cfg.alerta_semana) return;
-    var today = new Date();
-    var dow = today.getDay();
-    var classes    = _safeSheetObjects('Classes');
-    var alunos     = _safeSheetObjects('Alunos').filter(function(a){ return _isAtivo(a.Ativo); });
-    var todosProfs = _safeSheetObjects('Professores').filter(function(p){ return _isAtivo(p.Ativo); });
-    var days = ['Dom','Seg','Ter','Qua','Qui','Sex','S\xe1b'];
-    var assunto = _nomeIgreja() + ' - Aniversariantes da Semana';
-
-    // ── Membros ativos ──
-    var todosMembros = [];
-    if (cfg.alerta_membros !== false) {
-      try { todosMembros = Util.sheetToObjects('Membros').filter(function(m){ return _isAtivo(m.ativo); }); }
-      catch(e) { Logger.log('[AlertaSemana] Erro ao ler Membros: ' + e); }
-    }
-
-    // ── Por professor: envia lista da turma (apenas EBD, sem alteração) ──
-    todosProfs.forEach(function(prof) {
-      if (!prof.Email) return;
-      var anivTurma = [];
-      for (var i = 0; i < 7; i++) {
-        var ref = new Date(today.getFullYear(), today.getMonth(), today.getDate() - dow + i);
-        alunos.filter(function(a){ return a.ClasseID === prof.ClasseID; }).forEach(function(a){
-          if (_isBirthdayOn(a.DataNasc, ref))
-            anivTurma.push({ nome: a.Nome, diaLabel: days[i]+' '+('0'+ref.getDate()).slice(-2)+'/'+('0'+(ref.getMonth()+1)).slice(-2) });
-        });
-      }
-      if (!anivTurma.length) return;
-      var cl = (classes.filter(function(c){ return c.ID === prof.ClasseID; })[0] || {}).Nome || 'sua turma';
-
-      var semNascTurma = cfg.alerta_sem_nasc
-        ? alunos.filter(function(a){ return a.ClasseID === prof.ClasseID && !a.DataNasc; })
-        : [];
-      var plainSemNasc = semNascTurma.length
-        ? '\n\n--- ATENCAO: ' + semNascTurma.length + ' aluno(s) sem data de nascimento cadastrada ---\n' +
-          semNascTurma.map(function(a){ return '* ' + a.Nome; }).join('\n') +
-          '\nCadastre as datas para receber os alertas de aniversario.'
-        : '';
-      var htmlSemNasc = semNascTurma.length
-        ? '<hr><p style="color:#B45309"><strong>&#x26A0;&#xfe0f; ' + semNascTurma.length +
-          ' aluno(s) sem data de nascimento cadastrada em ' + cl + ':</strong></p><ul>' +
-          semNascTurma.map(function(a){ return '<li>' + a.Nome + '</li>'; }).join('') +
-          '</ul><p style="font-size:12px;color:#666">Cadastre as datas no m&#xf3;dulo Escola Dominical para que os alertas de anivers&#xe1;rio funcionem corretamente.</p>'
-        : '';
-
-      var plain1 = 'Escola Dominical - Aniversariantes da Semana\n\n' +
-        'Ola, ' + prof.Nome.split(' ')[0] + '! Esta semana temos aniversariantes em ' + cl + ':\n\n' +
-        anivTurma.map(function(a){ return a.nome + ' - ' + a.diaLabel; }).join('\n') +
-        '\n\nNao esqueca de desejar parabens!' + plainSemNasc;
-      var html1 = '<meta charset="UTF-8">' +
-        '<p><strong>&#x1F382; Escola Dominical &#x2013; Aniversariantes da Semana</strong></p>' +
-        '<p>Ol&#xe1;, ' + prof.Nome.split(' ')[0] + '! Esta semana temos aniversariantes em <strong>' + cl + '</strong>:</p><ul>' +
-        anivTurma.map(function(a){ return '<li><strong>' + a.nome + '</strong> &#x2013; ' + a.diaLabel + ' &#x1F973;</li>'; }).join('') +
-        '</ul><p>N&#xe3;o esque&#xe7;a de desejar parab&#xe9;ns!</p>' + htmlSemNasc;
-      _enviarEmailHtml(prof.Email, assunto, plain1, html1);
-    });
-
-    // ── Destinatários globais: email unificado EBD + Membros ──
-    var dest = cfg.destinatarios || [];
-
-    // Listas EBD da semana
-    var todosEBD = _listaAnivSemana(alunos.concat(todosProfs), 'DataNasc', 'Nome', today, dow, days);
-
-    // Alunos EBD sem DataNasc
-    var semNascGlobal = cfg.alerta_sem_nasc
-      ? alunos.filter(function(a){ return !a.DataNasc; })
-      : [];
-    var plainSemNascGlobal = semNascGlobal.length
-      ? '\n\n--- ATENCAO: ' + semNascGlobal.length + ' aluno(s) EBD sem data de nascimento ---\n' +
-        semNascGlobal.map(function(a){
-          var cl = (classes.filter(function(c){ return c.ID === a.ClasseID; })[0] || {}).Nome || 'Sem turma';
-          return '* ' + a.Nome + ' (' + cl + ')';
-        }).join('\n') + '\nCadastre as datas para receber os alertas de aniversario.'
-      : '';
-    var htmlSemNascGlobal = semNascGlobal.length
-      ? '<hr><p style="color:#B45309"><strong>&#x26A0;&#xfe0f; ' + semNascGlobal.length +
-        ' aluno(s) EBD sem data de nascimento cadastrada:</strong></p><ul>' +
-        semNascGlobal.map(function(a){
-          var cl = (classes.filter(function(c){ return c.ID === a.ClasseID; })[0] || {}).Nome || 'Sem turma';
-          return '<li><strong>' + a.Nome + '</strong> &#x2013; ' + cl + '</li>';
-        }).join('') +
-        '</ul><p style="font-size:12px;color:#666">Cadastre as datas no m&#xf3;dulo Escola Dominical.</p>'
-      : '';
-
-    // Membros sem nascimento
-    var semNascMembros = cfg.alerta_sem_nasc
-      ? todosMembros.filter(function(m){ return !m.nascimento; })
-      : [];
-    var plainSemNascMembros = semNascMembros.length
-      ? '\n\n--- ATENCAO: ' + semNascMembros.length + ' membro(s) sem data de nascimento ---\n' +
-        semNascMembros.map(function(m){ return '* ' + m.nome; }).join('\n') +
-        '\nCadastre as datas no modulo Membros.'
-      : '';
-    var htmlSemNascMembros = semNascMembros.length
-      ? '<hr><p style="color:#B45309"><strong>&#x26A0;&#xfe0f; ' + semNascMembros.length +
-        ' membro(s) sem data de nascimento cadastrada:</strong></p><ul>' +
-        semNascMembros.map(function(m){ return '<li><strong>' + m.nome + '</strong></li>'; }).join('') +
-        '</ul><p style="font-size:12px;color:#666">Cadastre as datas no m&#xf3;dulo Membros.</p>'
-      : '';
-
-    // Membros da semana
-    var todosMembrosAniv = _listaAnivSemana(todosMembros, 'nascimento', 'nome', today, dow, days);
-
-    // Monta blocos de seção para o email unificado
-    var sepStyle = 'border:none;border-top:1px solid #e5e7eb;margin:16px 0';
-    var secTitleStyle = 'font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px';
-
-    dest.forEach(function(r) {
-      if (!r.email || !r.alertaSemana) return;
-
-      // plain text
-      var plain2 = _nomeIgreja() + ' - Aniversariantes da Semana';
-      if (todosEBD.length)
-        plain2 += '\n\n--- ESCOLA DOMINICAL ---\n' + todosEBD.map(function(p){ return p.nome + ' - ' + p.diaLabel; }).join('\n');
-      else
-        plain2 += '\n\n--- ESCOLA DOMINICAL ---\nNenhum aniversariante esta semana.';
-      if (todosMembrosAniv.length)
-        plain2 += '\n\n--- MEMBROS ---\n' + todosMembrosAniv.map(function(p){ return p.nome + ' - ' + p.diaLabel; }).join('\n');
-      else
-        plain2 += '\n\n--- MEMBROS ---\nNenhum aniversariante esta semana.';
-      plain2 += plainSemNascGlobal + plainSemNascMembros;
-
-      // html
-      var html2 = '<meta charset="UTF-8">' +
-        '<p><strong>&#x1F382; ' + _htmlEsc(_nomeIgreja()) + ' &#x2013; Aniversariantes da Semana</strong></p>' +
-        '<hr style="' + sepStyle + '">' +
-        '<p style="' + secTitleStyle + '">Escola Dominical</p>' +
-        (todosEBD.length
-          ? '<ul>' + todosEBD.map(function(p){ return '<li><strong>' + p.nome + '</strong> &#x2013; ' + p.diaLabel + ' &#x1F973;</li>'; }).join('') + '</ul>'
-          : '<p style="color:#6b7280;font-size:13px">Nenhum aniversariante esta semana. &#x1F60A;</p>') +
-        '<hr style="' + sepStyle + '">' +
-        '<p style="' + secTitleStyle + '">Membros</p>' +
-        (todosMembrosAniv.length
-          ? '<ul>' + todosMembrosAniv.map(function(p){ return '<li><strong>' + p.nome + '</strong> &#x2013; ' + p.diaLabel + ' &#x1F973;</li>'; }).join('') + '</ul>'
-          : '<p style="color:#6b7280;font-size:13px">Nenhum aniversariante esta semana. &#x1F60A;</p>') +
-        htmlSemNascGlobal + htmlSemNascMembros;
-
-      _enviarEmailHtml(r.email, assunto, plain2, html2);
-    });
-  }
-
-  function getConfigAlertas(token) {
-    return withAuth(token, function(sess) { return Util.ok(_getConfigAlertas()); });
-  }
-
-  function salvarConfigAlertas(token, config) {
-    return withAuth(token, function(sess) { _setConfigAlertas(config); return Util.ok(true); });
-  }
-
-  function dispararAlertaManual(token, tipo) {
-    return withAuth(token, function(sess) {
-      var cfg = _getConfigAlertas();
-      if (!cfg.email_ativo) return Util.err('Email não ativo. Configure e ative primeiro.');
-
-      if (tipo === 'teste') {
-        // Envia email de confirmação para todos os destinatários globais com email válido,
-        // independente de haver aniversariantes. Serve apenas para validar a configuração.
-        var dest = (cfg.destinatarios || []).filter(function(d){ return d.email && /\S+@\S+\.\S+/.test(d.email); });
-        if (!dest.length) return Util.err('Nenhum destinatário global com email válido encontrado. Adicione e salve antes de testar.');
-        var assunto = '[Teste] Alertas Escola Dominical (' + _nomeIgreja() + ')';
-        var enviados = 0;
-        dest.forEach(function(d) {
-          // plaintext: sem emojis fora do BMP para evitar encoding corrompido
-          var corpo = 'Teste de Email - Escola Dominical\n\n' +
-            'Ola, ' + (d.nome || 'destinatario') + '!\n\n' +
-            'Este e um email de teste do sistema de alertas de aniversarios.\n' +
-            'Se voce recebeu esta mensagem, a configuracao esta funcionando corretamente.\n\n' +
-            '-- Sistema ' + _nomeIgreja();
-          // htmlBody: emojis como entidades hexadecimais (sem risco de encoding)
-          var html = '<meta charset="UTF-8">' +
-            '<p><strong>&#x2705; Teste de Email &#x2013; Escola Dominical</strong></p>' +
-            '<p>Ol&#xe1;, ' + (d.nome || 'destinat&#xe1;rio') + '!</p>' +
-            '<p>Este &#xe9; um email de teste do sistema de alertas de anivers&#xe1;rios.<br>' +
-            'Se voc&#xea; recebeu esta mensagem, a configura&#xe7;&#xe3;o est&#xe1; funcionando corretamente. &#x2705;</p>' +
-            '<p>&#x2014; Sistema ' + _htmlEsc(_nomeIgreja()) + '</p>';
-          var r = _enviarEmailHtml(d.email, assunto, corpo, html);
-          if (r.ok) enviados++;
-        });
-        if (!enviados) return Util.err('Falha ao enviar para os destinatários. Verifique se o script tem a permissão gmail.send autorizada.');
-        return Util.ok({ enviados: enviados });
-      }
-
-      if (tipo === 'dia') {
-        var res = _alertaDiarioFn();
-        if (res && res.motivo === 'sem_aniversariantes')
-          return Util.ok({ enviados: 0, aviso: 'Nenhum aniversariante hoje — nenhum email enviado.' });
-        return Util.ok(res || true);
-      } else if (tipo === 'semana') {
-        _alertaSegundaFeiraFn();
-        return Util.ok(true);
-      }
-      return Util.ok(true);
-    });
-  }
-
-  function alertaDiario()      { _alertaDiarioFn(); }
-  function alertaSegundaFeira(){ _alertaSegundaFeiraFn(); }
-
-
-  // ══════════════════════════════════════════
   //  DADOS DE DEMONSTRAÇÃO (somente admin)
   //  popularDemo: 5 turmas, 4–15 alunos cada, professores, 12 domingos já lançados
   //  + a aula de hoje aberta para chamada. limparBase: zera as abas da EBD.
@@ -1978,11 +1564,6 @@ var EscolaDominical = (function () {
     popularDemo:            popularDemo,
     limparBase:             limparBase,
 
-    getConfigAlertas:       getConfigAlertas,
-    salvarConfigAlertas:    salvarConfigAlertas,
-    dispararAlertaManual:   dispararAlertaManual,
-    alertaDiario:           alertaDiario,
-    alertaSegundaFeira:     alertaSegundaFeira,
     HEADERS:                HEADERS
   };
 
@@ -2040,33 +1621,39 @@ function ed_getPontosExtras(token)                     { return _safe_ed(functio
 function ed_getResumoClasses(token)                    { return _safe_ed(function(){ return EscolaDominical.getResumoClasses(token); }, []); }
 function ed_getResumoAulas(token)                      { return _safe_ed(function(){ return EscolaDominical.getResumoAulas(token); }, []); }
 function ed_getDadosIniciais(token, tabs)               { return _safe_ed(function(){ return EscolaDominical.getDadosIniciais(token, tabs); }, []); }
-// ─── ALERTAS / ANIVERSÁRIOS — wrappers públicos ────────────
-function ed_getConfigAlertas(token)                 { return _safe_ed(function(){ return EscolaDominical.getConfigAlertas(token); }, {}); }
-function ed_salvarConfigAlertas(token, config)      { return _safe_ed(function(){ return EscolaDominical.salvarConfigAlertas(token, config); }, {}); }
-function ed_dispararAlertaManual(token, tipo)       { return _safe_ed(function(){ return EscolaDominical.dispararAlertaManual(token, tipo); }, {}); }
-
-// Handlers dos triggers GAS (não recebem parâmetros)
-function ed_alertaDiario()      { EscolaDominical.alertaDiario(); }
-function ed_alertaSegundaFeira(){ EscolaDominical.alertaSegundaFeira(); }
-
-// Configurar triggers GAS — chamado manualmente pelo admin via frontend
-function ed_setupAlertaTriggers(token) {
-  return withAuth(token, function(sess) {
-    if (sess.perfil === 'professor') return { success: false, error: 'Sem permissão.' };
-    // Remove triggers existentes de alertas ED
-    ScriptApp.getProjectTriggers().forEach(function(t) {
-      var fn = t.getHandlerFunction();
-      if (fn === 'ed_alertaDiario' || fn === 'ed_alertaSegundaFeira') ScriptApp.deleteTrigger(t);
+// ── FONTE DE ALERTAS ──
+// Os alertas por e-mail (Alertas.js) leem as pessoas daqui; o módulo só informa quem existe e de qual turma.
+var __ALERTAS_FONTES__ = (typeof __ALERTAS_FONTES__ === 'undefined') ? [] : __ALERTAS_FONTES__;
+function _edAlertasLer(aba) { try { return Util.sheetToObjects(aba); } catch (e) { return null; } }
+function _edAlertasAtivo(v) { var s = String(v).trim().toUpperCase(); return v === true || v === 1 || s === 'TRUE' || s === '1' || s === 'SIM'; }
+__ALERTAS_FONTES__.push({
+  id: 'escola-dominical',
+  nome: 'Escola Dominical',
+  descricao: 'Alunos e professores ativos.',
+  responsaveisRotulo: 'Avisar cada professor sobre a própria turma',
+  responsaveisSub: 'O professor com e-mail cadastrado recebe só os aniversários dos alunos dele.',
+  gatilhosAntigos: ['ed_alertaDiario', 'ed_alertaSegundaFeira'],
+  disponivel: function () { return _edAlertasLer('Alunos') !== null; },
+  pessoas: function () {
+    var nomes = {};
+    (_edAlertasLer('Classes') || []).forEach(function (c) { nomes[String(c.ID)] = String(c.Nome || ''); });
+    var alunos = (_edAlertasLer('Alunos') || []).filter(function (a) { return _edAlertasAtivo(a.Ativo); }).map(function (a) {
+      return { nome: String(a.Nome || ''), nascimento: a.DataNasc, detalhe: nomes[String(a.ClasseID)] || '', grupo: a.ClasseID, papel: 'aluno', doGrupo: true, cobrarData: true };
     });
-    // Trigger semanal: toda segunda-feira às 07h00
-    ScriptApp.newTrigger('ed_alertaSegundaFeira')
-      .timeBased().onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(7).create();
-    // Trigger diário: todo dia às 08h00
-    ScriptApp.newTrigger('ed_alertaDiario')
-      .timeBased().everyDays(1).atHour(8).create();
-    return { success: true, data: { triggers: 2 } };
-  });
-}
+    var profs = (_edAlertasLer('Professores') || []).filter(function (p) { return _edAlertasAtivo(p.Ativo); }).map(function (p) {
+      return { nome: String(p.Nome || ''), nascimento: p.DataNasc, detalhe: nomes[String(p.ClasseID)] || '', grupo: p.ClasseID, papel: 'professor', doGrupo: false, cobrarData: false };
+    });
+    return alunos.concat(profs);
+  },
+  responsaveis: function () {
+    return (_edAlertasLer('Professores') || []).filter(function (p) { return _edAlertasAtivo(p.Ativo) && p.Email; })
+      .map(function (p) { return { nome: String(p.Nome || ''), email: String(p.Email), grupo: p.ClasseID }; });
+  }
+});
+
+// Acionadores criados antes da tela de Alertas continuam funcionando até serem refeitos por ela
+function ed_alertaDiario()       { Alertas.rodarDiario(); }
+function ed_alertaSegundaFeira() { Alertas.rodarSemanal(); }
 
 // ── MANIFESTO DO MÓDULO ──
 // Registrado na etapa 2 (tela Chamada). Telas seguintes entram em _escola-dominical.html.

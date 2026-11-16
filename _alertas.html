@@ -1,0 +1,193 @@
+<style>
+/* ALERTAS — só o que é específico da tela; a estrutura vem do Layout System (.page, .panel, .action-bar) */
+.alt-lista { display: flex; flex-direction: column; gap: 10px; }
+.alt-linha { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 14px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-md); }
+.alt-quem { flex: 1 1 200px; min-width: 0; }
+.alt-nome { font-size: var(--fs-sm); font-weight: 700; color: var(--text); overflow-wrap: anywhere; }
+.alt-email { font-size: 12px; color: var(--text-muted); overflow-wrap: anywhere; }
+.alt-quando { display: flex; gap: 14px; flex-wrap: wrap; }
+.alt-quando label { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); cursor: pointer; min-height: 32px; }
+.alt-quando input { accent-color: var(--teal); width: 16px; height: 16px; }
+.alt-novo { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end; margin-top: 14px; }
+.alt-vazio { margin: 0; padding: 14px; font-size: var(--fs-sm); color: var(--text-muted); text-align: center; border: 1px dashed var(--border-strong); border-radius: var(--radius-md); }
+.alt-estado { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.alt-nota { margin: 12px 0 0; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+.alt-resultado { margin: 12px 0 0; font-size: var(--fs-sm); color: var(--text-muted); min-height: 20px; }
+.alt-acoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.alt-sws { display: flex; flex-direction: column; gap: 10px; }
+@media (max-width: 640px) { .alt-novo { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+// ── Tela de Alertas (só admin) ─────────────────────────────
+var ALT = { orig: null, draft: null, info: null, ocupado: false };
+
+function _altClonar(o) { return JSON.parse(JSON.stringify(o)); }
+
+function renderAlertas() {
+  if (!App.session) { navigateTo('login'); return; }
+  renderView(
+    moduleBarHtml('Alertas', ['E-mail']) +
+    '<div class="page page-narrow">' +
+      '<div class="page-head"><h1 class="page-title">Alertas por e-mail</h1>' +
+      '<p class="page-sub">Avisos automáticos de aniversariantes, enviados sem ninguém precisar lembrar.</p></div>' +
+      '<section class="panel"><p class="panel-text" style="margin:0">Carregando...</p></section>' +
+    '</div>');
+  google.script.run
+    .withFailureHandler(function () { showToast('Falha de conexão. Tente novamente.', 'error'); })
+    .withSuccessHandler(function (res) {
+      if (!res || !res.success) { showToast((res && res.error) || 'Não foi possível carregar os alertas.', 'error'); return; }
+      _altCarregar(res.data); _altDesenhar();
+    })
+    .alertas_obter(App.session.token);
+}
+
+function _altCarregar(dados) {
+  ALT.info = dados;
+  ALT.orig = _altClonar(dados.config);
+  ALT.draft = _altClonar(dados.config);
+}
+
+function _altSw(chave, titulo, sub, desabilitado, fonte) {
+  var marcado = fonte ? ALT.draft.fontes[chave] !== false : ALT.draft[chave];
+  return '<label class="sw sw-row"><input type="checkbox" id="alt-' + (fonte ? 'f-' : '') + chave + '"' + (marcado && !desabilitado ? ' checked' : '') + (desabilitado ? ' disabled' : '') +
+    ' onchange="' + (fonte ? 'altFonte' : 'altMarcar') + '(\'' + chave + '\', this.checked)"><span class="sw-track"></span>' +
+    '<span class="sw-info"><span class="sw-txt">' + titulo + '</span><span class="sw-sub">' + sub + '</span></span></label>';
+}
+
+function _altDesenhar() {
+  var i = ALT.info, f = i.fontes;
+  var cota = (i.cota !== null && i.cota !== undefined) ? ' Envios restantes hoje: ' + i.cota + '.' : '';
+  renderView(
+    moduleBarHtml('Alertas', ['E-mail']) +
+    '<div class="page page-narrow">' +
+      '<div class="page-head"><h1 class="page-title">Alertas por e-mail</h1>' +
+      '<p class="page-sub">Avisos automáticos de aniversariantes, enviados sem ninguém precisar lembrar.</p></div>' +
+
+      '<section class="panel"><div class="panel-head"><h2 class="panel-title">Envio automático</h2></div>' +
+        '<p class="panel-text">Ao ligar, o sistema cria os agendamentos sozinho. Ao desligar, eles são removidos.</p>' +
+        _altSw('ativo', 'Enviar alertas automaticamente', 'Aniversariantes do dia, todo dia por volta das ' + i.horarios.diario + 'h (só envia quando há). Resumo da semana, às segundas por volta das ' + i.horarios.semanal + 'h.') +
+        '<div class="alt-estado" id="alt-estado"></div>' +
+        '<p class="alt-nota">' + (i.remetente ? 'Os e-mails saem da conta <b>' + escHtml(i.remetente) + '</b>.' : 'Os e-mails saem da conta que publicou o sistema.') + cota + '</p>' +
+      '</section>' +
+
+      '<section class="panel"><div class="panel-head"><h2 class="panel-title">O que entra nos e-mails</h2></div>' +
+        '<div class="alt-sws">' +
+          f.map(function (x) { return _altSw(x.id, escHtml(x.nome), x.disponivel ? escHtml(x.descricao) : 'Sem dados nesta planilha.', !x.disponivel, true); }).join('') +
+          (i.responsaveis ? _altSw('responsaveis', escHtml(i.responsaveis.rotulo), escHtml(i.responsaveis.sub)) : '') +
+          _altSw('semNasc', 'Lembrar cadastros sem data de nascimento', 'Entra no resumo da semana, com no máximo 30 nomes.') +
+        '</div></section>' +
+
+      '<section class="panel"><div class="panel-head"><h2 class="panel-title">Quem recebe</h2></div>' +
+        '<p class="panel-text">Cada pessoa escolhe se recebe o aviso do dia, o resumo da semana ou os dois. Até 20 destinatários.</p>' +
+        '<div class="alt-lista" id="alt-dest"></div>' +
+        '<div class="alt-novo"><div class="field" style="margin:0"><label for="alt-n-nome">Nome</label><input type="text" id="alt-n-nome" maxlength="60" autocomplete="off" placeholder="Opcional"></div>' +
+          '<div class="field" style="margin:0"><label for="alt-n-email">E-mail</label><input type="email" id="alt-n-email" autocomplete="off" placeholder="nome@exemplo.com" onkeydown="if(event.key===\'Enter\'){event.preventDefault();altAdicionar();}"></div>' +
+          '<button type="button" class="btn btn-secondary btn-sm" id="alt-adicionar" onclick="altAdicionar()">Adicionar</button></div>' +
+      '</section>' +
+
+      '<section class="panel"><div class="panel-head"><h2 class="panel-title">Testar e enviar agora</h2></div>' +
+        '<p class="panel-text">Os envios usam o que está salvo. Salve as alterações antes de testar.</p>' +
+        '<div class="alt-acoes">' +
+          '<button type="button" class="btn btn-secondary btn-sm" id="alt-testar" onclick="altTestar()">Enviar teste para mim</button>' +
+          '<button type="button" class="btn btn-secondary btn-sm" id="alt-agora-dia" onclick="altEnviarAgora(\'dia\')">Enviar aniversariantes de hoje</button>' +
+          '<button type="button" class="btn btn-secondary btn-sm" id="alt-agora-semana" onclick="altEnviarAgora(\'semana\')">Enviar resumo da semana</button>' +
+        '</div><p class="alt-resultado" id="alt-resultado" aria-live="polite"></p>' +
+      '</section>' +
+
+      '<div class="action-bar">' +
+        '<span class="action-bar-status" id="alt-status">Tudo salvo</span>' +
+        '<span class="action-bar-btns">' +
+          '<button class="btn btn-ghost btn-sm" id="alt-descartar" onclick="altDescartar()" disabled>Descartar</button>' +
+          '<button class="btn btn-primary btn-sm" id="alt-salvar" onclick="altSalvar()" disabled>Salvar alterações</button>' +
+        '</span>' +
+      '</div>' +
+    '</div>');
+  _altAtualizar();
+}
+
+function _altSujo() { return JSON.stringify(ALT.draft) !== JSON.stringify(ALT.orig); }
+
+function _altAtualizar() {
+  var sujo = _altSujo(), d = ALT.draft, ag = ALT.info.agendamentos;
+  var el = document.getElementById('alt-status');
+  if (el) { el.textContent = ALT.ocupado ? 'Salvando...' : (sujo ? 'Alterações não salvas' : 'Tudo salvo'); el.classList.toggle('pendente', sujo && !ALT.ocupado); }
+  ['alt-salvar', 'alt-descartar'].forEach(function (id) { var b = document.getElementById(id); if (b) b.disabled = !sujo || ALT.ocupado; });
+  ['alt-testar', 'alt-agora-dia', 'alt-agora-semana'].forEach(function (id) { var b = document.getElementById(id); if (b) b.disabled = sujo || ALT.ocupado; });
+  el = document.getElementById('alt-estado');
+  if (el) {
+    var ligado = ALT.orig.ativo && ag.diario && ag.semanal;
+    el.innerHTML = ligado
+      ? '<span class="badge badge-green">Agendado</span><span class="badge badge-teal">Diário ' + ALT.info.horarios.diario + 'h</span><span class="badge badge-teal">Segunda ' + ALT.info.horarios.semanal + 'h</span>'
+      : (ALT.orig.ativo ? '<span class="badge badge-gold">Agendamento incompleto. Salve de novo para refazer.</span>' : '<span class="badge badge-gold">Desligado</span>');
+  }
+  var box = document.getElementById('alt-dest');
+  if (box) {
+    box.innerHTML = d.destinatarios.length ? d.destinatarios.map(function (x, n) {
+      return '<div class="alt-linha"><div class="alt-quem"><div class="alt-nome">' + escHtml(x.nome || x.email) + '</div>' + (x.nome ? '<div class="alt-email">' + escHtml(x.email) + '</div>' : '') + '</div>' +
+        '<div class="alt-quando"><label><input type="checkbox"' + (x.dia ? ' checked' : '') + ' onchange="altDest(' + n + ',\'dia\',this.checked)">Aviso do dia</label>' +
+        '<label><input type="checkbox"' + (x.semana ? ' checked' : '') + ' onchange="altDest(' + n + ',\'semana\',this.checked)">Resumo da semana</label></div>' +
+        '<button type="button" class="btn btn-ghost btn-sm" aria-label="Remover ' + escHtml(x.email) + '" onclick="altRemover(' + n + ')">Remover</button></div>';
+    }).join('') : '<p class="alt-vazio">Ninguém recebe ainda. Adicione um e-mail abaixo.</p>';
+  }
+  var add = document.getElementById('alt-adicionar'); if (add) add.disabled = d.destinatarios.length >= 20;
+}
+
+function altMarcar(chave, valor) { ALT.draft[chave] = valor; _altAtualizar(); }
+function altFonte(id, valor) { ALT.draft.fontes[id] = valor; _altAtualizar(); }
+function altDest(n, campo, valor) { ALT.draft.destinatarios[n][campo] = valor; _altAtualizar(); }
+function altRemover(n) { ALT.draft.destinatarios.splice(n, 1); _altAtualizar(); }
+
+function altAdicionar() {
+  var nome = document.getElementById('alt-n-nome'), mail = document.getElementById('alt-n-email');
+  var email = (mail.value || '').trim().toLowerCase();
+  if (!/^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/.test(email)) { showToast('Digite um e-mail válido.', 'error'); mail.focus(); return; }
+  if (ALT.draft.destinatarios.some(function (x) { return x.email === email; })) { showToast('Esse e-mail já está na lista.', 'error'); return; }
+  ALT.draft.destinatarios.push({ nome: (nome.value || '').trim(), email: email, dia: true, semana: true });
+  nome.value = ''; mail.value = '';
+  _altAtualizar();
+}
+
+function altDescartar() { ALT.draft = _altClonar(ALT.orig); _altDesenhar(); }
+
+function _altResultado(texto, erro) {
+  var el = document.getElementById('alt-resultado');
+  if (el) { el.textContent = texto; el.style.color = erro ? 'var(--danger)' : 'var(--text-muted)'; }
+}
+
+function altSalvar() {
+  ALT.ocupado = true; _altAtualizar();
+  google.script.run
+    .withFailureHandler(function () { ALT.ocupado = false; _altAtualizar(); showToast('Falha de conexão. Tente novamente.', 'error'); })
+    .withSuccessHandler(function (res) {
+      ALT.ocupado = false;
+      if (res && res.success) { _altCarregar(res.data); _altDesenhar(); showToast(ALT.orig.ativo ? 'Salvo. Envio automático ligado.' : 'Alterações salvas.', 'success'); }
+      else { showToast((res && res.error) || 'Não foi possível salvar.', 'error'); renderAlertas(); }
+    })
+    .alertas_salvar(App.session.token, ALT.draft);
+}
+
+function altTestar() {
+  ALT.ocupado = true; _altAtualizar(); _altResultado('Enviando teste...');
+  google.script.run
+    .withFailureHandler(function () { ALT.ocupado = false; _altAtualizar(); _altResultado('Falha de conexão. Tente novamente.', true); })
+    .withSuccessHandler(function (res) {
+      ALT.ocupado = false; _altAtualizar();
+      if (res && res.success) _altResultado('Teste enviado para ' + res.data.enviado + '.');
+      else _altResultado((res && res.error) || 'Não foi possível enviar o teste.', true);
+    })
+    .alertas_testar(App.session.token);
+}
+
+function altEnviarAgora(tipo) {
+  ALT.ocupado = true; _altAtualizar(); _altResultado('Enviando...');
+  google.script.run
+    .withFailureHandler(function () { ALT.ocupado = false; _altAtualizar(); _altResultado('Falha de conexão. Tente novamente.', true); })
+    .withSuccessHandler(function (res) {
+      ALT.ocupado = false; _altAtualizar();
+      if (!res || !res.success) { _altResultado((res && res.error) || 'Não foi possível enviar.', true); return; }
+      _altResultado(res.aviso || (res.data.enviados + ' e-mail(s) enviado(s)' + (res.data.falhas ? ', ' + res.data.falhas + ' com falha' : '') + '.'));
+    })
+    .alertas_enviarAgora(App.session.token, tipo);
+}
+</script>
