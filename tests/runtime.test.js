@@ -533,6 +533,31 @@ test('membros: cadastrar, inativar e excluir refletem na hora na lista e nos KPI
   assert.equal(env.run("mb_deletarMembro('tok', __id)").success, false);
 });
 
+test('membros: importação em lote cria com ROL sequencial, ignora repetidos (CPF ou nome+nascimento) e entra nos KPIs', () => {
+  const { env } = envMembros();
+  env.ctx.__m = { nome: 'Existente', nascimento: '01/01/1990', cpf: '111.111.111-11', rol: '0007', ativo: true };
+  env.run("mb_salvarMembro('tok', __m)");
+  env.ctx.__l = [
+    { nome: 'Novo Um', nascimento: '2000-02-03', celular: '31999990000', ativo: true },
+    { nome: 'Existente', nascimento: '01/01/1990' },                        // mesmo nome + nascimento
+    { nome: 'Outro Nome', cpf: '11111111111' },                              // mesmo CPF
+    { nome: 'Novo Dois', rol: '0007', ativo: false },                        // ROL em uso → recebe o próximo
+    { nome: '' }
+  ];
+  const r = env.run("mb_importarLote('tok', __l)");
+  assert.equal(r.success, true, JSON.stringify(r));
+  assert.deepEqual([r.data.criados, r.data.duplicados, r.data.erros], [2, 2, 1]);
+  const lista = env.run("mb_listarMembros('tok')").data;
+  const por = Object.fromEntries(lista.map((m) => [m.nome, m]));
+  assert.equal(por['Novo Um'].nascimento, '03/02/2000');
+  assert.equal(por['Novo Um'].rol, '0008');
+  assert.equal(por['Novo Dois'].rol, '0009');
+  assert.equal(por['Novo Dois'].ativo, false);
+  assert.deepEqual([kpis(env).Ativos, kpis(env).Inativos], [2, 1]);
+  const de2 = env.run("mb_importarLote('tok', __l)").data;
+  assert.equal(de2.criados, 0, 'reimportar o mesmo arquivo não duplica');
+});
+
 test('membros: leitura não usa cache entre execuções (escrita feita por outra execução aparece)', () => {
   const { env, ss } = envMembros();
   env.ctx.__m = { nome: 'Ana Lima', ativo: true };
@@ -1103,6 +1128,41 @@ test('EBD: atividade recente da Início traz chamadas lançadas, aulas e alunos 
   assert.match(textos, /Aula cadastrada|Aluno adicionado à EBD/);
   const prof = envComPerfil('professor', abas).run("getAtividadeRecente('tok')");
   assert.equal(prof.data.filter((a) => /EBD|Chamada|Aula/.test(a.texto)).length, 0);
+});
+
+test('EBD importar/exportar: lote cria turma nova, ignora repetidos e aluno sem turma; professor não importa', () => {
+  const env = envComPerfil('secretaria', ABAS_EBD());
+  env.ctx.__l = [
+    { tipo: 'aluno', nome: 'Nova Aluna', turma: 'Turma Nova', telefone: '1', dataNasc: '01/02/2010', ativo: true },
+    { tipo: 'aluno', nome: 'Ana', turma: 'Jovens' },                  // já existe (nome igual ao do seed)
+    { tipo: 'aluno', nome: 'Sem Turma', turma: '' },
+    { tipo: 'professor', nome: 'Profe Novo', turma: 'Turma Nova', ativo: false },
+    { tipo: 'aluno', nome: '', turma: 'Jovens' }
+  ];
+  env.ctx.__m = { 'Turma Nova': '__new__', Jovens: 'c1' };
+  const r = env.run("ed_importarPessoasEbd('tok', __l, __m)");
+  assert.equal(r.success, true, JSON.stringify(r));
+  assert.deepEqual([r.data.alunos, r.data.professores, r.data.turmasCriadas, r.data.duplicados, r.data.erros], [1, 1, 1, 1, 2]);
+  const exp = env.run("ed_exportarDadosEbd('tok')").data;
+  assert.equal(exp.modulo, 'escola-dominical');
+  assert.ok(exp.alunos.some((a) => a.Nome === 'Nova Aluna') && exp.professores.some((p) => p.Nome === 'Profe Novo' && p.Ativo === false));
+  assert.equal(exp.classes.filter((c) => c.Nome === 'Turma Nova').length, 1);
+  // segunda importação do mesmo arquivo não duplica nem recria a turma
+  const r2 = env.run("ed_importarPessoasEbd('tok', __l, __m)").data;
+  assert.deepEqual([r2.alunos, r2.professores, r2.turmasCriadas], [0, 0, 0]);
+  const prof = envComPerfil('professor', ABAS_EBD());
+  assert.equal(prof.run("ed_importarPessoasEbd('tok', [{tipo:'aluno',nome:'X',turma:'Jovens'}], {})").success, false);
+  assert.equal(prof.run("ed_exportarDadosEbd('tok')").success, false);
+});
+
+test('EBD pessoasParaMembros: só ativos que ainda não são membros (por nome); funciona sem a aba Membros', () => {
+  const abas = ABAS_EBD();
+  abas.Membros = [['id', 'nome'], ['m1', ' ANA ']];
+  const lista = envComPerfil('admin', abas).run("ed_pessoasParaMembros('tok')").data.map((x) => x.nome);
+  assert.ok(lista.length > 0);
+  assert.ok(!lista.some((n) => n.toLowerCase().trim() === 'ana'));
+  const sem = envComPerfil('admin', ABAS_EBD()).run("ed_pessoasParaMembros('tok')");
+  assert.equal(sem.success, true);
 });
 
 test('EBD demo: só admin; popular exige base vazia; limpar zera; 5 turmas, 4–15 alunos, professores 2/2/2/1/1 e aula de hoje sem chamada', () => {

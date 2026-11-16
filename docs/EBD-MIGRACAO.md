@@ -71,3 +71,13 @@ Origem: `modulos-pendentes/escola-dominical/` (legado, mantido como referência)
 ## E4a — Início (indicadores sem barra + atividade recente da EBD)
 - Indicadores em lista (`kpiLayout: 'lista'`) não têm mais barra de proporção (comparar Alunos com Turmas não faz sentido).
 - Atividade recente: novo gancho de manifesto `atividade(perfil)` (`Modulos.atividades`), consumido por `Dashboard.getAtividadeRecente`. A EBD devolve chamadas lançadas, aulas cadastradas e alunos novos (`EscolaDominical.atividadeRecente`); professor não recebe. Sem o módulo, nada aparece e o núcleo continua igual.
+
+## E4b — Importadores / exportadores (Membros e EBD, separados)
+
+- **Helper global `Arq`** (`index.html`): `csvParse/csvGerar` (CSV com `;` + BOM, aspas, proteção contra fórmula), `baixar`, `ler` (CSV/JSON/XLSX; XLSX carregado sob demanda do cdnjs, xlsx 0.18.5), `dataBR`, `sim`.
+- **Formatos:** CSV = planilha (importar/exportar); JSON = backup completo. Ambos nos dois módulos.
+- **Membros** (`Membros.js` `importarLote`, `_membros.html` modal `modal-mb-io`): 4 passos Arquivo → Análise → Importar → Resultado. Lotes de até 200; ignora duplicados (CPF ou nome+nascimento); ROL sequencial. Backup JSON com fotos continua no menu.
+- **EBD** (`EscolaDominical.js` `exportarDadosEbd`, `importarPessoasEbd`; `_escola-dominical.html` modal `modal-edm-imp`): assistente de 5 passos; aceita CSV/JSON do novo sistema e planilha antiga (.xlsx/.csv: nome, turma, cargo, telefone, nascimento, status). Mapeia turmas por nome (ou cria). Acesso: engrenagem (Ajustes) → "Exportar e importar".
+- **Hook `fonteMembros`** no manifesto: o módulo oferece pessoas ao Membros sem o core/Membros citarem a EBD. Botão "Importar da EBD" aparece no novo membro só se o módulo estiver instalado.
+- **Atividades recentes:** hook `atividade(perfil)` → `Modulos.atividades` → Dashboard (E4a). Barra proporcional removida dos KPIs em lista.
+- Não implementado de propósito: "limpar dados" do sistema original.

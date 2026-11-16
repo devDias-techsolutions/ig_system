@@ -268,3 +268,46 @@ test('EBD: aba Alunos mostra a linha de frequência do trimestre de cada aluno',
   assert.equal(await page.locator('.edm-card:has-text("Carla Dias") .edm-tl-dot.p, .edm-card:has-text("Carla Dias") .edm-tl-dot.a').count(), 0, 'sem registro = bolinha tracejada');
   assert.deepEqual(erros, []);
 });
+
+test('EBD: exporta CSV e JSON; importador de 5 passos cria turma, alunos e professor a partir de CSV', async () => {
+  const backend = criarBackend(); semear(backend);
+  const { page, erros } = await abrir(browser, backend);
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  await page.evaluate(() => navigateTo('escola-dominical'));
+  await esperarTela(page, 'escola-dominical');
+  await page.waitForSelector('.edm-atalhos');
+  // exportação
+  await page.click('#edm-gear');
+  await page.waitForSelector('#modal-edm-form.open .edm-dados');
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.click('.edm-dados button:has-text("Exportar CSV")')]);
+  const csv = require('node:fs').readFileSync(await dl.path(), 'utf8');
+  assert.match(csv, /^﻿Tipo;Nome;Turma;Telefone;Email;DataNasc;Endereco;Ativo;CriadoEm/);
+  assert.match(csv, /aluno;Ana Souza;Jovens;/);
+  const [dj] = await Promise.all([page.waitForEvent('download'), page.click('.edm-dados button:has-text("Backup JSON")')]);
+  const bk = JSON.parse(require('node:fs').readFileSync(await dj.path(), 'utf8'));
+  assert.equal(bk.modulo, 'escola-dominical'); assert.equal(bk.alunos.length, 3);
+  // importação (planilha com cabeçalhos do sistema antigo)
+  await page.click('.edm-dados button:has-text("Importar")');
+  await page.waitForSelector('#modal-edm-imp.open .edm-drop');
+  const arq = 'name,classroom,position,phone,birthday,status\n"Davi Nogueira",Crianças,student,(31) 90000-0000,2012-05-03,active\n"Eva Prado",Crianças,student,,,inactive\n"Ana Souza",Jovens,student,,,active\n"Prof Zeca",Jovens,teacher,,,active\n';
+  await page.setInputFiles('#modal-edm-imp input[type=file]', { name: 'antigo.csv', mimeType: 'text/csv', buffer: Buffer.from(arq) });
+  await page.waitForFunction(() => !document.getElementById('edm-imp-prox').disabled);
+  await page.click('#edm-imp-prox');
+  assert.match(await page.innerText('#edm-imp-corpo'), /3 alunos/);
+  assert.match(await page.innerText('#edm-imp-corpo'), /1 professores/);
+  await page.click('button:has-text("Mapear turmas")');
+  await page.waitForSelector('.edm-imp-map');
+  assert.equal(await page.locator('.edm-imp-map').count(), 2);
+  assert.equal(await page.locator('.edm-imp-map:has(span:text-is("Jovens")) select').inputValue(), 'c1', 'casa turma existente por nome');
+  await page.click('#modal-edm-imp button:has-text("Importar")');
+  await page.waitForSelector('#modal-edm-imp .edm-imp-pills:has-text("turmas criadas")', { timeout: 8000 });
+  const res = await page.innerText('#edm-imp-corpo');
+  assert.match(res, /3 registros importados/);
+  assert.match(res, /1 já existiam/);
+  assert.match(res, /1 turmas criadas/);
+  const nomes = (aba) => backend.ss.getSheetByName(aba)._rows.slice(1).map((r) => r[1] || r[3]);
+  assert.ok(nomes('Classes').includes('Crianças'));
+  assert.ok(nomes('Alunos').includes('Davi Nogueira') && nomes('Alunos').includes('Eva Prado'));
+  assert.ok(backend.ss.getSheetByName('Professores')._rows.slice(1).some((r) => r[3] === 'Prof Zeca'));
+  assert.deepEqual(erros, []);
+});

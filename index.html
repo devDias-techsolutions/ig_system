@@ -1585,6 +1585,122 @@ function escHtml(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+// ── ARQUIVOS: leitura/escrita de CSV, JSON e planilhas (comum a qualquer módulo) ──
+var Arq = (function () {
+  function chave(s) {
+    return String(s == null ? '' : s).toLowerCase().replace(/[àáâãä]/g, 'a').replace(/[èéêë]/g, 'e').replace(/[ìíîï]/g, 'i')
+      .replace(/[òóôõö]/g, 'o').replace(/[ùúûü]/g, 'u').replace(/ç/g, 'c').replace(/[^a-z0-9]/g, '');
+  }
+  // CSV com aspas, quebras de linha dentro de aspas e separador detectado (; , ou tab). Devolve [{cabecalho: valor}].
+  function csvParse(texto) {
+    texto = String(texto || '').replace(/^﻿/, '');
+    var primeira = texto.split(/\r?\n/)[0] || '';
+    var sep = ';', melhor = -1;
+    [';', ',', '\t'].forEach(function (c) { var n = primeira.split(c).length; if (n > melhor) { melhor = n; sep = c; } });
+    var linhas = [], atual = [], campo = '', aspas = false, i, ch;
+    for (i = 0; i < texto.length; i++) {
+      ch = texto.charAt(i);
+      if (aspas) {
+        if (ch === '"') { if (texto.charAt(i + 1) === '"') { campo += '"'; i++; } else aspas = false; }
+        else campo += ch;
+      } else if (ch === '"') aspas = true;
+      else if (ch === sep) { atual.push(campo); campo = ''; }
+      else if (ch === '\n' || ch === '\r') {
+        if (ch === '\r' && texto.charAt(i + 1) === '\n') i++;
+        atual.push(campo); campo = '';
+        if (atual.length > 1 || atual[0] !== '') linhas.push(atual);
+        atual = [];
+      } else campo += ch;
+    }
+    if (campo !== '' || atual.length) { atual.push(campo); if (atual.length > 1 || atual[0] !== '') linhas.push(atual); }
+    if (!linhas.length) return [];
+    var cab = linhas[0].map(function (h) { return String(h).trim(); });
+    return linhas.slice(1).map(function (l) {
+      var o = {}; cab.forEach(function (h, n) { if (h) o[h] = l[n] === undefined ? '' : String(l[n]).trim(); }); return o;
+    });
+  }
+  // Excel pt-BR abre melhor com ; e BOM. Células que começam com = + @ viram texto (evita fórmula injetada).
+  function csvGerar(cabecalhos, linhas) {
+    function cel(v) {
+      var t = v == null ? '' : String(v);
+      if (/^[=+@\t]/.test(t)) t = "'" + t;
+      return /[;"\n\r]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+    }
+    return '﻿' + [cabecalhos.map(cel).join(';')].concat(linhas.map(function (l) { return cabecalhos.map(function (_, n) { return cel(l[n]); }).join(';'); })).join('\r\n');
+  }
+  function baixar(nome, conteudo, mime) {
+    var blob = new Blob([conteudo], { type: mime || 'text/plain;charset=utf-8' });
+    var url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = nome; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+  function hoje() { var d = new Date(), z = function (n) { return (n < 10 ? '0' : '') + n; }; return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()); }
+  var _xlsxPronto = null;
+  function _carregarXlsx(cb) {
+    if (window.XLSX) { cb(true); return; }
+    if (_xlsxPronto) { _xlsxPronto.push(cb); return; }
+    _xlsxPronto = [cb];
+    var sc = document.createElement('script');
+    sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    sc.onload = function () { var f = _xlsxPronto; _xlsxPronto = null; f.forEach(function (c) { c(true); }); };
+    sc.onerror = function () { var f = _xlsxPronto; _xlsxPronto = null; f.forEach(function (c) { c(false); }); };
+    document.head.appendChild(sc);
+  }
+  // Lê .csv/.txt/.json/.xlsx/.xls e devolve um array de objetos: cb(erro, linhas)
+  function ler(file, cb) {
+    var ext = String((file && file.name) || '').toLowerCase().split('.').pop();
+    var r = new FileReader();
+    r.onerror = function () { cb('Não foi possível ler o arquivo.'); };
+    if (ext === 'xlsx' || ext === 'xls') {
+      r.onload = function (ev) {
+        _carregarXlsx(function (ok) {
+          if (!ok) { cb('Não foi possível carregar o leitor de planilhas. Salve como CSV e tente de novo.'); return; }
+          try {
+            var wb = XLSX.read(ev.target.result, { type: 'array' });
+            cb(null, XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' }));
+          } catch (e) { cb('Planilha inválida.'); }
+        });
+      };
+      r.readAsArrayBuffer(file);
+      return;
+    }
+    r.onload = function (ev) {
+      try {
+        var txt = String(ev.target.result || '');
+        if (ext === 'json') {
+          var d = JSON.parse(txt);
+          cb(null, d);
+        } else cb(null, csvParse(txt));
+      } catch (e) { cb('Arquivo inválido.'); }
+    };
+    r.readAsText(file, 'utf-8');
+  }
+  // Primeiro valor preenchido entre os cabeçalhos aceitos (sem acento/caixa/símbolos).
+  function pegar(linha, nomes) {
+    var mapa = linha.__chaves;
+    if (!mapa) { mapa = {}; Object.keys(linha).forEach(function (k) { if (!mapa[chave(k)]) mapa[chave(k)] = k; }); Object.defineProperty(linha, '__chaves', { value: mapa, enumerable: false }); }
+    for (var i = 0; i < nomes.length; i++) {
+      var k = mapa[chave(nomes[i])];
+      if (k !== undefined && linha[k] !== '' && linha[k] != null) return String(linha[k]).trim();
+    }
+    return '';
+  }
+  // dd/MM/aaaa a partir de ISO, dd/MM/aaaa, serial do Excel ou Date
+  function dataBR(v) {
+    if (v == null || v === '') return '';
+    var z = function (n) { return (n < 10 ? '0' : '') + n; };
+    if (v instanceof Date) return isNaN(v) ? '' : z(v.getDate()) + '/' + z(v.getMonth() + 1) + '/' + v.getFullYear();
+    var s = String(v).trim(), m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return m[3] + '/' + m[2] + '/' + m[1];
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(s)) { var p = s.split(' ')[0].split('/'); return z(+p[0]) + '/' + z(+p[1]) + '/' + p[2]; }
+    var n = parseFloat(s);
+    if (!isNaN(n) && n > 1000 && /^[\d.]+$/.test(s)) return dataBR(new Date(Math.round((n - 25569) * 86400 * 1000) + 12 * 3600 * 1000));
+    return s;
+  }
+  function sim(v) { var s = chave(v); return s === 'active' || s === 'ativo' || s === 'true' || s === '1' || s === 'sim' || s === 'yes'; }
+  return { chave: chave, csvParse: csvParse, csvGerar: csvGerar, baixar: baixar, hoje: hoje, ler: ler, pegar: pegar, dataBR: dataBR, sim: sim };
+})();
+
 function _hexRgb(h) { return [parseInt(h.substr(1, 2), 16), parseInt(h.substr(3, 2), 16), parseInt(h.substr(5, 2), 16)]; }
 function _rgbHex(c) {
   return '#' + c.map(function (v) { v = Math.max(0, Math.min(255, Math.round(v))); return (v < 16 ? '0' : '') + v.toString(16); }).join('');

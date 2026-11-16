@@ -6,7 +6,8 @@
 //
 //    var __MANIFESTOS__ = (typeof __MANIFESTOS__ === 'undefined') ? [] : __MANIFESTOS__;
 //    __MANIFESTOS__.push({ id, nome, descricao, icone, rota, render, html,
-//                          perfis, ordem, abas:[{nome,colunas,cor}], kpis:function(){...}, atividade:function(perfil){...} });
+//                          perfis, ordem, abas:[{nome,colunas,cor}], kpis:function(){...}, atividade:function(perfil){...},
+//                          fonteMembros:{ rotulo, titulo, icone, fn } }); (opcional: oferece pessoas para o cadastro de membros)
 //
 //  O padrão acima NÃO depende da ordem de carga dos arquivos (o Apps Script
 //  não garante ordem). O núcleo nunca cita um módulo pelo nome: ele só lê
@@ -56,7 +57,8 @@ var Modulos = (function () {
     return ativos().map(function (m) {
       return {
         id: m.id, nome: m.nome, descricao: m.descricao || '', icone: m.icone || 'box',
-        rota: m.rota || m.id, render: m.render, perfis: m.perfis || ['admin'], permissoes: m.permissoes || null
+        rota: m.rota || m.id, render: m.render, perfis: m.perfis || ['admin'], permissoes: m.permissoes || null,
+        fonteMembros: m.fonteMembros || null
       };
     });
   }
