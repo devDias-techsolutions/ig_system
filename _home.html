@@ -253,7 +253,7 @@ function renderHome() {
               ? 'Ative módulos na aba <b>Config</b> da planilha (chave <b>MODULOS_ATIVOS</b>) ou instale um módulo.'
               : 'Peça ao administrador para liberar módulos para o seu perfil.')) +
       /* mesmos destinos do menu (módulos, Usuários, Identidade), conforme o perfil */
-      navItens().filter(function (it) { return it.rota !== 'home'; }).map(function (it, n) { return _moduleBtn(it.icone, it.nome, '', it.rota, n); }).join('') +
+      navItens().filter(function (it) { return it.rota !== 'home' && !it.soSidebar; }).map(function (it, n) { return _moduleBtn(it.icone, it.nome, '', it.rota, n); }).join('') +
     '</div>' +
   '</section>';
 

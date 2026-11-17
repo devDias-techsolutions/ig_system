@@ -1806,7 +1806,7 @@ function navItens() {
   var itens = [];
   if (ROUTE_PERMISSIONS.home.indexOf(perfil) !== -1) itens.push({ rota: 'home', nome: 'Início', icone: 'layout-dashboard', grupo: 'Principal' });
   modulosDoPerfil(perfil).forEach(function (m) { itens.push({ rota: m.rota, nome: m.nome, icone: m.icone, grupo: 'Módulos' }); });
-  if (perfil === 'admin') itens.push({ rota: 'painel', nome: 'Painel de controle', icone: 'sliders-horizontal', grupo: 'Administração', filhas: ['painel-atalhos', 'usuarios', 'identidade', 'alertas'] });
+  if (perfil === 'admin') itens.push({ rota: 'painel', nome: 'Painel de controle', icone: 'sliders-horizontal', grupo: 'Administração', soSidebar: true, filhas: ['painel-atalhos', 'usuarios', 'identidade', 'alertas'] });
   else if (ROUTE_PERMISSIONS.usuarios.indexOf(perfil) !== -1) itens.push({ rota: 'usuarios', nome: 'Usuários', icone: 'shield-check', grupo: 'Administração' });
   return itens;
 }

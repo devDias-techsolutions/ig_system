@@ -167,7 +167,7 @@ test('celular: sem menu inferior; sanduíche abre a gaveta e navega', async () =
   assert.equal(await page.locator('.app-bnav').count(), 0);
   assert.ok(!(await page.isVisible('#app-sidebar')), 'gaveta fechada');
   const atalhos = await page.$$eval('.hm-mods .hm-mod', (els) => els.map((e) => e.innerText.trim()));
-  assert.deepEqual(atalhos, ['Membros', 'Escola Dominical', 'Painel de controle']);
+  assert.deepEqual(atalhos, ['Membros', 'Escola Dominical']); // o Painel de controle fica só na sidebar
   await page.click('.hm-burger');
   await page.waitForSelector('#app-sidebar', { state: 'visible' });
   await page.click('#app-sidebar .sb-item:has-text("Membros")');
