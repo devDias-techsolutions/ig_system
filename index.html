@@ -667,7 +667,6 @@ body::after {
 }
 /* ao rolar até um item, deixa folga para a barra fixa não cobri-lo */
 .page :is(button, input, select, textarea, label, a) { scroll-margin-bottom: 110px; }
-}
 .action-bar-status { font-size: 12px; color: var(--text-muted); }
 .action-bar-status.pendente { color: var(--warning); font-weight: 700; }
 .action-bar-btns { display: flex; gap: 8px; flex-shrink: 0; }
@@ -1245,7 +1244,7 @@ textarea { height: auto; min-height: 88px; padding: var(--sp-3); resize: vertica
   body.nav-on .sb-foot { background: var(--bg-glass); }
   body.nav-on #app {
     position: fixed; z-index: 1; top: calc(var(--shell-gap) + 56px); bottom: var(--shell-gap); left: var(--panel-left); right: var(--shell-gap);
-    margin: 0; overflow-y: auto; overscroll-behavior: contain; background: var(--bg); border-radius: 0 0 var(--r-4) var(--r-4);
+    margin: 0; min-height: 0; max-width: none; overflow-y: auto; overscroll-behavior: contain; background: var(--bg); border-radius: 0 0 var(--r-4) var(--r-4);
     box-shadow: 0 24px 60px -30px rgba(0, 0, 0, .6);
   }
   body.nav-on #main-topnav {
