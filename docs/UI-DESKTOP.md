@@ -48,3 +48,10 @@ Cartões de entrada em grade automática (`auto-fill, minmax(280px, 1fr)`), maio
   "rótulo + descrição | controle", prévia ao vivo na Identidade, barra de salvar presa ao topo do conteúdo.
 - **D4 Escola Dominical**: abas sublinhadas, tabelas de turmas/alunos/professores, chamada em grade, relatórios em painéis.
 - **D5 Entrada**: login, primeiro acesso e recuperar senha em tela dividida (marca + formulário).
+
+
+## Início (desktop) — painel com agenda
+- Sem cartão institucional: título simples no canto superior esquerdo (saudação + data e igreja). O cartão continua só no celular.
+- Coluna principal: indicadores, atalhos (grade de botões) e, lado a lado, aniversariantes e atividade recente.
+- Coluna lateral (340px): calendário do mês e eventos programados da igreja, com estado vazio e botão "Agendar evento".
+- Agenda (`Agenda.js`, aba `Eventos`): todos veem; admin e secretaria agendam, editam e cancelam. Instalações antigas criam a aba sozinhas na primeira vez.

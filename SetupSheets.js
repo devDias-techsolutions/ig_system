@@ -28,6 +28,11 @@ var SetupSheets = (function () {
 
     Config: [
       'Chave', 'Valor', 'Descricao', 'AtualizadoEm'
+    ],
+
+    // Agenda da igreja (calendário do Início): eventos com data, hora e local
+    Eventos: [
+      'ID', 'Titulo', 'Data', 'Hora', 'Local', 'Descricao', 'Ativo', 'CriadoPor', 'CriadoEm'
     ]
   };
 
@@ -36,7 +41,8 @@ var SetupSheets = (function () {
     Usuarios:      '#1C353A',
     Sessoes:       '#0f2a2f',
     Imagens:       '#3a3a3a',
-    Config:        '#2a2a2a'
+    Config:        '#2a2a2a',
+    Eventos:       '#1C353A'
   };
 
   // Esquema = abas do núcleo + abas declaradas pelos módulos ativos (calculado a cada uso,
