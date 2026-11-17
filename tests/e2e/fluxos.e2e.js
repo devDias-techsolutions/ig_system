@@ -87,7 +87,7 @@ test('Home: nome, lema e cor da igreja vêm da aba Config; sem logo aparecem as 
   assert.match(await page.title(), /^Igreja Vida Nova/);
   assert.equal(await page.locator('.hm-logo').count(), 1, 'logo grande no cartão institucional');
   assert.equal(await page.textContent('.hm-logo .brand-mark span'), 'VN');
-  assert.equal(await page.isVisible('#main-topnav'), false, 'Início não tem barra superior');
+  assert.equal(await page.isVisible('#main-topnav'), true, 'No desktop o Início tem barra superior com o caminho');
   assert.equal(await page.textContent('#topnav-mark span'), 'VN');
   const cor = await page.evaluate(() => document.documentElement.style.getPropertyValue('--teal').trim());
   assert.ok(cor.length === 7 && cor[0] === '#', 'cor da marca aplicada: ' + cor);
