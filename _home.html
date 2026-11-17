@@ -284,6 +284,11 @@ function _homeArte() {
   '</svg>';
 }
 
+// "Bom dia, Ana" conforme a hora (desktop; no celular quem saúda é o cartão da igreja)
+function _homeSaudacao() {
+  var h = new Date().getHours(), nome = String((App.session && App.session.nome) || '').trim().split(/\s+/)[0];
+  return (h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite') + (nome ? ', ' + nome : '');
+}
 function renderHome() {
   if (!App.session) { navigateTo('login'); return; }
 
@@ -401,13 +406,6 @@ function renderHome() {
   _agCarregar();
 }
 
-
-function _homeSaudacao() {
-  var n = String((App.session && App.session.nome) || '').trim().split(/\s+/)[0];
-  var h = new Date().getHours();
-  var s = h < 12 ? 'Bom dia' : (h < 18 ? 'Boa tarde' : 'Boa noite');
-  return n ? s + ', ' + n : s;
-}
 
 /* ══════════════════════════════════════════════════
    AGENDA · calendário do mês e eventos programados da igreja
