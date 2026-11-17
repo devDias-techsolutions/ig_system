@@ -52,20 +52,17 @@
 .hm-main, .hm-side { display: contents; }
 .hm-s-atalhos { order: 1; } .hm-s-kpis { order: 2; } .hm-s-anivs { order: 3; } .hm-s-ativ { order: 4; }
 .hm-data { display: none; }
+.hm-hello { display: none; }
 @media (min-width: 1024px) {
   .hm-body { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 0 var(--sp-5); align-items: start; }
   .hm-main, .hm-side { display: block; min-width: 0; }
-  /* cartão institucional: contido na área de trabalho, marca à esquerda e data à direita */
   .page.hm { max-width: var(--page-w, 1360px); padding: var(--sp-6) var(--gutter) var(--sp-7); }
   .hm-body { padding: 0; }
-  .hm-hero { margin: 0 0 var(--sp-5); padding: var(--sp-5) var(--sp-6); border-radius: var(--r-4); }
-  .hm-hero-in { max-width: none; padding: 0; display: flex; align-items: flex-end; justify-content: space-between; gap: var(--sp-5); }
-  .hm-top { display: none; }
-  .hm-brand { flex-direction: row; align-items: center; text-align: left; gap: var(--sp-5); }
-  .hm-logo { width: 80px; height: 80px; }
-  .hm-title { font-size: var(--fs-xl); }
-  .hm-lema { margin: var(--sp-1) 0 0; max-width: 560px; }
-  .hm-data { display: block; flex-shrink: 0; font-size: var(--fs-sm); font-weight: 600; color: rgba(255, 255, 255, .78); }
+  /* desktop: a marca mora só na sidebar (canto superior esquerdo); aqui entra apenas a saudação */
+  .hm-hero { display: none; }
+  .hm-hello { display: block; margin: 0 0 var(--sp-5); }
+  .hm-hello h1 { margin: 0; font-size: var(--fs-2xl); font-weight: 800; letter-spacing: -.02em; color: var(--text); }
+  .hm-hello p { margin: var(--sp-1) 0 0; font-size: var(--fs-sm); color: var(--text-muted); }
 }
 
 /* ── Blocos e títulos ── */
@@ -246,6 +243,11 @@ function _homeArte() {
   '</svg>';
 }
 
+// "Bom dia, Ana" conforme a hora (desktop; no celular quem saúda é o cartão da igreja)
+function _homeSaudacao() {
+  var h = new Date().getHours(), nome = String((App.session && App.session.nome) || '').trim().split(/\s+/)[0];
+  return (h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite') + (nome ? ', ' + nome : '');
+}
 function renderHome() {
   if (!App.session) { navigateTo('login'); return; }
 
@@ -292,6 +294,7 @@ function renderHome() {
       '<div class="hm-data" aria-hidden="true">' + escHtml(_homeDataExtenso()) + '</div>' +
       '</div>' +
     '</header>' +
+    '<div class="hm-hello hm-rise" style="--i:0"><h1>' + escHtml(_homeSaudacao()) + '</h1><p>' + escHtml(_homeDataExtenso()) + '</p></div>' +
     '<div class="hm-body">';
   var sec = { atalhos: '', kpis: '', anivs: '', ativ: '' };
 
