@@ -39,6 +39,7 @@
 .idt-imagem span { font-size: 12px; color: #fff; opacity: .8; }
 .idt-acoes { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; }
 .idt-acoes .btn { flex: 1 1 auto; }
+.idt-mods { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 .idt-dica { margin: 0 0 16px; font-size: 12px; color: var(--text-muted); line-height: 1.55; }
 </style>
 
@@ -60,7 +61,8 @@ var IDT_CAMPOS = {
   cargoPastor: ['CARGO_PASTOR',    'Cargo',            'text', ''],
   endereco:    ['ENDERECO_IGREJA', 'Endereço da sede', 'text', 'Rodapé da carteirinha. Opcional.'],
   cnpj:        ['CNPJ_IGREJA',     'CNPJ',             'text', 'Rodapé da carteirinha. Opcional.'],
-  pastaFotos:  ['PASTA_FOTOS',     'Pasta das fotos no Drive', 'text', 'As novas fotos de membros vão para esta pasta (criada sozinha). Fotos já salvas continuam onde estão.']
+  pastaFotos:  ['PASTA_FOTOS',     'Pasta das fotos no Drive', 'text', 'As novas fotos de membros vão para esta pasta (criada sozinha). Fotos já salvas continuam onde estão.'],
+  urlApp:      ['URL_APP',         'Link do sistema', 'text', 'Termina em /exec. Vale para o QR Code da carteirinha. Vazio = o sistema usa o link da implantação atual.']
 };
 var IDT_RECENTES_MAX = 6;
 var IDT = { orig: {}, draft: {} };
@@ -70,6 +72,7 @@ function _idtValoresSalvos() {
   Object.keys(IDT_CAMPOS).forEach(function (k) { v[k] = IDENTIDADE[k] || ''; });
   if (v.nomeCurto === v.nome) v.nomeCurto = '';   // nome curto vazio = igual ao nome
   v.corPrimaria = IDENTIDADE.corPrimaria || '';
+  v.modulos = (IDENTIDADE.modulosLista || []).filter(function (m) { return m.ativo; }).map(function (m) { return m.id; }).join(',');
   return v;
 }
 
@@ -109,6 +112,8 @@ function renderIdentidade() {
 
       _idtSecao('Fotos dos membros', 'Onde as fotos novas são guardadas no Google Drive.', _idtCampo('pastaFotos', true)) +
 
+      _idtSecao('Sistema', 'Endereço usado no QR Code e módulos que esta igreja usa.', _idtCampo('urlApp', true) + _idtUrlEmUso() + _idtModulosHtml()) +
+
       '<div class="action-bar">' +
         '<span class="action-bar-status" id="idt-estado">Tudo salvo</span>' +
         '<span class="action-bar-btns">' +
@@ -123,6 +128,30 @@ function renderIdentidade() {
 
 function _idtSecao(titulo, texto, corpo) {
   return '<section class="panel"><div class="panel-head"><h2 class="panel-title">' + titulo + '</h2></div><p class="panel-text">' + texto + '</p>' + (corpo.indexOf('idt-grade') === -1 && corpo.indexOf('idt-cor-bloco') === -1 ? '<div class="form-grid">' + corpo + '</div>' : corpo) + '</section>';
+}
+
+// Link que o QR Code realmente usa agora (o digitado, ou o detectado da implantação)
+function _idtUrlEmUso() {
+  var u = IDENTIDADE.urlAppEmUso || '';
+  return '<p class="idt-ajuda span-all">' + (u ? 'Em uso agora: <b>' + escHtml(u) + '</b>' : 'Nenhum link válido em uso: o QR Code da carteirinha só funciona com o link da implantação (termina em /exec).') + '</p>';
+}
+
+// Módulos instalados: o admin escolhe quais a igreja usa (precisa de pelo menos um)
+function _idtModulosHtml() {
+  var lista = IDENTIDADE.modulosLista || [];
+  if (lista.length < 2) return '';
+  var on = (IDT.draft.modulos || '').split(',');
+  return '<div class="idt-mods span-all"><p class="idt-recentes-rotulo">Módulos ativos</p>' + lista.map(function (m) {
+    return '<label class="sw sw-row"><input type="checkbox" id="idt-mod-' + escHtml(m.id) + '"' + (on.indexOf(m.id) !== -1 ? ' checked' : '') + ' onchange="idtModulo(\'' + escHtml(m.id) + '\', this.checked)">' +
+      '<span class="sw-track"></span><span class="sw-info"><span class="sw-txt">' + escHtml(m.nome) + '</span><span class="sw-sub">' + escHtml(m.descricao) + '</span></span></label>';
+  }).join('') + '<p class="idt-ajuda">Ao salvar, feche e abra o sistema para o menu mudar. Os dados de um módulo desligado não são apagados.</p></div>';
+}
+
+function idtModulo(id, ligado) {
+  var set = (IDT.draft.modulos || '').split(',').filter(Boolean).filter(function (x) { return x !== id; });
+  if (ligado) set.push(id);
+  IDT.draft.modulos = (IDENTIDADE.modulosLista || []).map(function (m) { return m.id; }).filter(function (x) { return set.indexOf(x) !== -1; }).join(',');
+  _idtAtualizarTela();
 }
 
 function _idtCampo(k, largo) {
@@ -267,14 +296,16 @@ function idtSalvar() {
   Object.keys(IDT.draft).forEach(function (k) {
     var v = (IDT.draft[k] || '').trim();
     if (v === (IDT.orig[k] || '')) return;
+    if (k === 'modulos') { envio.MODULOS_ATIVOS = (v.split(',').length === (IDENTIDADE.modulosLista || []).length) ? '' : v; return; }
     envio[k === 'corPrimaria' ? 'COR_PRIMARIA' : IDT_CAMPOS[k][0]] = v;
   });
   if (!Object.keys(envio).length) return;
+  if (IDT.draft.modulos !== undefined && !(IDT.draft.modulos || '').trim() && (IDENTIDADE.modulosLista || []).length) { showToast('Mantenha pelo menos um módulo ativo.', 'error'); return; }
   var btn = document.getElementById('idt-salvar'); if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
   google.script.run
     .withFailureHandler(function () { _idtSalvarFim(); showToast('Falha de conexão. Tente novamente.', 'error'); })
     .withSuccessHandler(function (res) {
-      if (res && res.success) { if (envio.COR_PRIMARIA) _idtLembrarCor(envio.COR_PRIMARIA); _idtAtualizar(res.data); showToast('Alterações salvas.', 'success'); }
+      if (res && res.success) { if (envio.COR_PRIMARIA) _idtLembrarCor(envio.COR_PRIMARIA); _idtAtualizar(res.data); showToast(envio.MODULOS_ATIVOS !== undefined ? 'Salvo. Feche e abra o sistema para atualizar o menu.' : 'Alterações salvas.', 'success'); }
       else { _idtSalvarFim(); showToast((res && res.error) || 'Não foi possível salvar.', 'error'); }
     })
     .idt_salvarAjustes(App.session.token, envio);
