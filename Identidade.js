@@ -76,6 +76,11 @@ function _idtAdmin(token, fn) {
   });
 }
 
+// Admin: define, para todos, os atalhos escondidos nas barras dos módulos
+function idt_salvarAtalhos(token, mapa) {
+  return _idtAdmin(token, function () { return Util.ok({ atalhosOcultos: Config.salvarAtalhos(mapa) }); });
+}
+
 // Qualquer usuário logado: identidade completa (inclui a assinatura, que não vai na página de login)
 function idt_obter(token) {
   return withAuth(token, function () { return Util.ok(Config.identidadeCompleta()); });

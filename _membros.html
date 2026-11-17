@@ -517,14 +517,14 @@ function _mbTopnavActions() {
 // ── Barra do módulo e abas: componentes padrão do shell ──
 function _mbBuildTopnav() { return moduleBarHtml('Membros', ['CRUD', 'ROL Auto', 'Carteirinha', 'Cartas']); }
 var MB_ATALHOS = [['lista', 'users', 'Membros'], ['carteirinha', 'credit-card', 'Carteirinhas'], ['cartas', 'file-text', 'Cartas']];
+Atalhos.registrar('membros', 'membros', 'Membros', MB_ATALHOS, ['lista']); // o admin escolhe o que exibir (Painel de controle > Atalhos)
 function _mbBuildTabs() {
   /* Mesmos atalhos circulares da Início (.hm-mod); "Novo Membro" virou o botão flutuante (+) da lista */
-  Atalhos.registrar('membros', MB_ATALHOS, ['lista'], function() { var n = document.querySelector('.mb-atalhos'); if (n) { n.outerHTML = _mbBuildTabs(); if (window.lucide) lucide.createIcons(); } });
   return '<nav class="mb-atalhos atl-nav no-print" aria-label="Seções de Membros">' +
     Atalhos.filtrar('membros', MB_ATALHOS, ['lista']).map(function (t) {
       return '<button type="button" class="hm-mod' + (MB.tab === t[0] ? ' active' : '') + '" onclick="mbSetTab(\'' + t[0] + '\')">' +
         '<div class="hm-mod-icon"><i data-lucide="' + t[1] + '"></i></div><div class="hm-mod-name">' + t[2] + '</div></button>';
-    }).join('') + Atalhos.botao('membros') + '</nav>';
+    }).join('') + '</nav>';
 }
 
 // ── Render principal ─────────────────────────────────────

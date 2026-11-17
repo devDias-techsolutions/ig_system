@@ -213,7 +213,7 @@ function renderUsuarios() {
 
   renderView(
     
-    moduleBarHtml('Usuários', ['Acesso', 'Permissões'], _homeViewForPerfil(perfil))+
+    adminBarHtml('Usuários', ['Acesso', 'Permissões'], _homeViewForPerfil(perfil))+
     tabsHtml([['usuarios', 'users', 'Usuários']].concat(isAdmin ? [['permissoes', 'shield', 'Permissões']] : []), 'usuarios', 'usrSetTab', 'usr-tab-')+
 
     /* ── CONTENT ── */

@@ -27,7 +27,7 @@ function _altClonar(o) { return JSON.parse(JSON.stringify(o)); }
 function renderAlertas() {
   if (!App.session) { navigateTo('login'); return; }
   renderView(
-    moduleBarHtml('Alertas', ['E-mail']) +
+    adminBarHtml('Alertas', ['E-mail']) +
     '<div class="page page-narrow">' +
       '<div class="page-head"><h1 class="page-title">Alertas por e-mail</h1>' +
       '<p class="page-sub">Avisos automáticos de aniversariantes, enviados sem ninguém precisar lembrar.</p></div>' +
@@ -59,7 +59,7 @@ function _altDesenhar() {
   var i = ALT.info, f = i.fontes;
   var cota = (i.cota !== null && i.cota !== undefined) ? ' Envios restantes hoje: ' + i.cota + '.' : '';
   renderView(
-    moduleBarHtml('Alertas', ['E-mail']) +
+    adminBarHtml('Alertas', ['E-mail']) +
     '<div class="page page-narrow">' +
       '<div class="page-head"><h1 class="page-title">Alertas por e-mail</h1>' +
       '<p class="page-sub">Avisos automáticos de aniversariantes, enviados sem ninguém precisar lembrar.</p></div>' +

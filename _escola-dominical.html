@@ -261,17 +261,13 @@ function _edmOrdenarAulas(lista) {
 }
 function _edmNum(v) { var n = parseFloat(String(v || '').replace(/\./g, '').replace(',', '.')); return isNaN(n) ? 0 : n; }
 
+Atalhos.registrar('ebd', 'escola-dominical', 'Escola Dominical', EDM_TELAS, ['visao']); // o admin escolhe o que exibir (Painel de controle > Atalhos)
 function _edmAtalhosHtml() {
   var todas = edmTelasDoPerfil(), inicial = edmPodeEditar() ? 'visao' : 'chamada';
-  Atalhos.registrar('ebd', todas, [inicial], function () {
-    var n = document.querySelector('.edm-atalhos'); if (!n) return;
-    n.outerHTML = _edmAtalhosHtml(); if (window.lucide) lucide.createIcons();
-    var x = document.querySelector('.edm-atalhos'); if (x) { x.addEventListener('scroll', edmAtalhosDica, { passive: true }); edmAtalhosDica(); }
-  });
   return '<nav class="edm-atalhos atl-nav no-print" aria-label="Seções da Escola Dominical">' + Atalhos.filtrar('ebd', todas, [inicial]).map(function (t) {
     return '<button type="button" class="hm-mod' + (EDM.tela === t[0] ? ' active' : '') + '" data-tela="' + t[0] + '" onclick="edmIr(\'' + t[0] + '\')">' +
       '<div class="hm-mod-icon"><i data-lucide="' + t[1] + '"></i></div><div class="hm-mod-name">' + t[2] + '</div></button>';
-  }).join('') + Atalhos.botao('ebd') + '</nav>';
+  }).join('') + '</nav>';
 }
 function renderEscolaDominical() {
   if (!App.session) { navigateTo('login'); return; }

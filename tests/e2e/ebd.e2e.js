@@ -85,13 +85,7 @@ test('EBD: professor entra direto na Escola Dominical e só vê a turma vinculad
   await page.click('.edm-aulabtn:has-text("Lição 7")');
   await page.waitForSelector('.edm-card:has-text("Adultos")', { timeout: 6000 });
   assert.equal(await page.locator('.edm-card:has-text("Jovens")').count(), 0);
-  assert.deepEqual(await page.$$eval('.edm-atalhos .hm-mod:not(.atl-cfg)', (b) => b.map((x) => x.getAttribute('data-tela'))), ['visao', 'chamada', 'alunos', 'relatorios', 'ranking']);
-  await page.click('.edm-atalhos .atl-cfg');
-  await page.waitForSelector('#atl-overlay.open');
-  assert.equal(await page.locator('#atl-overlay input[data-id="chamada"]').isDisabled(), true, 'tela inicial fixa');
-  await page.locator('#atl-overlay input[data-id="ranking"]').evaluate((i) => i.click());
-  await page.click('#atl-overlay button:has-text("Salvar")');
-  await page.waitForFunction(() => !document.querySelector('.edm-atalhos .hm-mod[data-tela="ranking"]'));
+  assert.deepEqual(await page.$$eval('.edm-atalhos .hm-mod', (b) => b.map((x) => x.getAttribute('data-tela'))), ['visao', 'chamada', 'alunos', 'relatorios', 'ranking']);
   assert.deepEqual(erros, []);
 });
 
