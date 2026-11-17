@@ -47,6 +47,27 @@
 .hm-lema { max-width: 520px; margin: var(--sp-1) auto 0; font-size: var(--fs-sm); font-style: italic; line-height: 1.5; color: rgba(255, 255, 255, .82); }
 @media (min-width: 768px) { .hm-logo { width: 88px; height: 88px; } .hm-title { font-size: var(--fs-lg); } }
 
+/* ── Corpo: celular = uma coluna (atalhos, indicadores, aniversários, atividade); desktop = principal + lateral ── */
+.hm-body { display: flex; flex-direction: column; }
+.hm-main, .hm-side { display: contents; }
+.hm-s-atalhos { order: 1; } .hm-s-kpis { order: 2; } .hm-s-anivs { order: 3; } .hm-s-ativ { order: 4; }
+.hm-data { display: none; }
+@media (min-width: 1024px) {
+  .hm-body { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 0 var(--sp-5); align-items: start; }
+  .hm-main, .hm-side { display: block; min-width: 0; }
+  /* cartão institucional: contido na área de trabalho, marca à esquerda e data à direita */
+  .page.hm { max-width: var(--page-w, 1360px); padding: var(--sp-6) var(--gutter) var(--sp-7); }
+  .hm-body { padding: 0; }
+  .hm-hero { margin: 0 0 var(--sp-5); padding: var(--sp-5) var(--sp-6); border-radius: var(--r-4); }
+  .hm-hero-in { max-width: none; padding: 0; display: flex; align-items: flex-end; justify-content: space-between; gap: var(--sp-5); }
+  .hm-top { display: none; }
+  .hm-brand { flex-direction: row; align-items: center; text-align: left; gap: var(--sp-5); }
+  .hm-logo { width: 80px; height: 80px; }
+  .hm-title { font-size: var(--fs-xl); }
+  .hm-lema { margin: var(--sp-1) 0 0; max-width: 560px; }
+  .hm-data { display: block; flex-shrink: 0; font-size: var(--fs-sm); font-weight: 600; color: rgba(255, 255, 255, .78); }
+}
+
 /* ── Blocos e títulos ── */
 .hm-block { margin-bottom: var(--sp-5); }
 .hm-h { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-3); font-size: var(--fs-md); font-weight: 700; letter-spacing: -.01em; color: var(--text); }
@@ -69,9 +90,25 @@
 .hm-mod:focus-visible { outline: 2px solid var(--teal); outline-offset: 4px; border-radius: var(--r-3); }
 .hm-mod-name { font-size: var(--fs-xs); font-weight: 600; letter-spacing: -.01em; color: var(--text); overflow-wrap: anywhere; }
 
+/* Atalhos no desktop: lista vertical na lateral (ícone, nome); o círculo é só do celular */
+@media (min-width: 1024px) {
+  .hm-mods { grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
+  .hm-mods .hm-mod { flex-direction: row; justify-content: flex-start; text-align: left; gap: var(--sp-3); padding: var(--sp-2) var(--sp-3); border: 1px solid var(--border); border-radius: var(--r-3); background: var(--bg2); transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease); }
+  .hm-mods .hm-mod:hover { border-color: var(--teal-border); background: var(--bg3); }
+  .hm-mods .hm-mod-icon { width: 36px; height: 36px; border-radius: var(--r-2); box-shadow: none; }
+  .hm-mods .hm-mod:hover .hm-mod-icon { transform: none; box-shadow: none; }
+  .hm-mods .hm-mod-icon i, .hm-mods .hm-mod-icon svg { width: 18px; height: 18px; }
+  .hm-mods .hm-mod-name { font-size: var(--fs-sm); font-weight: 700; }
+}
+
 /* ── Indicadores: um cartão por módulo; o formato (grade, lista ou trio) vem do manifesto do módulo ── */
 .kp { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r-4); box-shadow: var(--shadow-sm); overflow: hidden; }
 .kp + .kp { margin-top: var(--sp-3); }
+/* desktop: cartões dos módulos lado a lado, quantos couberem */
+@media (min-width: 1024px) {
+  #kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: var(--sp-4); align-items: start; }
+  .kp + .kp { margin-top: 0; }
+}
 .kp-h { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4) var(--sp-2); }
 .kp-ic { width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; color: var(--on-teal, #fff); background: var(--teal); }
 .kp-ic i, .kp-ic svg { width: 16px; height: 16px; }
@@ -126,6 +163,14 @@
 .hm-aniv-nome { max-width: 100%; font-size: var(--fs-sm); font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hm-aniv-dia { padding: 3px var(--sp-3); border-radius: var(--r-pill); font-size: var(--fs-xs); font-weight: 700; color: var(--text-muted); background: var(--teal-dim); }
 .hm-aniv-dia.hoje { color: var(--hero-a); background: var(--hero-gold); }
+/* desktop (lateral estreita): uma pessoa por linha */
+@media (min-width: 1024px) {
+  .hm-anivs { grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
+  .hm-aniv { flex-direction: row; padding: var(--sp-2) var(--sp-3); text-align: left; }
+  .hm-aniv-av { width: 36px; height: 36px; flex-shrink: 0; }
+  .hm-aniv-nome { flex: 1; min-width: 0; }
+  .hm-aniv-dia { margin-left: auto; flex-shrink: 0; }
+}
 
 
 /* ── Atividade ── */
@@ -176,6 +221,10 @@ var HOME_PERFIL = {
   secretaria: { visao: 'Seu espaço de trabalho', sub: 'Atalhos para os módulos que você utiliza.',         secoes: ['kpis', 'modulos'],              admin: false }
 };
 var HOME_PERFIL_PADRAO = { visao: 'Início', sub: 'Acesse os módulos liberados para você.', secoes: ['kpis', 'modulos'], admin: false };
+
+function _homeDataExtenso() {
+  try { var t = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }); return t.charAt(0).toUpperCase() + t.slice(1); } catch (e) { return ''; }
+}
 
 function _homeTem(cfg, secao) { return cfg.secoes.indexOf(secao) !== -1; }
 
@@ -240,12 +289,14 @@ function renderHome() {
           (IDENTIDADE.lema ? '<p class="hm-lema">' + escHtml(IDENTIDADE.lema) + '</p>' : '') +
         '</div>' +
       '</div>' +
+      '<div class="hm-data" aria-hidden="true">' + escHtml(_homeDataExtenso()) + '</div>' +
       '</div>' +
     '</header>' +
     '<div class="hm-body">';
+  var sec = { atalhos: '', kpis: '', anivs: '', ativ: '' };
 
   /* ══ Atalhos (módulos liberados ao perfil + Usuários, quando permitido) ══ */
-  html += '<section class="hm-block hm-rise" style="--i:' + (i++) + '">' +
+  sec.atalhos = '<section class="hm-block hm-rise hm-s-atalhos" style="--i:' + (i++) + '">' +
     '<h2 class="hm-h">Atalhos</h2>' +
     '<div class="hm-mods">' +
       (mods.length ? '' : _homeEstado('layout-grid', 'Nenhum módulo disponível',
@@ -259,7 +310,7 @@ function renderHome() {
 
   /* ══ Indicadores em mosaico + faixa de atenção ══ */
   if (_homeTem(cfg, 'kpis')) {
-    html += '<section class="hm-block hm-rise" style="--i:' + (i++) + '">' +
+    sec.kpis = '<section class="hm-block hm-rise hm-s-kpis" style="--i:' + (i++) + '">' +
       '<h2 class="hm-h">Indicadores</h2>' +
       '<div id="kpi-grid">' + _kpiSkeleton() + '</div>' +
     '</section>';
@@ -267,7 +318,7 @@ function renderHome() {
 
   /* ══ Aniversariantes do mês ══ */
   if (comAniv) {
-    html += '<section class="hm-block hm-rise" style="--i:' + (i++) + '">' +
+    sec.anivs = '<section class="hm-block hm-rise hm-s-anivs" style="--i:' + (i++) + '">' +
       '<h2 class="hm-h">Aniversariantes do mês <button type="button" onclick="navigateTo(\'' + modAniv.rota + '\')">Ver tudo</button></h2>' +
       '<div class="hm-anivs" id="aniv-list">' + _anivSkeleton() + _anivSkeleton() + _anivSkeleton() + '</div>' +
     '</section>';
@@ -275,13 +326,13 @@ function renderHome() {
 
   /* ══ Atividade recente ══ */
   if (comAtividade) {
-    html += '<section class="panel hm-rise" style="--i:' + (i++) + '">' +
+    sec.ativ = '<section class="panel hm-rise hm-s-ativ" style="--i:' + (i++) + '">' +
       '<div class="panel-head"><h2 class="panel-title">Atividade recente</h2></div>' +
       '<div class="activity-list" id="activity-list">' + _activitySkeleton() + _activitySkeleton() + _activitySkeleton() + '</div>' +
     '</section>';
   }
 
-  html += '</div></div>'; /* /hm-body /hm */
+  html += '<div class="hm-main">' + sec.kpis + sec.ativ + '</div><div class="hm-side">' + sec.atalhos + sec.anivs + '</div></div></div>'; /* /hm-body /hm */
 
   renderView(html);
 

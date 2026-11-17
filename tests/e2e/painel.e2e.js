@@ -21,8 +21,9 @@ test('painel: menu tem um item só, sem bolinha no topo; cartões abrem as telas
   assert.deepEqual(await page.$$eval('.pn-card .pn-nome', (n) => n.map((x) => x.textContent)), ['Usuários', 'Identidade', 'Alertas', 'Atalhos']);
   await page.click('.pn-card:has-text("Alertas")');
   await esperarTela(page, 'alertas');
-  assert.match(await page.innerText('.module-bar'), /Painel de controle/);
-  await page.click('.module-bar-back');
+  // desktop (1280): o caminho fica na barra superior; a barra do módulo é só do celular
+  assert.match(await page.innerText('#topnav-crumb'), /Painel de controle/);
+  await page.click('#topnav-crumb .crumb-link');
   await esperarTela(page, 'painel');
   assert.equal(await page.locator('#app-sidebar .sb-item.active:has-text("Painel de controle")').count(), 1);
   assert.deepEqual(erros, []);

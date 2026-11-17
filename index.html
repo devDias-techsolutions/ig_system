@@ -607,7 +607,9 @@ body::after {
 ══════════════════════════════════════════════════ */
 .page { max-width: var(--page-w, 1120px); margin: 0 auto; padding: var(--sp-5) var(--gutter) var(--sp-7); }
 .page-narrow { --page-w: 960px; }
-.page-head { margin-bottom: var(--sp-5); }
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--sp-3) var(--sp-5); flex-wrap: wrap; margin-bottom: var(--sp-5); }
+.page-head-txt { min-width: 0; flex: 1 1 320px; }
+.page-head-actions { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
 .page-title { font-size: 22px; font-weight: 800; letter-spacing: -.02em; color: var(--text); margin: 0 0 4px; }
 .page-sub { font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.5; }
 
@@ -640,6 +642,18 @@ body::after {
 @media (max-width: 640px) { .panel { padding: var(--sp-4); } }
 
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0 14px; }
+
+/* ── DESKTOP (≥1024px): estrutura própria, não o celular esticado (ver docs/UI-DESKTOP.md) ──
+   .page vira área de trabalho larga; .d-split = conteúdo + coluna lateral; .d-cols = N colunas iguais */
+.d-split, .d-cols { display: grid; gap: var(--sp-5); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1024px) {
+  body.nav-on .page { padding-top: var(--sp-6); }
+  body.nav-on .page:not(.page-narrow) { --page-w: 1360px; }   /* telas de formulário (.page-narrow) ganham o layout em colunas na etapa D3 */
+  body.nav-on .page-title { font-size: var(--fs-xl); }
+  body.nav-on .page-sub { font-size: var(--fs-sm); }
+  .d-split { grid-template-columns: minmax(0, 1fr) 360px; align-items: start; }
+  .d-cols { grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); align-items: start; }
+}
 .form-grid .field { margin-bottom: 16px; }
 .form-grid .span-all { grid-column: 1 / -1; }
 
@@ -1219,9 +1233,18 @@ textarea { height: auto; min-height: 88px; padding: var(--sp-3); resize: vertica
   body.nav-on .app-sidebar { display: flex; }
   body.nav-on #app, body.nav-on #main-topnav { margin-left: var(--sidebar-w); }
   body.nav-on { --gutter: 32px; --gutter-lg: 40px; }
-  /* a marca já está na sidebar */
-  body.nav-on .topnav-left { visibility: hidden; }
+  /* A marca já está na sidebar: a barra superior mostra onde o usuário está (caminho) */
+  body.nav-on .topnav-logo-icon, body.nav-on .topnav-brand-txt, body.nav-on .topnav .nav-burger { display: none; }
+  body.nav-on .module-bar { display: none; }
+  body.nav-on .topnav-left { overflow: visible; }
+  body.nav-on .crumb { display: flex; }
 }
+.crumb { display: none; align-items: center; gap: var(--sp-2); min-width: 0; font-size: var(--fs-sm); }
+.crumb-link { padding: 0; border: 0; background: none; cursor: pointer; font: inherit; font-weight: 600; color: var(--text-muted); }
+.crumb-link:hover { color: var(--text); }
+.crumb-link:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; border-radius: var(--r-1); }
+.crumb-sep { color: var(--text-dim); }
+.crumb-now { font-weight: 800; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* "Usuários" já está na sidebar / gaveta */
 body.nav-on #topnav-usuarios-btn { display: none !important; }
 /* Atalhos circulares dos módulos (padrão único): não selecionado = fundo branco + contorno na cor da igreja; selecionado = sólido */
@@ -1272,6 +1295,7 @@ body.nav-on #topnav-usuarios-btn { display: none !important; }
 <header id="main-topnav" class="topnav" style="display:none" role="banner">
   <div class="topnav-left">
     <button type="button" class="icon-btn nav-burger" onclick="navAbrir()" aria-label="Abrir menu" aria-controls="app-sidebar"><i data-lucide="menu"></i></button>
+    <nav id="topnav-crumb" class="crumb" aria-label="Você está em"></nav>
     <div class="topnav-logo-icon">
       <span id="topnav-mark" class="brand-mark"></span>
     </div>
@@ -1521,6 +1545,7 @@ function _kpiGroup(o) {
 
 function moduleBarHtml(nome, tags, voltarView, raiz) {
   var v = voltarView || 'home';
+  App._crumbPend = { nome: nome, voltar: v, raiz: (raiz && raiz !== 'Gestão Ministerial') ? raiz : 'Início' };   // o desktop mostra isto na barra superior
   return '<div class="module-bar no-print">' +
     '<button class="module-bar-back" onclick="navigateTo(\'' + v + '\')" title="Voltar"><i data-lucide="arrow-left" class="ic-14"></i></button>' +
     '<span class="module-bar-app" onclick="navigateTo(\'' + v + '\')">' + escHtml(raiz || 'Gestão Ministerial') + '</span>' +
@@ -1548,6 +1573,27 @@ function tabsRevelar() {
   box.scrollLeft = Math.max(0, t.offsetLeft - (box.clientWidth - t.offsetWidth) / 2);
 }
 
+// Caminho na barra superior (desktop). Telas com barra do módulo informam por moduleBarHtml; a Início é "Início".
+function crumbAtualizar() {
+  var el = document.getElementById('topnav-crumb'); if (!el) return;
+  var c = App._crumbPend; App._crumbPend = null;
+  if (!c && App.currentView === 'home') c = { nome: 'Início', raiz: '', voltar: '' };
+  if (!c) { el.innerHTML = ''; return; }
+  el.innerHTML = (c.raiz ? '<button type="button" class="crumb-link" onclick="navigateTo(\'' + c.voltar + '\')">' + escHtml(c.raiz) + '</button><span class="crumb-sep" aria-hidden="true">/</span>' : '') +
+    '<span class="crumb-now" aria-current="page">' + escHtml(c.nome) + '</span>';
+}
+function ehDesktop() { return !!(window.matchMedia && window.matchMedia('(min-width: 1024px)').matches); }
+
+// Ao cruzar 1024px (girar o tablet, redimensionar a janela), a barra superior da Início aparece ou some
+if (window.matchMedia) {
+  var _mqDesk = window.matchMedia('(min-width: 1024px)');
+  var _mqMudou = function () {
+    var t = document.getElementById('main-topnav');
+    if (t && App.currentView === 'home' && authRequired.indexOf('home') !== -1 && document.body.classList.contains('nav-on')) t.style.display = ehDesktop() ? '' : 'none';
+  };
+  if (_mqDesk.addEventListener) _mqDesk.addEventListener('change', _mqMudou); else if (_mqDesk.addListener) _mqDesk.addListener(_mqMudou);
+}
+
 function renderView(html) {
   var viewport = document.getElementById('app-viewport');
   viewport.innerHTML = '<div class="view-container">' + html + '</div>';
@@ -1556,8 +1602,9 @@ function renderView(html) {
   // Mostrar/ocultar topnav persistente conforme tipo de view
   var topnav  = document.getElementById('main-topnav');
   var isAuth  = authRequired.indexOf(App.currentView || '') !== -1;
-  // A Início tem cartão institucional próprio (com o menu do usuário dentro): sem barra superior
-  if (topnav) topnav.style.display = (isAuth && App.currentView !== 'home') ? '' : 'none';
+  // No celular a Início tem cartão próprio (com o menu do usuário dentro): sem barra superior. No desktop todas as telas têm barra.
+  if (topnav) topnav.style.display = (isAuth && (App.currentView !== 'home' || ehDesktop())) ? '' : 'none';
+  crumbAtualizar();
   document.body.classList.toggle('on-home', App.currentView === 'home');
   renderNav(isAuth);
 

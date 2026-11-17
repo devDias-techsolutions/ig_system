@@ -1,7 +1,8 @@
 <style>
 /* PAINEL DE CONTROLE — só o específico; estrutura vem do Layout System (.page, .panel, .action-bar) */
 .pn-grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
-@media (min-width: 720px) { .pn-grade { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 720px) { .pn-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .pn-grade { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--sp-4); } .pn-card { padding: var(--sp-5); min-height: 164px; } }
 .pn-card { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-1); text-align: left; padding: var(--sp-4); background: var(--bg-glass-strong); border: 1px solid var(--border); border-radius: var(--r-4); cursor: pointer; font: inherit; color: var(--text); transition: border-color .2s; }
 .pn-card:hover { border-color: var(--teal); }
 .pn-card:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
@@ -27,9 +28,9 @@ function renderPainel() {
   if (!App.session) { navigateTo('login'); return; }
   renderView(
     moduleBarHtml('Painel de controle', []) +
-    '<div class="page page-narrow">' +
-      '<div class="page-head"><h1 class="page-title">Painel de controle</h1>' +
-      '<p class="page-sub">Ajustes gerais do sistema. Só o administrador vê esta tela.</p></div>' +
+    '<div class="page">' +
+      '<div class="page-head"><div class="page-head-txt"><h1 class="page-title">Painel de controle</h1>' +
+      '<p class="page-sub">Ajustes gerais do sistema. Só o administrador vê esta tela.</p></div></div>' +
       '<div class="pn-grade">' + PN_CARTOES.map(function (c) {
         return '<button type="button" class="pn-card" onclick="navigateTo(\'' + c[0] + '\')">' +
           '<span class="pn-ic"><i data-lucide="' + c[1] + '"></i></span>' +
