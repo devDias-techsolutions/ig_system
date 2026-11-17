@@ -1762,7 +1762,7 @@ function mbAbrirCarteirinhaDetalhe(id) {
     b.classList.toggle('active', b.getAttribute('onclick') === "mbSetTab('carteirinha')");
   });
   _mbRenderPanel();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  rolarTopo(true);
 }
 
 // ════════════════════════════════════════════
