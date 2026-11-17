@@ -462,7 +462,7 @@ test('módulos: manifesto é serializável (sem funções) e o JSON do HTML é s
 test('módulos: o esquema da planilha inclui as abas do núcleo e as declaradas pelos módulos ativos', () => {
   const env = freshEnv();
   const esq = JSON.parse(env.run('JSON.stringify(SetupSheets.schema())'));
-  assert.deepEqual(Object.keys(esq).sort(), ['Alunos', 'Aulas', 'Cartas', 'Chamadas', 'ChamadasInfo', 'Classes', 'Config', 'Credenciais', 'Imagens', 'Membros', 'PontosExtras', 'Professores', 'Sessoes', 'Usuarios']);
+  assert.deepEqual(Object.keys(esq).sort(), ['Alunos', 'Aulas', 'Cartas', 'Chamadas', 'ChamadasInfo', 'Classes', 'Config', 'Credenciais', 'Eventos', 'Imagens', 'Membros', 'PontosExtras', 'Professores', 'Sessoes', 'Usuarios']);
   assert.equal(esq.Membros[0], 'id');
   assert.ok(esq.Membros.includes('ativo'));
 });
@@ -475,7 +475,7 @@ test('módulos: módulo desativado some do registro, das abas, dos KPIs e do HTM
   assert.equal(env.run('Modulos.kpis().length'), 0);
   assert.equal(env.run('incluirModulos()'), '');
   const esq = JSON.parse(env.run('JSON.stringify(SetupSheets.schema())'));
-  assert.deepEqual(Object.keys(esq).sort(), ['Config', 'Imagens', 'Sessoes', 'Usuarios']);
+  assert.deepEqual(Object.keys(esq).sort(), ['Config', 'Eventos', 'Imagens', 'Sessoes', 'Usuarios']);
 });
 
 test('módulos: núcleo sem nenhum módulo — sem indicadores', () => {
@@ -1381,4 +1381,49 @@ test('config: atalhos escondidos — salva só chaves/ids válidos, lê de volta
   env.run('Config.salvarAtalhos({})');
   assert.equal(env.run("Config.get('ATALHOS_OCULTOS', 'padrao')"), 'padrao'); // vazio = sem escondidos
   assert.deepEqual(JSON.parse(env.run('Config.identidadeJson()')).atalhosOcultos, {});
+});
+
+// ── Agenda (eventos do calendário do Início) ──
+const COLS_EVENTOS = ['ID', 'Titulo', 'Data', 'Hora', 'Local', 'Descricao', 'Ativo', 'CriadoPor', 'CriadoEm'];
+function dataEm(dias) { const d = new Date(); d.setDate(d.getDate() + dias); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+
+test('agenda: salvar, listar em ordem de data e hora, editar e cancelar', () => {
+  const env = envComSessao({ Eventos: [COLS_EVENTOS] });
+  const a = env.run(`ag_salvar('tok', { titulo: 'Culto de doutrina', data: '${dataEm(3)}', hora: '19:30', local: 'Templo' })`);
+  assert.equal(a.success, true);
+  env.run(`ag_salvar('tok', { titulo: 'Ensaio', data: '${dataEm(1)}', hora: '', local: '' })`);
+  env.run(`ag_salvar('tok', { titulo: 'Culto cedo', data: '${dataEm(3)}', hora: '08:00' })`);
+  let l = JSON.parse(JSON.stringify(env.run("ag_listar('tok')").data));
+  assert.deepEqual(l.itens.map((e) => e.titulo), ['Ensaio', 'Culto cedo', 'Culto de doutrina']);
+  assert.equal(l.itens[2].hora, '19:30');
+  env.run(`ag_salvar('tok', { id: '${a.data.id}', titulo: 'Culto de ensino', data: '${dataEm(3)}', hora: '20:00' })`);
+  env.run(`ag_remover('tok', '${a.data.id}')`);
+  l = JSON.parse(JSON.stringify(env.run("ag_listar('tok')").data));
+  assert.deepEqual(l.itens.map((e) => e.titulo), ['Ensaio', 'Culto cedo']);
+});
+
+test('agenda: valida nome, data e hora', () => {
+  const env = envComSessao({ Eventos: [COLS_EVENTOS] });
+  assert.equal(env.run("ag_salvar('tok', { titulo: '', data: '2026-12-01' })").success, false);
+  assert.equal(env.run("ag_salvar('tok', { titulo: 'X', data: '2026-02-30' })").success, false);
+  assert.equal(env.run("ag_salvar('tok', { titulo: 'X', data: '01/12/2026' })").success, false);
+  assert.equal(env.run("ag_salvar('tok', { titulo: 'X', data: '2026-12-01', hora: '25:00' })").success, false);
+  assert.equal(env.run("ag_remover('tok', 'nao-existe')").success, false);
+});
+
+test('agenda: professor vê mas não altera; sem aba, ela é criada na primeira vez', () => {
+  const env = envComSessao({});
+  env.scriptCache.put('sess_prof', JSON.stringify({ token: 'prof', id: 'u3', nome: 'Caio', email: 'c@x.com', perfil: 'professor', expiraEm: new Date(Date.now() + 3600e3).toISOString(), primeiroAcesso: false }), 3600);
+  assert.equal(env.run("ag_listar('prof')").success, true);
+  assert.deepEqual(JSON.parse(JSON.stringify(env.run("ag_listar('prof')").data.itens)), []);
+  assert.equal(env.run(`ag_salvar('prof', { titulo: 'X', data: '${dataEm(2)}' })`).success, false);
+  assert.equal(env.run(`ag_salvar('tok', { titulo: 'X', data: '${dataEm(2)}' })`).success, true);
+});
+
+test('agenda: data e hora que a planilha devolve como Date saem em aaaa-mm-dd e hh:mm', () => {
+  const env = envComSessao({ Eventos: [COLS_EVENTOS, ['e1', 'Vigília', new Date(2099, 11, 5), new Date(1899, 11, 30, 21, 0), '', '', true, '', '']] });
+  const v = JSON.parse(JSON.stringify(env.run("ag_listar('tok')").data.itens)).filter((e) => e.id === 'e1')[0];
+  assert.ok(v, 'evento da planilha aparece');
+  assert.equal(v.data, '2099-12-05');
+  assert.equal(v.hora, '21:00');
 });

@@ -47,25 +47,20 @@
 .hm-lema { max-width: 520px; margin: var(--sp-1) auto 0; font-size: var(--fs-sm); font-style: italic; line-height: 1.5; color: rgba(255, 255, 255, .82); }
 @media (min-width: 768px) { .hm-logo { width: 88px; height: 88px; } .hm-title { font-size: var(--fs-lg); } }
 
-/* ── Corpo: celular = uma coluna (atalhos, indicadores, aniversários, atividade); desktop = principal + lateral ── */
+/* ── Corpo: celular = uma coluna (atalhos, indicadores, aniversários, atividade, agenda);
+   desktop = título simples no canto + coluna principal + coluna lateral com a agenda ── */
 .hm-body { display: flex; flex-direction: column; }
-.hm-main, .hm-side { display: contents; }
-.hm-s-atalhos { order: 1; } .hm-s-kpis { order: 2; } .hm-s-anivs { order: 3; } .hm-s-ativ { order: 4; }
-.hm-data { display: none; }
+.hm-main, .hm-side, .hm-duo { display: contents; }
+.hm-s-atalhos { order: 1; } .hm-s-kpis { order: 2; } .hm-s-anivs { order: 3; } .hm-s-ativ { order: 4; } .hm-s-agenda { order: 5; }
+.hm-head { display: none; }
 @media (min-width: 1024px) {
-  .hm-body { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 0 var(--sp-5); align-items: start; }
-  .hm-main, .hm-side { display: block; min-width: 0; }
-  /* cartão institucional: contido na área de trabalho, marca à esquerda e data à direita */
   .page.hm { max-width: var(--page-w, 1360px); padding: var(--sp-6) var(--gutter) var(--sp-7); }
-  .hm-body { padding: 0; }
-  .hm-hero { margin: 0 0 var(--sp-5); padding: var(--sp-5) var(--sp-6); border-radius: var(--r-4); }
-  .hm-hero-in { max-width: none; padding: 0; display: flex; align-items: flex-end; justify-content: space-between; gap: var(--sp-5); }
-  .hm-top { display: none; }
-  .hm-brand { flex-direction: row; align-items: center; text-align: left; gap: var(--sp-5); }
-  .hm-logo { width: 80px; height: 80px; }
-  .hm-title { font-size: var(--fs-xl); }
-  .hm-lema { margin: var(--sp-1) 0 0; max-width: 560px; }
-  .hm-data { display: block; flex-shrink: 0; font-size: var(--fs-sm); font-weight: 600; color: rgba(255, 255, 255, .78); }
+  .hm-hero { display: none; }
+  .hm-head { display: flex; }
+  .hm-body { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 0 var(--sp-5); align-items: start; padding: 0; }
+  .hm-main, .hm-side { display: block; min-width: 0; }
+  .hm-duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-5); align-items: start; }
+  .hm-duo > .hm-block { margin-bottom: 0; }
 }
 
 /* ── Blocos e títulos ── */
@@ -90,9 +85,9 @@
 .hm-mod:focus-visible { outline: 2px solid var(--teal); outline-offset: 4px; border-radius: var(--r-3); }
 .hm-mod-name { font-size: var(--fs-xs); font-weight: 600; letter-spacing: -.01em; color: var(--text); overflow-wrap: anywhere; }
 
-/* Atalhos no desktop: lista vertical na lateral (ícone, nome); o círculo é só do celular */
+/* Atalhos no desktop: grade de botões (ícone + nome); o círculo é só do celular */
 @media (min-width: 1024px) {
-  .hm-mods { grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
+  .hm-mods { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: var(--sp-2); }
   .hm-mods .hm-mod { flex-direction: row; justify-content: flex-start; text-align: left; gap: var(--sp-3); padding: var(--sp-2) var(--sp-3); border: 1px solid var(--border); border-radius: var(--r-3); background: var(--bg2); transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease); }
   .hm-mods .hm-mod:hover { border-color: var(--teal-border); background: var(--bg3); }
   .hm-mods .hm-mod-icon { width: 36px; height: 36px; border-radius: var(--r-2); box-shadow: none; }
@@ -172,6 +167,49 @@
   .hm-aniv-dia { margin-left: auto; flex-shrink: 0; }
 }
 
+
+/* ── Agenda: calendário do mês + eventos programados ── */
+.ag { border: 1px solid var(--border); border-radius: var(--r-4); background: var(--bg2); box-shadow: var(--shadow-sm); overflow: hidden; }
+.ag-cal { padding: var(--sp-4); }
+.ag-mes { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.ag-mes-nome { font-size: var(--fs-md); font-weight: 800; letter-spacing: -.01em; color: var(--text); }
+.ag-mes-nome::first-letter { text-transform: uppercase; }
+.ag-nav { width: 32px; height: 32px; display: grid; place-items: center; border: 0; border-radius: var(--r-2); background: none; color: var(--text-muted); cursor: pointer; }
+.ag-nav:hover { background: var(--teal-dim); color: var(--teal); }
+.ag-nav:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.ag-nav i, .ag-nav svg { width: 18px; height: 18px; }
+.ag-grade { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; text-align: center; }
+.ag-sem { padding-bottom: var(--sp-1); font-size: var(--fs-xs); font-weight: 700; color: var(--text-dim); }
+.ag-dia { position: relative; height: 36px; display: grid; place-items: center; border: 0; border-radius: 50%; background: none; font-family: inherit; font-size: var(--fs-sm); font-weight: 600; color: var(--text); cursor: pointer; font-variant-numeric: tabular-nums; }
+.ag-dia.fora { color: var(--text-dim); }
+.ag-dia:hover { background: var(--teal-dim); }
+.ag-dia:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; }
+.ag-dia.hoje { color: var(--on-teal, #fff); background: var(--teal); font-weight: 800; }
+.ag-dia.sel:not(.hoje) { box-shadow: inset 0 0 0 2px var(--teal); }
+.ag-dia.tem::after { content: ''; position: absolute; bottom: 4px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--teal); }
+.ag-dia.hoje.tem::after { background: var(--on-teal, #fff); }
+.ag-lista { border-top: 1px solid var(--border); padding: var(--sp-4); }
+.ag-lh { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); min-height: 32px; margin-bottom: var(--sp-3); }
+.ag-lt { margin: 0; font-size: var(--fs-md); font-weight: 800; letter-spacing: -.01em; color: var(--text); }
+.ag-lh button { min-height: 32px; padding: 0 var(--sp-2); border: 0; border-radius: var(--r-2); background: none; font-family: inherit; font-size: var(--fs-sm); font-weight: 700; color: var(--teal); cursor: pointer; }
+.ag-lh button:hover { background: var(--teal-dim); }
+.ag-lh button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.ag-ev { display: flex; align-items: stretch; gap: var(--sp-3); width: 100%; margin: 0 0 var(--sp-2); padding: var(--sp-2) var(--sp-3); text-align: left; font-family: inherit; color: inherit; border: 1px solid var(--border); border-left: 3px solid var(--teal); border-radius: var(--r-3); background: var(--bg-glass); }
+button.ag-ev { cursor: pointer; transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease); }
+button.ag-ev:hover { border-color: var(--teal-border); border-left-color: var(--teal); background: var(--bg3); }
+button.ag-ev:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.ag-ev-d { flex-shrink: 0; width: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; }
+.ag-ev-d b { font-size: var(--fs-lg); font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+.ag-ev-d span { font-size: var(--fs-xs); font-weight: 700; color: var(--teal); text-transform: uppercase; }
+.ag-ev-t { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.ag-ev-n { font-size: var(--fs-sm); font-weight: 700; color: var(--text); overflow-wrap: anywhere; }
+.ag-ev-m { font-size: var(--fs-xs); color: var(--text-muted); overflow-wrap: anywhere; }
+.ag-lista .hm-empty { padding: var(--sp-5) var(--sp-4); }
+.ag-form-linha { display: grid; grid-template-columns: minmax(0, 1fr) 120px; gap: var(--sp-3); }
+.ag-form-linha .field { margin-bottom: var(--sp-3); }
+#ag-overlay textarea { min-height: 72px; }
+#ag-erro { display: none; margin-bottom: var(--sp-3); font-size: var(--fs-sm); font-weight: 600; color: var(--danger); }
+#ag-erro.on { display: block; }
 
 /* ── Atividade ── */
 .activity-list { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--r-3); background: var(--bg-glass); overflow: hidden; }
@@ -289,11 +327,15 @@ function renderHome() {
           (IDENTIDADE.lema ? '<p class="hm-lema">' + escHtml(IDENTIDADE.lema) + '</p>' : '') +
         '</div>' +
       '</div>' +
-      '<div class="hm-data" aria-hidden="true">' + escHtml(_homeDataExtenso()) + '</div>' +
       '</div>' +
     '</header>' +
+    /* desktop: sem cartão institucional; só o título no canto superior esquerdo (o celular mantém o cartão) */
+    '<header class="page-head hm-head hm-rise" style="--i:' + (i++) + '"><div class="page-head-txt">' +
+      '<h1 class="page-title">' + escHtml(_homeSaudacao()) + '</h1>' +
+      '<p class="page-sub">' + escHtml(_homeDataExtenso() + (IDENTIDADE.nome ? ' · ' + IDENTIDADE.nome : '')) + '</p>' +
+    '</div></header>' +
     '<div class="hm-body">';
-  var sec = { atalhos: '', kpis: '', anivs: '', ativ: '' };
+  var sec = { atalhos: '', kpis: '', anivs: '', ativ: '', agenda: '' };
 
   /* ══ Atalhos (módulos liberados ao perfil + Usuários, quando permitido) ══ */
   sec.atalhos = '<section class="hm-block hm-rise hm-s-atalhos" style="--i:' + (i++) + '">' +
@@ -332,7 +374,13 @@ function renderHome() {
     '</section>';
   }
 
-  html += '<div class="hm-main">' + sec.kpis + sec.ativ + '</div><div class="hm-side">' + sec.atalhos + sec.anivs + '</div></div></div>'; /* /hm-body /hm */
+  /* ══ Agenda: calendário do mês + eventos programados ══ */
+  sec.agenda = '<section class="hm-block hm-rise hm-s-agenda" style="--i:' + (i++) + '" aria-label="Agenda da igreja">' +
+    '<div class="ag" id="ag-root">' + _agSkeleton() + '</div>' +
+  '</section>';
+
+  html += '<div class="hm-main">' + sec.kpis + sec.atalhos + '<div class="hm-duo">' + sec.anivs + sec.ativ + '</div></div>' +
+    '<div class="hm-side">' + sec.agenda + '</div></div></div>'; /* /hm-body /hm */
 
   renderView(html);
 
@@ -350,6 +398,200 @@ function renderHome() {
   if (_homeTem(cfg, 'kpis')) _loadKpis();
   if (comAniv) _loadAniv();
   if (comAtividade) _loadActivity();
+  _agCarregar();
+}
+
+
+function _homeSaudacao() {
+  var n = String((App.session && App.session.nome) || '').trim().split(/\s+/)[0];
+  var h = new Date().getHours();
+  var s = h < 12 ? 'Bom dia' : (h < 18 ? 'Boa tarde' : 'Boa noite');
+  return n ? s + ', ' + n : s;
+}
+
+/* ══════════════════════════════════════════════════
+   AGENDA · calendário do mês e eventos programados da igreja
+   Todos veem; admin e secretaria agendam, editam e cancelam.
+══════════════════════════════════════════════════ */
+var AG = { itens: [], hoje: '', mes: '', sel: '', ok: false };
+var AG_MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+var AG_MESES_CURTO = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+var AG_SEMANA = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+var AG_DIAS = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
+
+function _agPode() { var p = App.session && App.session.perfil; return p === 'admin' || p === 'secretaria'; }
+function _agDd(n) { return (n < 10 ? '0' : '') + n; }
+function _agYmd(a, m, d) { return a + '-' + _agDd(m) + '-' + _agDd(d); }
+function _agDataLonga(ymd) {
+  var p = ymd.split('-'), d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+  return AG_DIAS[d.getDay()].replace(/^./, function (c) { return c.toUpperCase(); }) + ', ' + Number(p[2]) + ' de ' + AG_MESES[Number(p[1]) - 1];
+}
+
+function _agSkeleton() {
+  return '<div class="ag-cal"><div class="skeleton" style="width:100%;height:232px;border-radius:var(--r-3)"></div></div>' +
+    '<div class="ag-lista"><div class="skeleton" style="width:100%;height:56px;border-radius:var(--r-3)"></div></div>';
+}
+
+function _agCarregar() {
+  AG.ok = false;
+  google.script.run
+    .withSuccessHandler(function (res) {
+      if (!res || !res.success) { _agErro(); return; }
+      AG.itens = (res.data && res.data.itens) || [];
+      AG.hoje = (res.data && res.data.hoje) || '';
+      if (!AG.mes) AG.mes = AG.hoje.slice(0, 7);
+      AG.ok = true;
+      _agDesenhar();
+    })
+    .withFailureHandler(_agErro)
+    .ag_listar(App.session.token);
+}
+
+function _agErro() {
+  var el = document.getElementById('ag-root');
+  if (!el) return;
+  el.innerHTML = '<div class="ag-lista" style="border-top:0">' + _homeEstado('wifi-off', 'Não foi possível carregar a agenda',
+    'Verifique sua internet e tente novamente.', _homeRetry('_agRecarregar'), true) + '</div>';
+  if (window.lucide) lucide.createIcons();
+}
+function _agRecarregar() { var el = document.getElementById('ag-root'); if (el) el.innerHTML = _agSkeleton(); _agCarregar(); }
+
+function _agDesenhar() {
+  var el = document.getElementById('ag-root');
+  if (!el) return;
+  var pm = AG.mes.split('-'), ano = Number(pm[0]), mes = Number(pm[1]);
+  var primeiro = new Date(ano, mes - 1, 1).getDay(), total = new Date(ano, mes, 0).getDate();
+  var comEvento = {};
+  AG.itens.forEach(function (e) { comEvento[e.data] = true; });
+
+  var cel = AG_SEMANA.map(function (d) { return '<div class="ag-sem" aria-hidden="true">' + d + '</div>'; }).join('');
+  for (var v = 0; v < primeiro; v++) cel += '<span></span>';
+  for (var d = 1; d <= total; d++) {
+    var ymd = _agYmd(ano, mes, d), tem = !!comEvento[ymd];
+    cel += '<button type="button" class="ag-dia' + (ymd === AG.hoje ? ' hoje' : '') + (ymd === AG.sel ? ' sel' : '') + (tem ? ' tem' : '') + '" data-ymd="' + ymd + '" onclick="_agDia(\'' + ymd + '\')" aria-label="' +
+      escHtml(_agDataLonga(ymd)) + (tem ? ', com evento' : '') + (ymd === AG.hoje ? ', hoje' : '') + '"' + (ymd === AG.sel ? ' aria-pressed="true"' : '') + '>' + d + '</button>';
+  }
+
+  /* lista: dia escolhido ou os próximos eventos (a partir de hoje) */
+  var itens, titulo;
+  if (AG.sel) { itens = AG.itens.filter(function (e) { return e.data === AG.sel; }); titulo = _agDataLonga(AG.sel); }
+  else { itens = AG.itens.filter(function (e) { return e.data >= AG.hoje; }).slice(0, 5); titulo = 'Próximos eventos'; }
+
+  var pode = _agPode();
+  var corpo;
+  if (!itens.length) {
+    corpo = _homeEstado('calendar-plus', AG.sel ? 'Nada agendado neste dia' : 'Nenhum evento agendado',
+      pode ? 'Agende cultos, reuniões e ações da igreja para que todos acompanhem aqui.' : 'Quando a igreja agendar um evento, ele aparece aqui.',
+      pode ? '<button type="button" class="btn btn-primary btn-sm" onclick="agAbrir(\'\',\'' + (AG.sel || '') + '\')"><i data-lucide="plus" class="ic-15"></i> Agendar evento</button>' : '');
+  } else {
+    corpo = itens.map(function (e) {
+      var p = e.data.split('-'), meta = [e.hora, e.local].filter(Boolean).join(' · ');
+      var tag = pode ? 'button type="button" onclick="agAbrir(\'' + escHtml(e.id) + '\')" aria-label="Editar evento ' + escHtml(e.titulo) + '"' : 'div';
+      return '<' + tag + ' class="ag-ev"><span class="ag-ev-d"><b>' + Number(p[2]) + '</b><span>' + AG_MESES_CURTO[Number(p[1]) - 1] + '</span></span>' +
+        '<span class="ag-ev-t"><span class="ag-ev-n">' + escHtml(e.titulo) + '</span>' + (meta ? '<span class="ag-ev-m">' + escHtml(meta) + '</span>' : '') + '</span></' + (pode ? 'button' : 'div') + '>';
+    }).join('');
+  }
+
+  el.innerHTML =
+    '<div class="ag-cal">' +
+      '<div class="ag-mes">' +
+        '<button type="button" class="ag-nav" onclick="_agMes(-1)" aria-label="Mês anterior"><i data-lucide="chevron-left"></i></button>' +
+        '<div class="ag-mes-nome" aria-live="polite">' + AG_MESES[mes - 1] + ' de ' + ano + '</div>' +
+        '<button type="button" class="ag-nav" onclick="_agMes(1)" aria-label="Próximo mês"><i data-lucide="chevron-right"></i></button>' +
+      '</div>' +
+      '<div class="ag-grade">' + cel + '</div>' +
+    '</div>' +
+    '<div class="ag-lista">' +
+      '<div class="ag-lh"><h2 class="ag-lt">' + escHtml(titulo) + '</h2>' +
+        (AG.sel ? '<button type="button" onclick="_agDia(\'\')">Ver próximos</button>' : (pode && itens.length ? '<button type="button" onclick="agAbrir(\'\',\'\')">Agendar</button>' : '')) +
+      '</div>' + corpo +
+    '</div>';
+  if (window.lucide) lucide.createIcons();
+}
+
+function _agMes(delta) {
+  var p = AG.mes.split('-'), d = new Date(Number(p[0]), Number(p[1]) - 1 + delta, 1);
+  AG.mes = d.getFullYear() + '-' + _agDd(d.getMonth() + 1);
+  AG.sel = '';
+  _agDesenhar();
+}
+function _agDia(ymd) { AG.sel = (AG.sel === ymd ? '' : ymd); if (AG.sel) AG.mes = AG.sel.slice(0, 7); _agDesenhar(); }
+
+/* ── Formulário (janela): agendar, editar e cancelar ── */
+function agAbrir(id, dataSugerida) {
+  var ev = id ? AG.itens.filter(function (e) { return e.id === id; })[0] : null;
+  if (id && !ev) return;
+  var ov = document.getElementById('ag-overlay');
+  if (!ov) { ov = document.createElement('div'); ov.id = 'ag-overlay'; ov.className = 'modal-overlay'; document.body.appendChild(ov); }
+  var dataIni = ev ? ev.data : (dataSugerida || AG.hoje);
+  ov.innerHTML =
+    '<div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="ag-titulo">' +
+      '<div class="modal-header"><h3 id="ag-titulo">' + (ev ? 'Editar evento' : 'Agendar evento') + '</h3>' +
+        '<button type="button" class="btn btn-ghost btn-sm" style="width:36px;padding:0" onclick="agFechar()" aria-label="Fechar">×</button></div>' +
+      '<div class="modal-body">' +
+        '<div id="ag-erro" role="alert"></div>' +
+        '<div class="field"><label for="ag-nome">Nome do evento <span class="req">*</span></label><input id="ag-nome" type="text" maxlength="80" autocomplete="off" value="' + escHtml(ev ? ev.titulo : '') + '" placeholder="Ex.: Culto de doutrina"></div>' +
+        '<div class="ag-form-linha">' +
+          '<div class="field"><label for="ag-data">Data <span class="req">*</span></label><input id="ag-data" type="date" value="' + escHtml(dataIni) + '"></div>' +
+          '<div class="field"><label for="ag-hora">Horário</label><input id="ag-hora" type="time" value="' + escHtml(ev ? ev.hora : '') + '"></div>' +
+        '</div>' +
+        '<div class="field"><label for="ag-local">Local</label><input id="ag-local" type="text" maxlength="80" autocomplete="off" value="' + escHtml(ev ? ev.local : '') + '" placeholder="Ex.: Templo principal"></div>' +
+        '<div class="field"><label for="ag-desc">Observações</label><textarea id="ag-desc" maxlength="300">' + escHtml(ev ? ev.descricao : '') + '</textarea></div>' +
+      '</div>' +
+      '<div class="modal-footer">' +
+        (ev ? '<button type="button" class="btn btn-danger" onclick="agCancelar(\'' + escHtml(ev.id) + '\')">Cancelar evento</button>' : '') +
+        '<button type="button" class="btn btn-secondary" style="margin-left:auto" onclick="agFechar()">Fechar</button>' +
+        '<button type="button" class="btn btn-primary" id="ag-salvar" onclick="agSalvar(\'' + (ev ? escHtml(ev.id) : '') + '\')">Salvar</button>' +
+      '</div>' +
+    '</div>';
+  requestAnimationFrame(function () { ov.classList.add('open'); var f = document.getElementById('ag-nome'); if (f) f.focus(); });
+  ov.onclick = function (e) { if (e.target === ov) agFechar(); };
+}
+function agFechar() {
+  var ov = document.getElementById('ag-overlay');
+  if (!ov) return;
+  ov.classList.remove('open');
+  setTimeout(function () { if (!ov.classList.contains('open')) ov.innerHTML = ''; }, 280);
+}
+function _agMsg(t) { var e = document.getElementById('ag-erro'); if (!e) return; e.textContent = t || ''; e.classList.toggle('on', !!t); }
+
+function agSalvar(id) {
+  var dados = {
+    id: id || '',
+    titulo: document.getElementById('ag-nome').value,
+    data: document.getElementById('ag-data').value,
+    hora: document.getElementById('ag-hora').value,
+    local: document.getElementById('ag-local').value,
+    descricao: document.getElementById('ag-desc').value
+  };
+  if (!String(dados.titulo).trim()) { _agMsg('Informe o nome do evento.'); return; }
+  if (!dados.data) { _agMsg('Informe a data do evento.'); return; }
+  var b = document.getElementById('ag-salvar'); b.disabled = true; _agMsg('');
+  google.script.run
+    .withSuccessHandler(function (res) {
+      if (!res || !res.success) { b.disabled = false; _agMsg((res && res.error) || 'Não foi possível salvar o evento.'); return; }
+      agFechar();
+      showToast(id ? 'Evento atualizado.' : 'Evento agendado.', 'success');
+      AG.sel = ''; AG.mes = dados.data.slice(0, 7);
+      _agCarregar();
+    })
+    .withFailureHandler(function () { b.disabled = false; _agMsg('Sem conexão com o servidor. Tente novamente.'); })
+    .ag_salvar(App.session.token, dados);
+}
+
+function agCancelar(id) {
+  var ev = AG.itens.filter(function (e) { return e.id === id; })[0];
+  if (!ev) return;
+  showConfirm('O evento <b>' + escHtml(ev.titulo) + '</b> deixa de aparecer na agenda.', { title: 'Cancelar evento?', confirmLabel: 'Cancelar evento', cancelLabel: 'Manter' }).then(function (ok) {
+    if (!ok) return;
+    google.script.run
+      .withSuccessHandler(function (res) {
+        if (!res || !res.success) { showToast((res && res.error) || 'Não foi possível cancelar o evento.', 'error'); return; }
+        agFechar(); showToast('Evento cancelado.', 'success'); AG.sel = ''; _agCarregar();
+      })
+      .withFailureHandler(function () { showToast('Sem conexão com o servidor.', 'error'); })
+      .ag_remover(App.session.token, id);
+  });
 }
 
 /* ── HELPERS ── */
