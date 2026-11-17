@@ -30,6 +30,7 @@ var Config = (function () {
     { Chave: 'CNPJ_IGREJA',    Valor: '',          Descricao: 'CNPJ da igreja, impresso na carteirinha (opcional)' },
     { Chave: 'MARCA_DAGUA_URL', Valor: '',         Descricao: 'Avançado: link da marca d\'água da carteirinha (https://). A imagem enviada pela tela Identidade tem prioridade' },
     { Chave: 'ASSINATURA_URL', Valor: '',          Descricao: 'Avançado: link da assinatura do pastor (https://). A imagem enviada pela tela Identidade tem prioridade' },
+    { Chave: 'ATALHOS_OCULTOS', Valor: '', Descricao: 'Atalhos escondidos nas barras dos módulos (JSON, ex.: {"membros":["cartas"]}). Mude pela tela Painel de controle > Atalhos' },
     { Chave: 'PASTA_FOTOS',    Valor: PASTA_FOTOS_PADRAO, Descricao: 'Nome da pasta do Google Drive onde as fotos dos membros são guardadas (criada automaticamente)' },
     { Chave: 'URL_APP',        Valor: '',          Descricao: 'Link oficial do sistema (Implantar > Gerenciar implantações > URL do app da Web, termina em /exec). Usado no QR Code do cartão. Vazio = o sistema descobre sozinho' },
     { Chave: 'MODULOS_ATIVOS', Valor: '',          Descricao: 'Módulos liberados, separados por vírgula, ex.: membros. Vazio = todos os módulos instalados' }
@@ -80,6 +81,35 @@ var Config = (function () {
   var MODELOS_CARTAO = ['classico', 'lateral', 'faixa', 'diagonal'];
   function _modeloCartao(v) { v = String(v || '').trim().toLowerCase(); return MODELOS_CARTAO.indexOf(v) >= 0 ? v : 'classico'; }
 
+  // Atalhos escondidos por módulo: { chaveDoModulo: [idsDosAtalhos] } (sempre um objeto válido)
+  function atalhosOcultos() {
+    var bruto = {};
+    try { bruto = JSON.parse(get('ATALHOS_OCULTOS', '') || '{}'); } catch (e) { bruto = {}; }
+    var out = {};
+    if (!bruto || typeof bruto !== 'object' || Array.isArray(bruto)) return out;
+    Object.keys(bruto).forEach(function (k) {
+      if (!/^[a-z0-9_-]{1,40}$/i.test(k) || !Array.isArray(bruto[k])) return;
+      var ids = bruto[k].map(String).filter(function (i) { return /^[a-z0-9_-]{1,40}$/i.test(i); });
+      if (ids.length) out[k] = ids;
+    });
+    return out;
+  }
+  // Grava o mapa (já limpo) na chave ATALHOS_OCULTOS. Devolve o mapa gravado.
+  function salvarAtalhos(mapa) {
+    var limpo = {};
+    Object.keys(mapa || {}).forEach(function (k) {
+      if (!/^[a-z0-9_-]{1,40}$/i.test(k) || !Array.isArray(mapa[k])) return;
+      var ids = mapa[k].map(String).filter(function (i) { return /^[a-z0-9_-]{1,40}$/i.test(i); });
+      if (ids.length) limpo[k] = ids;
+    });
+    var valor = Object.keys(limpo).length ? JSON.stringify(limpo) : '';
+    var ultima = null;
+    _linhas().forEach(function (r) { if (String(r.Chave).trim() === 'ATALHOS_OCULTOS') ultima = r; });
+    if (ultima) Util.updateRow('Config', ultima._rowIndex, { Chave: ultima.Chave, Valor: valor, Descricao: ultima.Descricao, AtualizadoEm: Util.now() });
+    else Util.insertRow('Config', { Chave: 'ATALHOS_OCULTOS', Valor: valor, Descricao: '', AtualizadoEm: Util.now() });
+    return limpo;
+  }
+
   // Dados de identidade usados pela tela (sempre válidos, mesmo sem Config)
   function identidade() {
     var nome = get('NOME_IGREJA', NOME_PADRAO);
@@ -96,7 +126,8 @@ var Config = (function () {
       endereco:    get('ENDERECO_IGREJA', ''),
       cnpj:        get('CNPJ_IGREJA', ''),
       marcaDagua:  _imagem('marcaDagua', 'MARCA_DAGUA_URL'),
-      assinatura:  _imagem('assinatura', 'ASSINATURA_URL')
+      assinatura:  _imagem('assinatura', 'ASSINATURA_URL'),
+      atalhosOcultos: atalhosOcultos()
     };
   }
 
@@ -214,7 +245,7 @@ var Config = (function () {
   }
 
   return {
-    get: get, identidade: identidade, iniciais: iniciais, iconeUrl: iconeUrl, identidadeJson: identidadeJson, identidadeCompleta: identidadeCompleta, salvar: salvar, validar: validar, remetente: remetente, urlApp: urlApp,
+    get: get, identidade: identidade, iniciais: iniciais, iconeUrl: iconeUrl, identidadeJson: identidadeJson, atalhosOcultos: atalhosOcultos, salvarAtalhos: salvarAtalhos, identidadeCompleta: identidadeCompleta, salvar: salvar, validar: validar, remetente: remetente, urlApp: urlApp,
     garantirChaves: garantirChaves, chaves: CHAVES, pastaFotos: function () { return get('PASTA_FOTOS', PASTA_FOTOS_PADRAO); }
   };
 })();

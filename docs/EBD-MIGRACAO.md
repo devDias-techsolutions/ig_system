@@ -82,7 +82,9 @@ Origem: `modulos-pendentes/escola-dominical/` (legado, mantido como referência)
 - **Atividades recentes:** hook `atividade(perfil)` → `Modulos.atividades` → Dashboard (E4a). Barra proporcional removida dos KPIs em lista.
 - Não implementado de propósito: "limpar dados" do sistema original.
 
-## Atalhos personalizáveis (padrão único)
-- Helper global `Atalhos` (`index.html`): `registrar`, `filtrar`, `botao`, `abrir`. Cada usuário escolhe quais atalhos do módulo exibir (modal "Personalizar atalhos"); guardado no aparelho (`localStorage`, chave por e-mail + módulo). A tela inicial do módulo é fixa; "Mostrar todos" restaura.
-- Usado em Membros (`'membros'`) e EBD (`'ebd'`). Para um novo módulo: `Atalhos.registrar(chave, itens, fixos, refazerNav)`, `Atalhos.filtrar(...)` e `Atalhos.botao(chave)` no fim da `nav`; classe `atl-nav` na `nav`.
-- Estilo único (`.atl-nav`, em `index.html`): não selecionado = fundo branco + contorno na cor da igreja; selecionado = sólido.
+## Painel de controle e atalhos (padrão único)
+- **Painel de controle** (`_painel.html`, só admin): único item "Administração" do menu; cartões Usuários, Identidade, Alertas e Atalhos. As telas filhas usam `adminBarHtml` (caminho "Painel de controle / Tela"). Secretaria continua com "Usuários" no menu.
+- **Atalhos** (`painel-atalhos`): o admin liga/desliga, por módulo, os atalhos da barra; vale para todos. Guardado na Config (`ATALHOS_OCULTOS`, JSON `{chave:[ids]}`), entregue ao cliente em `IDENTIDADE.atalhosOcultos`; gravação por `idt_salvarAtalhos` (`Config.salvarAtalhos`).
+- **Novo módulo:** `Atalhos.registrar(chave, rota, nome, itens, fixos)` ao carregar e `Atalhos.filtrar(chave, itens, fixos)` ao montar a barra (classe `atl-nav` na `nav`). A tela inicial do módulo é sempre visível.
+- **Estilo único** (`.atl-nav`, em `index.html`): não selecionado = fundo branco + contorno na cor da igreja; selecionado = sólido.
+- A bolinha com as iniciais saiu do topo; "Alterar senha" está no menu ⋮ e "Sair" no rodapé do menu sanduíche.

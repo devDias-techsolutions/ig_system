@@ -146,13 +146,13 @@ test('Home: conteúdo do nome da igreja é escapado (sem HTML injetado)', async 
 });
 
 // ── Navegação: sidebar no desktop, menu inferior no celular ──
-test('desktop: sidebar com Início, módulos, Usuários e Identidade; o item ativo acompanha a tela', async () => {
+test('desktop: sidebar com Início, módulos e Painel de controle; o item ativo acompanha a tela', async () => {
   const { page, erros } = await comoAdmin();
   assert.ok(await page.isVisible('#app-sidebar'));
   assert.equal(await page.locator('#app-bnav, .app-bnav').count(), 0, 'não existe mais menu inferior');
   assert.ok(!(await page.isVisible('#main-topnav .nav-burger')));
   const itens = await page.$$eval('#app-sidebar .sb-item', (els) => els.map((e) => e.innerText.trim()));
-  assert.deepEqual(itens, ['Início', 'Membros', 'Escola Dominical', 'Usuários', 'Identidade', 'Alertas']);
+  assert.deepEqual(itens, ['Início', 'Membros', 'Escola Dominical', 'Painel de controle']);
   assert.equal(await page.$eval('#app-sidebar .sb-item.active', (e) => e.innerText.trim()), 'Início');
   await page.click('#app-sidebar .sb-item:has-text("Membros")');
   await esperarTela(page, 'membros');
@@ -167,7 +167,7 @@ test('celular: sem menu inferior; sanduíche abre a gaveta e navega', async () =
   assert.equal(await page.locator('.app-bnav').count(), 0);
   assert.ok(!(await page.isVisible('#app-sidebar')), 'gaveta fechada');
   const atalhos = await page.$$eval('.hm-mods .hm-mod', (els) => els.map((e) => e.innerText.trim()));
-  assert.deepEqual(atalhos, ['Membros', 'Escola Dominical', 'Usuários', 'Identidade', 'Alertas']);
+  assert.deepEqual(atalhos, ['Membros', 'Escola Dominical', 'Painel de controle']);
   await page.click('.hm-burger');
   await page.waitForSelector('#app-sidebar', { state: 'visible' });
   await page.click('#app-sidebar .sb-item:has-text("Membros")');
@@ -175,7 +175,7 @@ test('celular: sem menu inferior; sanduíche abre a gaveta e navega', async () =
   await page.waitForSelector('#app-sidebar', { state: 'hidden' }); // gaveta fecha ao navegar
   await page.click('#main-topnav .nav-burger');
   await page.waitForSelector('#app-sidebar', { state: 'visible' });
-  assert.deepEqual(await page.$$eval('#app-sidebar .sb-item', (els) => els.map((e) => e.innerText.trim())), ['Início', 'Membros', 'Escola Dominical', 'Usuários', 'Identidade', 'Alertas']);
+  assert.deepEqual(await page.$$eval('#app-sidebar .sb-item', (els) => els.map((e) => e.innerText.trim())), ['Início', 'Membros', 'Escola Dominical', 'Painel de controle']);
   await page.click('#nav-scrim', { position: { x: 380, y: 400 } });
   await page.waitForSelector('#app-sidebar', { state: 'hidden' });
   assert.deepEqual(erros, []);

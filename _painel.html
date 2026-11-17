@@ -1,0 +1,103 @@
+<style>
+/* PAINEL DE CONTROLE — só o específico; estrutura vem do Layout System (.page, .panel, .action-bar) */
+.pn-grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+@media (min-width: 720px) { .pn-grade { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.pn-card { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-1); text-align: left; padding: var(--sp-4); background: var(--bg-glass-strong); border: 1px solid var(--border); border-radius: var(--r-4); cursor: pointer; font: inherit; color: var(--text); transition: border-color .2s; }
+.pn-card:hover { border-color: var(--teal); }
+.pn-card:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+.pn-ic { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: var(--teal); color: #fff; margin-bottom: var(--sp-2); }
+.pn-ic i, .pn-ic svg { width: 22px; height: 22px; }
+.pn-nome { font-size: var(--fs-md); font-weight: 800; }
+.pn-desc { font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.4; }
+.pn-sec { margin: var(--sp-4) 0 var(--sp-2); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); }
+.pn-sec:first-child { margin-top: 0; }
+</style>
+
+<script>
+// ── Painel de controle (só admin): porta de entrada das telas administrativas ──
+var PN_CARTOES = [
+  ['usuarios', 'shield-check', 'Usuários', 'Quem acessa e o que cada perfil pode fazer'],
+  ['identidade', 'palette', 'Identidade', 'Nome, cor, logo e dados da igreja'],
+  ['alertas', 'bell', 'Alertas', 'Avisos automáticos por e-mail'],
+  ['painel-atalhos', 'layout-grid', 'Atalhos', 'Quais atalhos cada módulo exibe']
+];
+var PN = { oculto: {} };
+
+function renderPainel() {
+  if (!App.session) { navigateTo('login'); return; }
+  renderView(
+    moduleBarHtml('Painel de controle', []) +
+    '<div class="page page-narrow">' +
+      '<div class="page-head"><h1 class="page-title">Painel de controle</h1>' +
+      '<p class="page-sub">Ajustes gerais do sistema. Só o administrador vê esta tela.</p></div>' +
+      '<div class="pn-grade">' + PN_CARTOES.map(function (c) {
+        return '<button type="button" class="pn-card" onclick="navigateTo(\'' + c[0] + '\')">' +
+          '<span class="pn-ic"><i data-lucide="' + c[1] + '"></i></span>' +
+          '<span class="pn-nome">' + c[2] + '</span><span class="pn-desc">' + c[3] + '</span></button>';
+      }).join('') + '</div>' +
+    '</div>');
+  if (window.lucide) lucide.createIcons();
+}
+
+function renderPainelAtalhos() {
+  if (!App.session) { navigateTo('login'); return; }
+  var mods = Atalhos.modulos('admin');
+  PN.oculto = {};
+  mods.forEach(function (m) { PN.oculto[m.chave] = Atalhos.ocultos(m.chave).slice(); });
+  PN.orig = JSON.stringify(PN.oculto);
+  var corpo = mods.length ? mods.map(function (m) {
+    return '<div class="pn-sec">' + escHtml(m.nome) + '</div><div class="atl-lista">' + m.itens.map(function (t) {
+      var fixo = m.fixos.indexOf(t[0]) !== -1;
+      return '<label class="sw sw-row"><input type="checkbox" data-mod="' + escHtml(m.chave) + '" data-id="' + escHtml(t[0]) + '"' +
+        (fixo || PN.oculto[m.chave].indexOf(t[0]) === -1 ? ' checked' : '') + (fixo ? ' disabled' : '') + ' onchange="pnMarcar(this)">' +
+        '<span class="sw-track"></span><span class="sw-info"><span class="sw-txt">' + escHtml(t[2]) + '</span>' +
+        (fixo ? '<span class="sw-sub">Tela inicial, sempre visível</span>' : '') + '</span></label>';
+    }).join('') + '</div>';
+  }).join('') : '<p class="panel-text" style="margin:0">Nenhum módulo com atalhos instalado.</p>';
+  renderView(
+    moduleBarHtml('Atalhos', [], 'painel', 'Painel de controle') +
+    '<div class="page page-narrow">' +
+      '<div class="page-head"><h1 class="page-title">Atalhos dos módulos</h1>' +
+      '<p class="page-sub">Escolha o que aparece na barra de atalhos de cada módulo. Vale para todos os usuários.</p></div>' +
+      '<section class="panel">' + corpo + '</section>' +
+      '<div class="action-bar"><span class="action-bar-status" id="pn-status">Tudo salvo</span>' +
+        '<span class="action-bar-btns">' +
+          '<button type="button" class="btn btn-ghost btn-sm" onclick="pnTodos()">Mostrar todos</button>' +
+          '<button type="button" class="btn btn-primary btn-sm" id="pn-salvar" onclick="pnSalvar()" disabled>Salvar</button>' +
+        '</span></div>' +
+    '</div>');
+}
+
+function pnMarcar(inp) {
+  var m = inp.getAttribute('data-mod'), id = inp.getAttribute('data-id'), lista = PN.oculto[m] || [];
+  lista = lista.filter(function (x) { return x !== id; });
+  if (!inp.checked) lista.push(id);
+  PN.oculto[m] = lista;
+  _pnAtualizar();
+}
+function _pnAtualizar() {
+  var mudou = JSON.stringify(PN.oculto) !== PN.orig;
+  var b = document.getElementById('pn-salvar'), s = document.getElementById('pn-status');
+  if (b) b.disabled = !mudou || !!PN.ocupado;
+  if (s) s.textContent = PN.ocupado ? 'Salvando...' : (mudou ? 'Alterações não salvas' : 'Tudo salvo');
+}
+function pnTodos() {
+  document.querySelectorAll('.atl-lista input[data-id]').forEach(function (i) { i.checked = true; });
+  Object.keys(PN.oculto).forEach(function (k) { PN.oculto[k] = []; });
+  _pnAtualizar();
+}
+function pnSalvar() {
+  PN.ocupado = true; _pnAtualizar();
+  google.script.run
+    .withFailureHandler(function () { PN.ocupado = false; _pnAtualizar(); showToast('Falha de conexão. Tente novamente.', 'error'); })
+    .withSuccessHandler(function (res) {
+      PN.ocupado = false;
+      if (res && res.success) {
+        IDENTIDADE.atalhosOcultos = res.data.atalhosOcultos || {};
+        PN.orig = JSON.stringify(PN.oculto); _pnAtualizar();
+        showToast('Atalhos salvos.', 'success');
+      } else { _pnAtualizar(); showToast((res && res.error) || 'Não foi possível salvar.', 'error'); }
+    })
+    .idt_salvarAtalhos(App.session.token, PN.oculto);
+}
+</script>

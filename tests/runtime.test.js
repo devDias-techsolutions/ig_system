@@ -112,7 +112,7 @@ test('config: sem a aba Config a identidade tem valores neutros (nunca derruba a
   const id = JSON.parse(env.run('Config.identidadeJson()'));
   assert.deepEqual(id, {
     nome: 'Minha Igreja', nomeCurto: 'Minha Igreja', lema: '', corPrimaria: '', cartaoModelo: 'classico', logoUrl: '',
-    pastor: '', cargoPastor: 'Pastor Presidente', endereco: '', cnpj: '', marcaDagua: '', assinatura: '',
+    pastor: '', cargoPastor: 'Pastor Presidente', endereco: '', cnpj: '', marcaDagua: '', assinatura: '', atalhosOcultos: {},
   });
 });
 
@@ -1333,4 +1333,15 @@ test('alertas: sem as abas da Escola Dominical a fonte aparece indisponível e n
   const env = envAlertas({ Membros: [COLS_MB] });
   const info = env.run("alertas_obter('tok')").data;
   assert.equal(info.fontes.find((f) => f.id === 'escola-dominical').disponivel, false);
+});
+
+test('config: atalhos escondidos — salva só chaves/ids válidos, lê de volta e vazio apaga', () => {
+  const env = envComConfig({});
+  env.ctx.__m = { membros: ['cartas', 'x y', 5], 'lixo!': ['a'], ebd: 'nao-lista', vazio: [] };
+  const gravado = JSON.parse(JSON.stringify(env.run('Config.salvarAtalhos(__m)')));
+  assert.deepEqual(gravado, { membros: ['cartas', '5'] });
+  assert.deepEqual(JSON.parse(env.run('Config.identidadeJson()')).atalhosOcultos, { membros: ['cartas', '5'] });
+  env.run('Config.salvarAtalhos({})');
+  assert.equal(env.run("Config.get('ATALHOS_OCULTOS', 'padrao')"), 'padrao'); // vazio = sem escondidos
+  assert.deepEqual(JSON.parse(env.run('Config.identidadeJson()')).atalhosOcultos, {});
 });

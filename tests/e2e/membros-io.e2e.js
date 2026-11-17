@@ -76,32 +76,3 @@ test('membros: "Importar da EBD" aparece no novo membro (módulo instalado) e pr
   assert.equal(await page.inputValue('#mbf-email'), 'aluno@x.com');
   assert.deepEqual(erros, []);
 });
-
-test('atalhos: personalizar oculta/mostra, a tela inicial é fixa e o estilo não selecionado é branco com contorno', async () => {
-  const backend = criarBackend();
-  const { page, erros } = await irParaMembros(backend);
-  assert.equal(await page.locator('.mb-atalhos .hm-mod:not(.atl-cfg)').count(), 3);
-  const estilo = await page.evaluate(() => { const i = document.querySelectorAll('.mb-atalhos .hm-mod:not(.active) .hm-mod-icon')[0]; const c = getComputedStyle(i); return [c.borderTopWidth, c.borderTopStyle]; });
-  assert.equal(estilo[1], 'solid');
-  assert.ok(parseFloat(estilo[0]) >= 1);
-  await page.click('.mb-atalhos .atl-cfg');
-  await page.waitForSelector('#atl-overlay.open');
-  assert.equal(await page.locator('#atl-overlay input[data-id="lista"]').isDisabled(), true);
-  await page.locator('#atl-overlay input[data-id="cartas"]').evaluate((i) => i.click());
-  await page.click('#atl-overlay button:has-text("Salvar")');
-  await page.waitForFunction(() => document.querySelectorAll('.mb-atalhos .hm-mod:not(.atl-cfg)').length === 2);
-  await page.reload();
-  await page.waitForFunction(() => window.App && App.session, null, { timeout: 15000 });
-  await page.waitForSelector('#app.ready');
-  await esperarTela(page, 'home');
-  await page.waitForTimeout(1500); // a inicialização ainda pode redesenhar a Início
-  await page.evaluate(() => navigateTo('membros'));
-  await esperarTela(page, 'membros');
-  await page.waitForSelector('.mb-atalhos');
-  assert.equal(await page.locator('.mb-atalhos .hm-mod:not(.atl-cfg)').count(), 2, 'preferência persiste');
-  await page.evaluate(() => Atalhos.abrir('membros'));
-  await page.waitForSelector('#atl-overlay.open');
-  await page.click('#atl-overlay button:has-text("Mostrar todos")');
-  await page.waitForFunction(() => document.querySelectorAll('.mb-atalhos .hm-mod:not(.atl-cfg)').length === 3);
-  assert.deepEqual(erros, []);
-});

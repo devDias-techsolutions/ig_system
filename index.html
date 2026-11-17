@@ -1228,7 +1228,6 @@ body.nav-on #topnav-usuarios-btn { display: none !important; }
 .atl-nav .hm-mod:not(.active) .hm-mod-icon { background:#fff; color:var(--teal); border:1.5px solid var(--teal); box-shadow:none; }
 [data-theme="dark"] .atl-nav .hm-mod:not(.active) .hm-mod-icon { background:var(--bg2); }
 .atl-nav .hm-mod.active .hm-mod-name { color:var(--teal); font-weight:800; }
-.atl-nav .atl-cfg .hm-mod-icon { border-style:dashed; }
 .atl-lista { display:flex; flex-direction:column; gap:var(--sp-2); }
 .sw { display:flex; align-items:center; gap:12px; min-height:44px; padding:0 var(--sp-3); border-radius:var(--radius-sm); cursor:pointer; user-select:none;
   background:var(--bg-glass); border:1px solid var(--border); transition:border-color .2s, background .2s; }
@@ -1294,6 +1293,9 @@ body.nav-on #topnav-usuarios-btn { display: none !important; }
         <button class="user-dd-item" onclick="closeMoreMenu();toggleTheme()">
           <i data-lucide="moon" class="ic-15"></i> Alternar tema
         </button>
+        <button class="user-dd-item" onclick="closeMoreMenu();showTrocarSenha()">
+          <i data-lucide="key" class="ic-15"></i> Alterar senha
+        </button>
         <!-- Slot: ações secundárias do módulo ativo (alertas, importador, etc.) -->
         <div id="topnav-more-module-items"></div>
       </div>
@@ -1303,30 +1305,6 @@ body.nav-on #topnav-usuarios-btn { display: none !important; }
       <i data-lucide="shield-check" style="width:15px;height:15px;color:var(--teal);flex-shrink:0"></i>
       <span>Usuários</span>
     </button>
-    <div class="topnav-avatar-wrap">
-      <button class="topnav-avatar-btn" onclick="toggleUserDropdown()" id="avatar-btn" title="">
-        <div class="avatar" id="topnav-initials" style="width:34px;height:34px;font-size:12px"></div>
-      </button>
-      <div class="user-dropdown" id="user-dropdown">
-        <div class="user-dd-header">
-          <div class="user-dd-nome"  id="topnav-dd-nome"></div>
-          <div class="user-dd-email" id="topnav-dd-email"></div>
-          <div style="margin-top:8px">
-            <span class="badge badge-teal" id="topnav-dd-badge"></span>
-          </div>
-        </div>
-        <button class="user-dd-item" onclick="closeDropdown();navigateTo('home')">
-          <i data-lucide="layout-dashboard" class="ic-15"></i> Dashboard
-        </button>
-        <button class="user-dd-item" onclick="closeDropdown();showTrocarSenha()">
-          <i data-lucide="key" class="ic-15"></i> Alterar senha
-        </button>
-        <hr class="divider" style="margin:6px 0">
-        <button class="user-dd-item danger" onclick="handleLogout()">
-          <i data-lucide="log-out" class="ic-15"></i> Sair
-        </button>
-      </div>
-    </div>
   </div>
 </header>
 
@@ -1432,7 +1410,9 @@ var VIEWS = {
   home:              'renderHome',
   'usuarios':        'renderUsuarios',
   'identidade':      'renderIdentidade',
-  'alertas':         'renderAlertas'
+  'alertas':         'renderAlertas',
+  'painel':          'renderPainel',
+  'painel-atalhos':  'renderPainelAtalhos'
 };
 
 // ── PERMISSÕES POR ROTA ───────────────────────────────────
@@ -1442,11 +1422,13 @@ var ROUTE_PERMISSIONS = {
   'home':              ['admin', 'secretaria'],
   'usuarios':          ['admin', 'secretaria'],
   'identidade':        ['admin'],
-  'alertas':           ['admin']
+  'alertas':           ['admin'],
+  'painel':            ['admin'],
+  'painel-atalhos':    ['admin']
 };
 
 // Views que exigem sessão ativa (topnav visível nestas)
-var authRequired = ['home', 'usuarios', 'identidade', 'alertas'];
+var authRequired = ['home', 'usuarios', 'identidade', 'alertas', 'painel', 'painel-atalhos'];
 
 MODULOS.forEach(function (m) {
   VIEWS[m.rota] = m.render;
@@ -1537,14 +1519,19 @@ function _kpiGroup(o) {
   '</section>';
 }
 
-function moduleBarHtml(nome, tags, voltarView) {
+function moduleBarHtml(nome, tags, voltarView, raiz) {
   var v = voltarView || 'home';
   return '<div class="module-bar no-print">' +
     '<button class="module-bar-back" onclick="navigateTo(\'' + v + '\')" title="Voltar"><i data-lucide="arrow-left" class="ic-14"></i></button>' +
-    '<span class="module-bar-app" onclick="navigateTo(\'' + v + '\')">Gestão Ministerial</span>' +
+    '<span class="module-bar-app" onclick="navigateTo(\'' + v + '\')">' + escHtml(raiz || 'Gestão Ministerial') + '</span>' +
     '<span class="module-bar-sep">/</span><span class="module-bar-name">' + escHtml(nome) + '</span>' +
     ((tags && tags.length) ? '<div class="module-bar-tags">' + tags.map(function (t) { return '<span class="module-bar-tag">' + escHtml(t) + '</span>'; }).join('') + '</div>' : '') +
     '</div>';
+}
+// Barra das telas administrativas: para o admin, o caminho passa pelo Painel de controle
+function adminBarHtml(nome, tags, voltarSecretaria) {
+  if (App.session && App.session.perfil === 'admin') return moduleBarHtml(nome, tags, 'painel', 'Painel de controle');
+  return moduleBarHtml(nome, tags, voltarSecretaria);
 }
 // Abas padrão. itens: [[id, icone, rotulo], ...]; cada botão chama fn('id') e tem id="prefixo+id"
 function tabsHtml(itens, ativo, fn, prefixoId) {
@@ -1593,64 +1580,26 @@ function escHtml(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// ── ATALHOS: cada usuário escolhe quais atalhos de um módulo exibir (guardado neste aparelho) ──
+// ── ATALHOS: o admin escolhe (Painel de controle > Atalhos) o que cada módulo exibe, para todos ──
+// Cada módulo registra suas telas ao carregar; a barra de atalhos do módulo passa por filtrar().
 var Atalhos = (function () {
   var reg = {};
-  function _k(chave) {
-    var u = (App.session && App.session.email) || 'anon'; // e-mail existe no login e na sessão restaurada (o id, só na restaurada)
-    return 'atalhos:' + u + ':' + chave;
-  }
   function _ocultos(chave) {
-    try { var v = JSON.parse(localStorage.getItem(_k(chave)) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; }
-  }
-  function _gravar(chave, lista) {
-    try { if (lista.length) localStorage.setItem(_k(chave), JSON.stringify(lista)); else localStorage.removeItem(_k(chave)); } catch (e) {}
+    var m = (typeof IDENTIDADE !== 'undefined' && IDENTIDADE.atalhosOcultos) || {};
+    return Array.isArray(m[chave]) ? m[chave] : [];
   }
   // itens: [[id, icone, rotulo]]; fixos: ids que nunca somem (tela inicial do módulo)
   function filtrar(chave, itens, fixos) {
     var o = _ocultos(chave);
     return itens.filter(function (t) { return o.indexOf(t[0]) === -1 || (fixos || []).indexOf(t[0]) !== -1; });
   }
-  function registrar(chave, itens, fixos, aoSalvar) { reg[chave] = { itens: itens, fixos: fixos || [], aoSalvar: aoSalvar }; }
-  function botao(chave) {
-    return '<button type="button" class="hm-mod atl-cfg" onclick="Atalhos.abrir(\'' + chave + '\')" aria-label="Personalizar atalhos">' +
-      '<div class="hm-mod-icon"><i data-lucide="sliders-horizontal"></i></div><div class="hm-mod-name">Atalhos</div></button>';
+  function registrar(chave, rota, nome, itens, fixos) { reg[chave] = { chave: chave, rota: rota, nome: nome, itens: itens, fixos: fixos || [] }; }
+  // módulos registrados que estão instalados e o perfil enxerga
+  function modulos(perfil) {
+    var rotas = modulosDoPerfil(perfil).map(function (m) { return m.rota; });
+    return Object.keys(reg).map(function (k) { return reg[k]; }).filter(function (r) { return rotas.indexOf(r.rota) !== -1; });
   }
-  function abrir(chave) {
-    var r = reg[chave]; if (!r) return;
-    var o = _ocultos(chave);
-    var ov = document.getElementById('atl-overlay');
-    if (!ov) { ov = document.createElement('div'); ov.id = 'atl-overlay'; ov.className = 'modal-overlay'; document.body.appendChild(ov); }
-    ov.onclick = function (e) { if (e.target === ov) fechar(); };
-    ov.setAttribute('data-chave', chave);
-    ov.innerHTML = '<div class="modal-box"><div class="modal-header"><div><h3>Personalizar atalhos</h3>' +
-      '<div class="modal-sub">Escolha o que aparece na barra. Fica salvo neste aparelho, só para você.</div></div></div>' +
-      '<div class="modal-body"><div class="atl-lista">' + r.itens.map(function (t) {
-        var fixo = r.fixos.indexOf(t[0]) !== -1;
-        return '<label class="sw sw-row"><input type="checkbox" data-id="' + escHtml(t[0]) + '"' + (fixo || o.indexOf(t[0]) === -1 ? ' checked' : '') + (fixo ? ' disabled' : '') + '>' +
-          '<span class="sw-track"></span><span class="sw-info"><span class="sw-txt">' + escHtml(t[2]) + '</span>' +
-          (fixo ? '<span class="sw-sub">Tela inicial, sempre visível</span>' : '') + '</span></label>';
-      }).join('') + '</div></div>' +
-      '<div class="modal-footer"><button class="btn btn-secondary" onclick="Atalhos.restaurar()">Mostrar todos</button>' +
-      '<button class="btn btn-primary" onclick="Atalhos.salvar()">Salvar</button></div></div>';
-    requestAnimationFrame(function () { ov.classList.add('open'); });
-  }
-  function fechar() { var ov = document.getElementById('atl-overlay'); if (ov) ov.classList.remove('open'); }
-  function _aplicar(chave, ocultos) {
-    _gravar(chave, ocultos); fechar();
-    var r = reg[chave]; if (r && r.aoSalvar) r.aoSalvar();
-  }
-  function salvar() {
-    var ov = document.getElementById('atl-overlay'); if (!ov) return;
-    var chave = ov.getAttribute('data-chave'), ocultos = [];
-    ov.querySelectorAll('input[data-id]').forEach(function (i) { if (!i.checked && !i.disabled) ocultos.push(i.getAttribute('data-id')); });
-    _aplicar(chave, ocultos);
-  }
-  function restaurar() {
-    var ov = document.getElementById('atl-overlay'); if (!ov) return;
-    _aplicar(ov.getAttribute('data-chave'), []);
-  }
-  return { filtrar: filtrar, registrar: registrar, botao: botao, abrir: abrir, fechar: fechar, salvar: salvar, restaurar: restaurar };
+  return { filtrar: filtrar, registrar: registrar, modulos: modulos, ocultos: _ocultos };
 })();
 
 // ── ARQUIVOS: leitura/escrita de CSV, JSON e planilhas (comum a qualquer módulo) ──
@@ -1857,9 +1806,8 @@ function navItens() {
   var itens = [];
   if (ROUTE_PERMISSIONS.home.indexOf(perfil) !== -1) itens.push({ rota: 'home', nome: 'Início', icone: 'layout-dashboard', grupo: 'Principal' });
   modulosDoPerfil(perfil).forEach(function (m) { itens.push({ rota: m.rota, nome: m.nome, icone: m.icone, grupo: 'Módulos' }); });
-  if (ROUTE_PERMISSIONS.usuarios.indexOf(perfil) !== -1) itens.push({ rota: 'usuarios', nome: 'Usuários', icone: 'shield-check', grupo: 'Administração' });
-  if (ROUTE_PERMISSIONS.identidade.indexOf(perfil) !== -1) itens.push({ rota: 'identidade', nome: 'Identidade', icone: 'palette', grupo: 'Administração' });
-  if (ROUTE_PERMISSIONS.alertas.indexOf(perfil) !== -1) itens.push({ rota: 'alertas', nome: 'Alertas', icone: 'bell', grupo: 'Administração' });
+  if (perfil === 'admin') itens.push({ rota: 'painel', nome: 'Painel de controle', icone: 'sliders-horizontal', grupo: 'Administração', filhas: ['painel-atalhos', 'usuarios', 'identidade', 'alertas'] });
+  else if (ROUTE_PERMISSIONS.usuarios.indexOf(perfil) !== -1) itens.push({ rota: 'usuarios', nome: 'Usuários', icone: 'shield-check', grupo: 'Administração' });
   return itens;
 }
 
@@ -1877,7 +1825,8 @@ function renderNav(isAuth) {
   var lista = itens.map(function (it) {
     var cab = '';
     if (it.grupo !== grupo) { grupo = it.grupo; cab = '<div class="sb-group">' + grupo + '</div>'; }
-    return cab + '<button class="sb-item' + (it.rota === atual ? ' active' : '') + '"' + (it.rota === atual ? ' aria-current="page"' : '') +
+    var on = it.rota === atual || (it.filhas || []).indexOf(atual) !== -1;
+    return cab + '<button class="sb-item' + (on ? ' active' : '') + '"' + (on ? ' aria-current="page"' : '') +
       ' onclick="navNavegar(\'' + it.rota + '\')"><i data-lucide="' + it.icone + '"></i><span>' + escHtml(it.nome) + '</span></button>';
   }).join('');
   var nome = App.session.nome || '';
@@ -2345,6 +2294,7 @@ if (document.readyState === 'loading') {
 <?!= include('_usuarios'); ?>
 <?!= include('_identidade'); ?>
 <?!= include('_alertas'); ?>
+<?!= include('_painel'); ?>
 
 </body>
 </html>
