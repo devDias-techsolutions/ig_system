@@ -1188,7 +1188,6 @@ textarea { height: auto; min-height: 88px; padding: var(--sp-3); resize: vertica
   backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);
   z-index: 150; overflow-y: auto;
 }
-[data-theme="light"] .app-sidebar { background: #FFFFFF; }
 .sb-brand { display: flex; align-items: center; gap: var(--sp-3); padding: 0 var(--sp-2) var(--sp-4); border-bottom: 1px solid var(--border); margin-bottom: var(--sp-2); }
 .sb-logo { width: 44px; height: 44px; border-radius: 14px; flex-shrink: 0; overflow: hidden; background: linear-gradient(135deg, var(--teal-dark), var(--teal)); box-shadow: 0 6px 18px var(--teal-glow); }
 .sb-brand-txt { min-width: 0; }
@@ -1219,6 +1218,7 @@ textarea { height: auto; min-height: 88px; padding: var(--sp-3); resize: vertica
 /* Celular: a sidebar vira gaveta (sanduíche); na Início os atalhos também navegam */
 .nav-burger { display: none; flex-shrink: 0; }
 @media (max-width: 1023px) {
+  [data-theme="light"] .app-sidebar { background: #FFFFFF; }
   body.nav-on .nav-burger { display: grid; }
   body.nav-on .app-sidebar {
     display: flex; width: min(300px, 84vw); z-index: 320; transform: translateX(-102%); visibility: hidden;
@@ -1230,9 +1230,29 @@ textarea { height: auto; min-height: 88px; padding: var(--sp-3); resize: vertica
   body.nav-open { overflow: hidden; }
 }
 @media (min-width: 1024px) {
-  body.nav-on .app-sidebar { display: flex; }
-  body.nav-on #app, body.nav-on #main-topnav { margin-left: var(--sidebar-w); }
-  body.nav-on { --gutter: 32px; --gutter-lg: 40px; }
+  /* Painel único: moldura escura na cor da igreja com o menu sobre ela e, ao lado, um painel arredondado
+     (barra superior + conteúdo). A rolagem é do painel, não da página. */
+  html:has(body.nav-on), body.nav-on { height: 100vh; height: 100dvh; overflow: hidden; }
+  body.nav-on { --frame: color-mix(in srgb, var(--teal-dark) 34%, #03090C); --shell-gap: 12px; --panel-left: calc(var(--sidebar-w) + var(--shell-gap)); background: var(--frame); --gutter: 32px; --gutter-lg: 40px; }
+  body.nav-on::before, body.nav-on::after { display: none; }
+  body.nav-on .app-sidebar {
+    display: flex; top: var(--shell-gap); bottom: var(--shell-gap); left: 0; width: calc(var(--sidebar-w) - var(--shell-gap));
+    padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-4); background: transparent; border: 0; backdrop-filter: none; -webkit-backdrop-filter: none;
+    --text: #E8F5F2; --text-muted: rgba(232, 245, 242, .70); --text-dim: rgba(232, 245, 242, .45);
+    --bg-glass: rgba(255, 255, 255, .07); --border: rgba(255, 255, 255, .12); --teal-dim: rgba(255, 255, 255, .12); --teal: #FFFFFF;
+  }
+  body.nav-on .sb-item.active::before { left: calc(-1 * var(--sp-3)); }
+  body.nav-on .sb-foot { background: var(--bg-glass); }
+  body.nav-on #app {
+    position: fixed; z-index: 1; top: calc(var(--shell-gap) + 56px); bottom: var(--shell-gap); left: var(--panel-left); right: var(--shell-gap);
+    margin: 0; overflow-y: auto; overscroll-behavior: contain; background: var(--bg); border-radius: 0 0 var(--r-4) var(--r-4);
+    box-shadow: 0 24px 60px -30px rgba(0, 0, 0, .6);
+  }
+  body.nav-on #main-topnav {
+    position: fixed; top: var(--shell-gap); left: var(--panel-left); right: var(--shell-gap); margin: 0; z-index: 200;
+    border-radius: var(--r-4) var(--r-4) 0 0; box-shadow: none; background: var(--bg);
+  }
+  [data-theme="light"] body.nav-on #main-topnav { background: var(--bg); }
   /* A marca já está na sidebar: a barra superior mostra onde o usuário está (caminho) */
   body.nav-on .topnav-logo-icon, body.nav-on .topnav-brand-txt, body.nav-on .topnav .nav-burger { display: none; }
   body.nav-on .module-bar { display: none; }
@@ -1609,7 +1629,7 @@ function renderView(html) {
   renderNav(isAuth);
 
   // Tela nova começa no topo (senão herda a rolagem da anterior e o topo fica sob a barra)
-  if (App._telaRenderizada !== App.currentView) { window.scrollTo(0, 0); App._telaRenderizada = App.currentView; }
+  if (App._telaRenderizada !== App.currentView) { rolarTopo(); App._telaRenderizada = App.currentView; }
 
   // Limpar slot de ações do módulo anterior
   var slot = document.getElementById('topnav-module-actions');
@@ -1890,6 +1910,11 @@ function renderNav(isAuth) {
 function navNavegar(rota) {
   navFechar();
   if (App.currentView !== rota) navigateTo(rota);
+}
+/* a rolagem é da página (celular) ou do painel #app (desktop) */
+function rolarTopo(suave) {
+  var o = suave ? { top: 0, behavior: 'smooth' } : { top: 0 };
+  window.scrollTo(o); var a = document.getElementById('app'); if (a && a.scrollTo) a.scrollTo(o);
 }
 function navAbrir() { document.body.classList.add('nav-open'); var b = document.querySelector('#app-sidebar .sb-item.active, #app-sidebar .sb-item'); if (b) b.focus(); }
 function navFechar() { document.body.classList.remove('nav-open'); }
