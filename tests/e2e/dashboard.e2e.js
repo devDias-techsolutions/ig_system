@@ -85,14 +85,61 @@ test('topo desktop: sino mostra as pendências dos módulos e o botão de tema a
   assert.deepEqual(erros, []);
 });
 
-test('dashboard desktop: aniversariantes paginados em pontos', async () => {
+test('dashboard desktop: aniversariantes compactos paginados em pontos (6 por página)', async () => {
   const backend = criarBackend();
   const { page, erros } = await entrarComo(backend, 'admin@igreja.test', 'Admin#Teste1');
-  ['Ana', 'Bia', 'Caio', 'Davi', 'Eva'].forEach((n) => membro(backend, n + ' Teste'));
+  ['Ana', 'Bia', 'Caio', 'Davi', 'Eva', 'Fabio', 'Gil', 'Hana'].forEach((n) => membro(backend, n + ' Teste'));
   await recarregarHome(page);
   assert.equal(await page.locator('#aniv-pg button').count(), 2);
-  assert.equal(await page.locator('#aniv-list .hm-aniv').count(), 3);
+  assert.equal(await page.locator('#aniv-list .hm-aniv').count(), 6);
   await page.click('#aniv-pg button:nth-child(2)');
   assert.equal(await page.locator('#aniv-list .hm-aniv').count(), 2);
   assert.deepEqual(erros, []);
 });
+
+test('dashboard desktop: aniversariantes sem registros mostram uma linha só', async () => {
+  const backend = criarBackend();
+  const { page, erros } = await entrarComo(backend, 'admin@igreja.test', 'Admin#Teste1');
+  await recarregarHome(page);
+  assert.match(await page.innerText('#aniv-list'), /Nenhum aniversariante neste mês/);
+  assert.equal(await page.locator('#aniv-pg button').count(), 0);
+  assert.deepEqual(erros, []);
+});
+
+for (const [w, h] of [[1280, 720], [1366, 768], [1920, 1080]]) {
+  test('dashboard desktop ' + w + 'x' + h + ': atividade agrupada por dia, sem rolagem e sem registro cortado', async () => {
+    const backend = criarBackend();
+    const { page, erros } = await entrarComo(backend, 'admin@igreja.test', 'Admin#Teste1');
+    // 8 alunos da EBD criados hoje (4), ontem (2) e há 10 dias (2): viram atividade recente
+    const fmt = (d) => { const z = (n) => String(n).padStart(2, '0'); return z(d.getDate()) + '/' + z(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + z(d.getHours()) + ':' + z(d.getMinutes()) + ':00'; };
+    [0, 0, 0, 0, 1, 1, 10, 10].forEach((dias, i) => {
+      const d = new Date(Date.now() - dias * 864e5 - i * 60e3);
+      backend.env.ctx.__a = { ID: 'al' + i, Nome: 'Aluno ' + i, Ativo: true, CriadoEm: fmt(d) };
+      backend.env.run("Util.insertRow('Alunos', __a)");
+    });
+    await page.setViewportSize({ width: w, height: h });
+    await recarregarHome(page);
+    await page.waitForSelector('#activity-list .activity-item');
+    const r = await page.evaluate(() => {
+      const lista = document.getElementById('activity-list');
+      const box = lista.getBoundingClientRect();
+      const itens = Array.from(lista.querySelectorAll('.activity-item')).map((n) => n.getBoundingClientRect());
+      const aniv = document.getElementById('aniv-list');
+      return {
+        rolaAtividade: lista.scrollHeight > lista.clientHeight + 1,
+        rolaAniv: aniv.scrollHeight > aniv.clientHeight + 1,
+        cortado: itens.some((b) => b.bottom > box.bottom + 1),
+        n: itens.length,
+        grupos: Array.from(lista.querySelectorAll('.hm-ativ-g')).map((g) => g.textContent),
+        pontos: document.querySelectorAll('#activity-pg button').length,
+      };
+    });
+    assert.equal(r.rolaAtividade, false, 'atividade sem rolagem');
+    assert.equal(r.rolaAniv, false, 'aniversariantes sem rolagem');
+    assert.equal(r.cortado, false, 'nenhum registro cortado');
+    assert.ok(r.n >= 1 && r.n <= 8, 'até 8 por página, conforme a altura: ' + r.n);
+    assert.equal(r.grupos[0], 'Hoje');
+    assert.notEqual(r.pontos, 1, 'pontos só existem com 2 páginas ou mais (telas altas comportam tudo numa página)');
+    assert.deepEqual(erros, []);
+  });
+}

@@ -48,7 +48,7 @@ var Dashboard = (function () {
 
       atividades.sort(function(a, b) { return b.ts - a.ts; });
 
-      return Util.ok(atividades.slice(0, 5));
+      return Util.ok(atividades.slice(0, 15));
     });
   }
 
