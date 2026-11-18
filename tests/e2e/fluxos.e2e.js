@@ -89,7 +89,7 @@ test('Home: nome, lema e cor da igreja vêm da aba Config; sem logo aparecem as 
   assert.equal(await page.textContent('.hm-logo .brand-mark span'), 'VN');
   assert.equal(await page.isVisible('#main-topnav'), true, 'No desktop o Início tem barra superior com o caminho');
   assert.equal(await page.textContent('#topnav-mark span'), 'VN');
-  const cor = await page.evaluate(() => document.documentElement.style.getPropertyValue('--teal').trim());
+  const cor = await page.evaluate(() => document.documentElement.style.getPropertyValue('--accent').trim());
   assert.ok(cor.length === 7 && cor[0] === '#', 'cor da marca aplicada: ' + cor);
   assert.deepEqual(erros, []);
 });
@@ -128,10 +128,10 @@ test('Home: cor muito escura é clareada no tema escuro (legibilidade) e volta a
   const { page } = await abrir(browser, backend);
   await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
   const lum = (h) => { const c = [1, 3, 5].map((i) => parseInt(h.substr(i, 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4))); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
-  const escuro = await page.evaluate(() => document.documentElement.style.getPropertyValue('--teal').trim());
+  const escuro = await page.evaluate(() => document.documentElement.style.getPropertyValue('--accent').trim());
   assert.ok(lum(escuro) >= 0.19, 'no tema escuro a cor precisa ser clareada: ' + escuro);
   await page.evaluate(() => toggleTheme());
-  const claro = await page.evaluate(() => document.documentElement.style.getPropertyValue('--teal').trim());
+  const claro = await page.evaluate(() => document.documentElement.style.getPropertyValue('--accent').trim());
   assert.ok(lum(claro) <= 0.17, 'no tema claro a cor escura serve: ' + claro);
 });
 
