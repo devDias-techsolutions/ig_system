@@ -34,23 +34,29 @@
    TOKENS — CINEMATIC DARK SYSTEM
 ───────────────────────────────────────────── */
 :root {
-  --bg:               #050B10;
-  --bg2:              #08131A;
-  --bg3:              #101C24;
-  --bg4:              #162835;
-  --bg5:              #1E3546;
+  --surface-0:               #050B10;
+  --surface-1:              #08131A;
+  --surface-2:              #101C24;
+  --surface-3:              #162835;
+  --surface-4:              #1E3546;
 
-  --bg-glass:         rgba(17, 27, 34, 0.55);
-  --bg-glass-strong:  rgba(14, 24, 32, 0.85);
-  --bg-elevated:      rgba(20, 32, 42, 0.98);
+  --surface-glass:         rgba(17, 27, 34, 0.55);
+  --surface-glass-strong:  rgba(14, 24, 32, 0.85);
+  --surface-elevated:      rgba(20, 32, 42, 0.98);
 
-  --teal:             #00D9C6;
-  --teal-light:       #00FFF0;
-  --teal-dark:        #00A99C;
-  --teal-dim:         rgba(0, 217, 198, 0.12);
-  --teal-border:      rgba(0, 217, 198, 0.25);
-  --teal-glow:        rgba(0, 217, 198, 0.3);
-  --teal-glow-soft:   rgba(0, 217, 198, 0.08);
+  /* Camada 1 — marca (entrada; vem da aba Config / logo). Componentes não usam estes dois diretamente. */
+  --brand-1:          #00D9C6;
+  --brand-2:          #4DA3FF;
+  /* Camada 2 — semânticos: superfícies (surface-*), texto (text-*), linhas (line-*), destaque (accent-*), estados (ok/warn/danger).
+     aplicarIdentidade() → gerarPaleta() sobrescreve estes valores com a paleta da igreja; os nomes antigos (--bg, --teal…) são apelidos no bloco abaixo. */
+  --accent:             #00D9C6;
+  --accent-fg:        #0B1620;
+  --accent-hi:       #00FFF0;
+  --accent-lo:        #00A99C;
+  --accent-soft:         rgba(0, 217, 198, 0.12);
+  --accent-line:      rgba(0, 217, 198, 0.25);
+  --accent-glow:        rgba(0, 217, 198, 0.3);
+  --accent-glow-soft:   rgba(0, 217, 198, 0.08);
 
   --cyan:             #4DA3FF;
   --purple:           #9B7CFF;
@@ -58,22 +64,22 @@
   --gold:             #D7B15B;
   --gold-dim:         rgba(215, 177, 91, 0.12);
 
-  --success:          #36D399;
-  --success-dim:      rgba(54, 211, 153, 0.12);
+  --ok:          #36D399;
+  --ok-soft:      rgba(54, 211, 153, 0.12);
   --danger:           #FF5E7A;
   --danger-dim:       rgba(255, 94, 122, 0.12);
-  --warning:          #FFC857;
+  --warn:          #FFC857;
 
-  --text:             #F4FBFF;
-  --text-soft:        #D8E5EA;
-  --text-muted:       #88A2AE;
-  --text-dim:         #7F9AA6;
+  --text-1:             #F4FBFF;
+  --text-2:        #D8E5EA;
+  --text-3:       #88A2AE;
+  --text-4:         #7F9AA6;
 
-  --border:           rgba(255, 255, 255, 0.08);
-  --border2:          rgba(255, 255, 255, 0.12);
-  --border-strong:    rgba(255, 255, 255, 0.18);
+  --line:           rgba(255, 255, 255, 0.08);
+  --line-2:          rgba(255, 255, 255, 0.12);
+  --line-strong:    rgba(255, 255, 255, 0.18);
 
-  --glass-line:       rgba(255, 255, 255, 0.06);
+  --line-glass:       rgba(255, 255, 255, 0.06);
 
   --shadow-sm:        0 4px 18px rgba(0, 0, 0, 0.3);
   --shadow:           0 12px 40px rgba(0, 0, 0, 0.5);
@@ -82,14 +88,14 @@
   --shadow-glow:
     0 0 0 1px rgba(255, 255, 255, 0.03),
     0 12px 48px rgba(0, 0, 0, 0.5),
-    0 0 40px color-mix(in srgb, var(--teal) 6%, transparent);
+    0 0 40px color-mix(in srgb, var(--accent) 6%, transparent);
 
-  --topnav-bg:        rgba(5, 11, 16, 0.90);
+  --topnav-bg:        color-mix(in srgb, var(--surface-0) 90%, transparent);
   --glass-bg-premium:     linear-gradient(180deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.01) 100%);
   --glass-border-premium: 1px solid rgba(255,255,255,.08);
   --glass-shadow-premium: 0 12px 40px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.1);
-  --bg-glass2:        rgba(20, 32, 44, 0.72);
-  --shadow-teal:      0 8px 32px color-mix(in srgb, var(--teal) 14%, transparent), 0 0 0 1px color-mix(in srgb, var(--teal) 8%, transparent);
+  --surface-glass-2:        rgba(20, 32, 44, 0.72);
+  --shadow-accent:      0 8px 32px color-mix(in srgb, var(--accent) 14%, transparent), 0 0 0 1px color-mix(in srgb, var(--accent) 8%, transparent);
 
   --radius-sm:        12px;
   --radius:           18px;
@@ -100,7 +106,7 @@
   --ease-spring:      cubic-bezier(.16, 1, .3, 1);
 
   --noise-opacity:    0.04;
-  --logo-filter:      drop-shadow(0 0 12px color-mix(in srgb, var(--teal) 20%, transparent));
+  --logo-filter:      drop-shadow(0 0 12px color-mix(in srgb, var(--accent) 20%, transparent));
   --logo-filter2: #000000;
   --scrollbar:        rgba(255, 255, 255, 0.16);
 
@@ -145,24 +151,25 @@
 ───────────────────────────────────────────── */
 
 [data-theme="light"] {
-  --bg:               #F1F1F1; /* cinza-claro neutro, sem tom azulado */
-  --bg2:              #FFFFFF; /* Pure White */
-  --bg3:              #F1F5F9; /* Slate 100 */
-  --bg4:              #E2E8F0; /* Slate 200 */
-  --bg5:              #CBD5E1; /* Slate 300 */
+  --surface-0:               #F1F1F1; /* cinza-claro neutro, sem tom azulado */
+  --surface-1:              #FFFFFF; /* Pure White */
+  --surface-2:              #F1F5F9; /* Slate 100 */
+  --surface-3:              #E2E8F0; /* Slate 200 */
+  --surface-4:              #CBD5E1; /* Slate 300 */
 
-  --bg-glass:         rgba(255, 255, 255, 0.75);
-  --bg-glass-strong:  rgba(255, 255, 255, 0.94);
-  --bg-elevated:      #FFFFFF;
+  --surface-glass:         rgba(255, 255, 255, 0.75);
+  --surface-glass-strong:  rgba(255, 255, 255, 0.94);
+  --surface-elevated:      #FFFFFF;
 
   /* Teais Saturação Enterprise */
-  --teal:             #00897B; 
-  --teal-light:       #00BFA5; 
-  --teal-dark:        #00695C; 
-  --teal-dim:         rgba(0, 137, 123, 0.08);
-  --teal-border:      rgba(0, 137, 123, 0.2);
-  --teal-glow:        rgba(0, 137, 123, 0.1);
-  --teal-glow-soft:   rgba(0, 137, 123, 0.04);
+  --accent:             #00897B; 
+  --accent-fg:        #FFFFFF;
+  --accent-hi:       #00BFA5; 
+  --accent-lo:        #00695C; 
+  --accent-soft:         rgba(0, 137, 123, 0.08);
+  --accent-line:      rgba(0, 137, 123, 0.2);
+  --accent-glow:        rgba(0, 137, 123, 0.1);
+  --accent-glow-soft:   rgba(0, 137, 123, 0.04);
 
   --cyan:             #0284C7; 
   --purple:           #4F46E5; 
@@ -170,40 +177,52 @@
   --gold:             #B45309; 
   --gold-dim:         rgba(180, 83, 9, 0.08);
 
-  --success:          #16A34A; 
-  --success-dim:      rgba(22, 163, 74, 0.08);
+  --ok:          #16A34A; 
+  --ok-soft:      rgba(22, 163, 74, 0.08);
   --danger:           #DC2626; 
   --danger-dim:       rgba(220, 38, 38, 0.08);
-  --warning:          #D97706;
+  --warn:          #D97706;
 
   /* Tipografia Ultra-Nítida */
-  --text:             #0F172A; /* Slate 900 */
-  --text-soft:        #334155; /* Slate 700 */
-  --text-muted:       #475569; /* Slate 600 */
-  --text-dim:         #566579; /* Slate 600 — AA sobre branco */
+  --text-1:             #0F172A; /* Slate 900 */
+  --text-2:        #334155; /* Slate 700 */
+  --text-3:       #475569; /* Slate 600 */
+  --text-4:         #566579; /* Slate 600 — AA sobre branco */
 
   /* Bordas Cirúrgicas Estilo Stripe */
-  --border:           #E2E8F0; 
-  --border2:          #CBD5E1; 
-  --border-strong:    #94A3B8; 
+  --line:           #E2E8F0; 
+  --line-2:          #CBD5E1; 
+  --line-strong:    #94A3B8; 
 
-  --glass-line:       rgba(255, 255, 255, 0.8);
+  --line-glass:       rgba(255, 255, 255, 0.8);
 
   --shadow-sm:        0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow:           0 1px 3px 0 rgba(0, 0, 0, 0.1);
   --shadow-lg:        0 10px 15px -3px rgba(15, 23, 42, 0.05);
   --shadow-glow:      0 4px 6px -1px rgba(15, 23, 42, 0.03);
 
-  --topnav-bg:        rgba(243, 247, 250, 0.94);
+  --topnav-bg:        color-mix(in srgb, var(--surface-0) 94%, transparent);
   --glass-bg-premium:     linear-gradient(160deg,#FFFFFF 0%,#F8FBFE 100%);
   --glass-border-premium: 1px solid rgba(12,28,40,.07);
   --glass-shadow-premium: 0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(15,23,42,.06);
-  --bg-glass2:        rgba(255, 255, 255, 0.85);
-  --shadow-teal:      0 8px 28px color-mix(in srgb, var(--teal) 12%, transparent), 0 0 0 1px color-mix(in srgb, var(--teal) 10%, transparent);
+  --surface-glass-2:        rgba(255, 255, 255, 0.85);
+  --shadow-accent:      0 8px 28px color-mix(in srgb, var(--accent) 12%, transparent), 0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent);
 
   --logo-filter:      none;
   --scrollbar:        #CBD5E1;
 }
+
+/* Apelidos dos nomes antigos → tokens semânticos (migração gradual; telas novas usam só os semânticos) */
+:root {
+  --bg: var(--surface-0); --bg2: var(--surface-1); --bg3: var(--surface-2); --bg4: var(--surface-3); --bg5: var(--surface-4);
+  --bg-glass: var(--surface-glass); --bg-glass-strong: var(--surface-glass-strong); --bg-elevated: var(--surface-elevated); --bg-glass2: var(--surface-glass-2);
+  --teal: var(--accent); --teal-light: var(--accent-hi); --teal-dark: var(--accent-lo); --teal-dim: var(--accent-soft);
+  --teal-border: var(--accent-line); --teal-glow: var(--accent-glow); --teal-glow-soft: var(--accent-glow-soft); --on-teal: var(--accent-fg);
+  --text: var(--text-1); --text-soft: var(--text-2); --text-muted: var(--text-3); --text-dim: var(--text-4);
+  --border: var(--line); --border2: var(--line-2); --border-strong: var(--line-strong); --glass-line: var(--line-glass);
+  --success: var(--ok); --success-dim: var(--ok-soft); --warning: var(--warn); --shadow-teal: var(--shadow-accent);
+}
+
 /* Ajuste de Orbes de fundo para o Light Mode não parecer sujo */
 [data-theme="light"] body::before {
   background:
@@ -1837,7 +1856,6 @@ function _corLegivel(c, tema) {
   return c;
 }
 
-// Aplica a cor primária da Config nas variáveis de tema (reaplicada ao trocar claro/escuro)
 // Holofote dos cartões: posição do cursor vira --mx/--my (o brilho está no CSS)
 document.addEventListener('pointermove', function (e) {
   var t = e.target && e.target.closest ? e.target.closest('.kpi-card, .hm-mod, .kpi-group') : null;
@@ -1847,23 +1865,80 @@ document.addEventListener('pointermove', function (e) {
   t.style.setProperty('--my', (e.clientY - r.top) + 'px');
 }, { passive: true });
 
+// ── Paleta da igreja ──────────────────────────────────────────
+// Entrada: cor primária (e secundária opcional) da marca + tema. Saída: valores dos tokens semânticos
+// (superfícies, texto, linhas, destaque). Os componentes só leem os semânticos; trocar a marca não exige mexer em CSS.
+function _rgbHsl(c) {
+  var r = c[0] / 255, g = c[1] / 255, b = c[2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, h = 0, s = 0, d = mx - mn;
+  if (d) {
+    s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn);
+    h = mx === r ? ((g - b) / d + (g < b ? 6 : 0)) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    h *= 60;
+  }
+  return [h, s, l];
+}
+function _hslRgb(h, s, l) {
+  h = ((h % 360) + 360) % 360;
+  var k = function (n) { return (n + h / 30) % 12; }, a = s * Math.min(l, 1 - l);
+  var f = function (n) { return l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))); };
+  return [f(0) * 255, f(8) * 255, f(4) * 255];
+}
+function _rgbaStr(c, a) { return 'rgba(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ',' + a + ')'; }
+
+var PALETA_CHAVES = ['brand-1', 'brand-2', 'accent', 'accent-hi', 'accent-lo', 'accent-soft', 'accent-line', 'accent-glow', 'accent-glow-soft', 'accent-fg', 'accent-2',
+  'surface-0', 'surface-1', 'surface-2', 'surface-3', 'surface-4', 'surface-glass', 'surface-glass-strong', 'surface-elevated', 'surface-glass-2',
+  'text-1', 'text-2', 'text-3', 'text-4', 'line', 'line-2', 'line-strong', 'line-glass'];
+
+function gerarPaleta(marca1, marca2, tema) {
+  var claro = tema === 'light';
+  var b1 = _hexRgb(marca1);
+  var hsl = _rgbHsl(b1);
+  var c = _corLegivel(b1, tema);
+  // secundária: a informada ou a vizinha (matiz +35°) da primária
+  var b2 = marca2 ? _hexRgb(marca2) : _hslRgb(hsl[0] + 35, Math.min(.75, Math.max(.35, hsl[1])), .55);
+  var c2 = _corLegivel(b2, tema);
+  var P = {};
+  P['brand-1'] = _rgbHex(b1); P['brand-2'] = _rgbHex(b2);
+  P['accent'] = _rgbHex(c);
+  P['accent-hi'] = _rgbHex(_mix(c, [255, 255, 255], 0.35));
+  P['accent-lo'] = _rgbHex(_mix(c, [0, 0, 0], 0.25));
+  P['accent-soft'] = _rgbaStr(c, claro ? .08 : .12);
+  P['accent-line'] = _rgbaStr(c, claro ? .2 : .25);
+  P['accent-glow'] = _rgbaStr(c, claro ? .1 : .3);
+  P['accent-glow-soft'] = _rgbaStr(c, claro ? .04 : .08);
+  P['accent-2'] = _rgbHex(c2);
+  // texto sobre o destaque: o que tiver mais contraste no pior ponto do degradê (claro → escuro)
+  var lo = _lum(_mix(c, [0, 0, 0], 0.25)), hi = _lum(_mix(c, [255, 255, 255], 0.35)), dk = _lum([11, 22, 32]);
+  P['accent-fg'] = ((lo + 0.05) / (dk + 0.05)) > (1.05 / (hi + 0.05)) ? '#0B1620' : '#FFFFFF';
+  // neutros: matiz da marca, croma baixo (marca quase cinza → neutros quase cinza)
+  var h = hsl[0], sn = hsl[1] < .12 ? .06 : Math.max(.1, Math.min(.3, hsl[1] * .35));
+  var N = function (l, s) { return _hslRgb(h, s === undefined ? sn : s, l); };
+  if (!claro) {
+    var s0 = N(.035), s1 = N(.06), s2 = N(.095), s3 = N(.135), s4 = N(.18);
+    P['surface-0'] = _rgbHex(s0); P['surface-1'] = _rgbHex(s1); P['surface-2'] = _rgbHex(s2); P['surface-3'] = _rgbHex(s3); P['surface-4'] = _rgbHex(s4);
+    P['surface-glass'] = _rgbaStr(N(.075), .55); P['surface-glass-strong'] = _rgbaStr(N(.06), .85);
+    P['surface-elevated'] = _rgbaStr(N(.09), .98); P['surface-glass-2'] = _rgbaStr(N(.1), .72);
+    P['text-1'] = _rgbHex(N(.975, Math.min(sn, .3))); P['text-2'] = _rgbHex(N(.88, Math.min(sn, .25)));
+    P['text-3'] = _rgbHex(N(.68, Math.min(sn, .2))); P['text-4'] = _rgbHex(N(.64, Math.min(sn, .2)));
+    P['line'] = 'rgba(255,255,255,.08)'; P['line-2'] = 'rgba(255,255,255,.12)'; P['line-strong'] = 'rgba(255,255,255,.18)'; P['line-glass'] = 'rgba(255,255,255,.06)';
+  } else {
+    var ls = Math.min(sn, .2);
+    P['surface-0'] = _rgbHex(N(.945, ls)); P['surface-1'] = '#FFFFFF'; P['surface-2'] = _rgbHex(N(.965, ls)); P['surface-3'] = _rgbHex(N(.92, ls)); P['surface-4'] = _rgbHex(N(.85, ls));
+    P['surface-glass'] = 'rgba(255,255,255,.75)'; P['surface-glass-strong'] = 'rgba(255,255,255,.94)'; P['surface-elevated'] = '#FFFFFF'; P['surface-glass-2'] = 'rgba(255,255,255,.85)';
+    P['text-1'] = _rgbHex(N(.11, Math.min(sn, .3))); P['text-2'] = _rgbHex(N(.24, Math.min(sn, .25)));
+    P['text-3'] = _rgbHex(N(.32, Math.min(sn, .2))); P['text-4'] = _rgbHex(N(.37, Math.min(sn, .2)));
+    P['line'] = _rgbHex(N(.9, ls)); P['line-2'] = _rgbHex(N(.82, ls)); P['line-strong'] = _rgbHex(N(.62, ls)); P['line-glass'] = 'rgba(255,255,255,.8)';
+  }
+  return P;
+}
+
+// Aplica a paleta da igreja (cor da Config) nos tokens; reaplicada ao trocar claro/escuro
 function aplicarIdentidade() {
   var root = document.documentElement.style;
   if (IDENTIDADE.corPrimaria) {
     var tema = document.documentElement.getAttribute('data-theme') || 'dark';
-    var c  = _corLegivel(_hexRgb(IDENTIDADE.corPrimaria), tema);
-    var rgba = function (a) { return 'rgba(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ',' + a + ')'; };
-    root.setProperty('--teal',           _rgbHex(c));
-    root.setProperty('--teal-light',     _rgbHex(_mix(c, [255, 255, 255], 0.35)));
-    root.setProperty('--teal-dark',      _rgbHex(_mix(c, [0, 0, 0], 0.25)));
-    root.setProperty('--teal-dim',       rgba(0.12));
-    root.setProperty('--teal-border',    rgba(0.25));
-    root.setProperty('--teal-glow',      rgba(0.30));
-    root.setProperty('--teal-glow-soft', rgba(0.08));
-    var _lo = _lum(_mix(c, [0, 0, 0], 0.25)), _hi = _lum(_mix(c, [255, 255, 255], 0.35)), _dk = _lum([11, 22, 32]);
-    var _cw = (1.05) / (_hi + 0.05);                 // pior caso do texto branco (ponta clara do gradiente)
-    var _cd = (_lo + 0.05) / (_dk + 0.05);          // pior caso do texto escuro (ponta escura)
-    root.setProperty('--on-teal', _cd > _cw ? '#0B1620' : '#fff');
+    var P = gerarPaleta(IDENTIDADE.corPrimaria, IDENTIDADE.corSecundaria || '', tema);
+    PALETA_CHAVES.forEach(function (k) { root.setProperty('--' + k, P[k]); });
     // cartão institucional: tom profundo da cor da igreja, escuro o bastante para texto branco (contraste ≥ 5:1)
     var _b0 = _hexRgb(IDENTIDADE.corPrimaria), _ha = _mix(_b0, [0, 0, 0], .68), _hb = _mix(_b0, [0, 0, 0], .42);
     for (var _k = 0; _k < 10 && _lum(_hb) > .16; _k++) _hb = _mix(_hb, [0, 0, 0], .12);
@@ -1871,7 +1946,7 @@ function aplicarIdentidade() {
     root.setProperty('--hero-a', _rgbHex(_ha));
     root.setProperty('--hero-b', _rgbHex(_hb));
   } else {
-    ['--hero-a','--hero-b','--on-teal','--teal','--teal-light','--teal-dark','--teal-dim','--teal-border','--teal-glow','--teal-glow-soft'].forEach(function (v) { root.removeProperty(v); });
+    PALETA_CHAVES.concat(['hero-a', 'hero-b']).forEach(function (v) { root.removeProperty('--' + v); });
   }
   document.title = IDENTIDADE.nome + ' — Gestão Ministerial';
   if (IDENTIDADE.logoUrl) {
