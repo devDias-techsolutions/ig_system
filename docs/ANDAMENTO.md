@@ -12,8 +12,7 @@ Quadro **informativo** para quem trabalha no sistema (qualquer conta, qualquer s
 ## Em andamento
 | Etapa | Branch / PR | Estado | Próximo passo | Arquivos principais |
 |---|---|---|---|---|
-| Refinamento visual R3: indicadores integrados e ações rápidas no Início | (não iniciada) | Aprovada; Início desktop atual é o do PR #114 | Superfície única de indicadores, ações em vez de atalhos | `_home.html`, `index.html` |
-| R4: atividade recente, aniversariantes e próximos eventos | (não iniciada) | Aprovada | Listas paginadas sem rolagem, selo de data nos eventos | `_home.html` |
+| R4: atividade recente, aniversariantes e próximos eventos | (não iniciada) | Aprovada; R3 já tirou o cartão Acesso rápido (ações no cabeçalho) | Listas paginadas sem rolagem, selo de data nos eventos | `_home.html` |
 | R5: galeria 5 marcas × 2 temas, ajustes de contraste | (não iniciada) | Aprovada | Capturas e correções; atualizar `CHANGELOG.md` | `index.html`, `tests/e2e/paleta.e2e.js` |
 | Desktop D2: Membros (tabela, painel lateral, formulário em 2 colunas, carteirinhas, cartas) | (não iniciada) | Plano em `docs/UI-DESKTOP.md` | Tabela ordenável com filtros | `_membros.html` |
 | Desktop D3: Usuários, Identidade, Alertas, Atalhos | (não iniciada) | Plano em `docs/UI-DESKTOP.md` | Layout de configurações com barra de ações ancorada | `_usuarios.html`, `_identidade.html`, `_alertas.html` |
@@ -22,7 +21,7 @@ Quadro **informativo** para quem trabalha no sistema (qualquer conta, qualquer s
 | Etapa 18: documentação e "cópia limpa" (`Implantacao.limpar()`, confirmação "LIMPAR") | (não iniciada) | Desenho feito, sem código | Implementar limpeza + README/manual | `Implantacao.js`, `Code.js`, `docs/` |
 
 ## Concluído recentemente
-- R1 tokens dinâmicos (#115) e R2 cor secundária + sugestão do logo (#116).
+- R3 indicadores integrados + ações rápidas no cabeçalho, R1 tokens dinâmicos (#115) e R2 cor secundária + sugestão do logo (#116).
 - Início desktop em uma tela (#114), densidade para notebook (#112), painel único (#109), agenda da igreja (#111).
 - Alertas por e-mail (#101), Identidade "Sistema" (#102).
 
