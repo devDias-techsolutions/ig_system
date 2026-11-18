@@ -82,9 +82,7 @@
   .hm-ch button i, .hm-ch button svg { width: 14px; height: 14px; }
   .hm-s-anivs, .hm-s-ativ { margin: 0; padding: var(--sp-3) var(--sp-4); }
   .hm-s-anivs .hm-h, .hm-s-ativ .panel-head { margin-bottom: var(--sp-2); }
-  .hm-s-anivs .hm-anivs, .hm-s-ativ .activity-list { flex: 1; min-height: 0; overflow-y: auto; }
-  .hm-s-ativ .activity-list { border: 0; background: none; border-radius: 0; }
-  .hm-s-ativ .activity-item { padding: var(--sp-2) 0; }
+  .hm-s-ativ .activity-list { flex: 1; min-height: 0; overflow: hidden; }
   .hm-card .hm-empty { flex: 1; justify-content: center; gap: var(--sp-1); padding: var(--sp-2); }
   .hm-card .hm-empty-icon { width: 36px; height: 36px; margin-bottom: var(--sp-1); }
   .hm-card .hm-empty-desc { font-size: var(--fs-xs); line-height: 1.4; }
@@ -104,7 +102,7 @@
 
   /* rosca de membros */
   .hm-ro { flex: 1; min-height: 0; display: flex; align-items: center; gap: var(--sp-4); }
-  .hm-ro svg { height: 100%; max-height: 120px; width: auto; aspect-ratio: 1; flex-shrink: 0; }
+  .hm-ro svg { height: 100%; max-height: 150px; width: auto; aspect-ratio: 1; flex-shrink: 0; }
   .hm-ro-trilha { stroke: var(--line-2); }
   .hm-ro-arco { stroke: var(--accent); }
   .hm-ro-n { fill: var(--text-1); font-weight: 800; }
@@ -131,9 +129,10 @@
 
   /* paginação das listas (pontos) */
   .hm-pg { display: flex; align-items: center; justify-content: center; gap: var(--sp-2); padding-top: var(--sp-2); }
-  .hm-pg button { width: 6px; height: 6px; padding: 0; border: 0; border-radius: var(--r-pill); background: var(--border2); cursor: pointer; transition: width var(--dur) var(--ease), background var(--dur) var(--ease); }
-  .hm-pg button.on { width: 18px; background: var(--teal); }
-  .hm-pg button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+  .hm-pg { min-height: 6px; flex-shrink: 0; }
+  .hm-pg button { width: 6px; height: 6px; padding: 0; border: 0; border-radius: var(--r-pill); background: var(--line-strong); cursor: pointer; transition: width var(--dur) var(--ease), background var(--dur) var(--ease); }
+  .hm-pg button.on { width: 18px; background: var(--accent); }
+  .hm-pg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 }
 /* só desktop: no celular a faixa, a rosca e as ações rápidas não existem */
 .hm-faixa, .hm-s-membros, .hm-acoes { display: none; }
@@ -240,26 +239,17 @@
   .kp-f { margin-top: auto; min-height: 36px; padding: var(--sp-1) var(--sp-3); }
 }
 
-/* ── Aniversariantes: 3 cartões lado a lado ── */
-.hm-anivs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
-.hm-aniv {
-  display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); padding: var(--sp-4) var(--sp-2); text-align: center;
-  border: 1px solid var(--border); border-radius: var(--r-3); background: var(--bg-glass); min-width: 0;
-}
-[data-theme="light"] .hm-aniv { background: #FFFFFF; box-shadow: var(--shadow-sm); }
-.hm-aniv-av { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-size: var(--fs-sm); font-weight: 800; color: var(--teal); background: var(--teal-dim); }
-.hm-aniv.hoje .hm-aniv-av { box-shadow: 0 0 0 2px var(--hero-gold); }
-.hm-aniv-nome { max-width: 100%; font-size: var(--fs-sm); font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.hm-aniv-dia { padding: 3px var(--sp-3); border-radius: var(--r-pill); font-size: var(--fs-xs); font-weight: 700; color: var(--text-muted); background: var(--teal-dim); }
-.hm-aniv-dia.hoje { color: var(--hero-a); background: var(--hero-gold); }
-/* desktop (lateral estreita): uma pessoa por linha */
-@media (min-width: 1024px) {
-  .hm-anivs { grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
-  .hm-aniv { flex-direction: row; padding: var(--sp-2) var(--sp-3); text-align: left; }
-  .hm-aniv-av { width: 36px; height: 36px; flex-shrink: 0; }
-  .hm-aniv-nome { flex: 1; min-width: 0; }
-  .hm-aniv-dia { margin-left: auto; flex-shrink: 0; }
-}
+/* ── Aniversariantes: linhas compactas, sem caixa por pessoa; colunas automáticas conforme a largura ── */
+.hm-anivs { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); column-gap: var(--sp-4); }
+.hm-aniv { display: flex; align-items: center; gap: var(--sp-3); min-width: 0; padding: var(--sp-2) var(--sp-2); border-top: 1px solid var(--line); border-radius: var(--r-2); }
+.hm-aniv-av { width: 30px; height: 30px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; font-size: var(--fs-xs); font-weight: 800; color: var(--accent); background: var(--accent-soft); }
+.hm-aniv-nome { flex: 1; min-width: 0; font-size: var(--fs-sm); font-weight: 600; color: var(--text-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hm-aniv-dia { flex-shrink: 0; font-size: var(--fs-xs); font-weight: 700; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.hm-aniv.hoje { border-top-color: transparent; background: var(--accent-soft); }
+.hm-aniv.hoje .hm-aniv-av { color: var(--accent-fg); background: var(--accent); }
+.hm-aniv-dia.hoje { padding: 2px var(--sp-2); border-radius: var(--r-pill); color: var(--accent-fg); background: var(--accent); }
+.hm-aniv-vazio { grid-column: 1 / -1; display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-1) 0; font-size: var(--fs-sm); color: var(--text-3); }
+.hm-aniv-vazio i, .hm-aniv-vazio svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--accent); }
 
 
 /* ── Agenda: calendário do mês + eventos programados ── */
@@ -291,33 +281,37 @@
 .ag-lh button { min-height: 32px; padding: 0 var(--sp-2); border: 0; border-radius: var(--r-2); background: none; font-family: inherit; font-size: var(--fs-sm); font-weight: 700; color: var(--teal); cursor: pointer; }
 .ag-lh button:hover { background: var(--teal-dim); }
 .ag-lh button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
-.ag-ev { display: flex; align-items: stretch; gap: var(--sp-3); width: 100%; margin: 0 0 var(--sp-2); padding: var(--sp-2) var(--sp-3); text-align: left; font-family: inherit; color: inherit; border: 1px solid var(--border); border-left: 3px solid var(--teal); border-radius: var(--r-3); background: var(--bg-glass); }
-button.ag-ev { cursor: pointer; transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease); }
-button.ag-ev:hover { border-color: var(--teal-border); border-left-color: var(--teal); background: var(--bg3); }
-button.ag-ev:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
-.ag-ev-d { flex-shrink: 0; width: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; }
-.ag-ev-d b { font-size: var(--fs-lg); font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
-.ag-ev-d span { font-size: var(--fs-xs); font-weight: 700; color: var(--teal); text-transform: uppercase; }
+.ag-ev { display: flex; align-items: center; gap: var(--sp-3); width: 100%; margin: 0; padding: var(--sp-2) var(--sp-1); text-align: left; font-family: inherit; color: inherit; border: 0; border-top: 1px solid var(--line); border-radius: var(--r-2); background: none; }
+button.ag-ev { cursor: pointer; transition: background var(--dur) var(--ease); }
+button.ag-ev:hover { background: var(--accent-soft); }
+button.ag-ev:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.ag-ev-d { flex-shrink: 0; width: 40px; padding: var(--sp-1) 0; display: flex; flex-direction: column; align-items: center; line-height: 1.1; border-radius: var(--r-3); background: var(--accent-soft); }
+.ag-ev-d b { font-size: var(--fs-lg); font-weight: 800; color: var(--text-1); font-variant-numeric: tabular-nums; }
+.ag-ev-d span { font-size: var(--fs-xs); font-weight: 700; color: var(--accent); text-transform: uppercase; }
 .ag-ev-t { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
-.ag-ev-n { font-size: var(--fs-sm); font-weight: 700; color: var(--text); overflow-wrap: anywhere; }
-.ag-ev-m { font-size: var(--fs-xs); color: var(--text-muted); overflow-wrap: anywhere; }
-.ag-lista .hm-empty { padding: var(--sp-5) var(--sp-4); }
+.ag-ev-n { font-size: var(--fs-sm); font-weight: 700; color: var(--text-1); overflow-wrap: anywhere; }
+.ag-ev-m { font-size: var(--fs-xs); color: var(--text-3); overflow-wrap: anywhere; }
+.ag-ev-h { margin-right: var(--sp-1); font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+.ag-vazio { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-2); padding: var(--sp-1) 0; }
+.ag-mais { margin: var(--sp-1) 0 0; font-size: var(--fs-xs); color: var(--text-3); }
+.ag-vazio p { margin: 0; font-size: var(--fs-sm); line-height: 1.4; color: var(--text-3); }
 .ag-form-linha { display: grid; grid-template-columns: minmax(0, 1fr) 120px; gap: var(--sp-3); }
 .ag-form-linha .field { margin-bottom: var(--sp-3); }
 #ag-overlay textarea { min-height: 72px; }
 #ag-erro { display: none; margin-bottom: var(--sp-3); font-size: var(--fs-sm); font-weight: 600; color: var(--danger); }
 #ag-erro.on { display: block; }
 
-/* ── Atividade ── */
-.activity-list { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--r-3); background: var(--bg-glass); overflow: hidden; }
-[data-theme="light"] .activity-list { background: #FFFFFF; }
-.activity-item { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--border); }
-.activity-item:last-child { border-bottom: none; }
-.activity-icon { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; background: var(--teal-dim); color: var(--teal); }
-.activity-icon i { width: 17px; height: 17px; }
-.activity-body { flex: 1; min-width: 0; }
-.activity-text { font-size: var(--fs-sm); font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.activity-time { margin-top: 2px; font-size: var(--fs-xs); color: var(--text-dim); }
+/* ── Atividade: lista sem caixa interna, agrupada por dia, divisórias finas ── */
+.activity-list { display: flex; flex-direction: column; }
+.hm-ativ-g { padding: var(--sp-2) 0 var(--sp-1); font-size: var(--fs-xs); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-3); }
+.hm-ativ-g:first-child { padding-top: 0; }
+.activity-item { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-2) 0; border-top: 1px solid var(--line); }
+.hm-ativ-g + .activity-item { border-top: 0; }
+.activity-icon { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; background: var(--accent-soft); color: var(--accent); }
+.activity-icon i { width: 15px; height: 15px; }
+.activity-body { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: var(--sp-3); }
+.activity-text { flex: 1; min-width: 0; font-size: var(--fs-sm); font-weight: 600; color: var(--text-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.activity-time { flex-shrink: 0; font-size: var(--fs-xs); color: var(--text-3); }
 
 /* ── Estados vazios / erro ── */
 .hm-empty {
@@ -402,21 +396,59 @@ function homeAcao(n) {
 }
 function _homeDesk() { return window.matchMedia && window.matchMedia('(min-width: 1024px)').matches; }
 
-/* Paginação em pontos (só desktop): mostra "tam" itens por página; lista curta não ganha pontos */
-function _homePaginar(listaId, pgId, itens, tam, htmlItem) {
-  var el = document.getElementById(listaId), pg = document.getElementById(pgId);
-  if (!el) return;
-  var paginas = _homeDesk() ? Math.ceil(itens.length / tam) : 1;
-  function ir(p) {
-    el.innerHTML = (paginas > 1 ? itens.slice(p * tam, p * tam + tam) : itens).map(htmlItem).join('');
-    if (pg) pg.innerHTML = paginas > 1 ? itens.slice(0, paginas).map(function (x, k) { return k < paginas ? '<button type="button" class="' + (k === p ? 'on' : '') + '" onclick="_homePg(\'' + listaId + '\',' + k + ')" aria-label="Página ' + (k + 1) + '"></button>' : ''; }).join('') : '';
+/* Paginação em pontos (só desktop): até "max" itens por página, e menos se a altura da lista não comportar:
+   nenhum registro fica cortado nem exige rolagem. Redesenha ao redimensionar a janela. */
+function _homePaginar(listaId, pgId, itens, max, htmlItem) {
+  if (!document.getElementById(listaId)) return;
+  var ctx = { p: 0, tam: 0 };
+  function desenhar() {
+    var el = document.getElementById(listaId), pg = document.getElementById(pgId);
+    if (!el) return;
+    var desk = _homeDesk();
+    if (!ctx.tam) ctx.tam = desk ? max : itens.length;
+    var n;
+    for (;;) {
+      n = Math.max(1, Math.ceil(itens.length / ctx.tam));
+      if (ctx.p > n - 1) ctx.p = n - 1;
+      el.innerHTML = itens.slice(ctx.p * ctx.tam, ctx.p * ctx.tam + ctx.tam).map(htmlItem).join('');
+      if (!desk || ctx.tam <= 1 || el.scrollHeight <= el.clientHeight + 1) break;
+      ctx.tam--;
+    }
+    if (pg) {
+      var pts = '';
+      if (desk && n > 1) for (var k = 0; k < n; k++) pts += '<button type="button" class="' + (k === ctx.p ? 'on' : '') + '" onclick="_homePg(\'' + listaId + '\',' + k + ')" aria-label="Página ' + (k + 1) + '"></button>';
+      pg.innerHTML = pts;
+    }
     if (window.lucide) setTimeout(function () { lucide.createIcons(); }, 0);
   }
+  ctx.desenhar = desenhar;
   window.__homePgs = window.__homePgs || {};
-  window.__homePgs[listaId] = ir;
-  ir(0);
+  window.__homePgs[listaId] = ctx;
+  if (!window.__homePgResize) {
+    window.__homePgResize = true;
+    var t;
+    window.addEventListener('resize', function () {
+      clearTimeout(t);
+      t = setTimeout(function () {
+        Object.keys(window.__homePgs).forEach(function (id) { var c = window.__homePgs[id]; c.tam = 0; c.desenhar(); });
+      }, 150);
+    });
+  }
+  desenhar();
 }
-function _homePg(listaId, p) { if (window.__homePgs && window.__homePgs[listaId]) window.__homePgs[listaId](p); }
+function _homePg(listaId, p) { var c = window.__homePgs && window.__homePgs[listaId]; if (c) { c.p = p; c.desenhar(); } }
+
+/* Agrupa a atividade por dia (a lista já vem em ordem cronológica, do mais recente ao mais antigo) */
+function _homeGrupoDia(ts) {
+  if (!ts) return 'Anteriores';
+  var h = new Date(); h.setHours(0, 0, 0, 0);
+  var d = new Date(ts); d.setHours(0, 0, 0, 0);
+  var dias = Math.round((h.getTime() - d.getTime()) / 864e5);
+  if (dias <= 0) return 'Hoje';
+  if (dias === 1) return 'Ontem';
+  if (dias < 7) return 'Esta semana';
+  return 'Anteriores';
+}
 
 function renderHome() {
   if (!App.session) { navigateTo('login'); return; }
@@ -618,23 +650,23 @@ function _agDesenhar() {
   }
 
   /* lista: dia escolhido ou os próximos eventos (a partir de hoje) */
-  var itens, titulo;
+  var itens, titulo, proximos = [];
   if (AG.sel) { itens = AG.itens.filter(function (e) { return e.data === AG.sel; }); titulo = _agDataLonga(AG.sel); }
-  else { itens = AG.itens.filter(function (e) { return e.data >= AG.hoje; }).slice(0, 5); titulo = 'Próximos eventos'; }
+  else { proximos = AG.itens.filter(function (e) { return e.data >= AG.hoje; }); itens = proximos.slice(0, 3); titulo = 'Próximos eventos'; }
 
   var pode = _agPode();
   var corpo;
   if (!itens.length) {
-    corpo = _homeEstado('calendar-plus', AG.sel ? 'Nada agendado neste dia' : 'Nenhum evento agendado',
-      pode ? 'Agende cultos, reuniões e ações da igreja para que todos acompanhem aqui.' : 'Quando a igreja agendar um evento, ele aparece aqui.',
-      pode ? '<button type="button" class="btn btn-primary btn-sm" onclick="agAbrir(\'\',\'' + (AG.sel || '') + '\')"><i data-lucide="plus" class="ic-15"></i> Agendar evento</button>' : '');
+    corpo = '<div class="ag-vazio"><p>' + (AG.sel ? 'Nada agendado neste dia.' : 'Nenhum evento agendado.') + ' ' +
+      (pode ? 'Agende cultos, reuniões e ações da igreja.' : 'Quando a igreja agendar, aparece aqui.') + '</p>' +
+      (pode ? '<button type="button" class="btn btn-primary btn-sm" onclick="agAbrir(\'\',\'' + (AG.sel || '') + '\')"><i data-lucide="plus" class="ic-15"></i> Agendar</button>' : '') + '</div>';
   } else {
     corpo = itens.map(function (e) {
-      var p = e.data.split('-'), meta = [e.hora, e.local].filter(Boolean).join(' · ');
+      var p = e.data.split('-'), meta = [e.hora ? '<span class="ag-ev-h">' + escHtml(e.hora) + '</span>' : '', escHtml(e.local || '')].filter(Boolean).join(' · ');
       var tag = pode ? 'button type="button" onclick="agAbrir(\'' + escHtml(e.id) + '\')" aria-label="Editar evento ' + escHtml(e.titulo) + '"' : 'div';
       return '<' + tag + ' class="ag-ev"><span class="ag-ev-d"><b>' + Number(p[2]) + '</b><span>' + AG_MESES_CURTO[Number(p[1]) - 1] + '</span></span>' +
-        '<span class="ag-ev-t"><span class="ag-ev-n">' + escHtml(e.titulo) + '</span>' + (meta ? '<span class="ag-ev-m">' + escHtml(meta) + '</span>' : '') + '</span></' + (pode ? 'button' : 'div') + '>';
-    }).join('');
+        '<span class="ag-ev-t"><span class="ag-ev-n">' + escHtml(e.titulo) + '</span>' + (meta ? '<span class="ag-ev-m">' + meta + '</span>' : '') + '</span></' + (pode ? 'button' : 'div') + '>';
+    }).join('') + (proximos.length > itens.length ? '<p class="ag-mais">+' + (proximos.length - itens.length) + ' no calendário</p>' : '');
   }
 
   el.innerHTML =
@@ -917,8 +949,10 @@ function _loadActivity() {
         mostrar(_homeEstado('clipboard-list', 'Nenhuma atividade recente', 'As ações recentes aparecerão aqui.'));
         return;
       }
-      _homePaginar('activity-list', 'activity-pg', res.data, 4, function (item) {
-        return '<div class="activity-item">' +
+      var ativ = res.data.slice(0, _homeDesk() ? 15 : 5).map(function (x) { x.grupo = _homeGrupoDia(x.ts); return x; });
+      _homePaginar('activity-list', 'activity-pg', ativ, 8, function (item, k, pag) {
+        return (k === 0 || pag[k - 1].grupo !== item.grupo ? '<div class="hm-ativ-g">' + item.grupo + '</div>' : '') +
+          '<div class="activity-item">' +
           '<div class="activity-icon"><i data-lucide="' + escHtml(item.icon || 'file-text') + '"></i></div>' +
           '<div class="activity-body">' +
             '<div class="activity-text">' + escHtml(item.texto) + '</div>' +
@@ -956,10 +990,10 @@ function _loadAniv() {
       }
       var d = res.data || {}, itens = d.itens || [];
       if (!itens.length) {
-        mostrar(_homeEstado('cake', 'Nenhum aniversariante neste mês', 'Membros ativos com data de nascimento neste mês aparecem aqui.'));
+        mostrar('<div class="hm-aniv-vazio"><i data-lucide="cake"></i><span>Nenhum aniversariante neste mês.</span></div>');
         return;
       }
-      _homePaginar('aniv-list', 'aniv-pg', itens, 3, function (x) {
+      _homePaginar('aniv-list', 'aniv-pg', itens, 6, function (x) {
         return '<div class="hm-aniv' + (x.hoje ? ' hoje' : '') + '">' +
           '<div class="hm-aniv-av">' + escHtml(getInitials(x.nome)) + '</div>' +
           '<div class="hm-aniv-nome">' + escHtml(x.nome) + '</div>' +
