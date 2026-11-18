@@ -61,14 +61,14 @@
   .hm-head .page-head-txt { position: relative; padding-left: var(--sp-3); }
   .hm-head .page-head-txt::before { content: ''; position: absolute; left: 0; top: 4px; bottom: 4px; width: 4px; border-radius: var(--r-1); background: linear-gradient(var(--teal), transparent); }
   .hm-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) clamp(236px, 20vw, 292px); gap: var(--sp-4); align-items: stretch; padding: 0; max-width: none; margin: 0; }
-  .hm-main { display: grid; grid-template-rows: auto auto minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-3); min-width: 0; min-height: 0; }
+  .hm-main { display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; gap: var(--sp-3); min-width: 0; min-height: 0; }
   .hm-mid, .hm-bot { display: grid; gap: var(--sp-3); min-width: 0; min-height: 0; }
   .hm-mid { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
   .hm-bot { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); }
   .hm-bot > :only-child { grid-column: 1 / -1; }
   .hm-s-kpis, .hm-s-atalhos { display: none; }
-  .hm-faixa { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--sp-3); }
-  .hm-s-membros, .hm-s-acesso { display: flex; }
+  .hm-faixa { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .hm-s-membros { display: flex; }
   .hm-side { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
   .hm-main .hm-block, .hm-side .hm-block { margin-bottom: 0; }
 
@@ -89,40 +89,45 @@
   .hm-card .hm-empty-icon { width: 36px; height: 36px; margin-bottom: var(--sp-1); }
   .hm-card .hm-empty-desc { font-size: var(--fs-xs); line-height: 1.4; }
 
-  /* faixa de indicadores: ícone em chip com degradê, número grande */
-  .hm-fk { position: relative; overflow: hidden; display: flex; align-items: center; gap: var(--sp-3); min-width: 0; padding: var(--sp-3); text-align: left; font-family: inherit; color: inherit; cursor: pointer;
-    border: 1px solid var(--border); border-radius: var(--r-4); box-shadow: var(--shadow-sm);
-    background: linear-gradient(135deg, color-mix(in srgb, var(--teal) 15%, var(--bg2)), var(--bg2) 72%);
-    transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease); }
-  .hm-fk:hover { border-color: var(--teal-border); transform: translateY(-1px); }
-  .hm-fk:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
-  .hm-fk-ic { width: 40px; height: 40px; flex-shrink: 0; display: grid; place-items: center; border-radius: var(--r-3); color: var(--on-teal, #fff); background: linear-gradient(145deg, var(--teal), var(--teal-dark)); box-shadow: 0 6px 14px -6px var(--teal-glow); }
-  .hm-fk-ic i, .hm-fk-ic svg { width: 20px; height: 20px; }
-  .hm-fk-num { display: block; font-size: var(--fs-xl); font-weight: 800; letter-spacing: -.03em; line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--text); }
-  .hm-fk-lab { display: block; margin-top: 2px; font-size: var(--fs-xs); font-weight: 600; color: var(--text-muted); }
+  /* indicadores: UMA superfície com células separadas por divisória fina (sem caixa por indicador); rótulo, número grande, ícone suave */
+  .hm-faixa { gap: 0; border: 1px solid var(--line); border-radius: var(--r-4); background: var(--surface-glass); box-shadow: var(--shadow-sm); overflow: hidden; }
+  .hm-fk { position: relative; display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); min-width: 0; padding: var(--sp-3) var(--sp-4); text-align: left; font-family: inherit; color: inherit; cursor: pointer; border: 0; background: transparent; transition: background var(--dur) var(--ease); }
+  .hm-fk + .hm-fk { border-left: 1px solid var(--line); }
+  .hm-fk:hover { background: var(--accent-soft); }
+  .hm-fk:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .hm-fk-txt { display: flex; flex-direction: column-reverse; gap: 2px; min-width: 0; }
+  .hm-fk-num { font-size: var(--fs-2xl); font-weight: 800; letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums; color: var(--text-1); }
+  .hm-fk-lab { font-size: var(--fs-xs); font-weight: 600; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hm-fk-ic { width: 32px; height: 32px; flex-shrink: 0; display: grid; place-items: center; border-radius: var(--r-pill); color: var(--accent); background: var(--accent-soft); transition: background var(--dur) var(--ease), color var(--dur) var(--ease); }
+  .hm-fk:hover .hm-fk-ic { background: var(--accent); color: var(--accent-fg); }
+  .hm-fk-ic i, .hm-fk-ic svg { width: 16px; height: 16px; }
 
   /* rosca de membros */
   .hm-ro { flex: 1; min-height: 0; display: flex; align-items: center; gap: var(--sp-4); }
   .hm-ro svg { height: 100%; max-height: 120px; width: auto; aspect-ratio: 1; flex-shrink: 0; }
-  .hm-ro-trilha { stroke: var(--border2); }
-  .hm-ro-arco { stroke: var(--teal); }
-  .hm-ro-n { fill: var(--text); font-weight: 800; }
-  .hm-ro-l { fill: var(--text-muted); font-weight: 600; }
+  .hm-ro-trilha { stroke: var(--line-2); }
+  .hm-ro-arco { stroke: var(--accent); }
+  .hm-ro-n { fill: var(--text-1); font-weight: 800; }
+  .hm-ro-l { fill: var(--text-3); font-weight: 600; }
   .hm-leg { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-2); }
-  .hm-leg-i { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-sm); color: var(--text-muted); }
-  .hm-leg-i i { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
-  .hm-leg-i.in i { background: var(--text-dim); }
+  .hm-leg-i { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-sm); color: var(--text-3); }
+  .hm-leg-i i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .hm-leg-i.in i { background: var(--text-4); }
   .hm-leg-i.an i { background: var(--hero-gold); }
   .hm-leg-i span { flex: 1; }
-  .hm-leg-i b { font-size: var(--fs-sm); font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+  .hm-leg-i b { font-size: var(--fs-sm); font-weight: 800; color: var(--text-1); font-variant-numeric: tabular-nums; }
 
-  /* acesso rápido: ações (e não navegação) */
-  .hm-ar { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); grid-auto-rows: minmax(0, 88px); align-content: center; gap: var(--sp-2); }
-  .hm-ar-b { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-2); min-width: 0; padding: var(--sp-2); text-align: center; font-family: inherit; font-size: var(--fs-xs); font-weight: 700; color: var(--text); cursor: pointer;
-    border: 1px solid var(--border); border-radius: var(--r-3); background: var(--bg-glass); transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease); }
-  .hm-ar-b:hover { border-color: var(--teal-border); background: var(--bg3); }
-  .hm-ar-b:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
-  .hm-ar-b i, .hm-ar-b svg { width: 22px; height: 22px; color: var(--teal); }
+  /* ações rápidas: botões no cabeçalho, ao lado da saudação (a primeira é a ação principal) */
+  .hm-acoes { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--sp-2); align-self: center; }
+  .hm-ac { display: inline-flex; align-items: center; gap: var(--sp-2); height: 34px; padding: 0 var(--sp-4) 0 var(--sp-3); font-family: inherit; font-size: var(--fs-sm); font-weight: 700; white-space: nowrap; color: var(--text-1); cursor: pointer;
+    border: 1px solid var(--line-2); border-radius: var(--r-pill); background: var(--surface-2); transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease), color var(--dur) var(--ease), transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+  .hm-ac i, .hm-ac svg { width: 16px; height: 16px; color: var(--accent); transition: color var(--dur) var(--ease); }
+  .hm-ac:hover { border-color: var(--accent-line); background: var(--accent-soft); }
+  .hm-ac:active { transform: translateY(1px) scale(.98); }
+  .hm-ac:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .hm-ac.pri { color: var(--accent-fg); border-color: transparent; background: linear-gradient(145deg, var(--accent), var(--accent-lo)); box-shadow: 0 6px 14px -8px var(--accent-glow); }
+  .hm-ac.pri i, .hm-ac.pri svg { color: inherit; }
+  .hm-ac.pri:hover { filter: brightness(1.07); }
 
   /* paginação das listas (pontos) */
   .hm-pg { display: flex; align-items: center; justify-content: center; gap: var(--sp-2); padding-top: var(--sp-2); }
@@ -130,9 +135,9 @@
   .hm-pg button.on { width: 18px; background: var(--teal); }
   .hm-pg button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
 }
-/* só desktop: no celular a faixa, a rosca e o acesso rápido não existem */
-.hm-faixa, .hm-s-membros, .hm-s-acesso { display: none; }
-@media (min-width: 1024px) { .hm-faixa { display: grid; } .hm-s-membros, .hm-s-acesso { display: flex; } }
+/* só desktop: no celular a faixa, a rosca e as ações rápidas não existem */
+.hm-faixa, .hm-s-membros, .hm-acoes { display: none; }
+@media (min-width: 1024px) { .hm-faixa { display: grid; } .hm-s-membros { display: flex; } .hm-acoes { display: flex; } }
 
 /* ── Blocos e títulos ── */
 .hm-block { margin-bottom: var(--sp-5); }
@@ -462,10 +467,16 @@ function renderHome() {
 
   var sec = { atalhos: '', kpis: '', anivs: '', ativ: '', agenda: '' };
   /* desktop: sem cartão institucional; só o título no canto superior esquerdo (o celular mantém o cartão) */
+  var acoes = _homeAcoes(mods, perfil);
+  HOME_ACOES = acoes;
   var cabecalho = '<header class="page-head hm-head hm-rise" style="--i:' + (i++) + '"><div class="page-head-txt">' +
       '<h1 class="page-title">' + escHtml(_homeSaudacao()) + '</h1>' +
       '<p class="page-sub">' + escHtml(_homeDataExtenso() + (IDENTIDADE.nome ? ' · ' + IDENTIDADE.nome : '')) + '</p>' +
-    '</div></header>';
+    '</div>' +
+    (acoes.length ? '<div class="hm-acoes" role="group" aria-label="Ações rápidas">' + acoes.map(function (a, n) {
+      return '<button type="button" class="hm-ac' + (n === 0 ? ' pri' : '') + '" onclick="homeAcao(' + n + ')"><i data-lucide="' + escHtml(a.icone || 'zap') + '"></i><span>' + escHtml(a.rotulo) + '</span></button>';
+    }).join('') + '</div>' : '') +
+    '</header>';
 
   /* ══ Atalhos (módulos liberados ao perfil + Usuários, quando permitido) ══ */
   sec.atalhos = '<section class="hm-block hm-rise hm-s-atalhos" style="--i:' + (i++) + '">' +
@@ -512,22 +523,15 @@ function renderHome() {
   '</section>';
 
   /* desktop: faixa de indicadores, rosca de Membros e acesso rápido (preenchidos quando os dados chegam; no celular ficam ocultos) */
-  var acoes = _homeAcoes(mods, perfil);
   var comRosca = !!modAniv && _homeTem(cfg, 'kpis');
-  var faixa = _homeTem(cfg, 'kpis') ? '<div class="hm-faixa" id="hm-faixa">' + [0, 1, 2, 3].map(function () { return '<div class="hm-fk is-loading"><div class="skeleton" style="width:40px;height:40px;border-radius:var(--r-3)"></div><div style="flex:1"><div class="skeleton" style="width:50%;height:18px;margin-bottom:6px"></div><div class="skeleton" style="width:80%;height:11px"></div></div></div>'; }).join('') + '</div>' : '';
+  var faixa = _homeTem(cfg, 'kpis') ? '<div class="hm-faixa" id="hm-faixa">' + [0, 1, 2, 3].map(function () { return '<div class="hm-fk is-loading"><div style="flex:1"><div class="skeleton" style="width:40%;height:24px;margin-bottom:6px"></div><div class="skeleton" style="width:70%;height:11px"></div></div><div class="skeleton" style="width:32px;height:32px;border-radius:50%"></div></div>'; }).join('') + '</div>' : '';
   var rosca = comRosca ? '<section class="hm-card hm-rise hm-s-membros" style="--i:' + (i++) + '">' +
       '<h2 class="hm-ch"><i data-lucide="users"></i><span class="hm-ch-t">Membros</span><button type="button" onclick="navigateTo(\'' + modAniv.rota + '\')">Ver todos <i data-lucide="arrow-right"></i></button></h2>' +
       '<div class="hm-ro" id="hm-rosca"></div></section>' : '';
-  var acesso = acoes.length ? '<section class="hm-card hm-rise hm-s-acesso" style="--i:' + (i++) + '">' +
-      '<h2 class="hm-ch"><i data-lucide="zap"></i><span class="hm-ch-t">Acesso rápido</span></h2>' +
-      '<div class="hm-ar">' + acoes.map(function (a, n) {
-        return '<button type="button" class="hm-ar-b" onclick="homeAcao(' + n + ')"><i data-lucide="' + escHtml(a.icone || 'zap') + '"></i><span>' + escHtml(a.rotulo) + '</span></button>';
-      }).join('') + '</div></section>' : '';
-  HOME_ACOES = acoes;
 
   html += '<div class="hm-main">' + cabecalho + faixa + sec.kpis + sec.atalhos +
       '<div class="hm-mid">' + rosca + sec.ativ + '</div>' +
-      '<div class="hm-bot">' + sec.anivs + acesso + '</div></div>' +
+      '<div class="hm-bot">' + sec.anivs + '</div></div>' +
     '<div class="hm-side">' + sec.agenda + '</div></div></div>'; /* /hm-body /hm */
 
   renderView(html);
@@ -869,8 +873,8 @@ function _homeDeskKpis(d) {
   if (fx) fx.innerHTML = d.filter(function (k) { return k.faixa; }).map(function (k) {
     var dest = k.destino || k.moduloRota || '';
     return '<button type="button" class="hm-fk"' + (dest ? ' onclick="navigateTo(\'' + escHtml(dest) + '\')"' : '') + '>' +
-      '<span class="hm-fk-ic"><i data-lucide="' + _kpiIcone(k) + '"></i></span>' +
-      '<span><span class="hm-fk-num">' + escHtml(_kpiNum(k)) + '</span><span class="hm-fk-lab">' + escHtml(k.rotulo || k.curto || '') + '</span></span></button>';
+      '<span class="hm-fk-txt"><span class="hm-fk-num">' + escHtml(_kpiNum(k)) + '</span><span class="hm-fk-lab">' + escHtml(k.rotulo || k.curto || '') + '</span></span>' +
+      '<span class="hm-fk-ic"><i data-lucide="' + _kpiIcone(k) + '"></i></span></button>';
   }).join('');
   var ro = document.getElementById('hm-rosca');
   if (ro) {
@@ -891,7 +895,7 @@ function _homeRecarregarKpis() {
   var grid = document.getElementById('kpi-grid');
   if (grid) grid.innerHTML = _kpiSkeleton();
   var fx = document.getElementById('hm-faixa');
-  if (fx) fx.innerHTML = '<div class="hm-fk is-loading"><div class="skeleton" style="width:40px;height:40px;border-radius:var(--r-3)"></div><div class="skeleton" style="flex:1;height:18px"></div></div>';
+  if (fx) fx.innerHTML = '<div class="hm-fk is-loading"><div class="skeleton" style="flex:1;height:24px"></div></div>';
   _loadKpis();
 }
 

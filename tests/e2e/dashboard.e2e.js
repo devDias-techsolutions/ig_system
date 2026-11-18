@@ -1,5 +1,5 @@
 'use strict';
-// Início no desktop: faixa de indicadores, rosca, acesso rápido (ações dos módulos), sino e paginação.
+// Início no desktop: faixa de indicadores, rosca, ações rápidas no cabeçalho (ações dos módulos), sino e paginação.
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const { chromium, criarBackend, abrir, entrar, esperarTela } = require('./harness');
@@ -43,15 +43,15 @@ test('dashboard desktop: acesso rápido abre as ações dos módulos', async () 
   const { page, erros } = await entrarComo(backend, 'admin@igreja.test', 'Admin#Teste1');
   membro(backend, 'Maria Silva');
   await recarregarHome(page);
-  assert.deepEqual(await page.$$eval('.hm-ar-b span', (n) => n.map((x) => x.textContent)), ['Novo membro', 'Emitir carta', 'Nova aula']);
-  await page.click('.hm-ar-b:has-text("Novo membro")');
+  assert.deepEqual(await page.$$eval('.hm-ac span', (n) => n.map((x) => x.textContent)), ['Novo membro', 'Emitir carta', 'Nova aula']);
+  await page.click('.hm-ac:has-text("Novo membro")');
   await page.waitForSelector('#mbf-nome', { timeout: 6000 });
   await page.evaluate(() => navigateTo('home')); await esperarTela(page, 'home');
-  await page.click('.hm-ar-b:has-text("Nova aula")');
+  await page.click('.hm-ac:has-text("Nova aula")');
   await page.waitForSelector('#modal-edm-form.open', { timeout: 6000 });
   assert.match(await page.innerText('#edm-form-titulo'), /Nova aula/);
   await page.evaluate(() => { edmFecharModal && edmFecharModal('modal-edm-form'); navigateTo('home'); }); await esperarTela(page, 'home');
-  await page.click('.hm-ar-b:has-text("Emitir carta")');
+  await page.click('.hm-ac:has-text("Emitir carta")');
   await page.waitForSelector('#cr-membro', { timeout: 6000 });
   assert.equal(await page.isChecked('input[name="cr-tipo"][value="recomendacao"]'), true);
   assert.deepEqual(erros, []);
@@ -61,7 +61,7 @@ test('dashboard desktop: secretaria vê Novo membro e Emitir carta; professor n�
   const backend = criarBackend();
   const { page } = await entrarComo(backend, 'sec@igreja.test', 'Sec#Teste1');
   await recarregarHome(page);
-  const nomes = await page.$$eval('.hm-ar-b span', (n) => n.map((x) => x.textContent));
+  const nomes = await page.$$eval('.hm-ac span', (n) => n.map((x) => x.textContent));
   assert.ok(nomes.includes('Novo membro') && nomes.includes('Emitir carta'));
 });
 
