@@ -78,3 +78,10 @@ Botão `.btn` 40px (`.btn-sm` 32, `.btn-lg` 44) · campo/select/busca 40px · r�
 - A cor vem da cor da marca (`COR_PRIMARIA`, tela Identidade): `mbCard_paleta()` deriva `--k1..--k6` inline no `.mb-card`. Cor muito clara é escurecida para o texto branco continuar legível.
 - Logo e marca d'água enviados são claros: só ficam sobre áreas coloridas do cartão.
 - Na Identidade, "Sugerir cores do logo" lê uma miniatura de 48 px no navegador e oferece até 5 cores; logo branco/cinza não gera sugestão e vale a cor escolhida à mão.
+
+
+## Cores: tokens em camadas (identidade dinâmica)
+1. **Marca** — `--brand-1`, `--brand-2`: vêm da Config (cor da igreja). Nenhum componente usa direto.
+2. **Semânticos** — `--surface-0..4` (moldura, painel, cartão, realce), `--text-1..4`, `--line`, `--line-2`, `--line-strong`, `--accent`, `--accent-hi/-lo/-soft/-line/-glow`, `--accent-fg` (texto sobre o destaque), `--accent-2` (secundária), `--ok`, `--warn`, `--danger`.
+3. **Componentes** — só leem os semânticos. `aplicarIdentidade()` chama `gerarPaleta()` e sobrescreve a camada 2; Light e Dark diferem apenas nos valores.
+Nomes antigos (`--bg2`, `--teal`, `--text-muted`…) são apelidos temporários definidos em um único bloco no `index.html`.
