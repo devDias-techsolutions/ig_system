@@ -143,3 +143,67 @@ for (const [w, h] of [[1280, 720], [1366, 768], [1920, 1080]]) {
     assert.deepEqual(erros, []);
   });
 }
+
+// Galeria: 5 marcas × 2 temas com dados reais; contraste dos textos realmente desenhados e Início sem rolagem
+const GALERIA = { azul: '#1D4ED8', vinho: '#7F1D3A', verde: '#15803D', laranja: '#EA580C', cinza: '#6B7280' };
+test('dashboard desktop: contraste dos textos desenhados em 5 marcas × 2 temas', async () => {
+  const backend = criarBackend();
+  const { page, erros } = await entrarComo(backend, 'admin@igreja.test', 'Admin#Teste1');
+  ['Ana', 'Bia', 'Caio'].forEach((n) => membro(backend, n + ' Teste'));
+  const fmt = (d) => { const z = (n) => String(n).padStart(2, '0'); return z(d.getDate()) + '/' + z(d.getMonth() + 1) + '/' + d.getFullYear() + ' 10:00:00'; };
+  backend.env.ctx.__a = { ID: 'alx', Nome: 'Aluno Teste', Ativo: true, CriadoEm: fmt(new Date()) };
+  backend.env.run("Util.insertRow('Alunos', __a)");
+  const d = new Date(Date.now() + 864e5); const z = (n) => String(n).padStart(2, '0');
+  backend.env.ctx.__e = { titulo: 'Culto', data: d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()), hora: '19:30', local: 'Templo' };
+  backend.env.run("Agenda.salvar(__e, { perfil: 'admin', nome: 'x' })");
+  const falhas = [];
+  for (const [nome, cor] of Object.entries(GALERIA)) {
+    for (const tema of ['dark', 'light']) {
+      await page.evaluate(([c, t]) => {
+        if (document.documentElement.getAttribute('data-theme') !== t) toggleTheme();
+        IDENTIDADE.corPrimaria = c; aplicarIdentidade(); renderHome();
+      }, [cor, tema]);
+      await page.waitForFunction(() => !document.querySelector('.hm-main .is-loading') && document.querySelector('.ag-ev') && document.querySelector('.activity-item'), null, { timeout: 8000 });
+      const r = await page.evaluate(() => {
+        const rgb = (s) => (s.match(/[\d.]+/g) || []).map(Number);
+        const lum = (c) => { const f = c.slice(0, 3).map((v) => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }); return .2126 * f[0] + .7152 * f[1] + .0722 * f[2]; };
+        const fundo = (el) => { for (let n = el; n; n = n.parentElement) { const c = rgb(getComputedStyle(n).backgroundColor); if (c.length >= 3 && (c[3] === undefined || c[3] > .9)) return c; } return [255, 255, 255]; };
+        const cr = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
+        const alvos = [['.hm-ch-t', 4.5], ['.hm-ch button', 4.5], ['.hm-fk-num', 4.5], ['.hm-fk-lab', 4.5], ['.hm-ativ-g', 4.5], ['.activity-text', 4.5], ['.activity-time', 4.5],
+          ['.hm-aniv-nome', 4.5], ['.hm-aniv-dia', 4.5], ['.ag-ev-n', 4.5], ['.ag-ev-m', 4.5], ['.ag-ev-h', 3], ['.ag-ev-d span', 3], ['.ag-lt', 4.5], ['.ag-lh button', 4.5], ['.ag-mes-nome', 4.5], ['.page-title', 4.5], ['.page-sub', 4.5]];
+        const out = [];
+        alvos.forEach(([sel, min]) => document.querySelectorAll(sel).forEach((el) => {
+          if (!el.offsetParent) return;
+          const v = cr(rgb(getComputedStyle(el).color), fundo(el));
+          if (v < min) out.push(sel + ' ' + v.toFixed(2) + ' < ' + min);
+        }));
+        return out;
+      });
+      r.forEach((x) => falhas.push(nome + ' ' + tema + ' ' + x));
+    }
+  }
+  assert.deepEqual([...new Set(falhas)], []);
+  assert.deepEqual(erros, []);
+});
+
+for (const [w, h] of [[1280, 720], [1366, 768], [1920, 1080]]) {
+  test('dashboard desktop ' + w + 'x' + h + ': o painel do Início não rola', async () => {
+    const backend = criarBackend();
+    const { page, erros } = await entrarComo(backend, 'admin@igreja.test', 'Admin#Teste1');
+    ['Ana', 'Bia', 'Caio', 'Davi', 'Eva', 'Fabio', 'Gil'].forEach((n) => membro(backend, n + ' Teste'));
+    await page.setViewportSize({ width: w, height: h });
+    await recarregarHome(page);
+    await page.waitForSelector('#aniv-list .hm-aniv');
+    await page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.effect && a.effect.getComputedTiming().iterations !== Infinity).map((a) => a.finished.catch(() => 0)))); // fim da animação de entrada dos cartões
+    const rolam = await page.evaluate(() => {
+      const out = [];
+      for (let n = document.querySelector('.hm'); n && n !== document.documentElement; n = n.parentElement) {
+        const oy = getComputedStyle(n).overflowY;
+        if (n.scrollHeight > n.clientHeight + 1 && (oy === 'auto' || oy === 'scroll')) out.push(n.tagName + '#' + n.id + ' ' + n.scrollHeight + '/' + n.clientHeight);
+      }
+      return out.concat(document.scrollingElement.scrollHeight > document.scrollingElement.clientHeight + 1 ? ['página'] : []);
+    });
+    assert.deepEqual(rolam, []);
+    assert.deepEqual(erros, []);
+  });
+}
