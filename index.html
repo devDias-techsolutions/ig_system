@@ -1134,6 +1134,19 @@ textarea { height: auto; min-height: 88px; padding: var(--sp-3); resize: vertica
   .topnav-sub { display: none; }
 }
 .topnav-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.topnav-desk { display: none; }
+@media (min-width: 1024px) { .topnav-desk { display: inline-flex; } }
+.topnav-icon-btn { position: relative; }
+.sino-n { position: absolute; top: 2px; right: 2px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: var(--r-pill); display: grid; place-items: center; font-size: var(--fs-xs); font-weight: 800; line-height: 1; color: #fff; background: var(--danger); box-shadow: 0 0 0 2px var(--bg2); }
+.sino-n[hidden] { display: none; }
+.sino-dd { width: min(320px, 92vw); padding: var(--sp-2); }
+.sino-h { padding: var(--sp-2) var(--sp-3); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); }
+.sino-it { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-2) var(--sp-3); border-radius: var(--r-3); font-size: var(--fs-sm); color: var(--text); }
+.sino-it i, .sino-it svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--warning); }
+.sino-it span { flex: 1; min-width: 0; }
+.sino-it button { border: 0; background: none; cursor: pointer; font-family: inherit; font-size: var(--fs-sm); font-weight: 800; color: var(--teal); padding: var(--sp-1); }
+.sino-ok { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-3); font-size: var(--fs-sm); color: var(--text-muted); }
+.sino-ok i, .sino-ok svg { width: 18px; height: 18px; color: var(--teal); }
 .topnav-sep   { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; margin: 0 4px; }
 .topnav-icon-btn {
   display: inline-flex; align-items: center; justify-content: center;
@@ -1335,6 +1348,17 @@ body.nav-on #topnav-usuarios-btn { display: none !important; }
   <div class="topnav-right">
     <!-- Slot: ação primária do módulo ativo (ex.: aniversariantes com badge) -->
     <div id="topnav-module-actions"></div>
+
+    <!-- Desktop: tema e sino de alertas antes do menu ⋮ (no celular o tema fica no ⋮) -->
+    <button class="topnav-icon-btn topnav-desk" onclick="toggleTheme()" id="topnav-theme-btn" title="Alternar tema" aria-label="Alternar tema">
+      <i data-lucide="sun-moon" class="ic-18"></i>
+    </button>
+    <div class="topnav-more-wrap topnav-desk" style="position:relative">
+      <button class="topnav-icon-btn" onclick="sinoAbrir(event)" id="sino-btn" title="Alertas" aria-label="Alertas" aria-haspopup="true">
+        <i data-lucide="bell" class="ic-18"></i><span class="sino-n" id="sino-n" hidden></span>
+      </button>
+      <div class="user-dropdown sino-dd" id="sino-dd" style="right:0" role="menu"></div>
+    </div>
 
     <!-- Mais opções: tema e ações secundárias do módulo -->
     <div class="topnav-more-wrap" style="position:relative">
@@ -2229,6 +2253,47 @@ document.addEventListener('click', function(e) {
   if (!dd.contains(e.target)) dd.classList.remove('open');
 });
 
+// ── SINO: pendências dos módulos (as mesmas do rodapé dos cartões de indicadores) ──
+var Sino = { itens: [], ok: false };
+function sinoUsar(kpis) {
+  Sino.itens = (kpis || []).filter(function (k) { return k.alerta && (k.valor || 0) > 0; });
+  Sino.ok = true;
+  var n = document.getElementById('sino-n');
+  if (n) { n.textContent = Sino.itens.length > 9 ? '9+' : String(Sino.itens.length); n.hidden = !Sino.itens.length; }
+}
+function sinoCarregar(depois) {
+  if (!App.session) return;
+  google.script.run
+    .withSuccessHandler(function (res) { if (res && res.success) sinoUsar(res.data || []); if (depois) depois(); })
+    .withFailureHandler(function () { if (depois) depois(); })
+    .getKpisHome(App.session.token);
+}
+function _sinoDesenhar() {
+  var dd = document.getElementById('sino-dd');
+  if (!dd) return;
+  dd.innerHTML = '<div class="sino-h">Alertas</div>' + (Sino.itens.length ? Sino.itens.map(function (k) {
+    var rot = String(k.rotulo || k.curto || '').toLowerCase();
+    if (k.valor === 1) rot = rot.replace(/^membros\b/, 'membro').replace(/^chamadas\b/, 'chamada');
+    return '<div class="sino-it"><i data-lucide="alert-triangle"></i><span><b>' + escHtml(k.valor) + '</b> ' + escHtml(rot) + '</span>' +
+      (k.destino ? '<button type="button" onclick="sinoIr(\'' + escHtml(k.destino) + '\')">' + escHtml(k.acao || 'Resolver') + '</button>' : '') + '</div>';
+  }).join('') : '<div class="sino-ok"><i data-lucide="check-circle-2"></i>Nada pendente</div>');
+  if (window.lucide) lucide.createIcons();
+}
+function sinoAbrir(e) {
+  if (e) e.stopPropagation();
+  var dd = document.getElementById('sino-dd');
+  if (!dd) return;
+  if (dd.classList.contains('open')) { dd.classList.remove('open'); return; }
+  closeMoreMenu();
+  _sinoDesenhar(); dd.classList.add('open');
+  sinoCarregar(function () { if (dd.classList.contains('open')) _sinoDesenhar(); }); // atualiza ao abrir
+}
+function sinoIr(rota) { var dd = document.getElementById('sino-dd'); if (dd) dd.classList.remove('open'); navigateTo(rota); }
+document.addEventListener('click', function (e) {
+  var dd = document.getElementById('sino-dd'), btn = document.getElementById('sino-btn');
+  if (dd && dd.classList.contains('open') && !(btn && btn.contains(e.target)) && !dd.contains(e.target)) dd.classList.remove('open');
+});
+
 // ── TEMA ─────────────────────────────────────────────────
 var THEME_KEY = 'ad_theme';
 
@@ -2348,6 +2413,7 @@ window.addEventListener('hashchange', function() {
 var _navigateToOriginal = navigateTo;
 navigateTo = function(view, params) {
   _navigateToOriginal(view, params);
+  if (App.session && view !== 'home' && !Sino.ok) sinoCarregar();
   // Empurra estado apenas para views autenticadas (não login)
   if (authRequired && authRequired.indexOf(view) !== -1) {
     navPush({ view: view });

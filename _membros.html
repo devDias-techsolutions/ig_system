@@ -876,6 +876,9 @@ function _mbBuildAniversariantes() {
 }
 
 // ── Navegação interna ────────────────────────────────────
+// Acesso rápido da Início: abre Cartas já em "Recomendação"
+function mbAcaoCarta() { CR.tipo = 'recomendacao'; mbSetTab('cartas'); }
+
 function mbNovoMembro() {
   MB.tab = 'form'; MB.editId = null;
   MB.fotoData = ''; MB.fotoZoom = 1; MB.fotoX = 50; MB.fotoY = 50; MB.fotoNova = false; MB.fotoRemovida = false;

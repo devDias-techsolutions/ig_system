@@ -7,6 +7,7 @@
 //    var __MANIFESTOS__ = (typeof __MANIFESTOS__ === 'undefined') ? [] : __MANIFESTOS__;
 //    __MANIFESTOS__.push({ id, nome, descricao, icone, rota, render, html,
 //                          perfis, ordem, abas:[{nome,colunas,cor}], kpis:function(){...}, atividade:function(perfil){...},
+//                          acoes:[{ rotulo, icone, rota, fn, perfis }] (opcional: ações do "Acesso rápido" da Início; fn é chamada após abrir a rota),
 //                          fonteMembros:{ rotulo, titulo, icone, fn } }); (opcional: oferece pessoas para o cadastro de membros)
 //
 //  O padrão acima NÃO depende da ordem de carga dos arquivos (o Apps Script
@@ -70,7 +71,8 @@ var Modulos = (function () {
       return {
         id: m.id, nome: m.nome, descricao: m.descricao || '', icone: m.icone || 'box',
         rota: m.rota || m.id, render: m.render, perfis: m.perfis || ['admin'], permissoes: m.permissoes || null,
-        fonteMembros: m.fonteMembros || null
+        fonteMembros: m.fonteMembros || null,
+        acoes: m.acoes || []
       };
     });
   }

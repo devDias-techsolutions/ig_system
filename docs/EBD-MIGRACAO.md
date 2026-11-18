@@ -88,3 +88,11 @@ Origem: `modulos-pendentes/escola-dominical/` (legado, mantido como referência)
 - **Novo módulo:** `Atalhos.registrar(chave, rota, nome, itens, fixos)` ao carregar e `Atalhos.filtrar(chave, itens, fixos)` ao montar a barra (classe `atl-nav` na `nav`). A tela inicial do módulo é sempre visível.
 - **Estilo único** (`.atl-nav`, em `index.html`): não selecionado = fundo branco + contorno na cor da igreja; selecionado = sólido.
 - A bolinha com as iniciais saiu do topo; "Alterar senha" está no menu ⋮ e "Sair" no rodapé do menu sanduíche.
+
+## Início no desktop (dashboard em uma tela)
+- **Só ≥1024 px** (celular e tablet não mudam). Em 1280×720 a página não rola: faixa de indicadores, meio (Membros em rosca + Atividade), base (Aniversariantes + Acesso rápido) e a coluna da Agenda.
+- **Faixa de indicadores:** vem dos KPIs dos módulos marcados com `faixa: true` no manifesto (o núcleo não cita a EBD).
+- **Acesso rápido:** ações declaradas no manifesto (`acoes: [{ rotulo, icone, rota, fn, perfis }]`); `homeAcao` abre a rota e chama a função. Hoje: Novo membro, Emitir carta (Recomendação) e Nova aula.
+- **Sino + tema** no topo (antes do ⋮): o sino lista as pendências dos módulos (KPIs com `alerta`), com badge numérico; atualiza ao abrir.
+- **Listas paginadas em pontos** (Atividade: 4 por página; Aniversariantes: 3). Sem dado real não se inventa nada (sem Visitantes, Crescimento, banner etc.).
+- **Dívida:** fundo da página com efeitos/gradientes (pedido pelo usuário para depois); busca global não entra.

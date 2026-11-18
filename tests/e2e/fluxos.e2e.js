@@ -201,10 +201,11 @@ test('Home: falha ao carregar indicadores mostra erro com "Tentar de novo" que f
   const original = backend.env.ctx.getKpisHome;
   backend.env.ctx.getKpisHome = (...a) => { if (falhar) throw new Error('queda'); return original(...a); };
   await page.evaluate(() => renderHome());
-  await page.waitForSelector('#kpi-grid .hm-empty.erro', { timeout: 6000 });
+  await page.waitForSelector('.hm-main .hm-empty.erro:visible', { timeout: 6000 }); // desktop: o erro aparece na faixa; celular: nos cartões
   falhar = false;
-  await page.click('#kpi-grid .hm-empty.erro .btn');
-  await page.waitForSelector('#kpi-grid .bn-card:not(.is-loading)', { timeout: 6000 });
+  await page.locator('.hm-main .hm-empty.erro:visible .btn').first().click();
+  await page.waitForFunction(() => !document.querySelector('.hm-main .hm-empty.erro') && !document.querySelector('.hm-main .is-loading'), null, { timeout: 6000 });
+  assert.ok(await page.locator('#kpi-grid .bn-card:not(.is-loading)').count() > 0);
 });
 
 // ── Membros × Home (o defeito do cache apareceu aqui) ───────

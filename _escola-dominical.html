@@ -828,6 +828,9 @@ function _edmAulaPorId(id) {
   for (var i = 0; i < l.length; i++) if (l[i].id === id) return { ID: l[i].id, NumLicao: l[i].numLicao, Titulo: l[i].titulo, Data: l[i].data, Trimestre: l[i].trimestre };
   return null;
 }
+// Acesso rápido da Início: abre direto o formulário de nova aula
+function edmAcaoNovaAula() { edmFormAula(''); }
+
 function edmFormAula(id) {
   var a = id ? _edmAulaPorId(id) : null;
   EDM.editId = a ? a.ID : '';
