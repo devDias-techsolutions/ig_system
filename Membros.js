@@ -514,6 +514,10 @@ __MANIFESTOS__.push({
   render: 'renderMembros',
   html: ['_membros', '_membros-cartas'],
   perfis: ['admin', 'secretaria'],
+  acoes: [
+    { rotulo: 'Novo membro', icone: 'user-plus', rota: 'membros', fn: 'mbNovoMembro', perfis: ['admin', 'secretaria'] },
+    { rotulo: 'Emitir carta', icone: 'file-text', rota: 'membros', fn: 'mbAcaoCarta', perfis: ['admin', 'secretaria'] }
+  ],
   ordem: 10,
   permissoes: {
     iconBg: 'rgba(77,163,255,.15)', iconColor: 'var(--cyan,#4da3ff)',
@@ -537,7 +541,7 @@ __MANIFESTOS__.push({
       return m && Number(m[2]) === mes;
     }).length;
     return [
-      { icone: 'users',  cor: 'kc-teal', valor: ativos.length, rotulo: 'Membros ativos',   curto: 'Ativos', vazio: 'Cadastre o primeiro membro', destino: 'membros' },
+      { icone: 'users',  cor: 'kc-teal', faixa: true, valor: ativos.length, rotulo: 'Membros ativos',   curto: 'Ativos', vazio: 'Cadastre o primeiro membro', destino: 'membros' },
       { icone: 'user-x', cor: 'kc-gold', valor: todos.length - ativos.length, rotulo: 'Membros inativos', curto: 'Inativos', destino: 'membros' },
       { icone: 'cake', cor: 'kc-gold', valor: aniv, rotulo: 'Aniversariantes do mês', curto: 'Aniversários', destino: 'membros' },
       { icone: 'camera', cor: 'kc-blue', valor: ativos.filter(function (r) { return !String(r.foto || '').trim(); }).length, rotulo: 'Membros sem foto', curto: 'Sem foto', dica: 'Complete os cadastros', destino: 'membros', alerta: true }

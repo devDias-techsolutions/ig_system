@@ -1772,6 +1772,9 @@ var EscolaDominicalManifesto = {
   render: 'renderEscolaDominical',
   html: ['_escola-dominical'],
   perfis: ['admin', 'secretaria', 'professor'],
+  acoes: [
+    { rotulo: 'Nova aula', icone: 'calendar-plus', rota: 'escola-dominical', fn: 'edmAcaoNovaAula', perfis: ['admin', 'secretaria'] }
+  ],
   ordem: 20,
   permissoes: {
     iconBg: 'rgba(255,184,77,.15)', iconColor: 'var(--gold,#ffb84d)',
@@ -1807,9 +1810,9 @@ var EscolaDominicalManifesto = {
     var profs  = Util.sheetToObjects('Professores').filter(function (p) { return ativo(p.Ativo); }).length;
     var pend = EscolaDominical.chamadasPendentesHoje();
     return [
-      { id: 'ed_alunos', rotulo: 'Alunos da EBD', curto: 'Alunos', valor: alunos, icone: 'graduation-cap', cor: 'kc-gold', destino: 'escola-dominical' },
-      { id: 'ed_turmas', rotulo: 'Turmas', curto: 'Turmas', valor: turmas, icone: 'users-round', cor: 'kc-blue', destino: 'escola-dominical' },
-      { id: 'ed_profs',  rotulo: 'Professores', curto: 'Professores', valor: profs, icone: 'book-user', cor: 'kc-green', destino: 'escola-dominical' },
+      { id: 'ed_alunos', faixa: true, rotulo: 'Alunos da EBD', curto: 'Alunos', valor: alunos, icone: 'graduation-cap', cor: 'kc-gold', destino: 'escola-dominical' },
+      { id: 'ed_turmas', faixa: true, rotulo: 'Turmas', curto: 'Turmas', valor: turmas, icone: 'users-round', cor: 'kc-blue', destino: 'escola-dominical' },
+      { id: 'ed_profs', faixa: true,  rotulo: 'Professores', curto: 'Professores', valor: profs, icone: 'book-user', cor: 'kc-green', destino: 'escola-dominical' },
       { id: 'ed_pend', rotulo: 'chamadas pendentes hoje', curto: 'Chamadas', valor: pend, icone: 'clipboard-list', cor: 'kc-gold', dica: 'Lance a chamada das turmas', acao: 'Lançar', destino: 'escola-dominical', alerta: true }
     ];
   }
