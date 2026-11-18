@@ -54,13 +54,25 @@
 .hm-s-atalhos { order: 1; } .hm-s-kpis { order: 2; } .hm-s-anivs { order: 3; } .hm-s-ativ { order: 4; } .hm-s-agenda { order: 5; }
 .hm-head { display: none; }
 @media (min-width: 1024px) {
-  .page.hm { max-width: var(--page-w, 1360px); padding: var(--sp-6) var(--gutter) var(--sp-7); }
+  /* Início desktop: ocupa o painel todo (sem largura máxima), coluna principal + agenda que nasce na altura da saudação */
+  .page.hm { max-width: none; width: 100%; min-height: calc(100dvh - 2 * var(--shell-gap, 10px) - var(--topbar-h, 44px)); display: flex; flex-direction: column; padding: var(--sp-5) var(--gutter); }
   .hm-hero { display: none; }
-  .hm-head { display: flex; }
-  .hm-body { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 0 var(--sp-5); align-items: start; padding: 0; }
-  .hm-main, .hm-side { display: block; min-width: 0; }
-  .hm-duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-5); align-items: start; }
-  .hm-duo > .hm-block { margin-bottom: 0; }
+  .hm-head { display: flex; margin-bottom: 0; }
+  .hm-body { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) clamp(236px, 20vw, 292px); gap: var(--sp-5); align-items: stretch; padding: 0; max-width: none; margin: 0; }
+  .hm-main { display: flex; flex-direction: column; gap: var(--sp-4); min-width: 0; }
+  .hm-main > *, .hm-duo > *, .hm-side > * { order: 0; }
+  .hm-side { display: flex; flex-direction: column; min-width: 0; }
+  .hm-main .hm-block, .hm-side .hm-block { margin-bottom: 0; }
+  .hm-main .hm-h { margin-bottom: var(--sp-2); }
+  .hm-duo { flex: 1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); align-items: stretch; min-height: 180px; }
+  .hm-duo > section { margin: 0; display: flex; flex-direction: column; min-width: 0; }
+  .hm-duo .hm-anivs, .hm-duo .activity-list { overflow-y: auto; max-height: 232px; }
+  .hm-duo .panel { padding: var(--sp-3); border-radius: var(--r-3); }
+  .hm-main .hm-empty, .hm-side .hm-empty { flex: 1; justify-content: center; gap: var(--sp-1); padding: var(--sp-3); }
+  .hm-main .hm-empty-icon, .hm-side .hm-empty-icon { width: 36px; height: 36px; margin-bottom: var(--sp-1); }
+  .hm-main .hm-empty .btn, .hm-side .hm-empty .btn { margin-top: var(--sp-2); }
+  .hm-duo .panel-head { margin-bottom: var(--sp-2); }
+}
 }
 
 /* ── Blocos e títulos ── */
@@ -87,10 +99,10 @@
 
 /* Atalhos no desktop: grade de botões (ícone + nome); o círculo é só do celular */
 @media (min-width: 1024px) {
-  .hm-mods { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: var(--sp-2); }
-  .hm-mods .hm-mod { flex-direction: row; justify-content: flex-start; text-align: left; gap: var(--sp-3); padding: var(--sp-2) var(--sp-3); border: 1px solid var(--border); border-radius: var(--r-3); background: var(--bg2); transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease); }
+  .hm-mods { grid-template-columns: repeat(auto-fill, minmax(150px, 190px)); gap: var(--sp-2); }
+  .hm-mods .hm-mod { flex-direction: row; justify-content: flex-start; text-align: left; gap: var(--sp-2); padding: var(--sp-1) var(--sp-3) var(--sp-1) var(--sp-1); border: 1px solid var(--border); border-radius: var(--r-3); background: var(--bg2); transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease); }
   .hm-mods .hm-mod:hover { border-color: var(--teal-border); background: var(--bg3); }
-  .hm-mods .hm-mod-icon { width: 36px; height: 36px; border-radius: var(--r-2); box-shadow: none; }
+  .hm-mods .hm-mod-icon { width: 30px; height: 30px; border-radius: var(--r-2); box-shadow: none; }
   .hm-mods .hm-mod:hover .hm-mod-icon { transform: none; box-shadow: none; }
   .hm-mods .hm-mod-icon i, .hm-mods .hm-mod-icon svg { width: 18px; height: 18px; }
   .hm-mods .hm-mod-name { font-size: var(--fs-sm); font-weight: 700; }
@@ -101,8 +113,7 @@
 .kp + .kp { margin-top: var(--sp-3); }
 /* desktop: cartões dos módulos lado a lado, quantos couberem */
 @media (min-width: 1024px) {
-  #kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: var(--sp-4); align-items: start; }
-  .kp + .kp { margin-top: 0; }
+  #kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--sp-4); align-items: stretch; }
 }
 .kp-h { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4) var(--sp-2); }
 .kp-ic { width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; color: var(--on-teal, #fff); background: var(--teal); }
@@ -145,6 +156,18 @@
 .kp-f.warn i, .kp-f.warn svg { color: var(--warning); }
 .kp-f button { min-height: 32px; padding: 0 var(--sp-1); border: 0; background: none; cursor: pointer; font-family: inherit; font-size: var(--fs-sm); font-weight: 800; color: color-mix(in srgb, var(--warning) 62%, #000); }
 .kp-f button:focus-visible { outline: 2px solid var(--warning); outline-offset: 2px; border-radius: var(--r-2); }
+/* desktop: cartões de módulo compactos e com a mesma altura (vem depois das regras-base de propósito) */
+@media (min-width: 1024px) {
+  .kp + .kp { margin-top: 0; }
+  .kp { display: flex; flex-direction: column; }
+  .kp-h { padding: var(--sp-2) var(--sp-3); }
+  .kp-grade { padding: 0 var(--sp-2) var(--sp-2); }
+  .bn-card.feat { min-height: 68px; padding: var(--sp-2) var(--sp-3); }
+  .bn-tile { min-height: 44px; padding: var(--sp-1) var(--sp-3); }
+  .kp-lista { flex: 1; display: flex; flex-direction: column; padding-bottom: 0; }
+  .kp-lista .bn-row { flex: 1; min-height: 34px; padding: var(--sp-1) var(--sp-3); }
+  .kp-f { margin-top: auto; min-height: 36px; padding: var(--sp-1) var(--sp-3); }
+}
 
 /* ── Aniversariantes: 3 cartões lado a lado ── */
 .hm-anivs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
@@ -169,8 +192,11 @@
 
 
 /* ── Agenda: calendário do mês + eventos programados ── */
+.hm-s-agenda { flex: 1; display: flex; flex-direction: column; }
+.hm-s-agenda .ag { flex: 1; display: flex; flex-direction: column; }
+.hm-s-agenda .ag-lista { flex: 1; overflow-y: auto; }
 .ag { border: 1px solid var(--border); border-radius: var(--r-4); background: var(--bg2); box-shadow: var(--shadow-sm); overflow: hidden; }
-.ag-cal { padding: var(--sp-4); }
+.ag-cal { padding: var(--sp-3); }
 .ag-mes { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin-bottom: var(--sp-3); }
 .ag-mes-nome { font-size: var(--fs-md); font-weight: 800; letter-spacing: -.01em; color: var(--text); }
 .ag-mes-nome::first-letter { text-transform: uppercase; }
@@ -180,7 +206,7 @@
 .ag-nav i, .ag-nav svg { width: 18px; height: 18px; }
 .ag-grade { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; text-align: center; }
 .ag-sem { padding-bottom: var(--sp-1); font-size: var(--fs-xs); font-weight: 700; color: var(--text-dim); }
-.ag-dia { position: relative; height: 30px; display: grid; place-items: center; border: 0; border-radius: 50%; background: none; font-family: inherit; font-size: var(--fs-sm); font-weight: 600; color: var(--text); cursor: pointer; font-variant-numeric: tabular-nums; }
+.ag-dia { position: relative; height: 26px; display: grid; place-items: center; border: 0; border-radius: 50%; background: none; font-family: inherit; font-size: var(--fs-sm); font-weight: 600; color: var(--text); cursor: pointer; font-variant-numeric: tabular-nums; }
 .ag-dia.fora { color: var(--text-dim); }
 .ag-dia:hover { background: var(--teal-dim); }
 .ag-dia:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; }
@@ -188,7 +214,7 @@
 .ag-dia.sel:not(.hoje) { box-shadow: inset 0 0 0 2px var(--teal); }
 .ag-dia.tem::after { content: ''; position: absolute; bottom: 4px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--teal); }
 .ag-dia.hoje.tem::after { background: var(--on-teal, #fff); }
-.ag-lista { border-top: 1px solid var(--border); padding: var(--sp-4); }
+.ag-lista { border-top: 1px solid var(--border); padding: var(--sp-3); }
 .ag-lh { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); min-height: 32px; margin-bottom: var(--sp-3); }
 .ag-lt { margin: 0; font-size: var(--fs-md); font-weight: 800; letter-spacing: -.01em; color: var(--text); }
 .ag-lh button { min-height: 32px; padding: 0 var(--sp-2); border: 0; border-radius: var(--r-2); background: none; font-family: inherit; font-size: var(--fs-sm); font-weight: 700; color: var(--teal); cursor: pointer; }
@@ -334,13 +360,14 @@ function renderHome() {
       '</div>' +
       '</div>' +
     '</header>' +
-    /* desktop: sem cartão institucional; só o título no canto superior esquerdo (o celular mantém o cartão) */
-    '<header class="page-head hm-head hm-rise" style="--i:' + (i++) + '"><div class="page-head-txt">' +
+    '<div class="hm-body">';
+
+  var sec = { atalhos: '', kpis: '', anivs: '', ativ: '', agenda: '' };
+  /* desktop: sem cartão institucional; só o título no canto superior esquerdo (o celular mantém o cartão) */
+  var cabecalho = '<header class="page-head hm-head hm-rise" style="--i:' + (i++) + '"><div class="page-head-txt">' +
       '<h1 class="page-title">' + escHtml(_homeSaudacao()) + '</h1>' +
       '<p class="page-sub">' + escHtml(_homeDataExtenso() + (IDENTIDADE.nome ? ' · ' + IDENTIDADE.nome : '')) + '</p>' +
-    '</div></header>' +
-    '<div class="hm-body">';
-  var sec = { atalhos: '', kpis: '', anivs: '', ativ: '', agenda: '' };
+    '</div></header>';
 
   /* ══ Atalhos (módulos liberados ao perfil + Usuários, quando permitido) ══ */
   sec.atalhos = '<section class="hm-block hm-rise hm-s-atalhos" style="--i:' + (i++) + '">' +
@@ -384,7 +411,7 @@ function renderHome() {
     '<div class="ag" id="ag-root">' + _agSkeleton() + '</div>' +
   '</section>';
 
-  html += '<div class="hm-main">' + sec.kpis + sec.atalhos + '<div class="hm-duo">' + sec.anivs + sec.ativ + '</div></div>' +
+  html += '<div class="hm-main">' + cabecalho + sec.kpis + sec.atalhos + '<div class="hm-duo">' + sec.anivs + sec.ativ + '</div></div>' +
     '<div class="hm-side">' + sec.agenda + '</div></div></div>'; /* /hm-body /hm */
 
   renderView(html);
