@@ -57,7 +57,7 @@
   .page.hm { max-width: var(--page-w, 1360px); padding: var(--sp-6) var(--gutter) var(--sp-7); }
   .hm-hero { display: none; }
   .hm-head { display: flex; }
-  .hm-body { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 0 var(--sp-5); align-items: start; padding: 0; }
+  .hm-body { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 0 var(--sp-5); align-items: start; padding: 0; }
   .hm-main, .hm-side { display: block; min-width: 0; }
   .hm-duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-5); align-items: start; }
   .hm-duo > .hm-block { margin-bottom: 0; }
@@ -101,7 +101,7 @@
 .kp + .kp { margin-top: var(--sp-3); }
 /* desktop: cartões dos módulos lado a lado, quantos couberem */
 @media (min-width: 1024px) {
-  #kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: var(--sp-4); align-items: start; }
+  #kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: var(--sp-4); align-items: start; }
   .kp + .kp { margin-top: 0; }
 }
 .kp-h { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4) var(--sp-2); }
@@ -174,13 +174,13 @@
 .ag-mes { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin-bottom: var(--sp-3); }
 .ag-mes-nome { font-size: var(--fs-md); font-weight: 800; letter-spacing: -.01em; color: var(--text); }
 .ag-mes-nome::first-letter { text-transform: uppercase; }
-.ag-nav { width: 32px; height: 32px; display: grid; place-items: center; border: 0; border-radius: var(--r-2); background: none; color: var(--text-muted); cursor: pointer; }
+.ag-nav { width: 28px; height: 28px; display: grid; place-items: center; border: 0; border-radius: var(--r-2); background: none; color: var(--text-muted); cursor: pointer; }
 .ag-nav:hover { background: var(--teal-dim); color: var(--teal); }
 .ag-nav:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
 .ag-nav i, .ag-nav svg { width: 18px; height: 18px; }
 .ag-grade { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; text-align: center; }
 .ag-sem { padding-bottom: var(--sp-1); font-size: var(--fs-xs); font-weight: 700; color: var(--text-dim); }
-.ag-dia { position: relative; height: 36px; display: grid; place-items: center; border: 0; border-radius: 50%; background: none; font-family: inherit; font-size: var(--fs-sm); font-weight: 600; color: var(--text); cursor: pointer; font-variant-numeric: tabular-nums; }
+.ag-dia { position: relative; height: 30px; display: grid; place-items: center; border: 0; border-radius: 50%; background: none; font-family: inherit; font-size: var(--fs-sm); font-weight: 600; color: var(--text); cursor: pointer; font-variant-numeric: tabular-nums; }
 .ag-dia.fora { color: var(--text-dim); }
 .ag-dia:hover { background: var(--teal-dim); }
 .ag-dia:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; }

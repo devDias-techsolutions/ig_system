@@ -1232,7 +1232,15 @@ textarea { height: auto; min-height: 88px; padding: var(--sp-3); resize: vertica
   /* Painel único: moldura escura na cor da igreja com o menu sobre ela e, ao lado, um painel arredondado
      (barra superior + conteúdo). A rolagem é do painel, não da página. */
   html:has(body.nav-on), body.nav-on { height: 100vh; height: 100dvh; overflow: hidden; }
-  body.nav-on { --frame: color-mix(in srgb, var(--teal-dark) 34%, #03090C); --shell-gap: 12px; --panel-left: calc(var(--sidebar-w) + var(--shell-gap)); background: var(--frame); --gutter: 32px; --gutter-lg: 40px; }
+  body.nav-on {
+    --frame: color-mix(in srgb, var(--teal-dark) 34%, #03090C); --shell-gap: 10px; --topbar-h: 44px; --sidebar-w: 232px;
+    --panel-left: calc(var(--sidebar-w) + var(--shell-gap)); background: var(--frame); --gutter: 24px; --gutter-lg: 32px;
+    /* Densidade desktop: o notebook de 14" com zoom do Windows (125–150%) tem só ~1280×640 px úteis. Mesma escala de nomes, valores menores. */
+    --sp-2: 6px; --sp-3: 10px; --sp-4: 12px; --sp-5: 18px; --sp-6: 24px; --sp-7: 32px;
+    --fs-xs: 11px; --fs-sm: 13px; --fs-md: 14px; --fs-lg: 17px; --fs-xl: 22px; --fs-2xl: 26px;
+    --r-1: 6px; --r-2: 10px; --r-3: 12px; --r-4: 18px;
+  }
+  @media (max-height: 760px) { body.nav-on { --sp-4: 10px; --sp-5: 14px; --sp-6: 18px; --sp-7: 24px; --fs-xl: 20px; --fs-2xl: 22px; } }
   body.nav-on::before, body.nav-on::after { display: none; }
   body.nav-on .app-sidebar {
     display: flex; top: var(--shell-gap); bottom: var(--shell-gap); left: 0; width: calc(var(--sidebar-w) - var(--shell-gap));
@@ -1243,14 +1251,15 @@ textarea { height: auto; min-height: 88px; padding: var(--sp-3); resize: vertica
   body.nav-on .sb-item.active::before { left: calc(-1 * var(--sp-3)); }
   body.nav-on .sb-foot { background: var(--bg-glass); }
   body.nav-on #app {
-    position: fixed; z-index: 1; top: calc(var(--shell-gap) + 56px); bottom: var(--shell-gap); left: var(--panel-left); right: var(--shell-gap);
+    position: fixed; z-index: 1; top: calc(var(--shell-gap) + var(--topbar-h)); bottom: var(--shell-gap); left: var(--panel-left); right: var(--shell-gap);
     margin: 0; min-height: 0; max-width: none; overflow-y: auto; overscroll-behavior: contain; background: var(--bg); border-radius: 0 0 var(--r-4) var(--r-4);
     box-shadow: 0 24px 60px -30px rgba(0, 0, 0, .6);
   }
   body.nav-on #main-topnav {
     position: fixed; top: var(--shell-gap); left: var(--panel-left); right: var(--shell-gap); margin: 0; z-index: 200;
-    border-radius: var(--r-4) var(--r-4) 0 0; box-shadow: none; background: var(--bg);
+    border-radius: var(--r-4) var(--r-4) 0 0; box-shadow: none; background: var(--bg); height: var(--topbar-h);
   }
+  body.nav-on .sb-item { padding-top: 8px; padding-bottom: 8px; }
   [data-theme="light"] body.nav-on #main-topnav { background: var(--bg); }
   /* A marca já está na sidebar: a barra superior mostra onde o usuário está (caminho) */
   body.nav-on .topnav-logo-icon, body.nav-on .topnav-brand-txt, body.nav-on .topnav .nav-burger { display: none; }

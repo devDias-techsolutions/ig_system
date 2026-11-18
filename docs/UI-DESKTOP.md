@@ -55,3 +55,6 @@ Cartões de entrada em grade automática (`auto-fill, minmax(280px, 1fr)`), maio
 - Coluna principal: indicadores, atalhos (grade de botões) e, lado a lado, aniversariantes e atividade recente.
 - Coluna lateral (340px): calendário do mês e eventos programados da igreja, com estado vazio e botão "Agendar evento".
 - Agenda (`Agenda.js`, aba `Eventos`): todos veem; admin e secretaria agendam, editam e cancelam. Instalações antigas criam a aba sozinhas na primeira vez.
+
+## Densidade (notebook 14")
+Windows com zoom de 125–150% deixa só ~1280×640 px úteis. No painel único (`body.nav-on`, ≥1024px) os mesmos tokens têm valores menores: texto 11/13/14/17/22/26, espaços 4/6/10/12/18/24/32, raios 6/10/12/18, menu 232px, barra superior 44px, calendário/indicadores em 300px/270px mínimos. Em alturas ≤760px os espaços e números grandes diminuem mais. Conferir sempre em 1280×640.
