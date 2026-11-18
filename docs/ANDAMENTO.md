@@ -12,7 +12,7 @@ Quadro **informativo** para quem trabalha no sistema (qualquer conta, qualquer s
 ## Em andamento
 | Etapa | Branch / PR | Estado | Próximo passo | Arquivos principais |
 |---|---|---|---|---|
-| R4: atividade recente, aniversariantes e próximos eventos | `inicio-r4` | Implementada; testes locais passando | Aguardar CI e mergear; depois R5 | `_home.html`, `Dashboard.js` |
+| R5: galeria de marcas e contraste do Início | `inicio-r5` | Implementada; testes locais passando | Aguardar CI e mergear; depois D2 (Membros) | `tests/e2e/dashboard.e2e.js` |
 | R5: galeria 5 marcas × 2 temas, ajustes de contraste | (não iniciada) | Aprovada | Capturas e correções; atualizar `CHANGELOG.md` | `index.html`, `tests/e2e/paleta.e2e.js` |
 | Desktop D2: Membros (tabela, painel lateral, formulário em 2 colunas, carteirinhas, cartas) | (não iniciada) | Plano em `docs/UI-DESKTOP.md` | Tabela ordenável com filtros | `_membros.html` |
 | Desktop D3: Usuários, Identidade, Alertas, Atalhos | (não iniciada) | Plano em `docs/UI-DESKTOP.md` | Layout de configurações com barra de ações ancorada | `_usuarios.html`, `_identidade.html`, `_alertas.html` |
