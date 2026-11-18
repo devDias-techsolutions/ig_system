@@ -10,6 +10,8 @@
 .idt-ajuda { font-size: var(--fs-xs); color: var(--text-dim); line-height: 1.4; }
 
 .idt-cor-bloco { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+.idt-cor-linha { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: end; }
+@media (max-width: 599px) { .idt-cor-linha { grid-template-columns: 1fr; } }
 .idt-cor-botao {
   position: relative; display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 6px 14px 6px 6px;
   background: var(--bg3); border: 1.5px solid var(--border-strong); border-radius: var(--r-3); cursor: pointer;
@@ -72,6 +74,7 @@ function _idtValoresSalvos() {
   Object.keys(IDT_CAMPOS).forEach(function (k) { v[k] = IDENTIDADE[k] || ''; });
   if (v.nomeCurto === v.nome) v.nomeCurto = '';   // nome curto vazio = igual ao nome
   v.corPrimaria = IDENTIDADE.corPrimaria || '';
+  v.corSecundaria = IDENTIDADE.corSecundaria || '';
   v.modulos = (IDENTIDADE.modulosLista || []).filter(function (m) { return m.ativo; }).map(function (m) { return m.id; }).join(',');
   return v;
 }
@@ -90,16 +93,12 @@ function renderIdentidade() {
 
       _idtSecao('Dados da igreja', 'Aparecem no login, no menu, no topo e nos e-mails do sistema.', _idtCampo('nome', true) + _idtCampo('nomeCurto') + _idtCampo('lema', true)) +
 
-      _idtSecao('Cor da marca', 'Muda botões, destaques, menus e a cor da carteirinha. Veja o resultado na hora e salve quando gostar.',
+      _idtSecao('Cores da marca', 'A cor principal define botões, destaques e o tom dos fundos; a secundária complementa. Veja o resultado na hora e salve quando gostar.',
         '<div class="idt-cor-bloco">' +
-          '<label class="idt-cor-botao" id="idt-cor-botao"><span class="idt-cor-amostra" id="idt-cor-amostra"></span>' +
-            '<span class="idt-cor-texto">Escolher cor</span>' +
-            '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>' +
-            '<input type="color" id="idt-cor-picker" oninput="idtCor(this.value)" aria-label="Escolher cor da marca"></label>' +
-          '<div class="field" style="margin:0"><label for="idt-cor-hex">Ou digite o código da cor</label>' +
-            '<input type="text" class="idt-cor-hex" id="idt-cor-hex" maxlength="7" placeholder="#RRGGBB" autocomplete="off" oninput="idtCorTexto(this.value)"></div>' +
+          _idtCorLinha('corPrimaria', 'idt-cor', 'Cor principal') +
+          _idtCorLinha('corSecundaria', 'idt-cor2', 'Cor secundária (opcional)') +
           '<div class="idt-cor-acoes"><button type="button" class="btn btn-secondary btn-sm" id="idt-cor-sugerir" onclick="idtSugerirCores()">Sugerir cores do logo</button>' +
-            '<button type="button" class="btn btn-ghost btn-sm" id="idt-cor-padrao" onclick="idtCor(\'\')">Usar cor padrão</button></div>' +
+            '<button type="button" class="btn btn-ghost btn-sm" id="idt-cor-padrao" onclick="idtCor(\'\')">Usar cores padrão</button></div>' +
           '<div id="idt-sugestoes" aria-live="polite"></div>' +
           _idtRecentesHtml() +
         '</div>') +
@@ -124,6 +123,18 @@ function renderIdentidade() {
     '</div>'
   );
   _idtAtualizarTela();
+}
+
+// Uma linha de cor: amostra + seletor nativo + código. A secundária vazia mostra a cor derivada e o botão "Automática".
+function _idtCorLinha(campo, pre, rotulo) {
+  var sec = campo === 'corSecundaria', c = '\'' + campo + '\'';
+  return '<div class="idt-cor-linha"><label class="idt-cor-botao" id="' + pre + '-botao"><span class="idt-cor-amostra" id="' + pre + '-amostra"></span>' +
+      '<span class="idt-cor-texto">' + rotulo + '</span>' +
+      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>' +
+      '<input type="color" id="' + pre + '-picker" oninput="idtCor(this.value, ' + c + ')" aria-label="Escolher ' + rotulo.toLowerCase() + '"></label>' +
+    '<div class="field" style="margin:0"><label for="' + pre + '-hex">Ou digite o código</label>' +
+      '<input type="text" class="idt-cor-hex" id="' + pre + '-hex" maxlength="7" placeholder="' + (sec ? 'Automática' : '#RRGGBB') + '" autocomplete="off" oninput="idtCorTexto(this.value, ' + c + ')"></div>' +
+    '</div>';
 }
 
 function _idtSecao(titulo, texto, corpo) {
@@ -221,6 +232,21 @@ function _idtCoresDoLogo(img) {
   return saida.map(function (c) { return _rgbHex(c).toUpperCase(); });
 }
 
+// Principal = cor mais frequente do logo; secundária = a mais frequente com tom claramente diferente (≥ 30°);
+// logo de uma cor só → secundária vazia (o sistema deriva uma vizinha)
+function _idtParSugerido(cores) {
+  var h = function (c) { return _rgbHsl(_hexRgb(c))[0]; };
+  var dist = function (a, b) { var d = Math.abs(h(a) - h(b)); return Math.min(d, 360 - d); };
+  var prim = cores[0], sec = '';
+  for (var i = 1; i < cores.length; i++) { if (dist(prim, cores[i]) >= 30) { sec = cores[i]; break; } }
+  return { corPrimaria: prim, corSecundaria: sec };
+}
+function idtAplicarSugestao() {
+  var p = IDT.sugestao; if (!p) return;
+  IDT.draft.corPrimaria = p.corPrimaria; IDT.draft.corSecundaria = p.corSecundaria;
+  _idtPreviaCor(); _idtAtualizarTela();
+}
+
 function idtSugerirCores() {
   var box = document.getElementById('idt-sugestoes');
   if (!box) return;
@@ -232,8 +258,13 @@ function idtSugerirCores() {
     var cores;
     try { cores = _idtCoresDoLogo(img); } catch (e) { msg('Não foi possível ler as cores deste logo. Escolha a cor manualmente.'); return; }
     if (!cores.length) { msg('O logo não tem cores marcantes (é branco, preto ou cinza). Escolha a cor da marca manualmente.'); return; }
-    box.innerHTML = '<p class="idt-recentes-rotulo">Cores do logo</p><div class="idt-recentes">' +
-      cores.map(function (c) { return '<button type="button" class="idt-recente" data-cor="' + c + '" style="background:' + c + '" aria-label="Usar a cor ' + c + '" onclick="idtCor(\'' + c + '\')"></button>'; }).join('') + '</div>';
+    var fila = function (campo, rotulo) {
+      return '<p class="idt-recentes-rotulo">' + rotulo + '</p><div class="idt-recentes">' +
+        cores.map(function (c) { return '<button type="button" class="idt-recente" data-campo="' + campo + '" data-cor="' + c + '" style="background:' + c + '" aria-label="Usar a cor ' + c + ' como ' + rotulo.toLowerCase() + '" onclick="idtCor(\'' + c + '\', \'' + campo + '\')"></button>'; }).join('') + '</div>';
+    };
+    box.innerHTML = fila('corPrimaria', 'Principal') + fila('corSecundaria', 'Secundária') +
+      '<div class="idt-cor-acoes"><button type="button" class="btn btn-primary btn-sm" id="idt-cor-aplicar" onclick="idtAplicarSugestao()">Aplicar sugestão do logo</button></div>';
+    IDT.sugestao = _idtParSugerido(cores);
     _idtAtualizarTela();
   };
   img.onerror = function () { msg('Não foi possível ler o logo para sugerir cores.'); };
@@ -243,18 +274,22 @@ function idtSugerirCores() {
 // ── Edição de textos e cor ─────────────────────────────────
 function idtDigitou(k, valor) { IDT.draft[k] = valor; _idtAtualizarTela(); }
 
-function idtCor(hex) {
-  IDT.draft.corPrimaria = hex;
+// Sem o 2º argumento, edita a cor principal; "Usar cores padrão" (hex vazio) limpa as duas
+function idtCor(hex, campo) {
+  if (!hex && !campo) { IDT.draft.corPrimaria = ''; IDT.draft.corSecundaria = ''; }
+  else IDT.draft[campo || 'corPrimaria'] = hex;
   _idtPreviaCor();
   _idtAtualizarTela();
 }
-function idtCorTexto(v) {
+function idtCorTexto(v, campo) {
   v = v.trim();
+  if (!v && campo === 'corSecundaria') { idtCor('', campo); return; }   // vazio = automática
   if (/^[0-9a-fA-F]{6}$/.test(v)) v = '#' + v;
-  if (/^#[0-9a-fA-F]{6}$/.test(v)) idtCor(v.toUpperCase());
+  if (/^#[0-9a-fA-F]{6}$/.test(v)) idtCor(v.toUpperCase(), campo);
 }
 function _idtPreviaCor() {
   IDENTIDADE.corPrimaria = IDT.draft.corPrimaria;   // prévia: o salvo volta em idtSair/idtDescartar
+  IDENTIDADE.corSecundaria = IDT.draft.corSecundaria;
   aplicarIdentidade();
 }
 
@@ -264,6 +299,7 @@ function _idtSujo() {
 
 function _idtAtualizarTela() {
   var d = IDT.draft, sujo = _idtSujo();
+  var cor2 = (d.corSecundaria || '').toUpperCase();
   var nome = (d.nome || '').trim() || 'Nome da igreja';
   var el = document.getElementById('idt-marca-nome'); if (el) el.textContent = nome;
   el = document.getElementById('idt-marca-lema'); if (el) el.textContent = (d.lema || '').trim();
@@ -271,10 +307,12 @@ function _idtAtualizarTela() {
   if (el) el.innerHTML = '<span>' + escHtml(iniciaisIgreja((d.nomeCurto || '').trim() || nome)) + '</span>' +
     (IDENTIDADE.logoUrl ? '<img src="' + escHtml(IDENTIDADE.logoUrl) + '" alt="" onload="this.previousElementSibling.style.visibility=\'hidden\'" onerror="this.style.display=\'none\'">' : '');
   var cor = (d.corPrimaria || '').toUpperCase();
-  document.querySelectorAll('.idt-recente').forEach(function (b) { b.classList.toggle('sel', b.getAttribute('data-cor') === cor); });
-  var amostra = document.getElementById('idt-cor-amostra'); if (amostra) amostra.style.background = cor || 'var(--teal)';
-  var picker = document.getElementById('idt-cor-picker'); if (picker && cor) picker.value = cor.toLowerCase();
-  var hex = document.getElementById('idt-cor-hex'); if (hex && document.activeElement !== hex) hex.value = cor;
+  document.querySelectorAll('.idt-recente').forEach(function (b) { var c = b.getAttribute('data-campo') === 'corSecundaria' ? cor2 : cor; b.classList.toggle('sel', b.getAttribute('data-cor') === c); });
+  [['idt-cor', cor, 'var(--brand-1)'], ['idt-cor2', cor2, 'var(--accent-2)']].forEach(function (x) {
+    var amostra = document.getElementById(x[0] + '-amostra'); if (amostra) amostra.style.background = x[1] || x[2];
+    var picker = document.getElementById(x[0] + '-picker'); if (picker && x[1]) picker.value = x[1].toLowerCase();
+    var hex = document.getElementById(x[0] + '-hex'); if (hex && document.activeElement !== hex) hex.value = x[1];
+  });
   el = document.getElementById('idt-estado');
   if (el) { el.textContent = sujo ? 'Alterações não salvas' : 'Tudo salvo'; el.classList.toggle('pendente', sujo); }
   ['idt-salvar', 'idt-descartar'].forEach(function (id) { var b = document.getElementById(id); if (b) b.disabled = !sujo; });
@@ -282,13 +320,16 @@ function _idtAtualizarTela() {
 
 function idtDescartar() {
   IDENTIDADE.corPrimaria = IDT.orig.corPrimaria;
+  IDENTIDADE.corSecundaria = IDT.orig.corSecundaria;
   aplicarIdentidade();
   renderIdentidade();
 }
 
 // Ao sair da tela sem salvar, a cor volta para a que está salva
 function idtSair() {
-  if (IDENTIDADE.corPrimaria !== (IDT.orig.corPrimaria || '')) { IDENTIDADE.corPrimaria = IDT.orig.corPrimaria || ''; aplicarIdentidade(); }
+  if (IDENTIDADE.corPrimaria !== (IDT.orig.corPrimaria || '') || (IDENTIDADE.corSecundaria || '') !== (IDT.orig.corSecundaria || '')) {
+    IDENTIDADE.corPrimaria = IDT.orig.corPrimaria || ''; IDENTIDADE.corSecundaria = IDT.orig.corSecundaria || ''; aplicarIdentidade();
+  }
 }
 
 function idtSalvar() {
@@ -297,7 +338,7 @@ function idtSalvar() {
     var v = (IDT.draft[k] || '').trim();
     if (v === (IDT.orig[k] || '')) return;
     if (k === 'modulos') { envio.MODULOS_ATIVOS = (v.split(',').length === (IDENTIDADE.modulosLista || []).length) ? '' : v; return; }
-    envio[k === 'corPrimaria' ? 'COR_PRIMARIA' : IDT_CAMPOS[k][0]] = v;
+    envio[k === 'corPrimaria' ? 'COR_PRIMARIA' : k === 'corSecundaria' ? 'COR_SECUNDARIA' : IDT_CAMPOS[k][0]] = v;
   });
   if (!Object.keys(envio).length) return;
   if (IDT.draft.modulos !== undefined && !(IDT.draft.modulos || '').trim() && (IDENTIDADE.modulosLista || []).length) { showToast('Mantenha pelo menos um módulo ativo.', 'error'); return; }
@@ -371,7 +412,7 @@ function idtEscolher(tipo, input) {
     google.script.run
       .withFailureHandler(function () { _idtOcupado(tipo, false); showToast('Falha de conexão. Tente novamente.', 'error'); })
       .withSuccessHandler(function (res) {
-        if (res && res.success) { _idtGuardarRascunho(); _idtAtualizar(res.data); showToast('Imagem salva.', 'success'); }
+        if (res && res.success) { _idtGuardarRascunho(); _idtAtualizar(res.data); showToast('Imagem salva.', 'success'); if (tipo === 'logo') setTimeout(idtSugerirCores, 60); }
         else { _idtOcupado(tipo, false); showToast((res && res.error) || 'Não foi possível salvar a imagem.', 'error'); }
       })
       .idt_enviarImagem(App.session.token, tipo, b64);

@@ -111,7 +111,7 @@ test('config: sem a aba Config a identidade tem valores neutros (nunca derruba a
   const env = freshEnv();
   const id = JSON.parse(env.run('Config.identidadeJson()'));
   assert.deepEqual(id, {
-    nome: 'Minha Igreja', nomeCurto: 'Minha Igreja', lema: '', corPrimaria: '', cartaoModelo: 'classico', logoUrl: '',
+    nome: 'Minha Igreja', nomeCurto: 'Minha Igreja', lema: '', corPrimaria: '', corSecundaria: '', cartaoModelo: 'classico', logoUrl: '',
     pastor: '', cargoPastor: 'Pastor Presidente', endereco: '', cnpj: '', marcaDagua: '', assinatura: '', atalhosOcultos: {},
   });
 });
@@ -663,6 +663,21 @@ test('identidade: admin salva nome, cor, pastor e demais ajustes; a última linh
   assert.equal(env.run('Config.identidade().nome'), 'Igreja Vida Nova');
   const linhas = env.run("Util.sheetToObjects('Config').filter(function (x) { return x.Chave === 'NOME_IGREJA'; }).length");
   assert.equal(linhas, 1, 'atualiza a linha existente em vez de duplicar');
+});
+
+test('identidade: cor secundária é salva, devolvida em minúsculas, pode ser limpa e recusa formato inválido', () => {
+  const env = envIdentidade();
+  env.ctx.__d = { COR_PRIMARIA: '#1D4ED8', COR_SECUNDARIA: '#F59E0B' };
+  let r = env.run("idt_salvarAjustes('tok', __d)");
+  assert.equal(r.success, true, JSON.stringify(r));
+  assert.equal(r.data.corSecundaria, '#f59e0b');
+  env.ctx.__d = { COR_SECUNDARIA: '' };
+  r = env.run("idt_salvarAjustes('tok', __d)");
+  assert.equal(r.success, true);
+  assert.equal(r.data.corSecundaria, '');
+  assert.equal(r.data.corPrimaria, '#1d4ed8', 'limpar a secundária não mexe na principal');
+  env.ctx.__d = { COR_SECUNDARIA: 'azul' };
+  assert.equal(env.run("idt_salvarAjustes('tok', __d)").success, false);
 });
 
 test('identidade: ajustes inválidos são recusados sem gravar nada; secretaria não grava', () => {

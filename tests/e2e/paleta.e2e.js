@@ -49,3 +49,26 @@ test('paleta: aplicar a identidade troca os tokens semânticos e os apelidos ant
   await page.evaluate(() => { IDENTIDADE.corPrimaria = ''; aplicarIdentidade(); });
   assert.deepEqual(await lerCss(), padrao);
 });
+
+test('identidade: cor secundária (digitada ou automática) vira prévia na hora e é salva; sugestão do logo escolhe tons diferentes', async () => {
+  const backend = criarBackend();
+  const { page } = await abrir(browser, backend);
+  const { entrar } = require('./harness');
+  await entrar(page, 'admin@igreja.test', 'Admin#Teste1', 'home');
+  await page.evaluate(() => navigateTo('identidade'));
+  await page.waitForSelector('#idt-cor2-hex');
+  const brand2 = () => page.evaluate(() => document.documentElement.style.getPropertyValue('--brand-2').trim().toLowerCase());
+  await page.fill('#idt-cor-hex', '#1D4ED8');
+  const automatica = await brand2();
+  assert.match(automatica, /^#[0-9a-f]{6}$/, 'sem secundária informada, o sistema deriva uma');
+  await page.fill('#idt-cor2-hex', '#F59E0B');
+  assert.equal(await brand2(), '#f59e0b');
+  await page.click('#idt-salvar');
+  await page.waitForFunction(() => IDENTIDADE.corSecundaria === '#f59e0b');
+  await page.fill('#idt-cor2-hex', '');
+  assert.equal(await brand2(), automatica, 'campo vazio volta para a automática');
+  const par = await page.evaluate(() => _idtParSugerido(['#1D4ED8', '#2563EB', '#F59E0B']));
+  assert.deepEqual(par, { corPrimaria: '#1D4ED8', corSecundaria: '#F59E0B' });
+  const uma = await page.evaluate(() => _idtParSugerido(['#1D4ED8', '#2563EB']));
+  assert.equal(uma.corSecundaria, '', 'logo de um tom só: secundária automática');
+});

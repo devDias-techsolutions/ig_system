@@ -6,6 +6,7 @@
 //    NOME_CURTO      nome curto (espaços pequenos)
 //    LEMA_IGREJA     versículo ou lema exibido no cabeçalho da Home
 //    COR_PRIMARIA    cor da marca no formato #RRGGBB (vazio = cor padrão)
+//    COR_SECUNDARIA  segunda cor da marca, #RRGGBB (vazio = o sistema deriva uma cor vizinha da principal)
 //    LOGO_URL        link do logo (Drive ou https://...)
 //    MODULOS_ATIVOS  ids dos módulos separados por vírgula (vazio = todos)
 //    PASTA_FOTOS     nome da pasta do Drive onde ficam as fotos dos membros
@@ -23,6 +24,7 @@ var Config = (function () {
     { Chave: 'NOME_CURTO',     Valor: '',          Descricao: 'Nome curto (opcional). Usado onde há pouco espaço' },
     { Chave: 'LEMA_IGREJA',    Valor: '',          Descricao: 'Versículo ou lema exibido no cabeçalho da tela inicial (opcional)' },
     { Chave: 'COR_PRIMARIA',   Valor: '',          Descricao: 'Cor da marca no formato #RRGGBB, ex.: #0F766E (vazio = cor padrão)' },
+    { Chave: 'COR_SECUNDARIA', Valor: '',          Descricao: 'Segunda cor da marca, #RRGGBB (vazio = derivada da cor principal)' },
     { Chave: 'CARTAO_MODELO', Valor: 'classico', Descricao: 'Modelo da carteirinha: classico, lateral, faixa ou diagonal. A cor segue a cor da marca (COR_PRIMARIA)' },
     { Chave: 'LOGO_URL',       Valor: '',          Descricao: 'Avançado: link do logo (https://). O ideal é enviar a imagem pela tela Identidade, que tem prioridade sobre este link' },
     { Chave: 'PASTOR',         Valor: '',          Descricao: 'Nome do pastor presidente (assinatura no verso da carteirinha; vazio = sem assinatura)' },
@@ -119,6 +121,7 @@ var Config = (function () {
       nomeCurto:   get('NOME_CURTO', '') || nome,
       lema:        get('LEMA_IGREJA', ''),
       corPrimaria: _corValida(get('COR_PRIMARIA', '')),
+      corSecundaria: _corValida(get('COR_SECUNDARIA', '')),
       cartaoModelo: _modeloCartao(get('CARTAO_MODELO', '')),
       logoUrl:     _imagem('logo', 'LOGO_URL'),
       // Dados da carteirinha (todos opcionais: o que estiver vazio simplesmente não é impresso)
@@ -171,6 +174,7 @@ var Config = (function () {
     NOME_CURTO:      ['Nome curto', 30, false],
     LEMA_IGREJA:     ['Lema', 160, false],
     COR_PRIMARIA:    ['Cor da marca', 7, false],
+    COR_SECUNDARIA:  ['Cor secundária', 7, false],
     CARTAO_MODELO:   ['Modelo da carteirinha', 12, false],
     PASTOR:          ['Pastor', 80, false],
     CARGO_PASTOR:    ['Cargo do pastor', 60, false],
@@ -191,7 +195,7 @@ var Config = (function () {
       var v = String(dados[k] === null || dados[k] === undefined ? '' : dados[k]).replace(/[\u0000-\u001F\u007F]/g, ' ').trim();
       if (def[2] && !v) return { ok: false, erro: def[0] + ' é obrigatório.' };
       if (v.length > def[1]) return { ok: false, erro: def[0] + ' aceita no máximo ' + def[1] + ' caracteres.' };
-      if (k === 'COR_PRIMARIA' && v && !/^#[0-9a-fA-F]{6}$/.test(v)) return { ok: false, erro: 'Cor inválida. Use o formato #RRGGBB.' };
+      if ((k === 'COR_PRIMARIA' || k === 'COR_SECUNDARIA') && v && !/^#[0-9a-fA-F]{6}$/.test(v)) return { ok: false, erro: 'Cor inválida. Use o formato #RRGGBB.' };
       if (k === 'CARTAO_MODELO' && v && MODELOS_CARTAO.indexOf(v) < 0) return { ok: false, erro: 'Modelo de carteirinha inválido.' };
       if (k === 'URL_APP' && v && !URL_APP_RE.test(v)) return { ok: false, erro: 'O link deve ser o endereço da implantação: https://script.google.com/.../exec' };
       if (k === 'MODULOS_ATIVOS' && v && !/^[a-z0-9_-]+(,[a-z0-9_-]+)*$/.test(v)) return { ok: false, erro: 'Lista de módulos inválida.' };
