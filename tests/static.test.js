@@ -349,6 +349,7 @@ test('qr: a página pública é noindex, sem login nem módulos, e o QR na carte
   assert.match(read('Code.js'), /params\.page === 'validar'/);
   assert.ok(!/google\.script\.run/.test(pag), 'a página pública não chama o servidor');
   assert.ok(!/cpf|rg\b|telefone|endereco|foto/i.test(pag.replace(/<style[\s\S]*?<\/style>/, '')), 'página pública só mostra nome/função/situação');
-  assert.ok(!/MB\.qrOn\s*=\s*true/.test(mb) && !/id="mb-qr-opt"[^']*checked(?!\?)/.test(mb), 'QR não pode vir marcado por padrão');
+  assert.ok(!/MB\.qrOn\s*=\s*true/.test(mb), 'QR não pode vir marcado por padrão');
+  assert.match(mb, /function mbCard_comQr/, 'QR é perguntado em modal interno ao gerar PDF');
   assert.match(mb, /mbCard_emitirQr\(m\)/);
 });
