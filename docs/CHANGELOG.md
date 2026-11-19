@@ -1,5 +1,9 @@
 # Changelog (interface)
 
+## Membros (desktop) — carteirinhas e cartas
+- **Carteirinhas:** lista de membros à esquerda (rola dentro do painel, com busca e seleção em lote) e prévia fixa à direita (frente e verso reduzidos, modelo, PDF e PNG sempre à vista).
+- **Cartas:** formulário e histórico de cartas emitidas à esquerda; prévia com capa e carta lado a lado, em tamanho maior, à direita.
+
 ## Membros (desktop) — lista em tabela
 - **Tabela ordenável** (≥1024 px): colunas ROL, Nome, Função, Celular e Situação; clique no título ordena (ícone indica o sentido). Filtros em linha: busca, situação e função. Paginação pela altura da tela. No celular segue a lista em cartões.
 - **Painel lateral de detalhe**: clicar na linha mostra foto, dados, mini carteirinha e os botões Editar, Carteirinha e Ficha completa.
