@@ -130,7 +130,7 @@
   display: inline-flex; align-items: center; gap: var(--sp-1); min-height: 32px; padding: 0 var(--sp-3); border-radius: var(--r-pill);
   font-size: var(--fs-xs); font-weight: 600; color: var(--text-muted); background: var(--bg-glass); border: 1px solid var(--border);
 }
-[data-theme="light"] .mb-chip { background: #FFFFFF; }
+[data-theme="light"] .mb-chip { background: var(--surface-1); }
 .mb-chip b { font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
 .mb-chip.ok b { color: var(--teal); }
 .mb-chip.warn { color: color-mix(in srgb, var(--warning) 70%, #000); border-color: color-mix(in srgb, var(--warning) 45%, transparent); background: color-mix(in srgb, var(--warning) 14%, transparent); }
@@ -141,7 +141,7 @@
   margin-bottom: 96px; padding: var(--sp-5); border-radius: var(--r-3); border: 1px solid var(--border);
   background: var(--bg-glass); box-shadow: var(--shadow-sm);
 }
-[data-theme="light"] .mb-form-card { background: #FFFFFF; }
+[data-theme="light"] .mb-form-card { background: var(--surface-1); }
 .mb-form-card input, .mb-form-card select, .mb-form-card textarea { backdrop-filter: none; background: var(--bg); border-radius: var(--r-2); }
 .mb-form-card input:focus, .mb-form-card select:focus, .mb-form-card textarea:focus { background: var(--bg); box-shadow: 0 0 0 3px var(--teal-glow-soft); }
 @media (max-width: 640px) { .mb-form-card { padding: var(--sp-4); } }
@@ -800,7 +800,7 @@ function mbAtualizarCardLista() {
           (m.foto?'<img src="'+(MB._fotoCache[m.foto]||'')+'" style="width:100%;height:100%;object-fit:cover">':((m.nome||'?')[0].toUpperCase()))+
         '</div>'+
         '<div style="flex:1;min-width:0;cursor:pointer" onclick="mbCard_selecionarPreview(\''+m.id+'\')">'+
-          '<div style="font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(m.nome||'—')+'</div>'+
+          '<div style="font-size:var(--fs-xs);font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(m.nome||'—')+'</div>'+
           '<div style="font-size:var(--fs-xs);color:var(--text-muted)">ROL '+m.rol+' · '+(m.funcao||'Membro')+'</div>'+
         '</div>'+
         '<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:var(--fs-xs);flex-shrink:0" onclick="event.stopPropagation();mbCard_downloadPDF(\''+m.id+'\')" title="PDF Carteirinha">'+
@@ -808,7 +808,7 @@ function mbAtualizarCardLista() {
         '</button>'+
       '</div>';
   });
-  grid.innerHTML = html || '<div style="text-align:center;padding:20px;font-size:12px;color:var(--text-muted)">Nenhum resultado.</div>';
+  grid.innerHTML = html || '<div style="text-align:center;padding:20px;font-size:var(--fs-xs);color:var(--text-muted)">Nenhum resultado.</div>';
   if (window.lucide) lucide.createIcons();
 }
 
@@ -2829,7 +2829,7 @@ function _mbBuildCarteirinha() {
           (m.foto?'<img src="'+(MB._fotoCache[m.foto]||'')+'" style="width:100%;height:100%;object-fit:cover">':((m.nome||'?')[0].toUpperCase()))+
         '</div>'+
         '<div style="flex:1;min-width:0;cursor:pointer" onclick="mbCard_selecionarPreview(\''+m.id+'\')">'+
-          '<div style="font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(m.nome||'—')+'</div>'+
+          '<div style="font-size:var(--fs-xs);font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(m.nome||'—')+'</div>'+
           '<div style="font-size:var(--fs-xs);color:var(--text-muted)">ROL '+m.rol+' · '+(m.funcao||'Membro')+'</div>'+
         '</div>'+
         '<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:var(--fs-xs);flex-shrink:0" onclick="event.stopPropagation();mbCard_downloadPDF(\''+m.id+'\')" title="PDF Carteirinha">'+
