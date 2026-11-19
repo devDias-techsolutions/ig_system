@@ -145,6 +145,29 @@
 .mb-form-card input, .mb-form-card select, .mb-form-card textarea { backdrop-filter: none; background: var(--bg); border-radius: var(--r-2); }
 .mb-form-card input:focus, .mb-form-card select:focus, .mb-form-card textarea:focus { background: var(--bg); box-shadow: 0 0 0 3px var(--teal-glow-soft); }
 @media (max-width: 640px) { .mb-form-card { padding: var(--sp-4); } }
+
+/* ── Cartão ao vivo no cadastro: gira para o verso quando o foco entra num campo do verso ── */
+.mb-form-wrap { display: block; }
+.mb-live { margin-bottom: var(--sp-4); padding: var(--sp-3); border-radius: var(--r-3); border: 1px solid var(--border); background: var(--surface-1); box-shadow: var(--shadow-sm); }
+.mb-live-top { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin-bottom: var(--sp-2); }
+.mb-live-lbl { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); }
+.mb-live-stage { perspective: 1000px; width: 340px; max-width: 100%; height: 214px; margin: 0 auto; }
+.mb-live-flip { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform calc(var(--dur-slow) * 2.4) var(--ease); }
+.mb-live-flip.virado { transform: rotateY(180deg); }
+.mb-live-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.mb-live-face.verso { transform: rotateY(180deg); }
+.mb-live-prog { margin-top: var(--sp-3); }
+.mb-live-bar { height: 6px; border-radius: var(--r-pill); background: var(--surface-3); overflow: hidden; }
+.mb-live-bar > i { display: block; height: 100%; border-radius: var(--r-pill); background: var(--teal); transition: width var(--dur) var(--ease); }
+.mb-live-txt { margin-top: var(--sp-1); font-size: var(--fs-xs); color: var(--text-muted); }
+@media (max-width: 400px) { .mb-live-stage { zoom: .9; } }
+@media (min-width: 1024px) {
+  .mb-form-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 372px; gap: var(--sp-5); align-items: start; }
+  .mb-live { position: sticky; top: var(--sp-3); order: 2; }
+  .mb-form-main { order: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .mb-live-flip, .mb-live-bar > i { transition: none; } }
+
 .mb-form-grid { display: grid; grid-template-columns: 1fr; gap: 0; }
 @media (min-width: 640px) { .mb-form-grid { grid-template-columns: 1fr 1fr; column-gap: 16px; } }
 .mb-form-full { grid-column: 1 / -1; }
@@ -611,6 +634,7 @@ function _mbRenderPanel() {
   if (MB.tab === 'carteirinha') panel.innerHTML = _mbBuildCarteirinha();
   if (MB.tab === 'cartas')      panel.innerHTML = mbCarta_build();
   if (window.lucide) lucide.createIcons();
+  if (MB.tab === 'form') mbLive_render();
   if (MB.tab === 'lista') _mbAnimKpis();
   if (MB.tab === 'cartas') mbCarta_depois();
   _mbBindSearchListeners();
@@ -919,6 +943,55 @@ function mbVerDetalhe(id) {
 var MB_ESTADOS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS',
   'MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
 
+
+// ── Cartão ao vivo ──────────────────────────────────────
+var MB_LIVE_FRENTE = ['mbf-nome', 'mbf-rol', 'mbf-funcao', 'mbf-sexo'];
+var MB_LIVE_VERSO  = ['mbf-nascimento', 'mbf-estadoCivil', 'mbf-rg', 'mbf-cpf', 'mbf-batismo', 'mbf-cidade', 'mbf-estado'];
+function _mbLiveHtml() {
+  return '<aside class="mb-live" id="mb-live" aria-label="Prévia da carteirinha">'+
+    '<div class="mb-live-top"><span class="mb-live-lbl" id="mb-live-lbl">Prévia ao vivo · Frente</span>'+
+    '<button type="button" class="btn btn-ghost btn-sm" onclick="mbLive_virar()" aria-label="Virar o cartão"><i data-lucide="rotate-cw" class="ic-14"></i></button></div>'+
+    '<div class="mb-live-stage"><div class="mb-live-flip" id="mb-live-flip"><div class="mb-live-face" id="mb-live-f"></div><div class="mb-live-face verso" id="mb-live-b"></div></div></div>'+
+    '<div class="mb-live-prog"><div class="mb-live-bar"><i id="mb-live-bar" style="width:0"></i></div><div class="mb-live-txt" id="mb-live-txt"></div></div>'+
+  '</aside>';
+}
+function _mbLiveVal(id) { var e = document.getElementById(id); return e ? String(e.value || '').trim() : ''; }
+function mbLive_render() {
+  var f = document.getElementById('mb-live-f'), b = document.getElementById('mb-live-b');
+  if (!f || !b || MB.tab !== 'form') return;
+  var d = {
+    rol: _mbLiveVal('mbf-rol'), nome: _mbLiveVal('mbf-nome'), funcao: _mbLiveVal('mbf-funcao'), sexo: _mbLiveVal('mbf-sexo'),
+    nascimento: _mbLiveVal('mbf-nascimento'), estadoCivil: _mbLiveVal('mbf-estadoCivil'), rg: _mbLiveVal('mbf-rg'), cpf: _mbLiveVal('mbf-cpf'),
+    batismo: _mbLiveVal('mbf-batismo'), cidade: _mbLiveVal('mbf-cidade'), estado: _mbLiveVal('mbf-estado'),
+    foto: '__live__', fotoX: MB.fotoX, fotoY: MB.fotoY, fotoZoom: MB.fotoZoom
+  };
+  MB._fotoCache['__live__'] = MB.fotoData || '';
+  f.innerHTML = mbCard_htmlFrente(d, false);
+  b.innerHTML = mbCard_htmlVerso(d, false, null);
+  var nf = [d.nome, d.rol, d.funcao, MB.fotoData].filter(Boolean).length;
+  var nv = [d.nascimento, d.estadoCivil, d.rg, d.cpf, d.batismo, d.cidade].filter(Boolean).length;
+  var bar = document.getElementById('mb-live-bar'); if (bar) bar.style.width = Math.round((nf + nv) / 10 * 100) + '%';
+  var tx = document.getElementById('mb-live-txt'); if (tx) tx.textContent = 'Frente: ' + nf + ' de 4 · Verso: ' + nv + ' de 6';
+}
+function mbLive_lado(verso) {
+  var fl = document.getElementById('mb-live-flip'); if (!fl) return;
+  fl.classList.toggle('virado', !!verso);
+  var l = document.getElementById('mb-live-lbl'); if (l) l.textContent = 'Prévia ao vivo · ' + (verso ? 'Verso' : 'Frente');
+}
+function mbLive_virar() { var fl = document.getElementById('mb-live-flip'); mbLive_lado(!(fl && fl.classList.contains('virado'))); }
+(function _mbLiveInit() {
+  document.addEventListener('focusin', function (e) {
+    var id = e.target && e.target.id;
+    if (MB.tab === 'form' && e.target && e.target.closest && e.target.closest('.mb-foto-card')) { mbLive_lado(false); return; }
+    if (!id || MB.tab !== 'form') return;
+    if (MB_LIVE_VERSO.indexOf(id) >= 0) mbLive_lado(true);
+    else if (MB_LIVE_FRENTE.indexOf(id) >= 0) mbLive_lado(false);
+  });
+  ['input', 'change'].forEach(function (ev) {
+    document.addEventListener(ev, function (e) { if (e.target && e.target.closest && e.target.closest('#mb-form')) mbLive_render(); });
+  });
+})();
+
 function _mbBuildForm() {
   var m = MB.editId
     ? (MB.membros.filter(function(x){ return String(x.id)===String(MB.editId); })[0] || {})
@@ -942,6 +1015,7 @@ function _mbBuildForm() {
     '</div>'+
     (!MB.editId ? _mbBotoesFonte() : '')+
 
+    '<div class="mb-form-wrap"><div class="mb-form-main">'+
     '<div class="mb-form-card">'+
     '<div class="mb-form-grid" id="mb-form">'+
 
@@ -1105,6 +1179,9 @@ function _mbBuildForm() {
     })() : '')+
 
     '</div>'+
+    '</div>'+ /* end form-main */
+    _mbLiveHtml()+
+    '</div>'+ /* end form-wrap */
 
     /* Barra de ações fixa (Layout System) */
     '<div class="action-bar" style="justify-content:flex-end">'+
@@ -1421,6 +1498,7 @@ function mbCapturarFoto() {
 function mbAtualizarFotoPreview() {
   var wrap = document.getElementById('mb-foto-preview');
   if (!wrap) return;
+  setTimeout(mbLive_render, 0);
   if (MB.fotoData) {
     wrap.innerHTML =
       '<img id="mb-foto-img" src="'+MB.fotoData+'" style="transform:scale('+MB.fotoZoom+');object-position:'+MB.fotoX+'% '+MB.fotoY+'%">'+
@@ -2311,6 +2389,7 @@ function mbFonteEscolher(id) {
 .mb-card-back .back-qr .qr-box img { width:100%; height:100%; image-rendering:pixelated; display:block; }
 .mb-card-back .back-qr .qr-box.prev { background:rgba(255,255,255,.12); border:1px dashed rgba(255,255,255,.55); color:#fff; font-size:11px; font-weight:800; }
 .mb-card-back .back-qr .qr-cap { margin-top:3px; font-size:5.5px; line-height:1.15; font-weight:700; text-transform:uppercase; letter-spacing:.35px; opacity:.9; white-space:nowrap; }
+.mb-qr-aviso { margin:0; color:var(--text-muted); font-size:var(--fs-sm); }
 .mb-qr-opt { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:12px; cursor:pointer; text-align:left;
   border:1px solid var(--border); background:var(--bg-card2, transparent); font-size:12px; line-height:1.4; }
 .mb-qr-opt input { margin-top:2px; accent-color: var(--teal); }
@@ -2682,7 +2761,7 @@ function mbCard_htmlVerso(m, forPrint, qrSrc) {
     ['RG', m.rg],
     ['CPF', m.cpf],
     ['Batismo', m.batismo],
-    ['Cidade/UF', (m.cidade||'')+'/'+(m.estado||'')]
+    ['Cidade/UF', (m.cidade||m.estado) ? (m.cidade||'')+'/'+(m.estado||'') : '']
   ];
 
   var grid = campos.map(function(c){
@@ -2792,12 +2871,10 @@ function _mbBuildCarteirinha() {
         '<div class="mb-card-preview-label">Frente</div>'+
         mbCard_htmlFrente(selected, false)+
         '<div class="mb-card-preview-label" style="margin-top:14px">Verso</div>'+
-        mbCard_htmlVerso(selected, false, MB.qrOn ? 'preview' : null)+
+        mbCard_htmlVerso(selected, false, null)+
       '</div>'+
       '<div class="mb-card-panel-actions">'+
         '<button class="btn btn-secondary btn-sm" id="mb-gal-abrir" onclick="mbCard_abrirGaleria()"><i data-lucide="layout-template" class="ic-14"></i> Modelo: '+_mbEsc((MB_CARD_MODELOS.filter(function(o){return o.id===mbCard_modelo();})[0]||MB_CARD_MODELOS[0]).nome)+'</button>'+
-        '<label class="mb-qr-opt"><input type="checkbox" id="mb-qr-opt"'+(MB.qrOn?' checked':'')+' onchange="mbCard_toggleQr(this.checked);_mbRenderPanel()">'+
-          '<span><b>Incluir QR Code de validação</b><small>Quem ler o QR vê nome, função e situação. Gera um código novo e cancela o QR de cartões anteriores deste membro.</small></span></label>'+
         '<button class="btn btn-primary btn-sm" onclick="mbCard_downloadPDF(\''+selected.id+'\')">'+
           '<i data-lucide="file-down" class="ic-14"></i> PDF (frente + verso)'+
         '</button>'+
@@ -3007,7 +3084,28 @@ function mbCard_capturar(m, showBack, qrSrc, formato) {
 }
 
 // ── Download PDF individual (frente + verso) ─────────────
-function mbCard_downloadPDF(id) {
+// QR de validação: a pergunta aparece só ao gerar PDF (modal interno). PNG nunca leva QR.
+function mbCard_comQr(depois) {
+  var ov = document.getElementById('modal-mb-qr');
+  if (!ov) { ov = document.createElement('div'); ov.className = 'modal-overlay'; ov.id = 'modal-mb-qr'; ov.onclick = function (e) { if (e.target === ov) mbCard_qrFechar(); }; document.body.appendChild(ov); }
+  MB._qrDepois = depois;
+  ov.innerHTML = '<div class="modal-box"><div class="modal-header"><div><h3>Incluir QR Code de validação?</h3>'+
+    '<div class="modal-sub">Quem ler o QR vê nome, função e situação do membro.</div></div></div>'+
+    '<div class="modal-body"><p class="mb-qr-aviso">Com QR, é gerado um código novo e o QR de cartões anteriores deste membro é cancelado.</p></div>'+
+    '<div class="modal-footer"><button class="btn btn-secondary" id="mb-qr-nao" onclick="mbCard_qrEscolher(\'nao\')">Sem QR</button>'+
+    '<button class="btn btn-primary" id="mb-qr-sim" onclick="mbCard_qrEscolher(\'sim\')">Com QR</button></div></div>';
+  requestAnimationFrame(function () { ov.classList.add('open'); });
+}
+function mbCard_qrFechar() { var ov = document.getElementById('modal-mb-qr'); if (ov) ov.classList.remove('open'); MB._qrDepois = null; }
+function mbCard_qrEscolher(escolha) {
+  var fn = MB._qrDepois;
+  var ov = document.getElementById('modal-mb-qr'); if (ov) ov.classList.remove('open');
+  MB._qrDepois = null;
+  MB.qrOn = escolha === 'sim';
+  if (fn) fn();
+}
+function mbCard_downloadPDF(id) { mbCard_comQr(function () { mbCard_downloadPDFgerar(id); }); }
+function mbCard_downloadPDFgerar(id) {
   var m = MB.membros.filter(function(x){ return String(x.id)===String(id); })[0];
   if (!m) return;
 
@@ -3045,6 +3143,7 @@ function mbCard_downloadPDF(id) {
 
 // ── Download PNG (frente ou verso) ───────────────────────
 function mbCard_downloadPNG(id, showBack) {
+  MB.qrOn = false;
   var m = MB.membros.filter(function(x){ return String(x.id)===String(id); })[0];
   if (!m) return;
 
@@ -3073,6 +3172,10 @@ function mbCard_downloadPNG(id, showBack) {
 
 // ── Gerar PDF em lote (5 por página A4, frente|verso lado a lado) ──
 function mbCard_gerarLote() {
+  if (!Object.keys(MB.cardSelecionados || {}).length) { showToast('Selecione pelo menos um membro.', 'warning'); return; }
+  mbCard_comQr(mbCard_gerarLoteGerar);
+}
+function mbCard_gerarLoteGerar() {
   MB.cardSelecionados = MB.cardSelecionados || {};
   var ids = Object.keys(MB.cardSelecionados);
   if (!ids.length) { showToast('Selecione pelo menos um membro.', 'warning'); return; }

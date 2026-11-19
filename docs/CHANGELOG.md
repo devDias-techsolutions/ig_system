@@ -1,5 +1,10 @@
 # Changelog (interface)
 
+## Membros — cartão ao vivo e QR
+- **Cartão ao vivo no cadastro.** Ao cadastrar ou editar um membro, a carteirinha (modelo e cor da Identidade) se monta enquanto se digita, na coluna da direita (no celular, acima do formulário). Ao entrar num campo do verso (nascimento, estado civil, RG, CPF, batismo, cidade/UF) o cartão gira para o verso; nos campos da frente e na foto, volta para a frente. Campos vazios aparecem como "—" e uma barra mostra o progresso. Salvo o cadastro, a carteirinha já está pronta na aba Carteirinhas. Respeita "reduzir movimento".
+- **QR de validação só no PDF.** A opção de QR saiu da tela de carteirinhas; ao gerar PDF (individual ou em lote) um modal pergunta "Incluir QR Code de validação?" (Com QR / Sem QR). PNG nunca leva QR.
+- **Padronização de estilo.** Fontes e cores soltas de Membros e Usuários viram tokens; o cabeçalho de Usuários segue a cor da igreja.
+
 ## Refinamento visual — identidade dinâmica
 - **R1 · Tokens em camadas.** Marca (`--brand-1/2`) → semânticos (`--surface-0..4`, `--text-1..4`, `--line*`, `--accent*`, `--ok/--warn/--danger`) → componentes. `gerarPaleta(marca1, marca2, tema)` calcula neutros tingidos pela marca, destaque legível e texto sobre o destaque, para Light e Dark com a mesma arquitetura. Os nomes antigos (`--bg2`, `--teal`, `--text-muted`…) continuam como apelidos e serão migrados aos poucos; telas novas usam só os semânticos. Teste `tests/e2e/paleta.e2e.js` garante contraste (AA) em 10 marcas × 2 temas.
 - **R2 · Cores da marca.** Nova chave `COR_SECUNDARIA` (opcional) e tela Identidade com principal + secundária, prévia imediata, botão "Usar cores padrão" e sugestão do logo (principal = tom mais frequente; secundária = tom claramente diferente, ≥ 30°). Ao enviar o logo, a sugestão aparece sozinha. Sem secundária, o sistema deriva uma cor vizinha da principal.

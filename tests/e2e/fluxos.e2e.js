@@ -676,14 +676,20 @@ test('carteirinha: QR de validação é opcional, aparece no verso sem cobrir a 
   const salvo = await page.evaluate(() => new Promise((ok) => google.script.run.withSuccessHandler(ok).mb_salvarMembro(App.session.token, { nome: 'Maria Souza', ativo: true, funcao: 'Diaconisa' })));
   assert.equal(salvo.success, true);
   await page.evaluate(() => { mbSetTab('carteirinha'); });
-  await page.waitForSelector('#mb-qr-opt', { timeout: 6000 });
-
-  assert.equal(await page.isChecked('#mb-qr-opt'), false, 'QR começa desligado');
+  await page.waitForSelector('.mb-card-panel-actions', { timeout: 6000 });
+  assert.equal(await page.locator('#mb-qr-opt').count(), 0, 'sem opção de QR na tela: a pergunta só vem ao gerar PDF');
   assert.equal(await page.locator('.mb-card-back .back-qr').count(), 0, 'sem QR no verso por padrão');
 
-  await page.check('#mb-qr-opt');
-  await page.waitForSelector('.mb-card-back .back-qr .qr-box.prev');
-  assert.equal(await page.isChecked('#mb-qr-opt'), true, 'escolha mantida após redesenhar');
+  await page.click('button:has-text("PDF (frente + verso)")');
+  await page.waitForSelector('#modal-mb-qr.open');
+  assert.match(await page.textContent('#modal-mb-qr h3'), /QR Code/);
+  await page.click('#mb-qr-sim');
+  assert.equal(await page.evaluate(() => MB.qrOn), true, 'escolha "Com QR" vale para esta geração');
+  await page.click('button:has-text("PDF (frente + verso)")');
+  await page.waitForSelector('#modal-mb-qr.open');
+  await page.click('#mb-qr-nao');
+  assert.equal(await page.evaluate(() => MB.qrOn), false, 'escolha "Sem QR"');
+  await page.evaluate(() => { MB.qrOn = true; });
 
   const qr = await page.evaluate(() => mbCard_emitirQr(MB.membros[0]));
   assert.match(qr, /^data:image\/gif;base64,/);
