@@ -146,6 +146,45 @@
 .mb-form-card input:focus, .mb-form-card select:focus, .mb-form-card textarea:focus { background: var(--bg); box-shadow: 0 0 0 3px var(--teal-glow-soft); }
 @media (max-width: 640px) { .mb-form-card { padding: var(--sp-4); } }
 
+
+/* ── Lista no desktop: tabela + painel lateral ── */
+.mb-tbl-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--sp-4); align-items: start; }
+.mb-tbl-card { border: 1px solid var(--border); border-radius: var(--r-3); background: var(--surface-1); overflow: hidden; }
+.mb-tbl { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.mb-tbl th, .mb-tbl td { padding: var(--sp-2) var(--sp-3); text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.mb-tbl th { font-size: var(--fs-xs); color: var(--text-muted); font-weight: 700; background: var(--bg2); }
+.mb-th { all: unset; cursor: pointer; display: inline-flex; gap: var(--sp-1); align-items: center; }
+.mb-th:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: var(--r-1); }
+.mb-th.on { color: var(--teal); }
+.mb-th-seta { font-size: var(--fs-xs); opacity: .7; }
+.mb-tr { cursor: pointer; transition: background var(--dur-fast) var(--ease); }
+.mb-tr:hover { background: var(--teal-glow-soft); }
+.mb-tr:focus-visible { outline: 2px solid var(--teal); outline-offset: -2px; }
+.mb-tr.sel { background: var(--teal-dim); box-shadow: inset 3px 0 0 var(--teal); }
+.mb-td-rol, .mb-td-cel { font-variant-numeric: tabular-nums; color: var(--text-muted); }
+.mb-td-nome { display: inline-flex; align-items: center; gap: var(--sp-2); font-weight: 600; color: var(--text); max-width: 280px; overflow: hidden; text-overflow: ellipsis; }
+.mb-td-acao { text-align: right; width: 1%; }
+.mb-av-sm { width: 28px; height: 28px; font-size: var(--fs-xs); flex-shrink: 0; }
+.mb-av-lg { width: 56px; height: 70px; border-radius: var(--r-1); font-size: var(--fs-lg); flex-shrink: 0; }
+.mb-pg { display: flex; align-items: center; justify-content: space-between; padding: var(--sp-2) var(--sp-3); font-size: var(--fs-xs); color: var(--text-muted); }
+.mb-pg-btns { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.mb-side { border: 1px solid var(--border); border-radius: var(--r-3); background: var(--surface-1); padding: var(--sp-3); display: flex; flex-direction: column; gap: var(--sp-3); position: sticky; top: var(--sp-3); }
+.mb-side-vazio { align-items: center; text-align: center; color: var(--text-muted); padding: var(--sp-6) var(--sp-3); }
+.mb-side-head { display: flex; gap: var(--sp-3); align-items: center; }
+.mb-side-nome { font-weight: 800; color: var(--text); font-size: var(--fs-md); }
+.mb-side-t { font-weight: 700; color: var(--text); }
+.mb-side-s { font-size: var(--fs-xs); color: var(--text-muted); margin-bottom: var(--sp-1); }
+.mb-side-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-2); }
+.mb-side-c { display: flex; flex-direction: column; font-size: var(--fs-xs); color: var(--text-muted); min-width: 0; }
+.mb-side-c:last-child { grid-column: 1 / -1; }
+.mb-side-c b { color: var(--text); font-size: var(--fs-sm); font-weight: 600; overflow-wrap: anywhere; }
+.mb-side-card { zoom: .8; display: flex; justify-content: center; }
+.mb-side-acoes { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+.mb-busca .ed-filter-select { width: auto; flex: 0 0 176px; }
+.mb-filtro-desk { min-width: 150px; }
+.mb-tbl .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (max-width: 1100px) { .mb-tbl-wrap { grid-template-columns: minmax(0, 1fr); } .mb-side { position: static; } }
+
 /* ── Cartão ao vivo no cadastro: gira para o verso quando o foco entra num campo do verso ── */
 .mb-form-wrap { display: block; }
 .mb-live { margin-bottom: var(--sp-4); padding: var(--sp-3); border-radius: var(--r-3); border: 1px solid var(--border); background: var(--surface-1); box-shadow: var(--shadow-sm); }
@@ -661,9 +700,10 @@ function _mbRenderPanel() {
 })();
 
 function _mbBindSearchListeners() { /* delegação já cobre tudo — mantido para compatibilidade */ }
-function _mbOnSearchLista(e) { MB.search = e.target.value; mbAtualizarLista(); }
+function _mbOnSearchLista(e) { MB.search = e.target.value; MB.pag = 0; mbAtualizarLista(); }
 function _mbOnSearchCard(e)  { MB.cardSearch = e.target.value; mbAtualizarCardLista(); }
-function _mbOnFiltroChange(e){ MB.filtroAtivo = e.target.value; mbAtualizarLista(); }
+function _mbOnFiltroChange(e){ MB.filtroAtivo = e.target.value; MB.pag = 0; mbAtualizarLista(); }
+function _mbOnFuncaoChange(e){ MB.filtroFuncao = e.target.value; MB.pag = 0; mbAtualizarLista(); }
 
 // ════════════════════════════════════════════
 //  ABA: LISTA
@@ -711,7 +751,7 @@ function _mbBuildLista() {
 
   // Busca + filtro — oninput atualiza SÓ o container da lista, sem recriar o input
   var busca =
-    '<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">'+
+    '<div class="mb-busca" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">'+
       '<div class="ed-search-wrap" style="flex:1;min-width:180px">'+
         '<span class="ed-search-icon"><i data-lucide="search" class="ic-15"></i></span>'+
         '<input class="ed-search" id="mb-search-input" type="text" placeholder="Buscar nome, ROL, função..." value="'+_mbEsc(MB.search)+'" oninput="_mbOnSearchLista(event)">'+
@@ -721,11 +761,101 @@ function _mbBuildLista() {
         '<option value="ativos"'  +(MB.filtroAtivo==='ativos'  ?' selected':'')+'>Ativos</option>'+
         '<option value="inativos"'+(MB.filtroAtivo==='inativos'?' selected':'')+'>Inativos</option>'+
       '</select>'+
+      _mbSelectFuncao()+
     '</div>';
 
   var fab = '<button type="button" class="mb-fab no-print" onclick="mbNovoMembro()" aria-label="Novo membro" title="Novo membro"><i data-lucide="plus"></i></button>';
   return kpis + '<section class="panel">' + toolbar + busca + '<div id="mb-lista-container">'+_mbBuildListaItens(filtrado, total)+'</div></section>' + fab;
 }
+
+
+// ── Lista no desktop: tabela ordenável, paginada, com painel lateral de detalhe ──
+function _mbDeskLista() { return !!(window.matchMedia && window.matchMedia('(min-width: 1024px)').matches); }
+function _mbSelectFuncao() {
+  var vistos = {}, ops = [];
+  MB.membros.forEach(function (m) { var f = String(m.funcao || 'Membro'); if (!vistos[f]) { vistos[f] = 1; ops.push(f); } });
+  if (ops.length < 2) return '';
+  ops.sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); });
+  return '<select class="ed-filter-select mb-filtro-desk" id="mb-filtro-funcao" onchange="_mbOnFuncaoChange(event)" aria-label="Filtrar por função">'+
+    '<option value="">Todas as funções</option>'+
+    ops.map(function (f) { return '<option value="'+_mbEsc(f)+'"'+(MB.filtroFuncao === f ? ' selected' : '')+'>'+_mbEsc(f)+'</option>'; }).join('')+
+  '</select>';
+}
+function _mbChaveOrd(m, col) {
+  if (col === 'rol') { var n = parseInt(m.rol, 10); return isNaN(n) ? 1e12 : n; }
+  if (col === 'ativo') return m.ativo === false ? 1 : 0;
+  return String(m[col] || (col === 'funcao' ? 'Membro' : '')).toLowerCase();
+}
+function _mbPorPagina() { return Math.max(5, Math.min(20, Math.floor((window.innerHeight - 440) / 46))); }
+function _mbAvatarHtml(m) {
+  return m.foto && MB._fotoCache[m.foto]
+    ? '<img src="'+MB._fotoCache[m.foto]+'" alt="" style="transform:scale('+(m.fotoZoom||1)+');object-position:'+(m.fotoX||50)+'% '+(m.fotoY||50)+'%">'
+    : _mbEsc((m.nome||'?')[0].toUpperCase());
+}
+function _mbBuildTabela(lista) {
+  var o = MB.ordem = MB.ordem || { col: 'nome', dir: 1 };
+  var ord = lista.slice().sort(function (a, b) {
+    var x = _mbChaveOrd(a, o.col), y = _mbChaveOrd(b, o.col);
+    return (x < y ? -1 : x > y ? 1 : 0) * o.dir;
+  });
+  var por = _mbPorPagina(), pags = Math.max(1, Math.ceil(ord.length / por));
+  MB.pag = Math.min(MB.pag || 0, pags - 1);
+  var ini = MB.pag * por, pag = ord.slice(ini, ini + por);
+  var sel = ord.filter(function (m) { return String(m.id) === String(MB.linhaSel); })[0] || null;
+  var th = function (col, rot) {
+    var on = o.col === col;
+    return '<th scope="col" aria-sort="'+(on ? (o.dir > 0 ? 'ascending' : 'descending') : 'none')+'"><button type="button" class="mb-th'+(on ? ' on' : '')+'" onclick="mbOrdenar(\''+col+'\')">'+rot+
+      '<span class="mb-th-seta">'+(on ? (o.dir > 0 ? '▲' : '▼') : '↕')+'</span></button></th>';
+  };
+  var linhas = pag.map(function (m) {
+    var ativo = m.ativo !== false;
+    return '<tr class="mb-tr'+(sel && String(sel.id) === String(m.id) ? ' sel' : '')+'" tabindex="0" onclick="mbSelLinha(\''+_mbEsc(m.id)+'\')" onkeydown="if(event.key===\'Enter\')mbSelLinha(\''+_mbEsc(m.id)+'\')">'+
+      '<td class="mb-td-rol">'+_mbEsc(m.rol || '—')+'</td>'+
+      '<td><span class="mb-td-nome"><span class="ed-list-avatar mb-av-sm">'+_mbAvatarHtml(m)+'</span>'+_mbEsc(m.nome || '—')+(_mbIsHoje(m.nascimento) ? ' 🎂' : '')+'</span></td>'+
+      '<td>'+_mbEsc(m.funcao || 'Membro')+'</td>'+
+      '<td class="mb-td-cel">'+_mbEsc(m.celular || '—')+'</td>'+
+      '<td><span class="badge '+(ativo ? 'badge-green' : 'badge-red')+'">'+(ativo ? 'Ativo' : 'Inativo')+'</span></td>'+
+      '<td class="mb-td-acao"><button class="ed-item-btn" onclick="event.stopPropagation();mbEditarMembro(\''+_mbEsc(m.id)+'\')" title="Editar" aria-label="Editar '+_mbEsc(m.nome || '')+'"><i data-lucide="pencil" class="ic-13"></i></button></td>'+
+    '</tr>';
+  }).join('');
+  var pg = '';
+  if (pags > 1) {
+    pg = '<div class="mb-pg"><span>Mostrando '+(ini + 1)+'–'+(ini + pag.length)+' de '+ord.length+'</span><span class="mb-pg-btns">'+
+      '<button type="button" class="btn btn-ghost btn-sm" onclick="mbPag('+(MB.pag - 1)+')"'+(MB.pag === 0 ? ' disabled' : '')+' aria-label="Página anterior">‹</button>'+
+      '<span>'+(MB.pag + 1)+' / '+pags+'</span>'+
+      '<button type="button" class="btn btn-ghost btn-sm" onclick="mbPag('+(MB.pag + 1)+')"'+(MB.pag >= pags - 1 ? ' disabled' : '')+' aria-label="Próxima página">›</button></span></div>';
+  }
+  return '<div class="mb-tbl-wrap"><div class="mb-tbl-card"><table class="mb-tbl"><thead><tr>'+
+    th('rol', 'ROL')+th('nome', 'Nome')+th('funcao', 'Função')+'<th scope="col">Celular</th>'+th('ativo', 'Situação')+'<th scope="col"><span class="sr-only">Ações</span></th>'+
+    '</tr></thead><tbody>'+linhas+'</tbody></table>'+pg+'</div>'+_mbBuildPainelLado(sel)+'</div>';
+}
+function _mbBuildPainelLado(m) {
+  if (!m) {
+    return '<aside class="mb-side mb-side-vazio" id="mb-side"><i data-lucide="user-round-search" class="ic-24"></i>'+
+      '<div class="mb-side-t">Selecione um membro</div><div class="mb-side-s">Clique em uma linha para ver os dados e a carteirinha.</div></aside>';
+  }
+  var ativo = m.ativo !== false;
+  var campo = function (r, v) { return '<div class="mb-side-c"><span>'+r+'</span><b>'+(v ? _mbEsc(v) : '—')+'</b></div>'; };
+  var end = [m.rua, m.numero].filter(Boolean).join(', ');
+  var end2 = [m.bairro, (m.cidade || m.estado) ? (m.cidade || '')+'/'+(m.estado || '') : ''].filter(Boolean).join(' · ');
+  return '<aside class="mb-side" id="mb-side">'+
+    '<div class="mb-side-head"><span class="ed-list-avatar mb-av-lg">'+_mbAvatarHtml(m)+'</span>'+
+      '<div class="mb-side-id"><div class="mb-side-nome">'+_mbEsc(m.nome || '—')+'</div><div class="mb-side-s">ROL '+_mbEsc(m.rol || '—')+' · '+_mbEsc(m.funcao || 'Membro')+'</div>'+
+      '<span class="badge '+(ativo ? 'badge-green' : 'badge-red')+'">'+(ativo ? 'Ativo' : 'Inativo')+'</span></div></div>'+
+    '<div class="mb-side-grid">'+campo('Nascimento', m.nascimento)+campo('Celular', m.celular)+campo('E-mail', m.email)+campo('Endereço', [end, end2].filter(Boolean).join(' — '))+'</div>'+
+    '<div class="mb-side-card">'+mbCard_htmlFrente(m, false)+'</div>'+
+    '<div class="mb-side-acoes"><button class="btn btn-primary btn-sm" onclick="mbEditarMembro(\''+_mbEsc(m.id)+'\')"><i data-lucide="pencil" class="ic-14"></i> Editar</button>'+
+      '<button class="btn btn-secondary btn-sm" onclick="mbAbrirCarteirinhaDetalhe(\''+_mbEsc(m.id)+'\')"><i data-lucide="id-card" class="ic-14"></i> Carteirinha</button>'+
+      '<button class="btn btn-ghost btn-sm" onclick="mbVerDetalhe(\''+_mbEsc(m.id)+'\')">Ficha completa</button></div>'+
+  '</aside>';
+}
+function mbOrdenar(col) {
+  var o = MB.ordem = MB.ordem || { col: 'nome', dir: 1 };
+  if (o.col === col) o.dir = -o.dir; else { o.col = col; o.dir = 1; }
+  MB.pag = 0; mbAtualizarLista();
+}
+function mbPag(n) { MB.pag = Math.max(0, n); mbAtualizarLista(); }
+function mbSelLinha(id) { MB.linhaSel = id; mbAtualizarLista(); }
 
 // ── Filtra membros conforme MB.search e MB.filtroAtivo ───
 // Busca por nome, função, celular ou ROL. O ROL aceita "22", "0022", "ROL 22" ou "Nº 22"
@@ -745,7 +875,7 @@ function _mbCasaBusca(m, busca) {
 
 function _mbFiltrarLista() {
   return MB.membros.filter(function(m){
-    var ok = _mbCasaBusca(m, MB.search);
+    var ok = _mbCasaBusca(m, MB.search) && (!MB.filtroFuncao || String(m.funcao || 'Membro') === MB.filtroFuncao);
     if (MB.filtroAtivo === 'ativos')   return ok && m.ativo !== false;
     if (MB.filtroAtivo === 'inativos') return ok && m.ativo === false;
     return ok;
@@ -762,6 +892,7 @@ function _mbBuildListaItens(lista, total) {
       '<div class="mb-empty-sub">'+(total===0?'Clique em "Novo Membro" para começar.':'Tente ajustar os filtros ou a busca.')+'</div>'+
     '</div>';
   }
+  if (_mbDeskLista()) return _mbBuildTabela(lista);
   var html = '<div class="ed-list">';
   lista.forEach(function(m){
     var ativo   = m.ativo !== false;

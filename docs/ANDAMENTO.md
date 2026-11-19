@@ -20,6 +20,7 @@ Quadro **informativo** para quem trabalha no sistema (qualquer conta, qualquer s
 | Etapa 18: documentação e "cópia limpa" (`Implantacao.limpar()`, confirmação "LIMPAR") | (não iniciada) | Desenho feito, sem código | Implementar limpeza + README/manual | `Implantacao.js`, `Code.js`, `docs/` |
 
 ## Concluído recentemente
+- Membros no desktop: lista em tabela ordenável com filtros, paginação e painel lateral (falta: carteirinhas em galeria + prévia fixa, cartas).
 - Cadastro de membro com cartão ao vivo (frente/verso girando) e pergunta de QR só ao gerar PDF.
 - Padronização de estilo (hex/fonte soltos em Membros e Usuários viram tokens; cabeçalho de Usuários segue a cor da igreja). Restam literais legítimos: arte do cartão (impressão), câmera, texto branco sobre cor.
 - R3 indicadores integrados + ações rápidas no cabeçalho, R1 tokens dinâmicos (#115) e R2 cor secundária + sugestão do logo (#116).
