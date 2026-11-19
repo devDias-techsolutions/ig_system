@@ -59,6 +59,13 @@
 .cr-hist-it span { color: var(--text-muted); font-size: var(--fs-xs); }
 .cr-hist-it .badge { margin-left: auto; flex-shrink: 0; }
 @media (min-width: 900px) { .cr-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-5); align-items: start; } .cr-layout > .panel { margin: 0; } }
+@media (min-width: 1024px) {
+  .cr-layout { grid-template-columns: minmax(0, 360px) minmax(0, 1fr); }
+  .cr-col { display: grid; gap: var(--sp-4); }
+  .cr-col > .panel { margin: 0; }
+  .cr-hist { max-height: 220px; overflow-y: auto; }
+  .cr-pre { grid-template-columns: 1fr 1fr; }
+}
 </style>
 
 <script>
@@ -194,7 +201,9 @@ function mbCarta_build() {
   var opcoes = ativos.map(function (m) {
     return '<option value="' + _mbEsc(m.id) + '"' + (String(m.id) === String(CR.membroId) ? ' selected' : '') + '>' + _mbEsc(m.nome) + (m.rol ? ' · ROL ' + _mbEsc(m.rol) : '') + '</option>';
   }).join('');
+  var hist_placeholder = '<section class="panel"><div class="panel-head"><h2 class="panel-title">Cartas emitidas</h2></div><div class="cr-hist" id="cr-hist"></div></section>';
   return '<div class="cr-layout">' +
+    '<div class="cr-col">' +
     '<section class="panel">' +
       '<div class="panel-head"><h2 class="panel-title">Emitir carta</h2></div>' +
       '<div class="form-grid">' +
@@ -209,12 +218,13 @@ function mbCarta_build() {
         '<div class="field"><label for="cr-data">Data</label><input type="date" id="cr-data" value="' + _mbEsc(CR.data) + '" oninput="mbCarta_set(\'data\',this.value)"></div>' +
       '</div>' +
     '</section>' +
+    hist_placeholder +
+    '</div>' +
     '<div>' +
       '<section class="panel"><div class="panel-head"><h2 class="panel-title">Prévia</h2></div>' +
         '<div class="cr-pre" id="cr-pre"></div>' +
         '<p class="panel-text" style="margin-top:var(--sp-3)">Imprima frente e verso (virar pela borda curta) e dobre ao meio: a capa fica certa depois da dobra.</p>' +
       '</section>' +
-      '<section class="panel"><div class="panel-head"><h2 class="panel-title">Cartas emitidas</h2></div><div class="cr-hist" id="cr-hist"></div></section>' +
     '</div>' +
   '</div>' +
   '<div class="action-bar"><button class="btn btn-primary" id="cr-gerar" onclick="mbCarta_gerar()"><i data-lucide="file-down" class="ic-16"></i>Gerar PDF</button></div>';
