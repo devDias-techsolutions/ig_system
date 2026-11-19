@@ -1,5 +1,9 @@
 # Changelog (interface)
 
+## Membros (desktop) — lista em tabela
+- **Tabela ordenável** (≥1024 px): colunas ROL, Nome, Função, Celular e Situação; clique no título ordena (ícone indica o sentido). Filtros em linha: busca, situação e função. Paginação pela altura da tela. No celular segue a lista em cartões.
+- **Painel lateral de detalhe**: clicar na linha mostra foto, dados, mini carteirinha e os botões Editar, Carteirinha e Ficha completa.
+
 ## Membros — cartão ao vivo e QR
 - **Cartão ao vivo no cadastro.** Ao cadastrar ou editar um membro, a carteirinha (modelo e cor da Identidade) se monta enquanto se digita, na coluna da direita (no celular, acima do formulário). Ao entrar num campo do verso (nascimento, estado civil, RG, CPF, batismo, cidade/UF) o cartão gira para o verso; nos campos da frente e na foto, volta para a frente. Campos vazios aparecem como "—" e uma barra mostra o progresso. Salvo o cadastro, a carteirinha já está pronta na aba Carteirinhas. Respeita "reduzir movimento".
 - **QR de validação só no PDF.** A opção de QR saiu da tela de carteirinhas; ao gerar PDF (individual ou em lote) um modal pergunta "Incluir QR Code de validação?" (Com QR / Sem QR). PNG nunca leva QR.
