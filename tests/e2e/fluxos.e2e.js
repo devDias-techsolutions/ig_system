@@ -552,6 +552,11 @@ test('padrão: Membros tem resumo enxuto em chips (sem indicadores grandes) e a 
   const feat = await page.evaluate(() => getComputedStyle(document.querySelector('.bn-card.feat')).backgroundImage);
   assert.doesNotMatch(feat, /rgb\(10, 61, 98\)/);
   await page.evaluate(() => navigateTo('membros'));
+  await page.waitForSelector('#mb-seg-status');
+  assert.deepEqual(await page.$$eval('#mb-seg-status .seg-n', (n) => n.map((x) => /^\d+$/.test(x.textContent))), [true, true, true], 'desktop: totais no seletor de situação');
+  assert.equal(await page.locator('.mb-chips').count(), 0, 'desktop: sem linha de indicadores');
+  await page.setViewportSize({ width: 390, height: 800 });
+  await page.evaluate(() => navigateTo('membros'));
   await page.waitForSelector('.mb-chips');
   const r = await page.evaluate(() => ({
     chips: document.querySelectorAll('.mb-chip').length,
