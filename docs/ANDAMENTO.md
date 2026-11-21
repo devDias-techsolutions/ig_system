@@ -12,6 +12,7 @@ Quadro **informativo** para quem trabalha no sistema (qualquer conta, qualquer s
 ## Em andamento
 | Etapa | Branch / PR | Estado | Próximo passo | Arquivos principais |
 |---|---|---|---|---|
+| D2 (ajuste): abas compactas, barra única, gaveta só com a carteirinha, Frente/Verso girando | `membros-d2-r2` | Implementada; testes locais passando | Aguardar CI e mergear; depois D3 (Usuários, Identidade, Alertas, Atalhos) | `index.html`, `_membros.html`, `_membros-cartas.html`, `tests/e2e/membros-tabela.e2e.js` |
 | R5: galeria de marcas e contraste do Início | `inicio-r5` | Implementada; testes locais passando | Aguardar CI e mergear; depois D2 (Membros) | `tests/e2e/dashboard.e2e.js` |
 | Desktop D2: Membros (tabela, painel lateral, formulário em 2 colunas, carteirinhas, cartas) | (não iniciada; formulário com cartão ao vivo já feito) | Plano em `docs/UI-DESKTOP.md` | Tabela ordenável com filtros | `_membros.html` |
 | Desktop D3: Usuários, Identidade, Alertas, Atalhos | (não iniciada) | Plano em `docs/UI-DESKTOP.md` | Layout de configurações com barra de ações ancorada | `_usuarios.html`, `_identidade.html`, `_alertas.html` |

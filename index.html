@@ -1307,10 +1307,45 @@ textarea { height: auto; min-height: 88px; padding: var(--sp-3); resize: vertica
 .crumb-now { font-weight: 800; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* "Usuários" já está na sidebar / gaveta */
 body.nav-on #topnav-usuarios-btn { display: none !important; }
-/* Atalhos circulares dos módulos (padrão único): não selecionado = fundo branco + contorno na cor da igreja; selecionado = sólido */
-.atl-nav .hm-mod:not(.active) .hm-mod-icon { background:#fff; color:var(--teal); border:1.5px solid var(--teal); box-shadow:none; }
-[data-theme="dark"] .atl-nav .hm-mod:not(.active) .hm-mod-icon { background:var(--bg2); }
+/* Atalhos dos módulos (padrão único). Celular: círculos (não selecionado = fundo branco + contorno na cor da igreja; selecionado = sólido).
+   Desktop: abas segmentadas compactas, no mesmo desenho do .seg. */
 .atl-nav .hm-mod.active .hm-mod-name { color:var(--teal); font-weight:800; }
+@media (max-width: 1023.98px) {
+  .atl-nav .hm-mod:not(.active) .hm-mod-icon { background:#fff; color:var(--teal); border:1.5px solid var(--teal); box-shadow:none; }
+  [data-theme="dark"] .atl-nav .hm-mod:not(.active) .hm-mod-icon { background:var(--bg2); }
+}
+@media (min-width: 1024px) {
+  .atl-nav { display:inline-flex; align-items:center; gap:2px; width:fit-content; max-width:100%; margin:var(--sp-3) var(--gutter) var(--sp-2); padding:3px; overflow-x:auto; border:1px solid var(--line); border-radius:var(--r-pill); background:var(--surface-1); }
+  .atl-nav .hm-mod { flex-direction:row; align-items:center; gap:var(--sp-2); width:auto; min-width:0; height:30px; padding:0 var(--sp-4); border-radius:var(--r-pill); color:var(--text-3); transition:background var(--dur) var(--ease), color var(--dur) var(--ease); }
+  .atl-nav .hm-mod::after { display:none; }
+  .atl-nav .hm-mod .hm-mod-icon { width:auto; height:auto; background:none; border:0; box-shadow:none; color:inherit; transform:none; }
+  .atl-nav .hm-mod .hm-mod-icon i, .atl-nav .hm-mod .hm-mod-icon svg { width:15px; height:15px; }
+  .atl-nav .hm-mod .hm-mod-name { font-size:var(--fs-sm); font-weight:700; color:inherit; white-space:nowrap; }
+  .atl-nav .hm-mod:hover:not(.active) { color:var(--text-1); background:var(--accent-soft); }
+  .atl-nav .hm-mod.active { color:var(--accent-fg); background:var(--accent); }
+  .atl-nav .hm-mod.active .hm-mod-name { color:inherit; }
+  .atl-nav + .page { padding-top:var(--sp-2); }
+}
+
+/* Seletor segmentado (filtros, Frente/Verso) */
+.seg { display:inline-flex; align-items:center; gap:2px; padding:3px; border:1px solid var(--line); border-radius:var(--r-pill); background:var(--surface-1); }
+.seg button { display:inline-flex; align-items:center; gap:var(--sp-2); height:28px; padding:0 var(--sp-3); border:0; border-radius:var(--r-pill); background:none; font:inherit; font-size:var(--fs-sm); font-weight:700; color:var(--text-3); cursor:pointer; white-space:nowrap; transition:background var(--dur) var(--ease), color var(--dur) var(--ease); }
+.seg button:hover:not([aria-pressed="true"]) { color:var(--text-1); background:var(--accent-soft); }
+.seg button[aria-pressed="true"] { color:var(--accent-fg); background:var(--accent); }
+.seg button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.seg-n { font-weight:600; font-variant-numeric:tabular-nums; opacity:.75; }
+
+/* Cartão que gira: o seletor (.seg) escolhe o lado e só um lado aparece por vez */
+.flip { perspective:1100px; }
+.flip-in { position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform calc(var(--dur-slow) * 2.4) var(--ease); }
+.flip-in.virado { transform:rotateY(180deg); }
+.flip-face { position:absolute; inset:0; display:grid; place-items:center; backface-visibility:hidden; -webkit-backface-visibility:hidden; }
+.flip-face.verso { transform:rotateY(180deg); }
+.flip-stage { width:calc(340px * var(--cz, 1)); height:calc(214px * var(--cz, 1)); margin:0 auto; }
+.flip-stage .flip-face { zoom:var(--cz, 1); }
+@media (max-width: 479.98px) { .flip-stage { --cz:.92; } }
+@media (max-width: 380px) { .flip-stage { --cz:.82; } }
+@media (prefers-reduced-motion: reduce) { .flip-in { transition:none; } }
 .atl-lista { display:flex; flex-direction:column; gap:var(--sp-2); }
 .sw { display:flex; align-items:center; gap:12px; min-height:44px; padding:0 var(--sp-3); border-radius:var(--radius-sm); cursor:pointer; user-select:none;
   background:var(--bg-glass); border:1px solid var(--border); transition:border-color .2s, background .2s; }
@@ -2019,6 +2054,18 @@ function navNavegar(rota) {
   if (App.currentView !== rota) navigateTo(rota);
 }
 /* a rolagem é da página (celular) ou do painel #app (desktop) */
+/* Seletor de lado (Frente/Verso) de um cartão que gira. id = id do .flip-in */
+function flipSegHtml(id, rotFrente, rotVerso) {
+  return '<div class="seg" data-flip="' + id + '" role="group" aria-label="Lado visível">' +
+    '<button type="button" data-lado="frente" aria-pressed="true" onclick="flipLado(\'' + id + '\',false)">' + rotFrente + '</button>' +
+    '<button type="button" data-lado="verso" aria-pressed="false" onclick="flipLado(\'' + id + '\',true)">' + rotVerso + '</button></div>';
+}
+function flipLado(id, verso) {
+  var f = document.getElementById(id); if (!f) return;
+  f.classList.toggle('virado', !!verso);
+  var seg = document.querySelector('.seg[data-flip="' + id + '"]');
+  if (seg) seg.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String((b.getAttribute('data-lado') === 'verso') === !!verso)); });
+}
 function rolarTopo(suave) {
   var o = suave ? { top: 0, behavior: 'smooth' } : { top: 0 };
   window.scrollTo(o); var a = document.getElementById('app'); if (a && a.scrollTo) a.scrollTo(o);
